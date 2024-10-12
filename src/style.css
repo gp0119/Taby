@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#app {
+    background-color: #fafafa;
+}
+
+@layer components {
+    .sortable-ghost-dashed-border {
+        @apply border border-dashed border-red-500 rounded;
+    }
+}

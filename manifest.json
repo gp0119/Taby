@@ -1,0 +1,33 @@
+{
+  "name": "tabs",
+  "manifest_version": 3,
+  "version": "1.0.0",
+  "description": "this is tabs",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "action": {
+    "default_popup": "src/popup.html"
+  },
+  "author": {
+    "email": "190875565@qq.com"
+  },
+  "permissions": [
+    "favicon",
+    "identity",
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "src/background/index.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["_favicon/*"],
+      "matches": ["<all_urls>"],
+      "extension_ids": ["*"]
+    }
+  ]
+}
