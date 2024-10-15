@@ -6,9 +6,6 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "action": {
-    "default_popup": "src/popup.html"
-  },
   "author": {
     "email": "190875565@qq.com"
   },
@@ -29,5 +26,11 @@
       "matches": ["<all_urls>"],
       "extension_ids": ["*"]
     }
-  ]
+  ],
+  "icons": {
+    "32": "src/assets/32.png",
+    "72": "src/assets/72.png",
+    "128": "src/assets/128.png",
+    "512": "src/assets/512.png"
+  }
 }

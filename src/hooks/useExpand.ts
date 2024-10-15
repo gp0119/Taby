@@ -1,17 +1,25 @@
-export function useExpand(defaultState = true) {
-  const expandedItems = ref<boolean[]>([]);
+import { useLocalStorage } from "@vueuse/core"
 
-  function generateExpandedItems(length: number) {
-    expandedItems.value = Array.from({ length }, () => defaultState);
+export function useExpand(key: string, defaultState = true) {
+  const expandedItems = useLocalStorage<{
+    [key: string]: boolean[]
+  }>(key, {})
+
+  function generateExpandedItems(activeSpaceIndex: number, length: number) {
+    expandedItems.value[activeSpaceIndex] = Array.from(
+      { length },
+      () => defaultState,
+    )
   }
 
-  function toggleExpand(index: number) {
-    expandedItems.value[index] = !expandedItems.value[index];
+  function toggleExpand(activeSpaceIndex: number, index: number) {
+    expandedItems.value[activeSpaceIndex][index] =
+      !expandedItems.value[activeSpaceIndex][index]
   }
 
   return {
     expandedItems,
     generateExpandedItems,
     toggleExpand,
-  };
+  }
 }

@@ -16,12 +16,12 @@
           <n-icon
             size="20"
             class="ml-2 inline-block cursor-pointer text-red-600"
-            @click="toggleExpand(index)"
+            @click="toggleExpand(0, index)"
           >
             <ChevronDownOutline />
           </n-icon>
         </div>
-        <template v-if="expandedItems[index]">
+        <template v-if="expandedItems[0][index]">
           <div
             v-for="child in item"
             :key="child.id"
@@ -49,15 +49,18 @@ import card from "./card.vue"
 import { ChevronDownOutline } from "@vicons/ionicons5"
 import { useExpand } from "@/hooks/useExpand.ts"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
-import { useDataStore } from "@/store/data.ts"
+import { useSpacesStore } from "@/store/spaces.ts"
 
-const { expandedItems, generateExpandedItems, toggleExpand } = useExpand()
+const { expandedItems, toggleExpand, generateExpandedItems } =
+  useExpand("asideExpandedItems")
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
-const dataStore = useDataStore()
+const spacesStore = useSpacesStore()
 
-onMounted(async () => {
+onMounted(async () => {})
+
+chrome.tabs.onUpdated.addListener(async () => {
   await getTabs()
-  generateExpandedItems(tabs.value.length)
+  generateExpandedItems(0, tabs.value.length)
   Sortable.create(document.querySelector(".right-aside-area") as HTMLElement, {
     group: {
       name: "right-aside-parent",
@@ -66,7 +69,6 @@ onMounted(async () => {
     animation: 150,
     handle: ".right-aside-item",
   })
-
   const dragChildAreas = document.querySelectorAll(".right-aside-window")
   dragChildAreas.forEach((dragChildArea) => {
     Sortable.create(dragChildArea as HTMLElement, {
@@ -81,6 +83,7 @@ onMounted(async () => {
           evt.dragged.classList.remove("group/aside")
           evt.dragged.classList.add("drag-item")
           evt.dragged.classList.add("group/content")
+          evt.dragged.classList.add("peer")
         } else {
           evt.dragged.classList.remove("drag-item")
           evt.dragged.classList.remove("group/content")
@@ -92,12 +95,11 @@ onMounted(async () => {
       onEnd: function (/**Event*/ evt) {
         const { item: itemEl, to } = evt
         const { id, windowid } = itemEl.dataset
-        console.log("evt: ", evt)
         if (to.classList.contains("drag-child-area")) {
           removeTab(Number(id))
           const toParent = to.parentElement
           const { collectionid: toClollectionIndex } = toParent!.dataset
-          dataStore.addCard(Number(toClollectionIndex), {
+          spacesStore.addCard(Number(toClollectionIndex), {
             title: itemEl.innerText,
             url: itemEl.dataset.url!,
             customTitle: "",
@@ -112,5 +114,6 @@ onMounted(async () => {
       },
     })
   })
+  console.log("tabs: ", tabs)
 })
 </script>

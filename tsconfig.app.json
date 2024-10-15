@@ -13,6 +13,7 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "preserve",
+    "jsxImportSource": "vue",
     "esModuleInterop": true,
 
     /* Linting */
@@ -25,8 +26,7 @@
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"]
     },
-    "allowSyntheticDefaultImports": true,
-    "types": ["@vue/runtime-dom", "@vue/runtime-core"]
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*.ts",

@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme-overrides="themeOverrides">
+  <n-config-provider :theme-overrides="themeOverrides" class="h-full">
     <n-dialog-provider>
       <n-layout has-sider class="h-full" content-class="bg-[#fafafa]">
         <n-layout-sider
