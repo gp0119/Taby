@@ -2,7 +2,7 @@
   <div
     class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 py-2.5"
   >
-    <span class="text-xl">{{ spacesStore.getActiveSpace.title }}</span>
+    <span class="text-xl">{{ title }}</span>
     <n-button size="tiny" type="primary" @click="onAddCollection">
       <span>ADD COLLECTION</span>
       <template #icon>
@@ -17,6 +17,7 @@
 <script setup lang="tsx">
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/ionicons5"
+import tabbyDatabaseService from "@/db"
 
 const spacesStore = useSpacesStore()
 
@@ -37,13 +38,21 @@ function onAddCollection() {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
       if (!formModel.value.title) return
-      spacesStore.addCollection({
+      await tabbyDatabaseService.addCollection({
         title: formModel.value.title,
-        cards: [],
+        spaceId: spacesStore.activeSpaceId,
+        labelIds: [],
       })
+      await spacesStore.getCollectionsById(spacesStore.activeSpaceId)
     },
   })
 }
+
+const title = computed(
+  () =>
+    spacesStore.allSpaces.find((item) => item.id === spacesStore.activeSpaceId)
+      ?.title,
+)
 </script>

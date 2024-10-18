@@ -2,7 +2,7 @@
   <n-scrollbar class="max-h-[calc(100vh-50px)]">
     <div class="drag-parent-area bg-gray-200">
       <div
-        v-for="(item, index) in spacesStore.getCollections"
+        v-for="(item, index) in spacesStore.currentCollections"
         :key="item.title"
         class="drag-item mb-0.5 bg-[#fafafa] p-7"
       >
@@ -31,10 +31,7 @@
             />
           </n-space>
         </div>
-        <div
-          v-show="expandedItems[spacesStore.activeSpaceIndex][index]"
-          :data-collectionid="index"
-        >
+        <div :data-collectionid="item.id">
           <n-grid
             :x-gap="20"
             :y-gap="20"
@@ -44,7 +41,7 @@
               'rounded border border-dashed border-gray-300':
                 !item.cards.length,
             }"
-            :data-collectionid="index"
+            :data-collectionid="item.id"
           >
             <n-gi
               v-for="(child, childIndex) in item.cards"
@@ -54,7 +51,7 @@
               <card
                 :child="child"
                 @click="onHandleClick(child)"
-                @delete="() => spacesStore.removeCard(index, childIndex)"
+                @delete="onDeleteCard"
                 @edit="onEdit(child, index, childIndex)"
               />
             </n-gi>
@@ -67,6 +64,12 @@
             </n-gi>
           </n-grid>
         </div>
+      </div>
+      <div
+        v-if="!spacesStore.currentCollections?.length"
+        class="bg-[#fafafa] py-16 text-center text-2xl text-gray-400"
+      >
+        No collections shared with this space yet.
       </div>
     </div>
   </n-scrollbar>
@@ -81,11 +84,17 @@ import { useExpand } from "@/hooks/useExpand.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { faviconURL } from "@/utils"
 import { iCard, iCollection } from "@/type.ts"
+import tabbyDatabaseService from "@/db"
 
 const spacesStore = useSpacesStore()
+
 const dialog = useDialog()
 
-onMounted(() => {
+function refresh() {
+  return spacesStore.getCollectionsById(spacesStore.activeSpaceId)
+}
+
+onMounted(async () => {
   Sortable.create(document.querySelector(".drag-parent-area") as HTMLElement, {
     group: {
       name: "nested-parent",
@@ -93,10 +102,18 @@ onMounted(() => {
     },
     animation: 150,
     ghostClass: "sortable-ghost-dashed-border",
-    onEnd: function (evt) {
-      console.log("evt: ", evt)
+    onEnd: async function (evt) {
       const { newIndex, oldIndex } = evt
-      spacesStore.moveCollection(oldIndex!, newIndex!)
+      let collectionId: number, targetCollectionId: number
+      spacesStore.currentCollections?.forEach((item, index) => {
+        if (index === oldIndex) collectionId = item.id
+        if (index === newIndex) targetCollectionId = item.id
+      })
+      await tabbyDatabaseService.moveCollection(
+        collectionId!,
+        targetCollectionId!,
+      )
+      await refresh()
     },
   })
 
@@ -118,14 +135,16 @@ onMounted(() => {
       },
       onEnd: function (evt) {
         const { from, to, oldIndex, newIndex } = evt
-        const { collectionid: fromCollectionIndex } = from.dataset
-        const { collectionid: toCollectionIndex } = to.dataset
-        spacesStore.moveCard(
-          Number(fromCollectionIndex!),
-          oldIndex!,
-          Number(toCollectionIndex!),
-          newIndex!,
-        )
+        const { collectionid: fromCollectionId } = from.dataset
+        const { collectionid: toCollectionId } = to.dataset
+        console.log("fromCollectionId: ", fromCollectionId)
+        console.log("toCollectionId: ", toCollectionId)
+        // spacesStore.moveCard(
+        //   Number(fromCollectionIndex!),
+        //   oldIndex!,
+        //   Number(toCollectionIndex!),
+        //   newIndex!,
+        // )
       },
     })
   })
@@ -136,25 +155,32 @@ const { expandedItems, generateExpandedItems, toggleExpand } = useExpand(
 )
 
 function onToggleExpand(index: number) {
-  if (!expandedItems.value[spacesStore.activeSpaceIndex].length) {
-    generateExpandedItems(
-      spacesStore.activeSpaceIndex,
-      spacesStore.getCollections.length,
-    )
-  }
-  toggleExpand(spacesStore.activeSpaceIndex, index)
+  // if (!expandedItems.value[spacesStore.activeSpaceIndex].length) {
+  //   generateExpandedItems(
+  //     spacesStore.activeSpaceIndex,
+  //     spacesStore.getCollections.length,
+  //   )
+  // }
+  // toggleExpand(spacesStore.activeSpaceIndex, index)
 }
 
 watchEffect(() => {
-  if (
-    expandedItems.value[spacesStore.activeSpaceIndex]?.length ===
-    spacesStore.getCollections?.length
+  // if (
+  //   expandedItems.value[spacesStore.activeSpaceIndex]?.length ===
+  //   spacesStore.getCollections?.length
+  // )
+  //   return
+  // generateExpandedItems(
+  //   spacesStore.activeSpaceIndex,
+  //   spacesStore.getCollections.length,
+  // )
+})
+
+watchEffect(async () => {
+  const collectionsToSet = await tabbyDatabaseService.getCollectionWithCards(
+    spacesStore.activeSpaceId,
   )
-    return
-  generateExpandedItems(
-    spacesStore.activeSpaceIndex,
-    spacesStore.getCollections.length,
-  )
+  spacesStore.setCurrentCollections(collectionsToSet)
 })
 
 function onHandleClick(child: any) {
@@ -197,11 +223,11 @@ function onEdit(child: iCard, collectionIndex: number, cardIndex: number) {
       </n-form>
     ),
     onPositiveClick: () => {
-      spacesStore.updateCard(collectionIndex, cardIndex, {
-        ...child,
-        customTitle: formModel.value.title,
-        customDescription: formModel.value.description,
-      })
+      // spacesStore.updateCard(collectionIndex, cardIndex, {
+      //   ...child,
+      //   customTitle: formModel.value.title,
+      //   customDescription: formModel.value.description,
+      // })
     },
   })
 }
@@ -213,7 +239,7 @@ function onDeleteCollection(item: iCollection, index: number) {
     negativeText: "Cancel",
     positiveText: "Save",
     onPositiveClick: () => {
-      spacesStore.removeCollection(index)
+      // spacesStore.removeCollection(index)
     },
   })
 }
@@ -231,7 +257,7 @@ function onMoveCollection(item: iCollection, fromIndex: number) {
         <n-form-item label="Space">
           <n-select
             v-model:value={formModel.value.toIndex}
-            options={spacesStore.mySpaces.map((item, toIndex) => ({
+            options={spacesStore.allSpaces.map((item, toIndex) => ({
               label: item.title,
               value: toIndex,
             }))}
@@ -241,8 +267,10 @@ function onMoveCollection(item: iCollection, fromIndex: number) {
     ),
     onPositiveClick: () => {
       if (!formModel.value.toIndex) return
-      spacesStore.moveCollectionToSpace(fromIndex, formModel.value.toIndex)
+      // spacesStore.moveCollectionToSpace(fromIndex, formModel.value.toIndex)
     },
   })
 }
+
+function onDeleteCard() {}
 </script>

@@ -20,10 +20,10 @@
     <div class="flex-1 px-4">
       <div
         class="flex cursor-pointer items-center py-2 font-medium"
-        v-for="(item, index) in spacesStore.mySpaces"
-        :class="{ 'text-red-450': spacesStore.activeSpaceIndex === index }"
+        v-for="item in spacesStore.allSpaces"
+        :class="{ 'text-red-450': spacesStore.activeSpaceId === item.id }"
         :key="item.title"
-        @click="spacesStore.updateActiveSpaceIndex(index)"
+        @click="onHandleSpaceClick(item)"
       >
         <n-icon size="18" :component="BagHandleOutline" />
         <span class="px-1">{{ item.title }}</span>
@@ -42,7 +42,15 @@
 import { Add, SettingsOutline, BagHandleOutline } from "@vicons/ionicons5"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
+import tabbyDatabaseService, { Space } from "@/db"
+
 const spacesStore = useSpacesStore()
+
+onMounted(async () => {
+  const allSpaces = await tabbyDatabaseService.getAllSpaces()
+  spacesStore.setAllSpaces(allSpaces)
+  spacesStore.setActiveSpaceId(allSpaces[0].id)
+})
 
 const dialog = useDialog()
 function onAddSpace() {
@@ -61,13 +69,17 @@ function onAddSpace() {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
       if (!formModel.value.title) return
-      spacesStore.addSpace({
+      await tabbyDatabaseService.addSpace({
         title: formModel.value.title,
-        spaces: [],
       })
+      spacesStore.setAllSpaces(await tabbyDatabaseService.getAllSpaces())
     },
   })
+}
+
+async function onHandleSpaceClick(space: Space) {
+  spacesStore.setActiveSpaceId(space.id)
 }
 </script>

@@ -9,7 +9,7 @@
       <div
         v-for="(item, index) in tabs"
         :key="index"
-        class="right-aside-window mb-3 rounded p-2.5 shadow-base"
+        class="mb-3 rounded p-2.5 shadow-base"
       >
         <div class="flex items-center py-1.5">
           <span>Window {{ index + 1 }}</span>
@@ -21,7 +21,7 @@
             <ChevronDownOutline />
           </n-icon>
         </div>
-        <template v-if="expandedItems[0][index]">
+        <div class="right-aside-window" v-if="expandedItems[0][index]">
           <div
             v-for="child in item"
             :key="child.id"
@@ -37,7 +37,7 @@
               @click="activeTab(child.id)"
             />
           </div>
-        </template>
+        </div>
       </div>
     </div>
   </div>
@@ -49,18 +49,15 @@ import card from "./card.vue"
 import { ChevronDownOutline } from "@vicons/ionicons5"
 import { useExpand } from "@/hooks/useExpand.ts"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
-import { useSpacesStore } from "@/store/spaces.ts"
+// import { useSpacesStore } from "@/store/spaces.ts"
 
 const { expandedItems, toggleExpand, generateExpandedItems } =
   useExpand("asideExpandedItems")
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
-const spacesStore = useSpacesStore()
+// const spacesStore = useSpacesStore()
 
-onMounted(async () => {})
-
-chrome.tabs.onUpdated.addListener(async () => {
+onMounted(async () => {
   await getTabs()
-  generateExpandedItems(0, tabs.value.length)
   Sortable.create(document.querySelector(".right-aside-area") as HTMLElement, {
     group: {
       name: "right-aside-parent",
@@ -72,11 +69,14 @@ chrome.tabs.onUpdated.addListener(async () => {
   const dragChildAreas = document.querySelectorAll(".right-aside-window")
   dragChildAreas.forEach((dragChildArea) => {
     Sortable.create(dragChildArea as HTMLElement, {
-      group: "right-aside-item",
+      group: {
+        name: "right-aside-child",
+      },
       animation: 150,
       handle: ".right-aside-item",
       ghostClass: "sortable-ghost-dashed-border",
       onMove: function (evt) {
+        console.log("move aside card: ", evt)
         if (evt.to.classList.contains("drag-child-area")) {
           evt.dragged.classList.remove("my-3")
           evt.dragged.classList.remove("right-aside-item")
@@ -93,18 +93,19 @@ chrome.tabs.onUpdated.addListener(async () => {
         }
       },
       onEnd: function (/**Event*/ evt) {
+        console.log("evt: ", evt)
         const { item: itemEl, to } = evt
         const { id, windowid } = itemEl.dataset
         if (to.classList.contains("drag-child-area")) {
           removeTab(Number(id))
-          const toParent = to.parentElement
-          const { collectionid: toClollectionIndex } = toParent!.dataset
-          spacesStore.addCard(Number(toClollectionIndex), {
-            title: itemEl.innerText,
-            url: itemEl.dataset.url!,
-            customTitle: "",
-            customDescription: "",
-          })
+          // const toParent = to.parentElement
+          // const { collectionid: toClollectionIndex } = toParent!.dataset
+          // spacesStore.addCard(Number(toClollectionIndex), {
+          //   title: itemEl.innerText,
+          //   url: itemEl.dataset.url!,
+          //   customTitle: "",
+          //   customDescription: "",
+          // })
         } else {
           const element =
             itemEl.nextElementSibling || itemEl.previousElementSibling
@@ -114,6 +115,12 @@ chrome.tabs.onUpdated.addListener(async () => {
       },
     })
   })
-  console.log("tabs: ", tabs)
+})
+
+chrome.tabs.onUpdated.addListener(async () => {
+  console.log(22)
+  await getTabs()
+  generateExpandedItems(0, tabs.value.length)
+  console.log(document.querySelector(".right-aside-area"))
 })
 </script>

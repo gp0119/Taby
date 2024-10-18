@@ -1,3 +1,3 @@
-import { getAuth } from "./auth";
+import { getAuth } from "./auth"
 
-getAuth();
+getAuth()

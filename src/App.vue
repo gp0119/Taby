@@ -1,39 +1,44 @@
 <template>
-  <n-config-provider :theme-overrides="themeOverrides" class="h-full">
-    <n-dialog-provider>
-      <n-layout has-sider class="h-full" content-class="bg-[#fafafa]">
-        <n-layout-sider
-          bordered
-          :width="200"
-          :collapsed-width="30"
-          content-class="bg-[#fafafa]"
-          :show-collapsed-content="false"
-          show-trigger="arrow-circle"
-        >
-          <left-aside />
-        </n-layout-sider>
-        <n-layout
-          content-class="bg-[#fafafa]"
-          has-sider
-          sider-placement="right"
-        >
-          <n-layout-content content-class="bg-[#fafafa]  overflow-hidden">
-            <navs />
-            <content />
-          </n-layout-content>
+  <Suspense>
+    <n-config-provider :theme-overrides="themeOverrides" class="h-full">
+      <n-dialog-provider>
+        <n-layout has-sider class="h-full" content-class="bg-[#fafafa]">
           <n-layout-sider
-            style="border-left: 1px solid rgb(239, 239, 245)"
-            :width="250"
+            bordered
+            :width="200"
             :collapsed-width="30"
+            content-class="bg-[#fafafa]"
             :show-collapsed-content="false"
             show-trigger="arrow-circle"
           >
-            <right-aside />
+            <left-aside />
           </n-layout-sider>
+          <n-layout
+            content-class="bg-[#fafafa]"
+            has-sider
+            sider-placement="right"
+          >
+            <n-layout-content content-class="bg-[#fafafa]  overflow-hidden">
+              <navs />
+              <content />
+            </n-layout-content>
+            <n-layout-sider
+              style="border-left: 1px solid rgb(239, 239, 245)"
+              :width="250"
+              :collapsed-width="30"
+              :show-collapsed-content="false"
+              show-trigger="arrow-circle"
+            >
+              <right-aside />
+            </n-layout-sider>
+          </n-layout>
         </n-layout>
-      </n-layout>
-    </n-dialog-provider>
-  </n-config-provider>
+      </n-dialog-provider>
+    </n-config-provider>
+    <template #fallback>
+      <div>Loading...</div>
+    </template>
+  </Suspense>
 </template>
 
 <script setup lang="ts">
