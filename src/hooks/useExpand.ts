@@ -5,16 +5,16 @@ export function useExpand(key: string, defaultState = true) {
     [key: string]: boolean[]
   }>(key, {})
 
-  function generateExpandedItems(activeSpaceIndex: number, length: number) {
-    expandedItems.value[activeSpaceIndex] = Array.from(
+  function generateExpandedItems(activeSpaceId: number, length: number) {
+    expandedItems.value[activeSpaceId] = Array.from(
       { length },
       () => defaultState,
     )
   }
 
-  function toggleExpand(activeSpaceIndex: number, index: number) {
-    expandedItems.value[activeSpaceIndex][index] =
-      !expandedItems.value[activeSpaceIndex][index]
+  function toggleExpand(activeSpaceId: number, index: number) {
+    expandedItems.value[activeSpaceId][index] =
+      !expandedItems.value[activeSpaceId][index]
   }
 
   return {

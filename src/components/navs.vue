@@ -2,7 +2,7 @@
   <div
     class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 py-2.5"
   >
-    <span class="text-xl">{{ title }}</span>
+    <span class="select-none text-xl">{{ title }}</span>
     <n-button size="tiny" type="primary" @click="onAddCollection">
       <span>ADD COLLECTION</span>
       <template #icon>

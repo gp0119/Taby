@@ -47,7 +47,6 @@ import leftAside from "./components/left-aside.vue"
 import rightAside from "./components/right-aside.vue"
 import content from "./components/content.vue"
 import { GlobalThemeOverrides } from "naive-ui"
-
 const themeOverrides: GlobalThemeOverrides = {
   common: {
     primaryColor: "#F65077",

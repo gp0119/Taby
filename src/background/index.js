@@ -1,3 +1,1 @@
-import { getAuth } from "./auth"
-
-getAuth()
+console.log(222)

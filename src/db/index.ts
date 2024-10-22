@@ -1,46 +1,12 @@
-import Dexie, { type EntityTable } from "dexie"
+import Dexie from "dexie"
 import { isUndef } from "@/utils/is.ts"
-
-export interface Space {
-  id: number
-  title: string
-  order: number
-}
-
-export interface Collection {
-  id: number
-  title: string
-  spaceId: number
-  order: number
-  labelIds: number[]
-}
-
-export interface Label {
-  id: number
-  title: string
-  color: string
-}
-
-export interface Card {
-  id: number
-  title: string
-  url: string
-  customTitle: string
-  customDescription: string
-  collectionId: number
-  order: number
-}
-
-export interface CollectionWithCards extends Collection {
-  cards: Card[]
-}
-
-type TabbyDatabase = Dexie & {
-  spaces: EntityTable<Space, "id">
-  collections: EntityTable<Collection, "id">
-  labels: EntityTable<Label, "id">
-  cards: EntityTable<Card, "id">
-}
+import {
+  Card,
+  Collection,
+  CollectionWithCards,
+  Space,
+  TabbyDatabase,
+} from "@/type.ts"
 
 class TabbyDatabaseService {
   ORDER_STEP: number
@@ -56,13 +22,50 @@ class TabbyDatabaseService {
       cards:
         "++id, title, url, customTitle, order, customDescription, collectionId",
     })
-    this.initDb()
   }
 
   async initDb() {
     const hasSpace = await this.db.spaces.count()
     if (!hasSpace) {
       await this.db.spaces.bulkAdd([{ title: "my collection", order: 1000 }])
+      // await this.db.collections.bulkAdd([
+      //   { title: "test1", spaceId: 1, order: 1000, labelIds: [] },
+      //   { title: "test2", spaceId: 1, order: 2000, labelIds: [] },
+      // ])
+      // await this.db.cards.bulkAdd([
+      //   {
+      //     title: "test1",
+      //     url: "https://www.baidu.com",
+      //     customTitle: "test1",
+      //     customDescription: "test1",
+      //     collectionId: 1,
+      //     order: 1000,
+      //   },
+      //   {
+      //     title: "test2",
+      //     url: "https://www.baidu.com",
+      //     customTitle: "test2",
+      //     customDescription: "test2",
+      //     collectionId: 1,
+      //     order: 2000,
+      //   },
+      //   {
+      //     title: "test3",
+      //     url: "https://www.baidu.com",
+      //     customTitle: "test3",
+      //     customDescription: "test3",
+      //     collectionId: 2,
+      //     order: 1000,
+      //   },
+      //   {
+      //     title: "test4",
+      //     url: "https://www.baidu.com",
+      //     customTitle: "test4",
+      //     customDescription: "test4",
+      //     collectionId: 2,
+      //     order: 2000,
+      //   },
+      // ])
     }
   }
 
@@ -115,7 +118,7 @@ class TabbyDatabaseService {
   }
 
   async moveSpace(id: number, targetId: number) {
-    const allSpaces = await this.db.spaces.toArray()
+    const allSpaces = await this.db.spaces.orderBy("order").toArray()
     let currentSpace, currentIndex, targetIndex
     for (const [index, space] of allSpaces.entries()) {
       if (space.id === id) {
@@ -197,10 +200,10 @@ class TabbyDatabaseService {
     if (!currentCollection) return
     const newOrder = await this.getNextOrder(
       this.db.collections,
-      (item) => item.spaceId === targetSpaceId,
+      (item) => item.spaceId === Number(targetSpaceId),
     )
     await this.db.collections.update(collectionId, {
-      spaceId: targetSpaceId,
+      spaceId: Number(targetSpaceId),
       order: newOrder,
     })
   }
@@ -214,6 +217,7 @@ class TabbyDatabaseService {
   }
 
   async addCard(card: Pick<Card, "title" | "url" | "collectionId">) {
+    console.log("card: ", card)
     const newOrder = await this.getNextOrder(
       this.db.cards,
       (item) => item.collectionId === card.collectionId,
@@ -245,7 +249,7 @@ class TabbyDatabaseService {
     if (!currentCard) return
     const allCards = await this.db.cards
       .where({ collectionId: currentCard.collectionId })
-      .toArray()
+      .sortBy("order")
     let targetIndex, currentIndex
     for (const [index, card] of allCards.entries()) {
       if (card.id === cardId) {
@@ -270,12 +274,11 @@ class TabbyDatabaseService {
   async moveCardToCollection(cardId: number, targetCollectionId: number) {
     const currentCard = await this.db.cards.get(cardId)
     if (!currentCard) return
-    const newOrder = await this.getNextOrder(
-      this.db.cards,
-      (item) => item.collectionId === targetCollectionId,
-    )
+    const newOrder = await this.getNextOrder(this.db.cards, (item) => {
+      return item.collectionId === Number(targetCollectionId)
+    })
     await this.db.cards.update(cardId, {
-      collectionId: targetCollectionId,
+      collectionId: Number(targetCollectionId),
       order: newOrder,
     })
   }

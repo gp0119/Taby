@@ -5,10 +5,10 @@
         class="flex h-[50px] items-center border-0 border-b border-solid px-4 leading-[50px]"
       >
         <n-avatar :src="logo" :size="26" class="bg-white" />
-        <span class="ml-2 text-xl">Tabby</span>
+        <span class="ml-2 select-none text-xl">Tabby</span>
       </div>
       <div class="flex justify-between px-4 py-2.5">
-        <span class="font-bold">SPACES</span>
+        <span class="select-none font-bold">SPACES</span>
         <n-icon
           size="18"
           class="cursor-pointer text-red-600"
@@ -26,7 +26,7 @@
         @click="onHandleSpaceClick(item)"
       >
         <n-icon size="18" :component="BagHandleOutline" />
-        <span class="px-1">{{ item.title }}</span>
+        <span class="select-none px-1">{{ item.title }}</span>
       </div>
     </div>
     <div class="border-0 border-t border-solid px-2.5 py-4">
@@ -42,7 +42,8 @@
 import { Add, SettingsOutline, BagHandleOutline } from "@vicons/ionicons5"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
-import tabbyDatabaseService, { Space } from "@/db"
+import tabbyDatabaseService from "@/db"
+import { Space } from "@/type"
 
 const spacesStore = useSpacesStore()
 

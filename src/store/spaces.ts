@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
-import tabbyDatabaseService, { CollectionWithCards, Space } from "@/db"
+import tabbyDatabaseService from "@/db"
 import { useLocalStorage } from "@vueuse/core"
+import { CollectionWithCards, Space } from "@/type.ts"
 
 export const useSpacesStore = defineStore("spaces", () => {
   const allSpaces = ref<Space[]>([])

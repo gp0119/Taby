@@ -3,12 +3,14 @@
     <div class="drag-parent-area bg-gray-200">
       <div
         v-for="(item, index) in spacesStore.currentCollections"
-        :key="item.title"
+        :key="item.id"
         class="drag-item mb-0.5 bg-[#fafafa] p-7"
       >
         <div class="group/title flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
-            <span>{{ item.title }}</span>
+            <span class="select-none"
+              >{{ item.title }}--{{ item.cards.length }}</span
+            >
             <n-icon
               size="20"
               class="ml-2 inline-block cursor-pointer text-red-600"
@@ -21,17 +23,20 @@
               size="20"
               class="cursor-pointer text-red-450"
               :component="FolderMoveTo"
-              @click="onMoveCollection(item, index)"
+              @click="onMoveCollection(item)"
             />
             <n-icon
               size="20"
               class="cursor-pointer text-red-450"
               :component="Delete"
-              @click="onDeleteCollection(item, index)"
+              @click="onDeleteCollection(item)"
             />
           </n-space>
         </div>
-        <div :data-collectionid="item.id">
+        <div
+          :data-collectionid="item.id"
+          v-if="expandedItems[spacesStore.activeSpaceId][index]"
+        >
           <n-grid
             :x-gap="20"
             :y-gap="20"
@@ -44,15 +49,15 @@
             :data-collectionid="item.id"
           >
             <n-gi
-              v-for="(child, childIndex) in item.cards"
-              :key="child.title"
+              v-for="child in item.cards"
+              :key="child.id"
               class="drag-item group/content peer"
             >
               <card
                 :child="child"
                 @click="onHandleClick(child)"
-                @delete="onDeleteCard"
-                @edit="onEdit(child, index, childIndex)"
+                @delete="onDeleteCard(child)"
+                @edit="onEdit(child)"
               />
             </n-gi>
             <n-gi
@@ -83,8 +88,8 @@ import { FolderMoveTo, Delete } from "@vicons/carbon"
 import { useExpand } from "@/hooks/useExpand.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { faviconURL } from "@/utils"
-import { iCard, iCollection } from "@/type.ts"
 import tabbyDatabaseService from "@/db"
+import { Card as iCard, Collection } from "@/type.ts"
 
 const spacesStore = useSpacesStore()
 
@@ -94,7 +99,16 @@ function refresh() {
   return spacesStore.getCollectionsById(spacesStore.activeSpaceId)
 }
 
-onMounted(async () => {
+watch(
+  () => spacesStore.activeSpaceId,
+  async () => {
+    await refresh()
+    createDraggable()
+  },
+  { immediate: true },
+)
+
+function createDraggable() {
   Sortable.create(document.querySelector(".drag-parent-area") as HTMLElement, {
     group: {
       name: "nested-parent",
@@ -116,13 +130,12 @@ onMounted(async () => {
       await refresh()
     },
   })
-
   const dragChildAreas = document.querySelectorAll(".drag-child-area")
   dragChildAreas.forEach((dragChildArea) => {
     Sortable.create(dragChildArea as HTMLElement, {
       group: {
         name: "nested-child",
-        put: ["nested-child", "right-aside-item"],
+        put: ["nested-child", "right-aside-child"],
       },
       animation: 150,
       handle: ".drag-item",
@@ -133,61 +146,66 @@ onMounted(async () => {
           return false // 阻止移动到这个区域
         }
       },
-      onEnd: function (evt) {
+      onEnd: async function (evt) {
         const { from, to, oldIndex, newIndex } = evt
         const { collectionid: fromCollectionId } = from.dataset
         const { collectionid: toCollectionId } = to.dataset
-        console.log("fromCollectionId: ", fromCollectionId)
-        console.log("toCollectionId: ", toCollectionId)
-        // spacesStore.moveCard(
-        //   Number(fromCollectionIndex!),
-        //   oldIndex!,
-        //   Number(toCollectionIndex!),
-        //   newIndex!,
-        // )
+        let fromCardId: number, toCardId: number
+        spacesStore.currentCollections?.forEach((item) => {
+          if (item.id === Number(fromCollectionId)) {
+            fromCardId = item.cards[oldIndex!]?.id
+          }
+          if (item.id === Number(toCollectionId)) {
+            toCardId = item.cards[newIndex!]?.id
+          }
+        })
+        if (fromCollectionId === toCollectionId) {
+          await tabbyDatabaseService.moveCard(fromCardId!, toCardId!)
+        } else {
+          await tabbyDatabaseService.moveCardToCollection(
+            fromCardId!,
+            Number(toCollectionId)!,
+          )
+        }
+        await refresh()
       },
     })
   })
-})
+}
 
 const { expandedItems, generateExpandedItems, toggleExpand } = useExpand(
   "contentExpandedItems",
 )
 
 function onToggleExpand(index: number) {
-  // if (!expandedItems.value[spacesStore.activeSpaceIndex].length) {
-  //   generateExpandedItems(
-  //     spacesStore.activeSpaceIndex,
-  //     spacesStore.getCollections.length,
-  //   )
-  // }
-  // toggleExpand(spacesStore.activeSpaceIndex, index)
+  if (!spacesStore.currentCollections) return
+  if (!expandedItems.value[spacesStore.activeSpaceId].length) {
+    generateExpandedItems(
+      spacesStore.activeSpaceId,
+      spacesStore.currentCollections.length,
+    )
+  }
+  toggleExpand(spacesStore.activeSpaceId, index)
 }
 
 watchEffect(() => {
-  // if (
-  //   expandedItems.value[spacesStore.activeSpaceIndex]?.length ===
-  //   spacesStore.getCollections?.length
-  // )
-  //   return
-  // generateExpandedItems(
-  //   spacesStore.activeSpaceIndex,
-  //   spacesStore.getCollections.length,
-  // )
-})
-
-watchEffect(async () => {
-  const collectionsToSet = await tabbyDatabaseService.getCollectionWithCards(
-    spacesStore.activeSpaceId,
+  if (
+    expandedItems.value[spacesStore.activeSpaceId]?.length ===
+      spacesStore.currentCollections?.length ||
+    !spacesStore.currentCollections
   )
-  spacesStore.setCurrentCollections(collectionsToSet)
+    return
+  generateExpandedItems(
+    spacesStore.activeSpaceId,
+    spacesStore.currentCollections.length,
+  )
 })
 
 function onHandleClick(child: any) {
   chrome.tabs.create({ url: child.url })
 }
 
-function onEdit(child: iCard, collectionIndex: number, cardIndex: number) {
+function onEdit(child: iCard) {
   const formModel = ref({
     title: child.customTitle || child.title,
     description: child.customDescription || child.title,
@@ -222,41 +240,40 @@ function onEdit(child: iCard, collectionIndex: number, cardIndex: number) {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: () => {
-      // spacesStore.updateCard(collectionIndex, cardIndex, {
-      //   ...child,
-      //   customTitle: formModel.value.title,
-      //   customDescription: formModel.value.description,
-      // })
+    onPositiveClick: async () => {
+      await tabbyDatabaseService.updateCardTitleAndDescription(child.id, {
+        title: formModel.value.title,
+        description: formModel.value.description,
+      })
+      await refresh()
     },
   })
 }
 
-function onDeleteCollection(item: iCollection, index: number) {
+function onDeleteCollection(item: Collection) {
   dialog.error({
     title: "Delete Collection",
     content: "Are you sure you want to delete this collection?",
     negativeText: "Cancel",
     positiveText: "Save",
-    onPositiveClick: () => {
-      // spacesStore.removeCollection(index)
+    onPositiveClick: async () => {
+      await tabbyDatabaseService.removeCollection(item.id)
+      await refresh()
     },
   })
 }
 
-function onMoveCollection(item: iCollection, fromIndex: number) {
-  const formModel = ref({
-    toIndex: "",
-  })
+function onMoveCollection(item: Collection) {
+  const spaceId = ref<number | null>(null)
   dialog.create({
     title: `Move ${item.title} to`,
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
-      <n-form model={formModel.value}>
+      <n-form>
         <n-form-item label="Space">
           <n-select
-            v-model:value={formModel.value.toIndex}
+            v-model:value={spaceId.value}
             options={spacesStore.allSpaces.map((item, toIndex) => ({
               label: item.title,
               value: toIndex,
@@ -265,12 +282,16 @@ function onMoveCollection(item: iCollection, fromIndex: number) {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: () => {
-      if (!formModel.value.toIndex) return
-      // spacesStore.moveCollectionToSpace(fromIndex, formModel.value.toIndex)
+    onPositiveClick: async () => {
+      if (!spaceId.value) return
+      await tabbyDatabaseService.moveCollectionToSpace(item.id, spaceId.value)
+      await refresh()
     },
   })
 }
 
-function onDeleteCard() {}
+async function onDeleteCard(card: iCard) {
+  await tabbyDatabaseService.removeCard(card.id)
+  await refresh()
+}
 </script>

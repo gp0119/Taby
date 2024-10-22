@@ -1,47 +1,55 @@
-import { isNewTabPage } from "@/utils";
-import { iCard } from "@/type.ts";
+import { isNewTabPage } from "@/utils"
+import { Card } from "@/type.ts"
 
 export function useChromeTabs() {
-  const tabs = ref<iCard[][]>([]);
+  const tabs = ref<{
+    [key: string]: Card[]
+  }>({})
 
   async function getTabs() {
-    const res = await chrome.tabs.query({});
-    console.log("res: ", res);
+    const res = await chrome.tabs.query({})
     tabs.value = res
       .filter((item) => !isNewTabPage(item.url as string))
-      .reduce((acc: iCard[][], cur) => {
-        const last = acc[acc.length - 1];
-        if (last && last[0].windowId === cur.windowId) {
-          last.push({
+      .reduce((acc: { [key: string]: Card[] }, cur) => {
+        if (acc[cur.windowId]) {
+          acc[cur.windowId].push({
             title: cur.title || "",
             url: cur.url || "",
+            customTitle: "",
+            customDescription: "",
             windowId: cur.windowId,
-            id: cur.id,
-            oldIndex: cur.index,
-          });
+            id: cur.id as number,
+            collectionId: 0,
+            order: 0,
+          })
         } else {
-          acc.push([
+          acc[cur.windowId] = [
             {
               title: cur.title || "",
               url: cur.url || "",
+              customTitle: "",
+              customDescription: "",
               windowId: cur.windowId,
-              id: cur.id,
-              oldIndex: cur.index,
+              id: cur.id as number,
+              collectionId: 0,
+              order: 0,
             },
-          ]);
+          ]
         }
-        return acc;
-      }, []);
+        return acc
+      }, {})
   }
 
   function createTab(url: string) {
-    return chrome.tabs.create({ url });
+    return chrome.tabs.create({ url })
   }
 
   function removeTab(tabId: number | undefined) {
-    if (!tabId) return;
-    tabs.value = tabs.value.map((item) => item.filter((i) => i.id !== tabId));
-    return chrome.tabs.remove(tabId);
+    if (!tabId) return
+    Object.keys(tabs.value).forEach((key) => {
+      tabs.value[key] = tabs.value[key].filter((item) => item.id !== tabId)
+    })
+    return chrome.tabs.remove(tabId)
   }
 
   async function moveTab(
@@ -49,14 +57,14 @@ export function useChromeTabs() {
     index: number,
     windowId: number,
   ) {
-    if (!tabId) return;
-    await chrome.tabs.move(tabId, { index, windowId });
-    await getTabs();
+    if (!tabId) return
+    await chrome.tabs.move(tabId, { index, windowId })
+    await getTabs()
   }
 
   function activeTab(tabId: number | undefined) {
-    if (!tabId) return;
-    return chrome.tabs.update(tabId, { active: true });
+    if (!tabId) return
+    return chrome.tabs.update(tabId, { active: true })
   }
 
   return {
@@ -66,5 +74,5 @@ export function useChromeTabs() {
     removeTab,
     moveTab,
     activeTab,
-  };
+  }
 }
