@@ -8,9 +8,7 @@
       >
         <div class="group/title flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
-            <span class="select-none"
-              >{{ item.title }}--{{ item.cards.length }}</span
-            >
+            <span class="select-none">{{ item.title }}</span>
             <n-icon
               size="20"
               class="ml-2 inline-block cursor-pointer text-red-600"
@@ -274,9 +272,9 @@ function onMoveCollection(item: Collection) {
         <n-form-item label="Space">
           <n-select
             v-model:value={spaceId.value}
-            options={spacesStore.allSpaces.map((item, toIndex) => ({
+            options={spacesStore.allSpaces.map((item) => ({
               label: item.title,
-              value: toIndex,
+              value: item.id,
             }))}
           ></n-select>
         </n-form-item>

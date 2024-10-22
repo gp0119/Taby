@@ -217,7 +217,6 @@ class TabbyDatabaseService {
   }
 
   async addCard(card: Pick<Card, "title" | "url" | "collectionId">) {
-    console.log("card: ", card)
     const newOrder = await this.getNextOrder(
       this.db.cards,
       (item) => item.collectionId === card.collectionId,
@@ -297,6 +296,10 @@ class TabbyDatabaseService {
         return { ...collection, cards }
       }),
     )
+  }
+
+  async batchAddCards(cards: Omit<Card, "id">[]) {
+    return this.db.cards.bulkAdd(cards)
   }
 }
 

@@ -29,21 +29,38 @@
         <span class="select-none px-1">{{ item.title }}</span>
       </div>
     </div>
-    <div class="border-0 border-t border-solid px-2.5 py-4">
-      <div class="flex items-center">
-        <n-icon size="18" :component="SettingsOutline" />
-        <span class="px-1">Setting</span>
-      </div>
+    <div class="px-2.5 py-4">
+      <n-space vertical>
+        <n-button class="w-full" @click="onImport"
+          >导入
+          <template #icon>
+            <n-icon size="18" :component="DocumentImport" />
+          </template>
+        </n-button>
+        <n-button class="w-full"
+          >设置
+          <template #icon>
+            <n-icon size="18" :component="SettingsOutline" />
+          </template>
+        </n-button>
+      </n-space>
     </div>
   </div>
 </template>
 
 <script setup lang="tsx">
-import { Add, SettingsOutline, BagHandleOutline } from "@vicons/ionicons5"
+import {
+  Add,
+  SettingsOutline,
+  BagHandleOutline,
+  ArchiveOutline,
+} from "@vicons/ionicons5"
+import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
 import tabbyDatabaseService from "@/db"
-import { Space } from "@/type"
+import { Collection, CollectionWithCards, Space } from "@/type"
+import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
 
 const spacesStore = useSpacesStore()
 
@@ -82,5 +99,70 @@ function onAddSpace() {
 
 async function onHandleSpaceClick(space: Space) {
   spacesStore.setActiveSpaceId(space.id)
+}
+
+function onImport() {
+  dialog.create({
+    title: "Import",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form>
+        <n-upload
+          accept=".json"
+          on-change={onChange}
+          max={1}
+          show-file-list={false}
+        >
+          <n-upload-dragger>
+            <div class="mt-2.5">
+              <n-icon size="48" depth={3}>
+                <ArchiveOutline />
+              </n-icon>
+            </div>
+            <n-text class="text-base">
+              Click or drag files to the area to upload them
+            </n-text>
+            <n-p depth="3" class="mt-2.5">
+              Please upload. json file
+            </n-p>
+          </n-upload-dragger>
+        </n-upload>
+      </n-form>
+    ),
+    onPositiveClick: async () => {},
+  })
+}
+
+function onChange({ file }: { file: UploadSettledFileInfo }) {
+  const reader = new FileReader()
+  reader.onload = async (event) => {
+    try {
+      const lists: {
+        lists: CollectionWithCards[]
+      } = JSON.parse(event.target?.result as string)
+      for (const list of lists.lists) {
+        const collectionId = await tabbyDatabaseService.addCollection({
+          title: list.title,
+          spaceId: spacesStore.activeSpaceId,
+          labelIds: [],
+        })
+        await tabbyDatabaseService.batchAddCards(
+          list.cards.map((item, index) => {
+            return {
+              ...item,
+              customTitle: item.customTitle || item.title,
+              customDescription: item.customDescription || item.title,
+              collectionId,
+              order: (index + 1) * 1000,
+            }
+          }),
+        )
+      }
+    } catch (error) {
+      console.error("文件内容不是有效的 JSON", error)
+    }
+  }
+  reader.readAsText(file.file as Blob)
 }
 </script>
