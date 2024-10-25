@@ -25,14 +25,10 @@ declare module 'vue' {
     NLayout: typeof import('naive-ui')['NLayout']
     NLayoutContent: typeof import('naive-ui')['NLayoutContent']
     NLayoutSider: typeof import('naive-ui')['NLayoutSider']
-    NP: typeof import('naive-ui')['NP']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
-    NSelectOption: typeof import('naive-ui')['NSelectOption']
     NSpace: typeof import('naive-ui')['NSpace']
-    NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
-    NUploadDragger: typeof import('naive-ui')['NUploadDragger']
     RightAside: typeof import('./src/components/right-aside.vue')['default']
   }
 }

@@ -21,7 +21,10 @@
             <ChevronDownOutline />
           </n-icon>
         </div>
-        <div class="right-aside-window p-2.5" v-if="expandedItems[0][index]">
+        <div
+          class="right-aside-window p-2.5"
+          v-if="expandedItems[0] && expandedItems[0][index]"
+        >
           <div
             v-for="child in item"
             :key="child.id"
@@ -33,7 +36,7 @@
             <card
               :child="child"
               @delete="removeTab(child.id)"
-              @click="activeTab(child.id)"
+              @click="activeTab(child)"
             />
           </div>
         </div>
@@ -51,17 +54,26 @@ import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import tabbyDatabaseService from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
 
+const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
 const { expandedItems, toggleExpand, generateExpandedItems } =
   useExpand("asideExpandedItems")
-const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
 const spacesStore = useSpacesStore()
 
 function refresh() {
   return spacesStore.getCollectionsById(spacesStore.activeSpaceId)
 }
 
+async function refreshTabs() {
+  await getTabs()
+}
+chrome.tabs.onUpdated.addListener(refreshTabs)
+chrome.tabs.onMoved.addListener(refreshTabs)
+chrome.tabs.onRemoved.addListener(refreshTabs)
+chrome.tabs.onAttached.addListener(refreshTabs)
+
 onMounted(async () => {
   await getTabs()
+  generateExpandedItems(0, Object.keys(tabs).length)
   Sortable.create(document.querySelector(".right-aside-area") as HTMLElement, {
     group: {
       name: "right-aside-parent",
@@ -98,7 +110,6 @@ onMounted(async () => {
         }
       },
       onEnd: async function (/**Event*/ evt) {
-        console.log("evt: ", evt)
         const { item: itemEl, to } = evt
         const { id, windowid } = itemEl.dataset
         if (to.classList.contains("drag-child-area")) {
@@ -120,10 +131,5 @@ onMounted(async () => {
       },
     })
   })
-})
-
-chrome.tabs.onUpdated.addListener(async () => {
-  await getTabs()
-  generateExpandedItems(0, Object.keys(tabs).length)
 })
 </script>

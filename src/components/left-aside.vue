@@ -31,16 +31,24 @@
     </div>
     <div class="px-2.5 py-4">
       <n-space vertical>
-        <n-button class="w-full" @click="onImport"
-          >导入
+        <n-upload
+          @change="onChange"
+          trigger-class="w-full"
+          accept=".json"
+          :show-file-list="false"
+          :max="1"
+        >
+          <n-button class="w-full">
+            <span>导入</span>
+            <template #icon>
+              <n-icon size="18" :component="DocumentImport" />
+            </template>
+          </n-button>
+        </n-upload>
+        <n-button class="w-full" @click="onSync">
+          <span>同步</span>
           <template #icon>
-            <n-icon size="18" :component="DocumentImport" />
-          </template>
-        </n-button>
-        <n-button class="w-full"
-          >设置
-          <template #icon>
-            <n-icon size="18" :component="SettingsOutline" />
+            <n-icon size="18" :component="SyncSharp" />
           </template>
         </n-button>
       </n-space>
@@ -49,25 +57,27 @@
 </template>
 
 <script setup lang="tsx">
-import {
-  Add,
-  SettingsOutline,
-  BagHandleOutline,
-  ArchiveOutline,
-} from "@vicons/ionicons5"
+import { Add, SyncSharp, BagHandleOutline } from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
 import tabbyDatabaseService from "@/db"
-import { Collection, CollectionWithCards, Space } from "@/type"
+import { CollectionWithCards, Space } from "@/type"
 import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
+import { FormInst } from "naive-ui"
+import { getGistById } from "@/sync/github.ts"
 
 const spacesStore = useSpacesStore()
 
-onMounted(async () => {
-  const allSpaces = await tabbyDatabaseService.getAllSpaces()
+const allSpaces = await tabbyDatabaseService.getAllSpaces()
+const collectionToSet = await tabbyDatabaseService.getCollectionWithCards(
+  allSpaces[0].id,
+)
+
+onMounted(() => {
   spacesStore.setAllSpaces(allSpaces)
   spacesStore.setActiveSpaceId(allSpaces[0].id)
+  spacesStore.setCurrentCollections(collectionToSet)
 })
 
 const dialog = useDialog()
@@ -101,39 +111,6 @@ async function onHandleSpaceClick(space: Space) {
   spacesStore.setActiveSpaceId(space.id)
 }
 
-function onImport() {
-  dialog.create({
-    title: "Import",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
-      <n-form>
-        <n-upload
-          accept=".json"
-          on-change={onChange}
-          max={1}
-          show-file-list={false}
-        >
-          <n-upload-dragger>
-            <div class="mt-2.5">
-              <n-icon size="48" depth={3}>
-                <ArchiveOutline />
-              </n-icon>
-            </div>
-            <n-text class="text-base">
-              Click or drag files to the area to upload them
-            </n-text>
-            <n-p depth="3" class="mt-2.5">
-              Please upload. json file
-            </n-p>
-          </n-upload-dragger>
-        </n-upload>
-      </n-form>
-    ),
-    onPositiveClick: async () => {},
-  })
-}
-
 function onChange({ file }: { file: UploadSettledFileInfo }) {
   const reader = new FileReader()
   reader.onload = async (event) => {
@@ -158,11 +135,85 @@ function onChange({ file }: { file: UploadSettledFileInfo }) {
             }
           }),
         )
+        await spacesStore.getCollectionsById(spacesStore.activeSpaceId)
       }
     } catch (error) {
       console.error("文件内容不是有效的 JSON", error)
     }
   }
   reader.readAsText(file.file as Blob)
+}
+
+function onSync() {
+  const formRef = ref<FormInst | null>(null)
+  const formModel = ref({
+    id: "43af9f678b44e79fc5183cf2d0a4617d",
+    accessToken: "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",
+  })
+  chrome.storage.sync.get(["accessToken", "id"], (result) => {
+    console.log("result: ", result)
+    if (result.accessToken && result.id) {
+      formModel.value.accessToken = result.accessToken
+      formModel.value.id = result.id
+    }
+  })
+  const formRules = {
+    accessToken: [{ required: true, message: "AccessToken is required" }],
+  }
+  dialog.create({
+    title: "sync witn github",
+    titleClass: "[&_.n-base-icon]:hidden",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form
+        ref={(el: FormInst) => (formRef.value = el)}
+        model={formModel.value}
+        rules={formRules}
+        require-mark-placement="left"
+      >
+        <n-form-item label="AccessToken:" path="accessToken">
+          <n-input v-model:value={formModel.value.accessToken} />
+        </n-form-item>
+        <n-form-item label="Id:" path="id:">
+          <n-input v-model:value={formModel.value.id} />
+        </n-form-item>
+      </n-form>
+    ),
+    onPositiveClick: () => {
+      formRef.value?.validate((err) => {
+        if (!err) {
+          chrome.storage.sync.set({ accessToken: formModel.value.accessToken })
+          chrome.storage.sync.set({ id: formModel.value.id })
+          getGistById(formModel.value.id).then((res) => {
+            console.log("res: ", res)
+          })
+          // console.log("formModel.value: ", formModel.value)
+          // getGistsByUserName("gp0119").then((res) => {
+          //   console.log("res: ", res)
+          // })
+          // fetch(`https://api.github.com/gists`, {
+          //   method: "post",
+          //   headers: {
+          //     Accept: "application/vnd.github.v3+json",
+          //     Authorization: `Bearer ${formModel.value.accessToken}`,
+          //   },
+          //   body: JSON.stringify({
+          //     description: "Tabby sync " + new Date().toLocaleString(),
+          //     public: false,
+          //     files: {
+          //       "tabby-sync-settings": {
+          //         content: "tabby will sync here.",
+          //       },
+          //     },
+          //   }),
+          // })
+          //   .then((response) => response.json())
+          //   .then((json) => console.log(json))
+        }
+      })
+      return false
+    },
+  })
 }
 </script>

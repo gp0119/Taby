@@ -57,14 +57,16 @@ export function useChromeTabs() {
     index: number,
     windowId: number,
   ) {
+    console.log("tabId: ", tabId, index, windowId)
     if (!tabId) return
     await chrome.tabs.move(tabId, { index, windowId })
     await getTabs()
   }
 
-  function activeTab(tabId: number | undefined) {
-    if (!tabId) return
-    return chrome.tabs.update(tabId, { active: true })
+  async function activeTab(child: Card) {
+    if (!child) return
+    await chrome.windows.update(child.windowId!, { focused: true })
+    return chrome.tabs.update(child.id, { active: true })
   }
 
   return {

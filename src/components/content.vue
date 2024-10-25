@@ -103,7 +103,6 @@ watch(
     await refresh()
     createDraggable()
   },
-  { immediate: true },
 )
 
 function createDraggable() {

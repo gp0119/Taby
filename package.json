@@ -12,16 +12,16 @@
     "@vicons/carbon": "^0.12.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vueuse/core": "^11.1.0",
-    "dexie": "^4.0.8",
+    "dexie": "^4.0.9",
     "lodash-es": "^4.17.21",
     "naive-ui": "^2.40.1",
     "pinia": "^2.2.4",
     "sortablejs": "^1.15.3",
-    "vue": "^3.5.10"
+    "vue": "^3.5.12"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.0.0-beta.25",
-    "@types/chrome": "^0.0.277",
+    "@crxjs/vite-plugin": "^2.0.0-beta.26",
+    "@types/chrome": "^0.0.279",
     "@types/sortablejs": "^1.15.8",
     "@vitejs/plugin-vue": "^5.1.4",
     "@vitejs/plugin-vue-jsx": "^4.0.1",
@@ -29,11 +29,11 @@
     "postcss": "^8.4.47",
     "prettier": "3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.8",
-    "tailwindcss": "^3.4.13",
-    "typescript": "^5.5.3",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
     "unplugin-auto-import": "^0.18.3",
     "unplugin-vue-components": "^0.27.4",
-    "vite": "^5.4.8",
+    "vite": "^5.4.9",
     "vue-tsc": "^2.1.6"
   }
 }

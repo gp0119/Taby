@@ -36,7 +36,7 @@
       </n-dialog-provider>
     </n-config-provider>
     <template #fallback>
-      <div>Loading...</div>
+      <div class="bg-red-450">Loading...</div>
     </template>
   </Suspense>
 </template>
