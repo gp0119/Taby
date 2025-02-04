@@ -71,7 +71,7 @@ const spacesStore = useSpacesStore()
 
 const allSpaces = await tabbyDatabaseService.getAllSpaces()
 const collectionToSet = await tabbyDatabaseService.getCollectionWithCards(
-  allSpaces[0].id,
+  allSpaces[0]?.id,
 )
 
 onMounted(() => {

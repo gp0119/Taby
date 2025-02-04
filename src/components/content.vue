@@ -105,7 +105,16 @@ watch(
   },
 )
 
+onMounted(async () => {
+  await refresh()
+  createDraggable()
+})
+
 function createDraggable() {
+  console.log(
+    'document.querySelector(".drag-parent-area"): ',
+    document.querySelector(".drag-parent-area"),
+  )
   Sortable.create(document.querySelector(".drag-parent-area") as HTMLElement, {
     group: {
       name: "nested-parent",
