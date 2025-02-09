@@ -249,6 +249,10 @@ function onSync() {
                   formModel.value.accessToken,
                   formModel.value.gistId,
                 )
+                await chrome.storage.sync.set({
+                  accessToken: formModel.value.accessToken,
+                  gistId: formModel.value.gistId,
+                })
                 await refresh()
                 dialog.destroyAll()
               })
