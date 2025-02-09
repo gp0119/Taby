@@ -17,10 +17,11 @@
         />
       </div>
     </div>
-    <div class="flex-1 px-4">
+    <div class="space-container flex-1 px-4">
       <div
-        class="flex cursor-pointer items-center py-2 font-medium"
+        class="space-item flex cursor-pointer items-center py-2 font-medium"
         v-for="item in allSpaces"
+        :data-id="item.id"
         :class="{ 'text-red-450': activeSpaceId === item.id }"
         :key="item.title"
         @click="onHandleSpaceClick(item)"
@@ -66,6 +67,7 @@ import { CollectionWithCards, Space } from "@/type"
 import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
 import { FormInst } from "naive-ui"
 import { uploadAll, downloadAll } from "@/sync/gistSync"
+import Sortable from "sortablejs"
 
 const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
@@ -83,10 +85,32 @@ onMounted(async () => {
   await setTimeout(async () => {
     await init()
   }, 100)
+  createDraggable()
 })
 
 const allSpaces = computed(() => spacesStore.spaces)
 const activeSpaceId = computed(() => spacesStore.activeId)
+
+const createDraggable = () => {
+  Sortable.create(document.querySelector(".space-container") as HTMLElement, {
+    animation: 150,
+    handle: ".space-item",
+    ghostClass: "sortable-ghost-dashed-border",
+    onEnd: async (evt) => {
+      const { item: itemEl } = evt
+      const element = itemEl.nextElementSibling || itemEl.previousElementSibling
+      const currentSpaceId = itemEl.getAttribute("data-id")
+      const targetSpaceId = element?.getAttribute("data-id")
+      if (currentSpaceId && targetSpaceId) {
+        await dataManager.moveSpace(
+          Number(currentSpaceId),
+          Number(targetSpaceId),
+        )
+        await refresh()
+      }
+    },
+  })
+}
 
 const dialog = useDialog()
 const message = useMessage()
