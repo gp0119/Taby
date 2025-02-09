@@ -107,6 +107,14 @@ onMounted(async () => {
   createDraggable()
 })
 
+watch(
+  () => collections.value.length,
+  async () => {
+    await refresh()
+    createDraggable()
+  },
+)
+
 function createDraggable() {
   Sortable.create(document.querySelector(".drag-parent-area") as HTMLElement, {
     group: {
