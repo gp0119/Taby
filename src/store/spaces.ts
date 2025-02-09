@@ -7,7 +7,7 @@ export const useSpacesStore = defineStore("spaces", () => {
   const dataManager = new DataManager()
   const spaces = ref<Space[]>([])
   const collections = ref<CollectionWithCards[]>([])
-  const activeId = useLocalStorage<number>("activeSpaceId", 0)
+  const activeId = useLocalStorage<number>("activeSpaceId", 1)
 
   const currentSpace = computed(() =>
     spaces.value.find((space) => space.id === activeId.value),

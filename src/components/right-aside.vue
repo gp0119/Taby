@@ -6,38 +6,48 @@
       OPEN TABS
     </div>
     <div class="right-aside-area px-3 py-4">
-      <div
-        v-for="(item, windowId, index) in tabs"
-        :key="index"
-        class="mb-3 rounded shadow-base"
-      >
-        <div class="flex items-center p-2.5">
-          <span class="select-none">Window {{ index + 1 }}</span>
-          <n-icon
-            size="20"
-            class="ml-2 inline-block cursor-pointer text-red-600"
-            @click="isExpanded = !isExpanded"
-          >
-            <ChevronDownOutline />
-          </n-icon>
+      <template v-if="!Object.keys(tabs).length">
+        <div class="mb-3 rounded shadow-base">
+          <div class="flex items-center p-2.5">
+            <span class="select-none">Window 1</span>
+          </div>
+          <div class="p-2.5 text-gray-300">No Tabs</div>
         </div>
-        <div class="right-aside-window p-2.5" v-if="isExpanded">
-          <div
-            v-for="child in item"
-            :key="child.id"
-            :data-id="child.id"
-            :data-windowid="windowId"
-            :data-url="child.url"
-            class="group/aside right-aside-item mb-3"
-          >
-            <card
-              :child="child"
-              @delete="removeTab(child.id)"
-              @click="activeTab(child)"
-            />
+      </template>
+      <template v-else>
+        <div
+          v-for="(item, windowId, index) in tabs"
+          :key="index"
+          class="mb-3 rounded shadow-base"
+        >
+          <div class="flex items-center p-2.5">
+            <span class="select-none">Window {{ index + 1 }}</span>
+            <n-icon
+              size="20"
+              class="ml-2 inline-block cursor-pointer text-red-600"
+              @click="isExpanded = !isExpanded"
+            >
+              <ChevronDownOutline />
+            </n-icon>
+          </div>
+          <div class="right-aside-window p-2.5" v-if="isExpanded">
+            <div
+              v-for="child in item"
+              :key="child.id"
+              :data-id="child.id"
+              :data-windowid="windowId"
+              :data-url="child.url"
+              class="group/aside right-aside-item mb-3"
+            >
+              <card
+                :child="child"
+                @delete="removeTab(child.id)"
+                @click="activeTab(child)"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -61,6 +71,7 @@ function refresh() {
 
 async function refreshTabs() {
   await getTabs()
+  console.log("tabs: ", tabs)
 }
 chrome.tabs.onUpdated.addListener(refreshTabs)
 chrome.tabs.onMoved.addListener(refreshTabs)
