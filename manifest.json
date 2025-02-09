@@ -1,21 +1,15 @@
 {
-  "name": "tabs",
+  "name": "Taby",
   "manifest_version": 3,
-  "version": "1.0.0",
-  "description": "this is tabs",
+  "version": "0.0.1",
+  "description": "A simple new tab extension",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
   "author": {
     "email": "190875565@qq.com"
   },
-  "permissions": [
-    "favicon",
-    "identity",
-    "storage",
-    "tabs",
-    "activeTab"
-  ],
+  "permissions": ["favicon", "identity", "storage", "tabs", "activeTab"],
   "background": {
     "service_worker": "src/background/index.js",
     "type": "module"
