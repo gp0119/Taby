@@ -1,42 +1,78 @@
 <template>
-  <n-scrollbar class="max-h-[calc(100vh-50px)] bg-gray-200">
-    <div class="drag-parent-area">
+  <n-scrollbar class="max-h-[calc(100vh-50px)]">
+    <div class="drag-parent-area bg-gray-200">
       <div
-        v-for="(item, index) in dataStore.data"
-        :key="item.title"
-        class="drag-item mb-1.5 bg-[#fafafa] p-7"
+        v-for="item in collections"
+        :key="item.id"
+        class="drag-item mb-0.5 bg-[#fafafa] p-7"
       >
-        <div class="flex items-center pb-4 text-lg">
-          <span>{{ item.title }}</span>
-          <n-icon
-            size="20"
-            class="ml-2 inline-block cursor-pointer text-red-600"
-            @click="toggleExpand(index)"
-            :component="ChevronDownOutline"
-          />
+        <div class="group/title flex items-center justify-between pb-4 text-lg">
+          <div class="flex items-center">
+            <span class="select-none">{{ item.title }}</span>
+            <n-icon
+              size="20"
+              class="ml-2 inline-block cursor-pointer text-red-600"
+              :component="ChevronDownOutline"
+              @click="expandStore.toggleExpand(item.id)"
+            />
+          </div>
+          <n-space class="!hidden group-hover/title:!flex">
+            <n-icon
+              size="20"
+              class="cursor-pointer text-red-450"
+              :component="FolderMoveTo"
+              @click="onMoveCollection(item)"
+            />
+            <n-icon
+              size="20"
+              class="cursor-pointer text-red-450"
+              :component="Delete"
+              @click="onDeleteCollection(item)"
+            />
+          </n-space>
         </div>
-        <div v-show="expandedItems[index]" :data-collectionid="index">
+        <div
+          :data-collectionid="item.id"
+          v-if="expandStore.getExpandState(item.id)"
+        >
           <n-grid
             :x-gap="20"
             :y-gap="20"
             cols="1 400:2 600:3 800:4 1000:5 1200:6 1400:7 1600:8 1800:9 2000:10 2200:11 2400:12"
-            class="drag-child-area"
-            :data-collectionid="index"
+            class="drag-child-area min-h-[50px] has-[.drag-item]:border-none"
+            :class="{
+              'rounded border border-dashed border-gray-300':
+                !item.cards.length,
+            }"
+            :data-collectionid="item.id"
           >
             <n-gi
-              v-for="(child, childIndex) in item.cards"
-              :key="child.title"
-              class="drag-item group/content"
+              v-for="child in item.cards"
+              :key="child.id"
+              class="drag-item group/content peer"
             >
               <card
                 :child="child"
                 @click="onHandleClick(child)"
-                @delete="() => dataStore.removeCard(index, childIndex)"
+                @delete="onDeleteCard(child)"
                 @edit="onEdit(child)"
               />
             </n-gi>
+            <n-gi
+              class="empty-text text-center leading-[50px] text-gray-300 peer-[.drag-item]:hidden"
+              v-if="!item.cards.length"
+              span="24"
+            >
+              This collection is empty. Drag tabs here
+            </n-gi>
           </n-grid>
         </div>
+      </div>
+      <div
+        v-if="!collections?.length"
+        class="bg-[#fafafa] py-16 text-center text-2xl text-gray-400"
+      >
+        No collections shared with this space yet.
       </div>
     </div>
   </n-scrollbar>
@@ -46,15 +82,32 @@
 import card from "./card.vue"
 import Sortable from "sortablejs"
 import { ChevronDownOutline, DocumentTextOutline } from "@vicons/ionicons5"
-import { useExpand } from "@/hooks/useExpand.ts"
-import { useDataStore } from "@/store/data.ts"
+import { FolderMoveTo, Delete } from "@vicons/carbon"
+import { useSpacesStore } from "@/store/spaces.ts"
+import { useExpandStore } from "@/store/expand.ts"
 import { faviconURL } from "@/utils"
-import { iCard } from "@/type.ts"
+import DataManager from "@/db"
+import { Card as iCard, Collection } from "@/type.ts"
 
-const dataStore = useDataStore()
+const spacesStore = useSpacesStore()
+const expandStore = useExpandStore()
+const dataManager = new DataManager()
+
 const dialog = useDialog()
-console.log("dataStore: ", dataStore)
-onMounted(() => {
+
+function refresh() {
+  return spacesStore.fetchCollections(spacesStore.activeId)
+}
+
+const collections = computed(() => spacesStore.collections)
+const allSpaces = computed(() => spacesStore.spaces)
+
+onMounted(async () => {
+  await refresh()
+  createDraggable()
+})
+
+function createDraggable() {
   Sortable.create(document.querySelector(".drag-parent-area") as HTMLElement, {
     group: {
       name: "nested-parent",
@@ -62,18 +115,23 @@ onMounted(() => {
     },
     animation: 150,
     ghostClass: "sortable-ghost-dashed-border",
-    onEnd: function (evt) {
+    onEnd: async function (evt) {
       const { newIndex, oldIndex } = evt
-      dataStore.moveCollection(oldIndex!, newIndex!)
+      let collectionId: number, targetCollectionId: number
+      collections.value?.forEach((item, index) => {
+        if (index === oldIndex) collectionId = item.id
+        if (index === newIndex) targetCollectionId = item.id
+      })
+      await dataManager.moveCollection(collectionId!, targetCollectionId!)
+      await refresh()
     },
   })
-
   const dragChildAreas = document.querySelectorAll(".drag-child-area")
   dragChildAreas.forEach((dragChildArea) => {
     Sortable.create(dragChildArea as HTMLElement, {
       group: {
         name: "nested-child",
-        put: ["nested-child", "right-aside-item"],
+        put: ["nested-child", "right-aside-child"],
       },
       animation: 150,
       handle: ".drag-item",
@@ -84,23 +142,32 @@ onMounted(() => {
           return false // 阻止移动到这个区域
         }
       },
-      onEnd: function (evt) {
+      onEnd: async function (evt) {
         const { from, to, oldIndex, newIndex } = evt
-        const { collectionid: fromCollectionIndex } = from.dataset
-        const { collectionid: toCollectionIndex } = to.dataset
-        dataStore.moveCard(
-          Number(fromCollectionIndex!),
-          oldIndex!,
-          Number(toCollectionIndex!),
-          newIndex!,
-        )
+        const { collectionid: fromCollectionId } = from.dataset
+        const { collectionid: toCollectionId } = to.dataset
+        let fromCardId: number, toCardId: number
+        collections.value?.forEach((item) => {
+          if (item.id === Number(fromCollectionId)) {
+            fromCardId = item.cards[oldIndex!]?.id
+          }
+          if (item.id === Number(toCollectionId)) {
+            toCardId = item.cards[newIndex!]?.id
+          }
+        })
+        if (fromCollectionId === toCollectionId) {
+          await dataManager.moveCard(fromCardId!, toCardId!)
+        } else {
+          await dataManager.moveCardToCollection(
+            fromCardId!,
+            Number(toCollectionId)!,
+          )
+        }
+        await refresh()
       },
     })
   })
-  generateExpandedItems(dataStore.data.length)
-})
-
-const { expandedItems, generateExpandedItems, toggleExpand } = useExpand()
+}
 
 function onHandleClick(child: any) {
   chrome.tabs.create({ url: child.url })
@@ -141,9 +208,58 @@ function onEdit(child: iCard) {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: () => {
-      console.log(111)
+    onPositiveClick: async () => {
+      await dataManager.updateCardTitleAndDescription(child.id, {
+        title: formModel.value.title,
+        description: formModel.value.description,
+      })
+      await refresh()
     },
   })
+}
+
+function onDeleteCollection(item: Collection) {
+  dialog.error({
+    title: "Delete Collection",
+    content: "Are you sure you want to delete this collection?",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    onPositiveClick: async () => {
+      await dataManager.removeCollection(item.id)
+      await refresh()
+    },
+  })
+}
+
+function onMoveCollection(item: Collection) {
+  const spaceId = ref<number | null>(null)
+  dialog.create({
+    title: `Move ${item.title} to`,
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form>
+        <n-form-item label="Space">
+          <n-select
+            v-model:value={spaceId.value}
+            options={allSpaces.value.map((item) => ({
+              label: item.title,
+              value: item.id,
+            }))}
+          ></n-select>
+        </n-form-item>
+      </n-form>
+    ),
+    onPositiveClick: async () => {
+      if (!spaceId.value) return
+      await dataManager.moveCollectionToSpace(item.id, spaceId.value)
+      await refresh()
+    },
+  })
+}
+
+async function onDeleteCard(card: iCard) {
+  await dataManager.removeCard(card.id)
+  await refresh()
 }
 </script>

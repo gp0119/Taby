@@ -12,6 +12,7 @@ declare module 'vue' {
     LeftAside: typeof import('./src/components/left-aside.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
     Navs: typeof import('./src/components/navs.vue')['default']
+    NButton: typeof import('naive-ui')['NButton']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NForm: typeof import('naive-ui')['NForm']
@@ -24,7 +25,11 @@ declare module 'vue' {
     NLayout: typeof import('naive-ui')['NLayout']
     NLayoutContent: typeof import('naive-ui')['NLayoutContent']
     NLayoutSider: typeof import('naive-ui')['NLayoutSider']
+    NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
+    NSelect: typeof import('naive-ui')['NSelect']
+    NSpace: typeof import('naive-ui')['NSpace']
+    NUpload: typeof import('naive-ui')['NUpload']
     RightAside: typeof import('./src/components/right-aside.vue')['default']
   }
 }

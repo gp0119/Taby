@@ -2,40 +2,242 @@
   <div class="flex h-full flex-col">
     <div>
       <div
-        class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 leading-[50px]"
+        class="flex h-[50px] items-center border-0 border-b border-solid px-4 leading-[50px]"
       >
-        <span class="text-xl">gp</span>
-        <n-icon
-          size="20"
-          class="cursor-pointer text-red-600"
-          :component="SwapHorizontal"
-        />
+        <n-avatar :src="logo" :size="26" class="bg-white" />
+        <span class="ml-2 select-none text-xl">Tabby</span>
       </div>
       <div class="flex justify-between px-4 py-2.5">
-        <span class="font-bold">SPACES</span>
-        <n-icon size="18" class="text-red-600" :component="Add" />
+        <span class="select-none font-bold">SPACES</span>
+        <n-icon
+          size="18"
+          class="cursor-pointer text-red-600"
+          :component="Add"
+          @click="onAddSpace"
+        />
       </div>
     </div>
     <div class="flex-1 px-4">
-      <div class="flex items-center py-2 font-medium text-red-600">
+      <div
+        class="flex cursor-pointer items-center py-2 font-medium"
+        v-for="item in allSpaces"
+        :class="{ 'text-red-450': activeSpaceId === item.id }"
+        :key="item.title"
+        @click="onHandleSpaceClick(item)"
+      >
         <n-icon size="18" :component="BagHandleOutline" />
-        <span class="px-1">My Collections</span>
+        <span class="select-none px-1">{{ item.title }}</span>
       </div>
     </div>
-    <div class="border-0 border-t border-solid px-2.5 py-4">
-      <div class="flex items-center">
-        <n-icon size="18" :component="SettingsOutline" />
-        <span class="px-1">Setting</span>
-      </div>
+    <div class="px-2.5 py-4">
+      <n-space vertical>
+        <n-upload
+          @change="onChange"
+          trigger-class="w-full"
+          accept=".json"
+          :show-file-list="false"
+          :max="1"
+        >
+          <n-button class="w-full">
+            <span>导入</span>
+            <template #icon>
+              <n-icon size="18" :component="DocumentImport" />
+            </template>
+          </n-button>
+        </n-upload>
+        <n-button class="w-full" @click="onSync">
+          <span>同步</span>
+          <template #icon>
+            <n-icon size="18" :component="SyncSharp" />
+          </template>
+        </n-button>
+      </n-space>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import {
-  Add,
-  SettingsOutline,
-  BagHandleOutline,
-  SwapHorizontal,
-} from "@vicons/ionicons5"
+<script setup lang="tsx">
+import { Add, SyncSharp, BagHandleOutline } from "@vicons/ionicons5"
+import { DocumentImport } from "@vicons/carbon"
+import { useSpacesStore } from "@/store/spaces.ts"
+import logo from "../assets/72.png"
+import DanaManager from "@/db"
+import { CollectionWithCards, Space } from "@/type"
+import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
+import { FormInst } from "naive-ui"
+import { uploadAll, downloadAll } from "@/sync/gistSync"
+
+const spacesStore = useSpacesStore()
+const dataManager = new DanaManager()
+
+const refresh = async () => {
+  spacesStore.fetchSpaces()
+  spacesStore.fetchCollections(spacesStore.activeId)
+}
+
+const init = async () => {
+  await spacesStore.initialize()
+}
+
+onMounted(async () => {
+  await setTimeout(async () => {
+    await init()
+  }, 100)
+})
+
+const allSpaces = computed(() => spacesStore.spaces)
+const activeSpaceId = computed(() => spacesStore.activeId)
+
+const dialog = useDialog()
+const message = useMessage()
+function onAddSpace() {
+  const formModel = ref({ title: "" })
+  dialog.create({
+    title: () => {
+      return <span>Add Space</span>
+    },
+    titleClass: "[&_.n-base-icon]:hidden",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form model={formModel.value}>
+        <n-form-item label="Title">
+          <n-input v-model:value={formModel.value.title} />
+        </n-form-item>
+      </n-form>
+    ),
+    onPositiveClick: async () => {
+      if (!formModel.value.title) return
+      await dataManager.addSpace({
+        title: formModel.value.title,
+      })
+      spacesStore.initialize()
+    },
+  })
+}
+
+async function onHandleSpaceClick(space: Space) {
+  spacesStore.setActiveSpace(space.id!)
+}
+
+function onChange({ file }: { file: UploadSettledFileInfo }) {
+  const reader = new FileReader()
+  reader.onload = async (event) => {
+    try {
+      const lists: {
+        lists: CollectionWithCards[]
+      } = JSON.parse(event.target?.result as string)
+      for (const list of lists.lists) {
+        const collectionId = (await dataManager.addCollection({
+          title: list.title,
+          spaceId: activeSpaceId.value,
+          labelIds: [],
+        })) as number
+        await dataManager.batchAddCards(
+          list.cards.map((item, index) => {
+            return {
+              ...item,
+              customTitle: item.customTitle || item.title,
+              customDescription: item.customDescription || item.title,
+              collectionId,
+              order: (index + 1) * 1000,
+            }
+          }),
+        )
+        await refresh()
+      }
+    } catch (error) {
+      console.error("文件内容不是有效的 JSON", error)
+    }
+  }
+  reader.readAsText(file.file as Blob)
+}
+
+function onSync() {
+  const formRef = ref<FormInst | null>(null)
+  const formModel = ref({
+    gistId: "",
+    accessToken: "",
+  })
+  chrome.storage.sync.get(["accessToken", "gistId"], (result) => {
+    console.log("result: ", result)
+    if (result.accessToken && result.gistId) {
+      formModel.value.accessToken = result.accessToken
+      formModel.value.gistId = result.gistId
+    }
+  })
+  const formRules = {
+    accessToken: [{ required: true, message: "AccessToken is required" }],
+  }
+  dialog.create({
+    title: "sync witn github",
+    titleClass: "[&_.n-base-icon]:hidden",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form
+        ref={(el: FormInst) => (formRef.value = el)}
+        model={formModel.value}
+        rules={formRules}
+        require-mark-placement="left"
+      >
+        <n-form-item label="AccessToken:" path="accessToken">
+          <n-input v-model:value={formModel.value.accessToken} />
+        </n-form-item>
+        <n-form-item label="GistId:" path="gistId">
+          <n-input v-model:value={formModel.value.gistId} />
+        </n-form-item>
+      </n-form>
+    ),
+    action: () => (
+      <n-space>
+        <n-button
+          type="primary"
+          size="small"
+          onClick={() => {
+            formRef.value?.validate().then(async () => {
+              try {
+                await uploadAll(
+                  formModel.value.accessToken,
+                  formModel.value.gistId,
+                )
+                await chrome.storage.sync.set({
+                  accessToken: formModel.value.accessToken,
+                  gistId: formModel.value.gistId,
+                })
+                message.success("同步成功")
+                dialog.destroyAll()
+              } catch (error) {
+                message.error("上传失败")
+              }
+            })
+          }}
+        >
+          上传本地
+        </n-button>
+        <n-button
+          type="info"
+          size="small"
+          onClick={() => {
+            try {
+              formRef.value?.validate().then(async () => {
+                await downloadAll(
+                  formModel.value.accessToken,
+                  formModel.value.gistId,
+                )
+                await refresh()
+                dialog.destroyAll()
+              })
+              message.success("下载成功")
+            } catch (error) {
+              message.error("下载失败")
+            }
+          }}
+        >
+          下载远程
+        </n-button>
+      </n-space>
+    ),
+  })
+}
 </script>

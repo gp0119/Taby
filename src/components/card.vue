@@ -22,9 +22,10 @@
         </template>
       </n-avatar>
       <span
-        class="flex-1 overflow-hidden overflow-ellipsis whitespace-nowrap font-normal"
+        class="flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal"
         >{{ child.customTitle || child.title }}</span
       >
+      <!--   删除按钮   -->
       <n-icon-wrapper
         :size="16"
         :border-radius="16"
@@ -40,10 +41,11 @@
     </div>
     <div class="relative p-2.5 group-[.right-aside-item]/aside:hidden">
       <div
-        class="overflow-hidden overflow-ellipsis whitespace-nowrap font-light"
+        class="select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light"
       >
         {{ child.customDescription || child.title }}
       </div>
+      <!--   复制按钮   -->
       <n-icon-wrapper
         v-if="isSupported"
         :size="24"
@@ -57,6 +59,7 @@
           :component="CopyOutline"
         />
       </n-icon-wrapper>
+      <!--   编辑按钮   -->
       <n-icon-wrapper
         :size="24"
         :border-radius="24"
@@ -77,10 +80,10 @@
 import { DocumentTextOutline, Close, CopyOutline } from "@vicons/ionicons5"
 import { Pen } from "@vicons/carbon"
 import { faviconURL } from "@/utils"
-import { iCard } from "@/type.ts"
+import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 
-const props = defineProps<{ child: iCard }>()
+const props = defineProps<{ child: Card }>()
 const { copy, isSupported } = useClipboard()
 
 const emit = defineEmits(["delete", "click", "copy", "edit"])

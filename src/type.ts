@@ -1,25 +1,54 @@
-export interface iCard {
-  title: string;
-  url: string;
-  customTitle?: string;
-  customDescription?: string;
-  windowId?: number;
-  id?: number | undefined;
-  oldIndex?: number;
+interface BaseEntity {
+  id: number
+  createdAt?: number
+  modifiedAt?: number
 }
 
-export interface iLabel {
-  title: string;
-  color: string;
+export interface iCard extends BaseEntity {
+  title: string
+  url: string
+  customTitle?: string
+  customDescription?: string
+  windowId?: number
+  oldIndex?: number
 }
 
-export interface iCollection {
-  title: string;
-  cards: iCard[];
-  labels?: iLabel[];
+export interface Space extends BaseEntity {
+  title: string
+  order: number
 }
 
-export interface iCollections {
-  title: string;
-  collections: iCollection[];
+export interface Collection extends BaseEntity {
+  title: string
+  spaceId: number
+  order: number
+  labelIds: number[]
+}
+
+export interface Label extends BaseEntity {
+  title: string
+  color: string
+}
+
+export interface Card extends BaseEntity {
+  title: string
+  url: string
+  customTitle: string
+  customDescription: string
+  collectionId: number
+  order: number
+  windowId?: number
+}
+
+export interface CollectionWithCards extends Collection {
+  isExpanded?: boolean
+  cards: Card[]
+}
+
+export interface SyncData {
+  spaces: Space[]
+  collections: Collection[]
+  labels: Label[]
+  cards: Card[]
+  timestamp: number
 }
