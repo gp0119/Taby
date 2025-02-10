@@ -26,7 +26,7 @@
         :key="item.title"
         @click="onHandleSpaceClick(item)"
       >
-        <n-icon size="18" :component="BagHandleOutline" />
+        <n-icon size="18" :component="StorefrontOutline" />
         <span class="select-none px-1">{{ item.title }}</span>
       </div>
     </div>
@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="tsx">
-import { Add, SyncSharp, BagHandleOutline } from "@vicons/ionicons5"
+import { Add, SyncSharp, StorefrontOutline } from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
@@ -73,8 +73,8 @@ const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
 
 const refresh = async () => {
-  spacesStore.fetchSpaces()
-  spacesStore.fetchCollections(spacesStore.activeId)
+  await spacesStore.fetchSpaces()
+  await spacesStore.fetchCollections(spacesStore.activeId)
 }
 
 const init = async () => {
@@ -82,7 +82,7 @@ const init = async () => {
 }
 
 onMounted(async () => {
-  await setTimeout(async () => {
+  setTimeout(async () => {
     await init()
   }, 100)
   createDraggable()
@@ -135,12 +135,12 @@ function onAddSpace() {
       await dataManager.addSpace({
         title: formModel.value.title,
       })
-      spacesStore.initialize()
+      await spacesStore.initialize()
     },
   })
 }
 
-async function onHandleSpaceClick(space: Space) {
+function onHandleSpaceClick(space: Space) {
   spacesStore.setActiveSpace(space.id!)
 }
 

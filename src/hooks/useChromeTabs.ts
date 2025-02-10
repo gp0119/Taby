@@ -40,10 +40,6 @@ export function useChromeTabs() {
       }, {})
   }
 
-  function createTab(url: string) {
-    return chrome.tabs.create({ url })
-  }
-
   function removeTab(tabId: number | undefined) {
     if (!tabId) return
     Object.keys(tabs.value).forEach((key) => {
@@ -71,7 +67,6 @@ export function useChromeTabs() {
   return {
     tabs,
     getTabs,
-    createTab,
     removeTab,
     moveTab,
     activeTab,

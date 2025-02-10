@@ -20,6 +20,12 @@
             <n-icon
               size="20"
               class="cursor-pointer text-red-450"
+              :component="Edit"
+              @click="onEditCollection(item)"
+            />
+            <n-icon
+              size="20"
+              class="cursor-pointer text-red-450"
               :component="FolderMoveTo"
               @click="onMoveCollection(item)"
             />
@@ -33,7 +39,7 @@
         </div>
         <div
           :data-collectionid="item.id"
-          v-if="expandStore.getExpandState(item.id)"
+          v-show="expandStore.getExpandState(item.id)"
         >
           <n-grid
             :x-gap="20"
@@ -82,7 +88,7 @@
 import card from "./card.vue"
 import Sortable from "sortablejs"
 import { ChevronDownOutline, DocumentTextOutline } from "@vicons/ionicons5"
-import { FolderMoveTo, Delete } from "@vicons/carbon"
+import { FolderMoveTo, Delete, Edit } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useExpandStore } from "@/store/expand.ts"
 import { faviconURL } from "@/utils"
@@ -261,6 +267,26 @@ function onMoveCollection(item: Collection) {
     onPositiveClick: async () => {
       if (!spaceId.value) return
       await dataManager.moveCollectionToSpace(item.id, spaceId.value)
+      await refresh()
+    },
+  })
+}
+
+function onEditCollection(item: Collection) {
+  const formModel = ref({ title: item.title })
+  dialog.create({
+    title: "Edit Collection",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form model={formModel.value}>
+        <n-form-item label="Title">
+          <n-input v-model:value={formModel.value.title} />
+        </n-form-item>
+      </n-form>
+    ),
+    onPositiveClick: async () => {
+      await dataManager.updateCollectionTitle(item.id, formModel.value.title)
       await refresh()
     },
   })

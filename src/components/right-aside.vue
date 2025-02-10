@@ -71,7 +71,6 @@ function refresh() {
 
 async function refreshTabs() {
   await getTabs()
-  console.log("tabs: ", tabs)
 }
 chrome.tabs.onUpdated.addListener(refreshTabs)
 chrome.tabs.onMoved.addListener(refreshTabs)
