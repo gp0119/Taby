@@ -1,15 +1,26 @@
 import Dexie, { EntityTable } from "dexie"
-
 import { Card, Collection, Label, Space } from "@/type.ts"
+import { uploadAll } from "@/sync/gistSync.ts"
+import { debounce } from "lodash-es"
+
+const SYNC_INTERVAL = 1000 * 60
+const syncToGist = debounce(async () => {
+  const { accessToken, gistId } = await chrome.storage.sync.get([
+    "accessToken",
+    "gistId",
+  ])
+  if (!accessToken || !gistId) return
+  await uploadAll(accessToken, gistId)
+}, SYNC_INTERVAL)
 
 class DataBase extends Dexie {
   spaces!: EntityTable<Space, "id">
   collections!: EntityTable<Collection, "id">
   labels!: EntityTable<Label, "id">
   cards!: EntityTable<Card, "id">
-
   constructor() {
     super("TabbyDatabase")
+
     this.version(1).stores({
       spaces: "++id, title, order, createdAt, modifiedAt",
       collections:
@@ -46,15 +57,52 @@ class DataBase extends Dexie {
         const now = Date.now()
         obj.createdAt = now
         obj.modifiedAt = now
+        syncToGist()
       })
       table.hook("updating", function (modifications, _primKey, _obj) {
         if (typeof modifications === "object") {
           // @ts-ignore
           modifications.modifiedAt = Date.now()
+          syncToGist()
         }
         return modifications
       })
     })
+  }
+
+  async exportData() {
+    const spaces = await this.spaces.toArray()
+    const collections = await this.collections.toArray()
+    const labels = await this.labels.toArray()
+    const cards = await this.cards.toArray()
+    return {
+      spaces,
+      collections,
+      labels,
+      cards,
+    }
+  }
+
+  async clearData() {
+    await Promise.all([
+      this.spaces.clear(),
+      this.collections.clear(),
+      this.labels.clear(),
+      this.cards.clear(),
+    ])
+  }
+
+  async importData(data: {
+    spaces: Space[]
+    collections: Collection[]
+    labels: Label[]
+    cards: Card[]
+  }) {
+    await this.clearData()
+    await this.spaces.bulkAdd(data.spaces)
+    await this.collections.bulkAdd(data.collections)
+    await this.labels.bulkAdd(data.labels)
+    await this.cards.bulkAdd(data.cards)
   }
 }
 

@@ -11,48 +11,48 @@ const updateLastSyncTime = async () => {
 // 创建 Octokit 实例
 const createOctokit = (token: string) => new Octokit({ auth: token })
 
-// 获取本地所有数据
-const getAllLocalData = async (): Promise<SyncData> => ({
-  spaces: await db.spaces.toArray(),
-  collections: await db.collections.toArray(),
-  labels: await db.labels.toArray(),
-  cards: await db.cards.toArray(),
-  timestamp: Date.now(),
-})
-
-// 清空本地数据
-const clearLocalData = async () => {
-  await Promise.all([
-    db.spaces.clear(),
-    db.collections.clear(),
-    db.labels.clear(),
-    db.cards.clear(),
-  ])
+export const createGist = async (
+  token: string,
+  data: {
+    description?: string
+    public: boolean
+    files: { "tabby-backup.json": { content: string } }
+  },
+) => {
+  const octokit = createOctokit(token)
+  const gist = await octokit.gists.create(data)
+  return gist.data.id
 }
 
-// 批量添加数据
-const bulkAddData = async (data: SyncData) => {
-  await Promise.all([
-    db.spaces.bulkAdd(data.spaces),
-    db.collections.bulkAdd(data.collections),
-    db.labels.bulkAdd(data.labels),
-    db.cards.bulkAdd(data.cards),
-  ])
+export const updateGist = async (
+  token: string,
+  data: {
+    gist_id: string
+    description?: string
+    public: boolean
+    files: { "tabby-backup.json": { content: string } }
+  },
+) => {
+  const octokit = createOctokit(token)
+  await octokit.gists.update(data)
 }
 
 // 上传本地数据到 Gist
-export const uploadAll = async (token: string, gistId: string) => {
-  const octokit = createOctokit(token)
-  const localData = await getAllLocalData()
+export const uploadAll = async (token: string, gistId?: string) => {
+  const localData = await db.exportData()
   const compressed = compressToUTF16(JSON.stringify(localData))
-  await octokit.gists.update({
-    gist_id: gistId,
-    files: {
-      "tabby-backup.json": { content: compressed },
-    },
-  })
-
+  const data = {
+    description: "Tabby Backup",
+    public: false,
+    files: { "tabby-backup.json": { content: compressed } },
+  }
+  if (!gistId) {
+    gistId = await createGist(token, data)
+  } else {
+    await updateGist(token, { gist_id: gistId, ...data })
+  }
   await updateLastSyncTime()
+  return gistId
 }
 
 // 从 Gist 下载数据
@@ -70,8 +70,7 @@ export const downloadAll = async (token: string, gistId: string) => {
     "rw",
     [db.spaces, db.collections, db.labels, db.cards],
     async () => {
-      await clearLocalData()
-      await bulkAddData(remoteData)
+      await db.importData(remoteData)
     },
   )
 

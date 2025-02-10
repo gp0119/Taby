@@ -185,8 +185,10 @@ function onSync() {
   })
   chrome.storage.sync.get(["accessToken", "gistId"], (result) => {
     console.log("result: ", result)
-    if (result.accessToken && result.gistId) {
+    if (result.accessToken) {
       formModel.value.accessToken = result.accessToken
+    }
+    if (result.gistId) {
       formModel.value.gistId = result.gistId
     }
   })
@@ -208,7 +210,11 @@ function onSync() {
         <n-form-item label="AccessToken:" path="accessToken">
           <n-input v-model:value={formModel.value.accessToken} />
         </n-form-item>
-        <n-form-item label="GistId:" path="gistId">
+        <n-form-item
+          label="GistId:"
+          path="gistId"
+          v-slots={{ label: () => <span>GistId:</span> }}
+        >
           <n-input v-model:value={formModel.value.gistId} />
         </n-form-item>
       </n-form>
@@ -218,16 +224,17 @@ function onSync() {
         <n-button
           type="primary"
           size="small"
+          disabled={!formModel.value.accessToken}
           onClick={() => {
             formRef.value?.validate().then(async () => {
               try {
-                await uploadAll(
+                const res = await uploadAll(
                   formModel.value.accessToken,
                   formModel.value.gistId,
                 )
                 await chrome.storage.sync.set({
                   accessToken: formModel.value.accessToken,
-                  gistId: formModel.value.gistId,
+                  gistId: res,
                 })
                 message.success("同步成功")
                 dialog.destroyAll()
@@ -242,6 +249,7 @@ function onSync() {
         <n-button
           type="info"
           size="small"
+          disabled={!(formModel.value.accessToken && formModel.value.gistId)}
           onClick={() => {
             try {
               formRef.value?.validate().then(async () => {
