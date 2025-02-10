@@ -17,9 +17,10 @@
 <script setup lang="tsx">
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/ionicons5"
-import tabbyDatabaseService from "@/db"
+import DataManager from "@/db"
 
 const spacesStore = useSpacesStore()
+const dataManager = new DataManager()
 
 const dialog = useDialog()
 function onAddCollection() {
@@ -40,19 +41,18 @@ function onAddCollection() {
     ),
     onPositiveClick: async () => {
       if (!formModel.value.title) return
-      await tabbyDatabaseService.addCollection({
+      await dataManager.addCollection({
         title: formModel.value.title,
-        spaceId: spacesStore.activeSpaceId,
+        spaceId: spacesStore.activeId,
         labelIds: [],
       })
-      await spacesStore.getCollectionsById(spacesStore.activeSpaceId)
+      await spacesStore.fetchCollections(spacesStore.activeId)
     },
   })
 }
 
 const title = computed(
   () =>
-    spacesStore.allSpaces.find((item) => item.id === spacesStore.activeSpaceId)
-      ?.title,
+    spacesStore.spaces.find((item) => item.id === spacesStore.activeId)?.title,
 )
 </script>

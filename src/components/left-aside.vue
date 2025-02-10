@@ -17,11 +17,12 @@
         />
       </div>
     </div>
-    <div class="flex-1 px-4">
+    <div class="space-container flex-1 px-4">
       <div
-        class="flex cursor-pointer items-center py-2 font-medium"
-        v-for="item in spacesStore.allSpaces"
-        :class="{ 'text-red-450': spacesStore.activeSpaceId === item.id }"
+        class="space-item flex cursor-pointer items-center py-2 font-medium"
+        v-for="item in allSpaces"
+        :data-id="item.id"
+        :class="{ 'text-red-450': activeSpaceId === item.id }"
         :key="item.title"
         @click="onHandleSpaceClick(item)"
       >
@@ -61,26 +62,58 @@ import { Add, SyncSharp, BagHandleOutline } from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
-import tabbyDatabaseService from "@/db"
+import DanaManager from "@/db"
 import { CollectionWithCards, Space } from "@/type"
 import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
 import { FormInst } from "naive-ui"
-import { getGistById } from "@/sync/github.ts"
+import { uploadAll, downloadAll } from "@/sync/gistSync"
+import Sortable from "sortablejs"
 
 const spacesStore = useSpacesStore()
+const dataManager = new DanaManager()
 
-const allSpaces = await tabbyDatabaseService.getAllSpaces()
-const collectionToSet = await tabbyDatabaseService.getCollectionWithCards(
-  allSpaces[0]?.id,
-)
+const refresh = async () => {
+  spacesStore.fetchSpaces()
+  spacesStore.fetchCollections(spacesStore.activeId)
+}
 
-onMounted(() => {
-  spacesStore.setAllSpaces(allSpaces)
-  spacesStore.setActiveSpaceId(allSpaces[0].id)
-  spacesStore.setCurrentCollections(collectionToSet)
+const init = async () => {
+  await spacesStore.initialize()
+}
+
+onMounted(async () => {
+  await setTimeout(async () => {
+    await init()
+  }, 100)
+  createDraggable()
 })
 
+const allSpaces = computed(() => spacesStore.spaces)
+const activeSpaceId = computed(() => spacesStore.activeId)
+
+const createDraggable = () => {
+  Sortable.create(document.querySelector(".space-container") as HTMLElement, {
+    animation: 150,
+    handle: ".space-item",
+    ghostClass: "sortable-ghost-dashed-border",
+    onEnd: async (evt) => {
+      const { item: itemEl } = evt
+      const element = itemEl.nextElementSibling || itemEl.previousElementSibling
+      const currentSpaceId = itemEl.getAttribute("data-id")
+      const targetSpaceId = element?.getAttribute("data-id")
+      if (currentSpaceId && targetSpaceId) {
+        await dataManager.moveSpace(
+          Number(currentSpaceId),
+          Number(targetSpaceId),
+        )
+        await refresh()
+      }
+    },
+  })
+}
+
 const dialog = useDialog()
+const message = useMessage()
 function onAddSpace() {
   const formModel = ref({ title: "" })
   dialog.create({
@@ -99,16 +132,16 @@ function onAddSpace() {
     ),
     onPositiveClick: async () => {
       if (!formModel.value.title) return
-      await tabbyDatabaseService.addSpace({
+      await dataManager.addSpace({
         title: formModel.value.title,
       })
-      spacesStore.setAllSpaces(await tabbyDatabaseService.getAllSpaces())
+      spacesStore.initialize()
     },
   })
 }
 
 async function onHandleSpaceClick(space: Space) {
-  spacesStore.setActiveSpaceId(space.id)
+  spacesStore.setActiveSpace(space.id!)
 }
 
 function onChange({ file }: { file: UploadSettledFileInfo }) {
@@ -119,12 +152,12 @@ function onChange({ file }: { file: UploadSettledFileInfo }) {
         lists: CollectionWithCards[]
       } = JSON.parse(event.target?.result as string)
       for (const list of lists.lists) {
-        const collectionId = await tabbyDatabaseService.addCollection({
+        const collectionId = (await dataManager.addCollection({
           title: list.title,
-          spaceId: spacesStore.activeSpaceId,
+          spaceId: activeSpaceId.value,
           labelIds: [],
-        })
-        await tabbyDatabaseService.batchAddCards(
+        })) as number
+        await dataManager.batchAddCards(
           list.cards.map((item, index) => {
             return {
               ...item,
@@ -135,7 +168,7 @@ function onChange({ file }: { file: UploadSettledFileInfo }) {
             }
           }),
         )
-        await spacesStore.getCollectionsById(spacesStore.activeSpaceId)
+        await refresh()
       }
     } catch (error) {
       console.error("文件内容不是有效的 JSON", error)
@@ -147,14 +180,14 @@ function onChange({ file }: { file: UploadSettledFileInfo }) {
 function onSync() {
   const formRef = ref<FormInst | null>(null)
   const formModel = ref({
-    id: "43af9f678b44e79fc5183cf2d0a4617d",
-    accessToken: "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",
+    gistId: "",
+    accessToken: "",
   })
-  chrome.storage.sync.get(["accessToken", "id"], (result) => {
+  chrome.storage.sync.get(["accessToken", "gistId"], (result) => {
     console.log("result: ", result)
-    if (result.accessToken && result.id) {
+    if (result.accessToken && result.gistId) {
       formModel.value.accessToken = result.accessToken
-      formModel.value.id = result.id
+      formModel.value.gistId = result.gistId
     }
   })
   const formRules = {
@@ -175,45 +208,64 @@ function onSync() {
         <n-form-item label="AccessToken:" path="accessToken">
           <n-input v-model:value={formModel.value.accessToken} />
         </n-form-item>
-        <n-form-item label="Id:" path="id:">
-          <n-input v-model:value={formModel.value.id} />
+        <n-form-item label="GistId:" path="gistId">
+          <n-input v-model:value={formModel.value.gistId} />
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: () => {
-      formRef.value?.validate((err) => {
-        if (!err) {
-          chrome.storage.sync.set({ accessToken: formModel.value.accessToken })
-          chrome.storage.sync.set({ id: formModel.value.id })
-          getGistById(formModel.value.id).then((res) => {
-            console.log("res: ", res)
-          })
-          // console.log("formModel.value: ", formModel.value)
-          // getGistsByUserName("gp0119").then((res) => {
-          //   console.log("res: ", res)
-          // })
-          // fetch(`https://api.github.com/gists`, {
-          //   method: "post",
-          //   headers: {
-          //     Accept: "application/vnd.github.v3+json",
-          //     Authorization: `Bearer ${formModel.value.accessToken}`,
-          //   },
-          //   body: JSON.stringify({
-          //     description: "Tabby sync " + new Date().toLocaleString(),
-          //     public: false,
-          //     files: {
-          //       "tabby-sync-settings": {
-          //         content: "tabby will sync here.",
-          //       },
-          //     },
-          //   }),
-          // })
-          //   .then((response) => response.json())
-          //   .then((json) => console.log(json))
-        }
-      })
-      return false
-    },
+    action: () => (
+      <n-space>
+        <n-button
+          type="primary"
+          size="small"
+          onClick={() => {
+            formRef.value?.validate().then(async () => {
+              try {
+                await uploadAll(
+                  formModel.value.accessToken,
+                  formModel.value.gistId,
+                )
+                await chrome.storage.sync.set({
+                  accessToken: formModel.value.accessToken,
+                  gistId: formModel.value.gistId,
+                })
+                message.success("同步成功")
+                dialog.destroyAll()
+              } catch (error) {
+                message.error("上传失败")
+              }
+            })
+          }}
+        >
+          上传本地
+        </n-button>
+        <n-button
+          type="info"
+          size="small"
+          onClick={() => {
+            try {
+              formRef.value?.validate().then(async () => {
+                await downloadAll(
+                  formModel.value.accessToken,
+                  formModel.value.gistId,
+                )
+                await chrome.storage.sync.set({
+                  accessToken: formModel.value.accessToken,
+                  gistId: formModel.value.gistId,
+                })
+                await refresh()
+                dialog.destroyAll()
+              })
+              message.success("下载成功")
+            } catch (error) {
+              message.error("下载失败")
+            }
+          }}
+        >
+          下载远程
+        </n-button>
+      </n-space>
+    ),
   })
 }
 </script>

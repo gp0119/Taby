@@ -1,40 +1,63 @@
 import { defineStore } from "pinia"
-import tabbyDatabaseService from "@/db"
 import { useLocalStorage } from "@vueuse/core"
-import { CollectionWithCards, Space } from "@/type.ts"
+import type { CollectionWithCards, Space } from "@/type"
+import DataManager from "@/db"
 
 export const useSpacesStore = defineStore("spaces", () => {
-  const allSpaces = ref<Space[]>([])
+  const dataManager = new DataManager()
+  const spaces = ref<Space[]>([])
+  const collections = ref<CollectionWithCards[]>([])
+  const activeId = useLocalStorage<number>("activeSpaceId", 1)
 
-  const currentCollections = ref<CollectionWithCards[] | null>(null)
+  const currentSpace = computed(() =>
+    spaces.value.find((space) => space.id === activeId.value),
+  )
 
-  const activeSpaceId = useLocalStorage("activeSpaceId", 0)
-
-  function setActiveSpaceId(id: number) {
-    activeSpaceId.value = id
+  async function fetchSpaces() {
+    try {
+      const allSpaces = await dataManager.getAllSpaces()
+      spaces.value = allSpaces
+      return allSpaces
+    } catch (error) {
+      console.error("Failed to fetch spaces:", error)
+      return []
+    }
   }
 
-  function setAllSpaces(spaces: Space[]) {
-    allSpaces.value = spaces
+  async function fetchCollections(spaceId: number) {
+    try {
+      const items = await dataManager.getCollectionWithCards(spaceId)
+      collections.value = items
+      return items
+    } catch (error) {
+      console.error(`Failed to fetch collections for space ${spaceId}:`, error)
+      return []
+    }
   }
 
-  function setCurrentCollections(space: CollectionWithCards[]) {
-    currentCollections.value = space
+  async function setActiveSpace(id: number) {
+    activeId.value = id
+    await fetchCollections(id)
   }
 
-  async function getCollectionsById(collectionId: number) {
-    const collectionsToSet =
-      await tabbyDatabaseService.getCollectionWithCards(collectionId)
-    setCurrentCollections(collectionsToSet)
+  // 初始化方法
+  async function initialize() {
+    const spaces = await fetchSpaces()
+    if (spaces.length > 0 && !activeId.value) {
+      console.log("setActiveSpace")
+      await setActiveSpace(spaces[0].id!)
+    }
   }
 
   return {
-    allSpaces,
-    activeSpaceId,
-    currentCollections,
-    setCurrentCollections,
-    setAllSpaces,
-    setActiveSpaceId,
-    getCollectionsById,
+    spaces,
+    collections,
+    activeId,
+
+    currentSpace,
+    fetchSpaces,
+    fetchCollections,
+    setActiveSpace,
+    initialize,
   }
 })

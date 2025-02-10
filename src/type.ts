@@ -1,37 +1,36 @@
-import Dexie, { type EntityTable } from "dexie"
+interface BaseEntity {
+  id: number
+  createdAt?: number
+  modifiedAt?: number
+}
 
-export interface iCard {
+export interface iCard extends BaseEntity {
   title: string
   url: string
   customTitle?: string
   customDescription?: string
   windowId?: number
-  id?: number | undefined
   oldIndex?: number
 }
 
-export interface Space {
-  id: number
+export interface Space extends BaseEntity {
   title: string
   order: number
 }
 
-export interface Collection {
-  id: number
+export interface Collection extends BaseEntity {
   title: string
   spaceId: number
   order: number
   labelIds: number[]
 }
 
-export interface Label {
-  id: number
+export interface Label extends BaseEntity {
   title: string
   color: string
 }
 
-export interface Card {
-  id: number
+export interface Card extends BaseEntity {
   title: string
   url: string
   customTitle: string
@@ -42,12 +41,14 @@ export interface Card {
 }
 
 export interface CollectionWithCards extends Collection {
+  isExpanded?: boolean
   cards: Card[]
 }
 
-export type TabbyDatabase = Dexie & {
-  spaces: EntityTable<Space, "id">
-  collections: EntityTable<Collection, "id">
-  labels: EntityTable<Label, "id">
-  cards: EntityTable<Card, "id">
+export interface SyncData {
+  spaces: Space[]
+  collections: Collection[]
+  labels: Label[]
+  cards: Card[]
+  timestamp: number
 }

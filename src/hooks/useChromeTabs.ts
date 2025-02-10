@@ -57,7 +57,6 @@ export function useChromeTabs() {
     index: number,
     windowId: number,
   ) {
-    console.log("tabId: ", tabId, index, windowId)
     if (!tabId) return
     await chrome.tabs.move(tabId, { index, windowId })
     await getTabs()
