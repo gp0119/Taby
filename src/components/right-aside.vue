@@ -40,6 +40,7 @@
               class="group/aside right-aside-item mb-3"
             >
               <card
+                type="right-aside"
                 :child="child"
                 @delete="removeTab(child.id)"
                 @click="activeTab(child)"

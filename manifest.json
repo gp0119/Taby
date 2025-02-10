@@ -9,9 +9,9 @@
   "author": {
     "email": "190875565@qq.com"
   },
-  "permissions": ["favicon", "identity", "storage", "tabs", "activeTab"],
+  "permissions": ["favicon", "storage", "tabs", "activeTab"],
   "background": {
-    "service_worker": "src/background/index.js",
+    "service_worker": "background/service-worker.js",
     "type": "module"
   },
   "web_accessible_resources": [
@@ -22,10 +22,9 @@
     }
   ],
   "icons": {
-    "32": "src/assets/32.png",
-    "72": "src/assets/72.png",
-    "128": "src/assets/128.png",
-    "512": "src/assets/512.png"
-  },
-  "host_permissions": ["<all_urls>"]
+    "32": "icons/32.png",
+    "72": "icons/72.png",
+    "128": "icons/128.png",
+    "512": "icons/512.png"
+  }
 }

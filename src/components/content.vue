@@ -58,6 +58,7 @@
               class="drag-item group/content peer"
             >
               <card
+                type="content"
                 :child="child"
                 @click="onHandleClick(child)"
                 @delete="onDeleteCard(child)"

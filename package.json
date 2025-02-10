@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "watch-build": "vite --watch build",
+    "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,7 +23,6 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.0.0-beta.30",
     "@types/chrome": "^0.0.301",
     "@types/sortablejs": "^1.15.8",
     "@vitejs/plugin-vue": "^5.2.1",
@@ -31,6 +31,7 @@
     "postcss": "^8.5.1",
     "prettier": "3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "rollup-plugin-copy": "^3.5.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
     "unplugin-auto-import": "^19.0.0",

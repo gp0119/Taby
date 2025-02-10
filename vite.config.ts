@@ -1,20 +1,19 @@
 import { defineConfig } from "vite"
 import vue from "@vitejs/plugin-vue"
-import { crx, ManifestV3Export } from "@crxjs/vite-plugin"
-import manifest from "./manifest.json" assert { type: "json" }
 import AutoImport from "unplugin-auto-import/vite"
 import Components from "unplugin-vue-components/vite"
 import { NaiveUiResolver } from "unplugin-vue-components/resolvers"
 import vueJsx from "@vitejs/plugin-vue-jsx"
+import copy from "rollup-plugin-copy"
+import path from "path"
+
+console.log("copy: ", copy)
+
 // https://vitejs.dev/config/
 export default defineConfig({
-  legacy: {
-    skipWebSocketTokenCheck: true,
-  },
   plugins: [
     vue(),
     vueJsx({}),
-    crx({ manifest: manifest as ManifestV3Export }),
     AutoImport({
       imports: [
         "vue",
@@ -32,6 +31,14 @@ export default defineConfig({
     Components({
       resolvers: [NaiveUiResolver()],
     }),
+    copy({
+      targets: [
+        { src: "manifest.json", dest: "dist" }, // 复制 manifest.json 到 dist 目录
+        { src: "src/assets/**", dest: "dist/icons" }, // 复制 src/icons/** 到 dist/icons 目录
+      ],
+      copySync: true,
+      hook: "writeBundle",
+    }),
   ],
   resolve: {
     alias: [
@@ -39,11 +46,25 @@ export default defineConfig({
       { find: "@components", replacement: "/src/components" },
     ],
   },
-  // build: {
-  //   rollupOptions: {
-  //     input: {
-  //       popup: "src/popup.html",
-  //     },
-  //   },
-  // },
+  build: {
+    rollupOptions: {
+      input: {
+        index: path.resolve(__dirname, "index.html"),
+        background: path.resolve(__dirname, "src/background/service-worker.js"),
+      },
+      output: {
+        assetFileNames: "assets/[name]-[hash].[ext]", // 静态资源
+        chunkFileNames: "js/[name]-[hash].js", // 代码分割中产生的 chunk
+        name: "[name].js",
+        entryFileNames: (chunkInfo) => {
+          const baseName = path.basename(
+            chunkInfo.facadeModuleId!,
+            path.extname(chunkInfo.facadeModuleId!),
+          )
+          const saveArr = ["service-worker"]
+          return `[name]/${saveArr.includes(baseName) ? baseName : chunkInfo.name}.js`
+        },
+      },
+    },
+  },
 })

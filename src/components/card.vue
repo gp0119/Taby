@@ -7,7 +7,11 @@
       class="relative flex items-center rounded border-0 border-b border-solid px-4 py-3 group-[.right-aside-item]/aside:p-2"
     >
       <n-avatar
-        :src="faviconURL(child.url)"
+        :src="
+          type === 'right-aside'
+            ? getFaviconFromCache(child.url)
+            : faviconURL(child.url)
+        "
         class="mr-2.5 flex-shrink-0 bg-white group-[.drag-item]/content:h-[24px] group-[.right-aside-item]/aside:h-[20px] group-[.drag-item]/content:w-[24px] group-[.right-aside-item]/aside:w-[20px]"
       >
         <template #fallback>
@@ -79,11 +83,11 @@
 <script setup lang="ts">
 import { DocumentTextOutline, Close, CopyOutline } from "@vicons/ionicons5"
 import { Pen } from "@vicons/carbon"
-import { faviconURL } from "@/utils"
+import { faviconURL, getFaviconFromCache } from "@/utils"
 import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 
-const props = defineProps<{ child: Card }>()
+const props = defineProps<{ child: Card; type: string }>()
 const { copy, isSupported } = useClipboard()
 
 const emit = defineEmits(["delete", "click", "copy", "edit"])
