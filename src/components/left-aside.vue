@@ -5,7 +5,7 @@
         class="flex h-[50px] items-center border-0 border-b border-solid px-4 leading-[50px]"
       >
         <n-avatar :src="logo" :size="26" class="bg-white" />
-        <span class="ml-2 select-none text-xl">Tabby</span>
+        <span class="ml-2 select-none text-xl">Taby</span>
       </div>
       <div class="flex justify-between px-4 py-2.5">
         <span class="select-none font-bold">SPACES</span>

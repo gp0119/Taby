@@ -7,7 +7,7 @@
     "newtab": "index.html"
   },
   "author": {
-    "email": "190875565@qq.com"
+    "email": "ganpeng0119@gmail.com"
   },
   "permissions": ["favicon", "storage", "tabs", "activeTab"],
   "background": {

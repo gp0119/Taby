@@ -16,7 +16,7 @@ export const createGist = async (
   data: {
     description?: string
     public: boolean
-    files: { "tabby-backup.json": { content: string } }
+    files: { "taby-backup.json": { content: string } }
   },
 ) => {
   const octokit = createOctokit(token)
@@ -30,7 +30,7 @@ export const updateGist = async (
     gist_id: string
     description?: string
     public: boolean
-    files: { "tabby-backup.json": { content: string } }
+    files: { "taby-backup.json": { content: string } }
   },
 ) => {
   const octokit = createOctokit(token)
@@ -42,9 +42,9 @@ export const uploadAll = async (token: string, gistId?: string) => {
   const localData = await db.exportData()
   const compressed = compressToUTF16(JSON.stringify(localData))
   const data = {
-    description: "Tabby Backup",
+    description: "Taby Backup",
     public: false,
-    files: { "tabby-backup.json": { content: compressed } },
+    files: { "taby-backup.json": { content: compressed } },
   }
   if (!gistId) {
     gistId = await createGist(token, data)
@@ -59,9 +59,9 @@ export const uploadAll = async (token: string, gistId?: string) => {
 export const downloadAll = async (token: string, gistId: string) => {
   const octokit = createOctokit(token)
   const gist = (await octokit.gists.get({ gist_id: gistId })) as unknown as {
-    data: { files: { "tabby-backup.json": { content: string } } }
+    data: { files: { "taby-backup.json": { content: string } } }
   }
-  const compressedContent = gist.data.files["tabby-backup.json"]?.content
+  const compressedContent = gist.data.files["taby-backup.json"]?.content
   if (!compressedContent) throw new Error("远程数据为空")
   const remoteData: SyncData = JSON.parse(
     decompressFromUTF16(compressedContent),

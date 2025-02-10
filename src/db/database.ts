@@ -19,7 +19,7 @@ class DataBase extends Dexie {
   labels!: EntityTable<Label, "id">
   cards!: EntityTable<Card, "id">
   constructor() {
-    super("TabbyDatabase")
+    super("TabyDatabase")
 
     this.version(1).stores({
       spaces: "++id, title, order, createdAt, modifiedAt",
