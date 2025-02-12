@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="tsx">
-import { Add, SyncSharp, StorefrontOutline } from "@vicons/ionicons5"
+import { Add, SyncSharp, StorefrontOutline, LogoGithub } from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
@@ -114,6 +114,7 @@ const createDraggable = () => {
 
 const dialog = useDialog()
 const message = useMessage()
+
 function onAddSpace() {
   const formModel = ref({ title: "" })
   dialog.create({
@@ -206,7 +207,22 @@ function onSync() {
         rules={formRules}
         require-mark-placement="left"
       >
-        <n-form-item label="AccessToken:" path="accessToken">
+        <n-form-item
+          label="AccessToken:"
+          path="accessToken"
+          label-style="width: 100%"
+          v-slots={{
+            label: () => (
+              <div>
+                <span>AccessToken:</span>
+                <a href="https://github.com/settings/tokens" class="ml-2.5" target="_blank">
+                  <n-icon size="12" component={LogoGithub} />{" "}
+                  <span class="text-blue-500">Get AccessToken</span>
+                </a>
+              </div>
+            ),
+          }}
+        >
           <n-input v-model:value={formModel.value.accessToken} />
         </n-form-item>
         <n-form-item
