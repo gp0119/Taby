@@ -50,20 +50,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: path.resolve(__dirname, "index.html"),
-        background: path.resolve(__dirname, "src/background/service-worker.js"),
       },
       output: {
         assetFileNames: "assets/[name]-[hash].[ext]", // 静态资源
         chunkFileNames: "js/[name]-[hash].js", // 代码分割中产生的 chunk
         name: "[name].js",
-        entryFileNames: (chunkInfo) => {
-          const baseName = path.basename(
-            chunkInfo.facadeModuleId!,
-            path.extname(chunkInfo.facadeModuleId!),
-          )
-          const saveArr = ["service-worker"]
-          return `[name]/${saveArr.includes(baseName) ? baseName : chunkInfo.name}.js`
-        },
       },
     },
   },

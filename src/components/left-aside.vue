@@ -184,7 +184,6 @@ function onSync() {
     accessToken: "",
   })
   chrome.storage.sync.get(["accessToken", "gistId"], (result) => {
-    console.log("result: ", result)
     if (result.accessToken) {
       formModel.value.accessToken = result.accessToken
     }

@@ -37,6 +37,19 @@ export const updateGist = async (
   await octokit.gists.update(data)
 }
 
+export const fetchGist = async (token: string, gistId: string) => {
+  const octokit = createOctokit(token)
+  const gist = await octokit.gists.get({ gist_id: gistId }) as unknown as {
+    data: { files: { "taby-backup.json": { content: string } } }
+  }
+  const compressedContent = gist.data.files["taby-backup.json"]?.content
+  if (!compressedContent) throw new Error("远程数据为空")
+  const remoteData: SyncData = JSON.parse(
+    decompressFromUTF16(compressedContent),
+  )
+  return remoteData
+}
+
 // 上传本地数据到 Gist
 export const uploadAll = async (token: string, gistId?: string) => {
   const localData = await db.exportData()
@@ -57,15 +70,7 @@ export const uploadAll = async (token: string, gistId?: string) => {
 
 // 从 Gist 下载数据
 export const downloadAll = async (token: string, gistId: string) => {
-  const octokit = createOctokit(token)
-  const gist = (await octokit.gists.get({ gist_id: gistId })) as unknown as {
-    data: { files: { "taby-backup.json": { content: string } } }
-  }
-  const compressedContent = gist.data.files["taby-backup.json"]?.content
-  if (!compressedContent) throw new Error("远程数据为空")
-  const remoteData: SyncData = JSON.parse(
-    decompressFromUTF16(compressedContent),
-  )
+  const remoteData = await fetchGist(token, gistId)
   await db.transaction(
     "rw",
     [db.spaces, db.collections, db.labels, db.cards],

@@ -44,15 +44,46 @@
 </template>
 
 <script setup lang="ts">
+import { useSpacesStore } from "@/store/spaces.ts"
+import { downloadAll } from "@/sync/gistSync.ts"
 import navs from "./components/navs.vue"
 import leftAside from "./components/left-aside.vue"
 import rightAside from "./components/right-aside.vue"
 import content from "./components/content.vue"
 import { GlobalThemeOverrides } from "naive-ui"
+
 const themeOverrides: GlobalThemeOverrides = {
   common: {
     primaryColor: "#F65077",
     primaryColorHover: "#e54a6f",
   },
 }
+
+const spacesStore = useSpacesStore()
+
+const refresh = async () => {
+  await spacesStore.fetchSpaces()
+  await spacesStore.fetchCollections(spacesStore.activeId)
+}
+
+async function autoSync() {
+  const result = await chrome.storage.sync.get(["accessToken", "gistId"])
+  const {accessToken, gistId} = result
+  if (!accessToken || !gistId) return
+  const lastSyncTime = localStorage.getItem('lastSyncTime')
+  if (!lastSyncTime) {
+    await downloadAll(accessToken, gistId)
+    await refresh()
+    localStorage.setItem('lastSyncTime', Date.now() + '')
+    return
+  } else {
+    const now = Date.now()
+    if (now - Number(lastSyncTime) > 1000 * 60 * 60) {
+      await downloadAll(accessToken, gistId)
+      await refresh()
+      localStorage.setItem('lastSyncTime', Date.now() + '')
+    }
+  }
+}
+autoSync()
 </script>
