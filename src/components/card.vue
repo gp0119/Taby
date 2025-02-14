@@ -1,21 +1,16 @@
 <template>
-  <div
-    class="w-full cursor-pointer rounded border border-gray-100 bg-white group-hover/aside:border-gray-400 group-[.drag-item]/content:shadow-card [&:hover_.delete]:flex"
-    @click="onHandleClick"
-  >
-    <div
-      class="relative flex items-center rounded border-0 border-b border-solid px-4 py-3 group-[.right-aside-item]/aside:p-2"
-    >
+  <div class="card" @click="onHandleClick">
+    <div class="card-header">
       <n-avatar
         :src="
           type === 'right-aside'
             ? getFaviconFromCache(child.url)
             : faviconURL(child.url)
         "
-        class="mr-2.5 flex-shrink-0 bg-white group-[.drag-item]/content:h-[24px] group-[.right-aside-item]/aside:h-[20px] group-[.drag-item]/content:w-[24px] group-[.right-aside-item]/aside:w-[20px]"
+        class="card-avatar"
       >
         <template #fallback>
-          <div class="flex w-full items-center justify-center">
+          <div class="flex-center w-full">
             <n-icon
               class="bg-white"
               color="#999"
@@ -25,16 +20,11 @@
           </div>
         </template>
       </n-avatar>
-      <span
-        class="flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal"
-        >{{ child.customTitle || child.title }}</span
-      >
+      <span class="card-description">{{
+        child.customTitle || child.title
+      }}</span>
       <!--   删除按钮   -->
-      <n-icon-wrapper
-        :size="16"
-        :border-radius="16"
-        class="delete absolute -right-2.5 hidden rounded-full bg-gray-300 hover:bg-red-450 group-[.drag-item]/content:-top-1.5 group-[.right-aside-item]/aside:top-1/2 group-[.right-aside-item]/aside:-translate-y-1/2"
-      >
+      <n-icon-wrapper :size="16" :border-radius="16" class="delete-button">
         <n-icon
           color="#fff"
           :size="12"
@@ -43,7 +33,7 @@
         />
       </n-icon-wrapper>
     </div>
-    <div class="relative p-2.5 group-[.right-aside-item]/aside:hidden">
+    <div class="card-title-wrapper">
       <div
         class="select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light"
       >
@@ -54,7 +44,7 @@
         v-if="isSupported"
         :size="24"
         :border-radius="24"
-        class="absolute right-6 hidden rounded-full bg-red-450 group-hover/content:flex group-[.drag-item]/content:-bottom-2"
+        class="copy-button"
       >
         <n-icon
           color="#fff"
@@ -64,11 +54,7 @@
         />
       </n-icon-wrapper>
       <!--   编辑按钮   -->
-      <n-icon-wrapper
-        :size="24"
-        :border-radius="24"
-        class="absolute -right-2.5 hidden rounded-full bg-red-450 group-hover/content:flex group-[.drag-item]/content:-bottom-2"
-      >
+      <n-icon-wrapper :size="24" :border-radius="24" class="edit-button">
         <n-icon
           color="#fff"
           :size="12"
@@ -108,3 +94,42 @@ function onHandleEdit() {
   emit("edit")
 }
 </script>
+<style scoped>
+.card {
+  @apply w-full cursor-pointer rounded border border-gray-100 bg-white;
+  @apply group-hover/aside:border-gray-400;
+  @apply group-[.drag-item]/content:shadow-card;
+  @apply [&:hover_.delete\-button]:animate-scale-in [&:hover_.delete\-button]:flex;
+}
+.card-header {
+  @apply relative flex items-center rounded border-0 border-b border-solid px-4 py-3;
+  @apply group-[.right-aside-item]/aside:p-2;
+}
+.card-avatar {
+  @apply mr-2.5 flex-shrink-0 bg-white;
+  @apply group-[.drag-item]/content:h-[24px] group-[.drag-item]/content:w-[24px];
+  @apply group-[.right-aside-item]/aside:h-[20px] group-[.right-aside-item]/aside:w-[20px];
+}
+.card-description {
+  @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal;
+}
+.delete-button {
+  @apply absolute -right-2.5 hidden rounded-full bg-gray-300 hover:bg-red-450;
+  @apply group-[.drag-item]/content:-top-1.5;
+  @apply group-[.right-aside-item]/aside:top-2.5;
+}
+.card-title-wrapper {
+  @apply relative p-2.5;
+  @apply group-[.right-aside-item]/aside:hidden;
+}
+.copy-button {
+  @apply absolute right-6 hidden rounded-full bg-red-450;
+  @apply group-hover/content:animate-scale-in group-hover/content:flex;
+  @apply group-[.drag-item]/content:-bottom-2;
+}
+.edit-button {
+  @apply absolute -right-2.5 hidden rounded-full bg-red-450;
+  @apply group-hover/content:animate-scale-in group-hover/content:flex;
+  @apply group-[.drag-item]/content:-bottom-2;
+}
+</style>

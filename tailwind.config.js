@@ -16,6 +16,21 @@ export default {
           450: "#F65077",
         },
       },
+      keyframes: {
+        scaleIn: {
+          "0%": {
+            transform: "scale(0)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "scale(1)",
+            opacity: "1",
+          },
+        },
+      },
+      animation: {
+        "scale-in": "scaleIn 0.2s ease-out",
+      },
     },
   },
   plugins: ["prettier-plugin-tailwindcss"],
