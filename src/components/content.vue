@@ -1,10 +1,10 @@
 <template>
   <n-scrollbar class="max-h-[calc(100vh-50px)]">
-    <div class="drag-parent-area bg-gray-200">
+    <div class="drag-parent-area">
       <div
         v-for="item in collections"
         :key="item.id"
-        class="drag-item mb-0.5 bg-[#fafafa] p-7"
+        class="drag-item bg-body-bg mb-0.5 p-7"
       >
         <div class="group/title flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
@@ -19,19 +19,19 @@
           <n-space class="!hidden group-hover/title:!flex">
             <n-icon
               size="20"
-              class="cursor-pointer text-red-450"
+              class="text-primary cursor-pointer"
               :component="Edit"
               @click="onEditCollection(item)"
             />
             <n-icon
               size="20"
-              class="cursor-pointer text-red-450"
+              class="text-primary cursor-pointer"
               :component="FolderMoveTo"
               @click="onMoveCollection(item)"
             />
             <n-icon
               size="20"
-              class="cursor-pointer text-red-450"
+              class="text-primary cursor-pointer"
               :component="Delete"
               @click="onDeleteCollection(item)"
             />
@@ -77,7 +77,7 @@
       </div>
       <div
         v-if="!collections?.length"
-        class="bg-[#fafafa] py-16 text-center text-2xl text-gray-400"
+        class="bg-body-bg py-16 text-center text-2xl text-gray-400"
       >
         No collections shared with this space yet.
       </div>

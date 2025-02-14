@@ -3,23 +3,23 @@
     <n-config-provider :theme-overrides="themeOverrides" class="h-full">
       <n-dialog-provider>
         <n-message-provider>
-          <n-layout has-sider class="h-full" content-class="bg-[#fafafa]">
+          <n-layout has-sider class="h-full" content-class="bg-body-bg">
             <n-layout-sider
-              bordered
               :width="200"
               :collapsed-width="30"
-              content-class="bg-[#fafafa]"
+              content-class="bg-body-bg"
               :show-collapsed-content="false"
               show-trigger="arrow-circle"
+              class="border-r"
             >
               <left-aside />
             </n-layout-sider>
             <n-layout
-              content-class="bg-[#fafafa]"
+              content-class="bg-body-bg"
               has-sider
               sider-placement="right"
             >
-              <n-layout-content content-class="bg-[#fafafa]  overflow-hidden">
+              <n-layout-content content-class="bg-body-bg  overflow-hidden">
                 <navs />
                 <content />
               </n-layout-content>
@@ -38,7 +38,7 @@
       </n-dialog-provider>
     </n-config-provider>
     <template #fallback>
-      <div class="bg-red-450">Loading...</div>
+      <div class="bg-primary">Loading...</div>
     </template>
   </Suspense>
 </template>
@@ -54,8 +54,8 @@ import { GlobalThemeOverrides } from "naive-ui"
 
 const themeOverrides: GlobalThemeOverrides = {
   common: {
-    primaryColor: "#F65077",
-    primaryColorHover: "#e54a6f",
+    primaryColor: "var(--primary)",
+    primaryColorHover: "var(--darken-primary)",
   },
 }
 
@@ -68,20 +68,20 @@ const refresh = async () => {
 
 async function autoSync() {
   const result = await chrome.storage.sync.get(["accessToken", "gistId"])
-  const {accessToken, gistId} = result
+  const { accessToken, gistId } = result
   if (!accessToken || !gistId) return
-  const lastSyncTime = localStorage.getItem('lastSyncTime')
+  const lastSyncTime = localStorage.getItem("lastSyncTime")
   if (!lastSyncTime) {
     await downloadAll(accessToken, gistId)
     await refresh()
-    localStorage.setItem('lastSyncTime', Date.now() + '')
+    localStorage.setItem("lastSyncTime", Date.now() + "")
     return
   } else {
     const now = Date.now()
     if (now - Number(lastSyncTime) > 1000 * 60 * 60) {
       await downloadAll(accessToken, gistId)
       await refresh()
-      localStorage.setItem('lastSyncTime', Date.now() + '')
+      localStorage.setItem("lastSyncTime", Date.now() + "")
     }
   }
 }

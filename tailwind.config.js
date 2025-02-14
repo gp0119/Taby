@@ -12,6 +12,13 @@ export default {
         base: "1px 2px 4px rgba(112, 112, 140, 0.15)",
       },
       colors: {
+        primary: "var(--primary)",
+        "darken-primary": "var(--darken-primary)",
+        "body-bg": "var(--body-background)",
+        "card-bg": "var(--card-background)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        borderColor: "var(--border-color)",
         red: {
           450: "#F65077",
         },

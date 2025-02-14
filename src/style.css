@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-#app {
-    background-color: #fafafa;
-}
-
 @layer utilities {
     .flex-center {
         display: flex;

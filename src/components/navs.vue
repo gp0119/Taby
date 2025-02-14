@@ -14,7 +14,7 @@
       </n-button>
       <n-icon
         size="20"
-        class="cursor-pointer text-red-450"
+        class="text-primary cursor-pointer"
         @click="onEditSpace"
       >
         <Settings />
@@ -117,7 +117,7 @@ function onDeleteSpace() {
       return (
         <span>
           Are you sure you want to delete{" "}
-          <span class="text-red-450">{title.value}</span> this space?
+          <span class="text-primary">{title.value}</span> this space?
         </span>
       )
     },

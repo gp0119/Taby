@@ -20,9 +20,7 @@
           </div>
         </template>
       </n-avatar>
-      <span class="card-description">{{
-        child.customTitle || child.title
-      }}</span>
+      <span class="card-title">{{ child.customTitle || child.title }}</span>
       <!--   删除按钮   -->
       <n-icon-wrapper :size="16" :border-radius="16" class="delete-button">
         <n-icon
@@ -35,7 +33,7 @@
     </div>
     <div class="card-title-wrapper">
       <div
-        class="select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light"
+        class="text-text-secondary select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light"
       >
         {{ child.customDescription || child.title }}
       </div>
@@ -96,13 +94,13 @@ function onHandleEdit() {
 </script>
 <style scoped>
 .card {
-  @apply w-full cursor-pointer rounded border border-gray-100 bg-white;
+  @apply bg-card-bg w-full cursor-pointer rounded-md border border-gray-100;
   @apply group-hover/aside:border-gray-400;
-  @apply group-[.drag-item]/content:shadow-card;
+  @apply group-[.drag-item]/content:shadow-inner;
   @apply [&:hover_.delete\-button]:animate-scale-in [&:hover_.delete\-button]:flex;
 }
 .card-header {
-  @apply relative flex items-center rounded border-0 border-b border-solid px-4 py-3;
+  @apply relative flex items-center border-0 border-b border-solid px-4 py-3;
   @apply group-[.right-aside-item]/aside:p-2;
 }
 .card-avatar {
@@ -110,11 +108,11 @@ function onHandleEdit() {
   @apply group-[.drag-item]/content:h-[24px] group-[.drag-item]/content:w-[24px];
   @apply group-[.right-aside-item]/aside:h-[20px] group-[.right-aside-item]/aside:w-[20px];
 }
-.card-description {
-  @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal;
+.card-title {
+  @apply text-text-primary flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal;
 }
 .delete-button {
-  @apply absolute -right-2.5 hidden rounded-full bg-gray-300 hover:bg-red-450;
+  @apply hover:bg-primary absolute -right-2.5 hidden rounded-full bg-gray-300;
   @apply group-[.drag-item]/content:-top-1.5;
   @apply group-[.right-aside-item]/aside:top-2.5;
 }
@@ -123,12 +121,12 @@ function onHandleEdit() {
   @apply group-[.right-aside-item]/aside:hidden;
 }
 .copy-button {
-  @apply absolute right-6 hidden rounded-full bg-red-450;
+  @apply bg-primary absolute right-6 hidden rounded-full;
   @apply group-hover/content:animate-scale-in group-hover/content:flex;
   @apply group-[.drag-item]/content:-bottom-2;
 }
 .edit-button {
-  @apply absolute -right-2.5 hidden rounded-full bg-red-450;
+  @apply bg-primary absolute -right-2.5 hidden rounded-full;
   @apply group-hover/content:animate-scale-in group-hover/content:flex;
   @apply group-[.drag-item]/content:-bottom-2;
 }

@@ -11,7 +11,7 @@
         <span class="select-none font-bold">SPACES</span>
         <n-icon
           size="18"
-          class="cursor-pointer text-red-600"
+          class="text-primary cursor-pointer"
           :component="Add"
           @click="onAddSpace"
         />
@@ -22,7 +22,7 @@
         class="space-item flex cursor-pointer items-center py-2 font-medium"
         v-for="item in allSpaces"
         :data-id="item.id"
-        :class="{ 'text-red-450': activeSpaceId === item.id }"
+        :class="{ 'text-primary': activeSpaceId === item.id }"
         :key="item.title"
         @click="onHandleSpaceClick(item)"
       >
@@ -58,7 +58,12 @@
 </template>
 
 <script setup lang="tsx">
-import { Add, SyncSharp, StorefrontOutline, LogoGithub } from "@vicons/ionicons5"
+import {
+  Add,
+  SyncSharp,
+  StorefrontOutline,
+  LogoGithub,
+} from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "../assets/72.png"
@@ -215,7 +220,11 @@ function onSync() {
             label: () => (
               <div>
                 <span>AccessToken:</span>
-                <a href="https://github.com/settings/tokens" class="ml-2.5" target="_blank">
+                <a
+                  href="https://github.com/settings/tokens"
+                  class="ml-2.5"
+                  target="_blank"
+                >
                   <n-icon size="12" component={LogoGithub} />{" "}
                   <span class="text-blue-500">Get AccessToken</span>
                 </a>
