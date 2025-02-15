@@ -1,8 +1,8 @@
 <template>
   <div
-    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 py-2.5"
+    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 py-2.5 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
-    <span class="select-none text-xl">{{ title }}</span>
+    <span class="select-none text-xl text-primary">{{ title }}</span>
     <n-space>
       <n-button size="tiny" type="primary" @click="onAddCollection">
         <span>ADD COLLECTION</span>
@@ -14,20 +14,50 @@
       </n-button>
       <n-icon
         size="20"
-        class="text-primary cursor-pointer"
+        class="cursor-pointer text-primary"
         @click="onEditSpace"
       >
         <Settings />
       </n-icon>
+      <n-select
+        size="tiny"
+        :show-checkmark="false"
+        :show-arrow="false"
+        :consistent-menu-width="false"
+        v-model:value="currentTheme"
+        :options="themeOptions"
+        @update:value="onUpdateValue"
+        :render-label="renderLabel"
+      >
+      </n-select>
     </n-space>
   </div>
 </template>
 
 <script setup lang="tsx">
 import { useSpacesStore } from "@/store/spaces.ts"
+import { useThemeStore } from "@/store/theme.ts"
 import { Add, Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
 import DataManager from "@/db"
+import { SelectOption, SelectGroupOption } from "naive-ui"
+
+const { themeColor, theme, setTheme } = useThemeStore()
+const currentTheme = ref(theme)
+
+const themeOptions = Object.keys(themeColor).map((key) => ({
+  label: key,
+  value: key,
+  color: themeColor[key].primary,
+}))
+
+const onUpdateValue = (value: string) => {
+  setTheme(value)
+}
+
+const renderLabel = (option: SelectOption | SelectGroupOption) => {
+  return <div class="h-4 w-4" style={`background: ${option.color}`}></div>
+}
 
 const spacesStore = useSpacesStore()
 const dataManager = new DataManager()

@@ -5,13 +5,13 @@
         class="flex h-[50px] items-center border-0 border-b border-solid px-4 leading-[50px]"
       >
         <n-avatar :src="logo" :size="26" class="bg-white" />
-        <span class="ml-2 select-none text-xl">Taby</span>
+        <span class="ml-2 select-none text-xl text-primary">Taby</span>
       </div>
       <div class="flex justify-between px-4 py-2.5">
-        <span class="select-none font-bold">SPACES</span>
+        <span class="select-none font-bold text-text-primary">SPACES</span>
         <n-icon
           size="18"
-          class="text-primary cursor-pointer"
+          class="cursor-pointer text-primary"
           :component="Add"
           @click="onAddSpace"
         />
@@ -19,10 +19,10 @@
     </div>
     <div class="space-container flex-1 px-4">
       <div
-        class="space-item flex cursor-pointer items-center py-2 font-medium"
+        class="space-item flex cursor-pointer items-center py-2 font-medium text-text-primary"
         v-for="item in allSpaces"
         :data-id="item.id"
-        :class="{ 'text-primary': activeSpaceId === item.id }"
+        :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
         :key="item.title"
         @click="onHandleSpaceClick(item)"
       >

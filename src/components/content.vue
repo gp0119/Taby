@@ -1,17 +1,17 @@
 <template>
   <n-scrollbar class="max-h-[calc(100vh-50px)]">
-    <div class="drag-parent-area">
+    <div class="drag-parent-area bg-border-color">
       <div
         v-for="item in collections"
         :key="item.id"
-        class="drag-item bg-body-bg mb-0.5 p-7"
+        class="drag-item mb-[1px] bg-body-bg p-7"
       >
         <div class="group/title flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
-            <span class="select-none">{{ item.title }}</span>
+            <span class="select-none text-text-primary">{{ item.title }}</span>
             <n-icon
               size="20"
-              class="ml-2 inline-block cursor-pointer text-red-600"
+              class="ml-2 inline-block cursor-pointer text-primary"
               :component="ChevronDownOutline"
               @click="expandStore.toggleExpand(item.id)"
             />
@@ -19,19 +19,19 @@
           <n-space class="!hidden group-hover/title:!flex">
             <n-icon
               size="20"
-              class="text-primary cursor-pointer"
+              class="cursor-pointer text-primary"
               :component="Edit"
               @click="onEditCollection(item)"
             />
             <n-icon
               size="20"
-              class="text-primary cursor-pointer"
+              class="cursor-pointer text-primary"
               :component="FolderMoveTo"
               @click="onMoveCollection(item)"
             />
             <n-icon
               size="20"
-              class="text-primary cursor-pointer"
+              class="cursor-pointer text-primary"
               :component="Delete"
               @click="onDeleteCollection(item)"
             />

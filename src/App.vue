@@ -24,7 +24,8 @@
                 <content />
               </n-layout-content>
               <n-layout-sider
-                style="border-left: 1px solid rgb(239, 239, 245)"
+                content-class="bg-body-bg"
+                class="border-l"
                 :width="250"
                 :collapsed-width="30"
                 :show-collapsed-content="false"
@@ -45,6 +46,7 @@
 
 <script setup lang="ts">
 import { useSpacesStore } from "@/store/spaces.ts"
+import { useThemeStore } from "@/store/theme.ts"
 import { downloadAll } from "@/sync/gistSync.ts"
 import navs from "./components/navs.vue"
 import leftAside from "./components/left-aside.vue"
@@ -52,12 +54,16 @@ import rightAside from "./components/right-aside.vue"
 import content from "./components/content.vue"
 import { GlobalThemeOverrides } from "naive-ui"
 
-const themeOverrides: GlobalThemeOverrides = {
+const themeStore = useThemeStore()
+
+themeStore.setThemeProperty()
+
+const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
-    primaryColor: "var(--primary)",
-    primaryColorHover: "var(--darken-primary)",
+    primaryColor: themeStore.themeColor[themeStore.theme].primary,
+    primaryColorHover: themeStore.themeColor[themeStore.theme].darkenPrimary,
   },
-}
+}))
 
 const spacesStore = useSpacesStore()
 

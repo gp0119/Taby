@@ -33,7 +33,7 @@
     </div>
     <div class="card-title-wrapper">
       <div
-        class="text-text-secondary select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light"
+        class="select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light text-text-secondary"
       >
         {{ child.customDescription || child.title }}
       </div>
@@ -94,25 +94,25 @@ function onHandleEdit() {
 </script>
 <style scoped>
 .card {
-  @apply bg-card-bg w-full cursor-pointer rounded-md border border-gray-100;
-  @apply group-hover/aside:border-gray-400;
-  @apply group-[.drag-item]/content:shadow-inner;
-  @apply [&:hover_.delete\-button]:animate-scale-in [&:hover_.delete\-button]:flex;
+  @apply w-full cursor-pointer rounded-md bg-card-bg shadow-base;
+  @apply group-hover/aside:bg-hover-color;
+  @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
-  @apply relative flex items-center border-0 border-b border-solid px-4 py-3;
+  @apply relative flex items-center rounded-md border-0 border-b border-solid px-4 py-3;
   @apply group-[.right-aside-item]/aside:p-2;
 }
 .card-avatar {
-  @apply mr-2.5 flex-shrink-0 bg-white;
+  @apply sepia-base mr-2.5 flex-shrink-0 bg-white;
   @apply group-[.drag-item]/content:h-[24px] group-[.drag-item]/content:w-[24px];
   @apply group-[.right-aside-item]/aside:h-[20px] group-[.right-aside-item]/aside:w-[20px];
 }
+
 .card-title {
-  @apply text-text-primary flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal;
+  @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
 }
 .delete-button {
-  @apply hover:bg-primary absolute -right-2.5 hidden rounded-full bg-gray-300;
+  @apply absolute -right-2.5 hidden rounded-full bg-gray-300 hover:bg-primary;
   @apply group-[.drag-item]/content:-top-1.5;
   @apply group-[.right-aside-item]/aside:top-2.5;
 }
@@ -121,13 +121,13 @@ function onHandleEdit() {
   @apply group-[.right-aside-item]/aside:hidden;
 }
 .copy-button {
-  @apply bg-primary absolute right-6 hidden rounded-full;
-  @apply group-hover/content:animate-scale-in group-hover/content:flex;
+  @apply absolute right-6 hidden rounded-full bg-primary;
+  @apply group-hover/content:flex group-hover/content:animate-scale-in;
   @apply group-[.drag-item]/content:-bottom-2;
 }
 .edit-button {
-  @apply bg-primary absolute -right-2.5 hidden rounded-full;
-  @apply group-hover/content:animate-scale-in group-hover/content:flex;
+  @apply absolute -right-2.5 hidden rounded-full bg-primary;
+  @apply group-hover/content:flex group-hover/content:animate-scale-in;
   @apply group-[.drag-item]/content:-bottom-2;
 }
 </style>

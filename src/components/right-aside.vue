@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="h-[50px] select-none border-0 border-b border-solid px-3 text-right leading-[50px]"
+      class="h-[50px] select-none border-0 border-b border-solid px-3 text-right leading-[50px] text-text-primary"
     >
       OPEN TABS
     </div>
@@ -9,9 +9,9 @@
       <template v-if="!Object.keys(tabs).length">
         <div class="mb-3 rounded shadow-base">
           <div class="flex items-center p-2.5">
-            <span class="select-none">Window 1</span>
+            <span class="select-none text-text-primary">Window 1</span>
           </div>
-          <div class="p-2.5 text-gray-300">No Tabs</div>
+          <div class="p-2.5 text-gray-300 text-text-primary">No Tabs</div>
         </div>
       </template>
       <template v-else>
@@ -21,10 +21,12 @@
           class="mb-3 rounded shadow-base"
         >
           <div class="flex items-center p-2.5">
-            <span class="select-none">Window {{ index + 1 }}</span>
+            <span class="select-none text-text-primary"
+              >Window {{ index + 1 }}</span
+            >
             <n-icon
               size="20"
-              class="ml-2 inline-block cursor-pointer text-red-600"
+              class="ml-2 inline-block cursor-pointer text-primary"
               @click="isExpanded = !isExpanded"
             >
               <ChevronDownOutline />
