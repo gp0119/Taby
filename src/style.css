@@ -12,6 +12,6 @@
 
 @layer components {
     .sortable-ghost-dashed-border {
-        @apply border border-dashed border-red-500 rounded;
+        @apply border border-dashed border-primary rounded;
     }
 }

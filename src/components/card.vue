@@ -94,7 +94,7 @@ function onHandleEdit() {
 </script>
 <style scoped>
 .card {
-  @apply w-full cursor-pointer rounded-md bg-card-bg shadow-base;
+  @apply bg-card-color w-full cursor-pointer rounded-md shadow-base;
   @apply group-hover/aside:bg-hover-color;
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
@@ -103,7 +103,7 @@ function onHandleEdit() {
   @apply group-[.right-aside-item]/aside:p-2;
 }
 .card-avatar {
-  @apply sepia-base mr-2.5 flex-shrink-0 bg-white;
+  @apply mr-2.5 flex-shrink-0 bg-white sepia-base;
   @apply group-[.drag-item]/content:h-[24px] group-[.drag-item]/content:w-[24px];
   @apply group-[.right-aside-item]/aside:h-[20px] group-[.right-aside-item]/aside:w-[20px];
 }

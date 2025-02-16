@@ -69,7 +69,8 @@ function onAddCollection() {
     title: () => {
       return <span>Add Collection</span>
     },
-    titleClass: "[&_.n-base-icon]:hidden",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "bg-body-color",
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
@@ -102,13 +103,14 @@ function onEditSpace() {
     title: () => {
       return <span>Edit Space</span>
     },
-    titleClass: "[&_.n-base-icon]:hidden",
+    class: "bg-body-color",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
       <div>
-        <n-form model={formModel.value} label-placement="left">
-          <n-form-item label="Space Title: ">
+        <n-form model={formModel.value}>
+          <n-form-item label="Space Title: " class="!text-text-primary">
             <n-input v-model:value={formModel.value.title} />
           </n-form-item>
         </n-form>
@@ -143,9 +145,11 @@ function onEditSpace() {
 function onDeleteSpace() {
   dialog.error({
     title: "Delete Space",
+    titleClass: "!text-text-primary",
+    class: "bg-body-color",
     content: () => {
       return (
-        <span>
+        <span class="text-text-primary">
           Are you sure you want to delete{" "}
           <span class="text-primary">{title.value}</span> this space?
         </span>

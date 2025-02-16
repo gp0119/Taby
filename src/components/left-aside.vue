@@ -126,7 +126,8 @@ function onAddSpace() {
     title: () => {
       return <span>Add Space</span>
     },
-    titleClass: "[&_.n-base-icon]:hidden",
+    class: "bg-body-color",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
@@ -201,8 +202,9 @@ function onSync() {
     accessToken: [{ required: true, message: "AccessToken is required" }],
   }
   dialog.create({
+    class: "bg-body-color",
     title: "sync witn github",
-    titleClass: "[&_.n-base-icon]:hidden",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
@@ -271,7 +273,6 @@ function onSync() {
           上传本地
         </n-button>
         <n-button
-          type="info"
           size="small"
           disabled={!(formModel.value.accessToken && formModel.value.gistId)}
           onClick={() => {

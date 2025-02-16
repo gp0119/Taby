@@ -3,11 +3,11 @@
     <n-config-provider :theme-overrides="themeOverrides" class="h-full">
       <n-dialog-provider>
         <n-message-provider>
-          <n-layout has-sider class="h-full" content-class="bg-body-bg">
+          <n-layout has-sider class="h-full" content-class="bg-body-color">
             <n-layout-sider
               :width="200"
               :collapsed-width="30"
-              content-class="bg-body-bg"
+              content-class="bg-body-color"
               :show-collapsed-content="false"
               show-trigger="arrow-circle"
               class="border-r"
@@ -15,16 +15,16 @@
               <left-aside />
             </n-layout-sider>
             <n-layout
-              content-class="bg-body-bg"
+              content-class="bg-body-color"
               has-sider
               sider-placement="right"
             >
-              <n-layout-content content-class="bg-body-bg  overflow-hidden">
+              <n-layout-content content-class="bg-body-color  overflow-hidden">
                 <navs />
                 <content />
               </n-layout-content>
               <n-layout-sider
-                content-class="bg-body-bg"
+                content-class="bg-body-color"
                 class="border-l"
                 :width="250"
                 :collapsed-width="30"
@@ -62,6 +62,17 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
     primaryColor: themeStore.themeColor[themeStore.theme].primary,
     primaryColorHover: themeStore.themeColor[themeStore.theme].darkenPrimary,
+  },
+  Button: {
+    textColor: themeStore.themeColor[themeStore.theme].textPrimary,
+    colorPressedPrimary: themeStore.themeColor[themeStore.theme].darkenPrimary,
+  },
+  Input: {
+    color: themeStore.themeColor[themeStore.theme].cardBackground,
+    textColor: themeStore.themeColor[themeStore.theme].textPrimary,
+  },
+  Form: {
+    labelTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
   },
 }))
 

@@ -42,8 +42,8 @@ export const useThemeStore = defineStore("theme", () => {
       sepia: "0.6",
     },
     dark: {
-      primary: "#2C3A4F",
-      darkenPrimary: "#56647b",
+      primary: "#4d648d",
+      darkenPrimary: "#13243b",
       bodyBackground: "#1A1F2B",
       cardBackground: "#292e3b",
       textPrimary: "#cbd5e1",

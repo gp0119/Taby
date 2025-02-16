@@ -12,8 +12,8 @@ export default {
       colors: {
         primary: "var(--primary)",
         "darken-primary": "var(--darkenPrimary)",
-        "body-bg": "var(--bodyBackground)",
-        "card-bg": "var(--cardBackground)",
+        "body-color": "var(--bodyBackground)",
+        "card-color": "var(--cardBackground)",
         "text-primary": "var(--textPrimary)",
         "text-secondary": "var(--textSecondary)",
         "border-color": "var(--borderColor)",

@@ -4,7 +4,7 @@
       <div
         v-for="item in collections"
         :key="item.id"
-        class="drag-item mb-[1px] bg-body-bg p-7"
+        class="drag-item bg-body-color mb-[1px] p-7"
       >
         <div class="group/title flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
@@ -77,7 +77,7 @@
       </div>
       <div
         v-if="!collections?.length"
-        class="bg-body-bg py-16 text-center text-2xl text-gray-400"
+        class="bg-body-color py-16 text-center text-2xl text-gray-400"
       >
         No collections shared with this space yet.
       </div>
