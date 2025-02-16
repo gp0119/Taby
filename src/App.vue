@@ -10,6 +10,7 @@
               content-class="bg-body-color"
               :show-collapsed-content="false"
               show-trigger="arrow-circle"
+              trigger-class="!bg-body-color"
               class="border-r"
             >
               <left-aside />
@@ -30,6 +31,7 @@
                 :collapsed-width="30"
                 :show-collapsed-content="false"
                 show-trigger="arrow-circle"
+                trigger-class="!bg-body-color"
               >
                 <right-aside />
               </n-layout-sider>
@@ -62,6 +64,10 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
     primaryColor: themeStore.themeColor[themeStore.theme].primary,
     primaryColorHover: themeStore.themeColor[themeStore.theme].darkenPrimary,
+    inputColor: themeStore.themeColor[themeStore.theme].cardBackground,
+    popoverColor: themeStore.themeColor[themeStore.theme].cardBackground,
+    hoverColor: themeStore.themeColor[themeStore.theme].hoverColor,
+    textColor2: themeStore.themeColor[themeStore.theme].textPrimary,
   },
   Button: {
     textColor: themeStore.themeColor[themeStore.theme].textPrimary,

@@ -25,7 +25,7 @@
       <n-icon-wrapper :size="16" :border-radius="16" class="delete-button">
         <n-icon
           color="#fff"
-          :size="12"
+          :size="14"
           @click.stop="onHandleDelete"
           :component="Close"
         />
@@ -112,7 +112,7 @@ function onHandleEdit() {
   @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
 }
 .delete-button {
-  @apply absolute -right-2.5 hidden rounded-full bg-gray-300 hover:bg-primary;
+  @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;
   @apply group-[.drag-item]/content:-top-1.5;
   @apply group-[.right-aside-item]/aside:top-2.5;
 }
@@ -121,12 +121,12 @@ function onHandleEdit() {
   @apply group-[.right-aside-item]/aside:hidden;
 }
 .copy-button {
-  @apply absolute right-6 hidden rounded-full bg-primary;
+  @apply absolute right-6 hidden rounded-full bg-primary hover:opacity-70;
   @apply group-hover/content:flex group-hover/content:animate-scale-in;
   @apply group-[.drag-item]/content:-bottom-2;
 }
 .edit-button {
-  @apply absolute -right-2.5 hidden rounded-full bg-primary;
+  @apply absolute -right-2.5 hidden rounded-full bg-primary hover:opacity-70;
   @apply group-hover/content:flex group-hover/content:animate-scale-in;
   @apply group-[.drag-item]/content:-bottom-2;
 }

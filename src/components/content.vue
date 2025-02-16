@@ -195,6 +195,8 @@ function onEdit(child: iCard) {
   })
   dialog.create({
     title: "",
+    titleClass: "!text-text-primary",
+    class: "bg-body-color",
     negativeText: "Cancel",
     positiveText: "Save",
     icon: () => (
@@ -237,6 +239,8 @@ function onDeleteCollection(item: Collection) {
   dialog.error({
     title: "Delete Collection",
     content: "Are you sure you want to delete this collection?",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "bg-body-color",
     negativeText: "Cancel",
     positiveText: "Save",
     onPositiveClick: async () => {
@@ -250,6 +254,8 @@ function onMoveCollection(item: Collection) {
   const spaceId = ref<number | null>(null)
   dialog.create({
     title: `Move ${item.title} to`,
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "bg-body-color",
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
@@ -277,6 +283,8 @@ function onEditCollection(item: Collection) {
   const formModel = ref({ title: item.title })
   dialog.create({
     title: "Edit Collection",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "bg-body-color",
     negativeText: "Cancel",
     positiveText: "Save",
     content: () => (
