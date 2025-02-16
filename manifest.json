@@ -1,7 +1,7 @@
 {
   "name": "Taby",
   "manifest_version": 3,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple new tab extension",
   "chrome_url_overrides": {
     "newtab": "index.html"
