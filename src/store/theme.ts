@@ -2,8 +2,7 @@ import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
 
 export const useThemeStore = defineStore("theme", () => {
-  const theme = useLocalStorage<string>("theme", "green")
-
+  const theme = useLocalStorage<string>("theme", "pink")
   const themeColor: Record<string, Record<string, string>> = {
     pink: {
       primary: "#f65077",
