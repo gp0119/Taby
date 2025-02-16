@@ -4,9 +4,9 @@
       <div
         v-for="item in collections"
         :key="item.id"
-        class="drag-item bg-body-color mb-[1px] p-7"
+        class="drag-item bg-body-color group/item mb-[1px] p-7"
       >
-        <div class="group/title flex items-center justify-between pb-4 text-lg">
+        <div class="flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
             <span class="select-none text-text-primary">{{ item.title }}</span>
             <n-icon
@@ -16,7 +16,7 @@
               @click="expandStore.toggleExpand(item.id)"
             />
           </div>
-          <n-space class="!hidden group-hover/title:!flex">
+          <n-space class="!hidden group-hover/item:!flex">
             <n-icon
               size="20"
               class="cursor-pointer text-primary"
