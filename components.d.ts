@@ -26,6 +26,7 @@ declare module 'vue' {
     NLayoutContent: typeof import('naive-ui')['NLayoutContent']
     NLayoutSider: typeof import('naive-ui')['NLayoutSider']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
+    NPopover: typeof import('naive-ui')['NPopover']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
     NSpace: typeof import('naive-ui')['NSpace']

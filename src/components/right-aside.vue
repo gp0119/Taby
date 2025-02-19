@@ -39,6 +39,7 @@
               :data-id="child.id"
               :data-windowid="windowId"
               :data-url="child.url"
+              :data-title="child.title"
               class="group/aside right-aside-item mb-3"
             >
               <card
@@ -124,7 +125,7 @@ onMounted(async () => {
           const toParent = to.parentElement
           const { collectionid: toClollectionId } = toParent!.dataset
           await dataManager.addCard({
-            title: itemEl.innerText,
+            title: itemEl.dataset.title!,
             url: itemEl.dataset.url!,
             collectionId: Number(toClollectionId!),
           })
