@@ -141,6 +141,14 @@ class dataManager {
     return db.labels.add({ title, color })
   }
 
+  async removeLabel(id: number) {
+    return db.labels.delete(id)
+  }
+
+  async updateLabel(id: number, title: string, color: string) {
+    return db.labels.update(id, { title, color })
+  }
+
   async addCard(card: Pick<Card, "title" | "url" | "collectionId">) {
     const lastCard = await db.cards
       .where(["collectionId+order"])

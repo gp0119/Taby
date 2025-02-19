@@ -21,6 +21,7 @@
       :component="FolderMoveTo"
       @click="onMoveCollection(item)"
     />
+    <TagAction />
     <n-icon
       size="20"
       class="mx-1.5 cursor-pointer text-primary"
@@ -39,6 +40,7 @@ import DataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces"
 import { useRefresh } from "@/hooks/useRresh"
 import { useChromeTabs } from "@/hooks/useChromeTabs"
+import TagAction from "@/components/tag-action.vue"
 const dialog = useDialog()
 defineProps<{
   item: CollectionWithCards
