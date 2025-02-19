@@ -61,16 +61,12 @@ import card from "./card.vue"
 import { ChevronDownOutline } from "@vicons/ionicons5"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import DataManager from "@/db"
-import { useSpacesStore } from "@/store/spaces.ts"
+import { useRefresh } from "@/hooks/useRresh"
 
 const dataManager = new DataManager()
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
 const isExpanded = ref(true)
-const spacesStore = useSpacesStore()
-
-function refresh() {
-  return spacesStore.fetchCollections(spacesStore.activeId)
-}
+const { refreshCollections } = useRefresh()
 
 async function refreshTabs() {
   await getTabs()
@@ -129,7 +125,7 @@ onMounted(async () => {
             collectionId: Number(toClollectionId!),
           })
           itemEl.remove()
-          await refresh()
+          await refreshCollections()
         } else {
           const element =
             itemEl.nextElementSibling || itemEl.previousElementSibling

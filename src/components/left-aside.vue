@@ -73,14 +73,11 @@ import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
 import { FormInst } from "naive-ui"
 import { uploadAll, downloadAll } from "@/sync/gistSync"
 import Sortable from "sortablejs"
+import { useRefresh } from "@/hooks/useRresh"
 
 const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
-
-const refresh = async () => {
-  await spacesStore.fetchSpaces()
-  await spacesStore.fetchCollections(spacesStore.activeId)
-}
+const { refreshSpaces, refreshCollections } = useRefresh()
 
 const init = async () => {
   await spacesStore.initialize()
@@ -111,7 +108,7 @@ const createDraggable = () => {
           Number(currentSpaceId),
           Number(targetSpaceId),
         )
-        await refresh()
+        await refreshSpaces()
       }
     },
   })
@@ -175,7 +172,7 @@ function onChange({ file }: { file: UploadSettledFileInfo }) {
             }
           }),
         )
-        await refresh()
+        await refreshCollections()
       }
     } catch (error) {
       console.error("文件内容不是有效的 JSON", error)
@@ -286,7 +283,8 @@ function onSync() {
                   accessToken: formModel.value.accessToken,
                   gistId: formModel.value.gistId,
                 })
-                await refresh()
+                await refreshSpaces()
+                await refreshCollections()
                 dialog.destroyAll()
               })
               message.success("下载成功")

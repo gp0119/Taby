@@ -4,7 +4,7 @@
       <div
         v-for="item in collections"
         :key="item.id"
-        class="drag-item bg-body-color group/item mb-[1px] p-7"
+        class="drag-item group/item mb-[1px] bg-body-color p-7"
       >
         <div class="flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
@@ -16,26 +16,7 @@
               @click="expandStore.toggleExpand(item.id)"
             />
           </div>
-          <n-space class="!hidden group-hover/item:!flex">
-            <n-icon
-              size="20"
-              class="cursor-pointer text-primary"
-              :component="Edit"
-              @click="onEditCollection(item)"
-            />
-            <n-icon
-              size="20"
-              class="cursor-pointer text-primary"
-              :component="FolderMoveTo"
-              @click="onMoveCollection(item)"
-            />
-            <n-icon
-              size="20"
-              class="cursor-pointer text-primary"
-              :component="Delete"
-              @click="onDeleteCollection(item)"
-            />
-          </n-space>
+          <collection-action :item="item" />
         </div>
         <div
           :data-collectionid="item.id"
@@ -87,37 +68,34 @@
 
 <script setup lang="tsx">
 import card from "./card.vue"
+import collectionAction from "./collection-action.vue"
 import Sortable from "sortablejs"
 import { ChevronDownOutline, DocumentTextOutline } from "@vicons/ionicons5"
-import { FolderMoveTo, Delete, Edit } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useExpandStore } from "@/store/expand.ts"
 import { faviconURL } from "@/utils"
 import DataManager from "@/db"
-import { Card as iCard, Collection } from "@/type.ts"
+import { Card as iCard } from "@/type.ts"
+import { useRefresh } from "@/hooks/useRresh"
 
 const spacesStore = useSpacesStore()
 const expandStore = useExpandStore()
 const dataManager = new DataManager()
 
 const dialog = useDialog()
-
-function refresh() {
-  return spacesStore.fetchCollections(spacesStore.activeId)
-}
+const { refreshCollections } = useRefresh()
 
 const collections = computed(() => spacesStore.collections)
-const allSpaces = computed(() => spacesStore.spaces)
 
 onMounted(async () => {
-  await refresh()
+  await refreshCollections()
   createDraggable()
 })
 
 watch(
   () => collections.value.length,
   async () => {
-    await refresh()
+    await refreshCollections()
     createDraggable()
   },
 )
@@ -138,7 +116,7 @@ function createDraggable() {
         if (index === newIndex) targetCollectionId = item.id
       })
       await dataManager.moveCollection(collectionId!, targetCollectionId!)
-      await refresh()
+      await refreshCollections()
     },
   })
   const dragChildAreas = document.querySelectorAll(".drag-child-area")
@@ -178,7 +156,7 @@ function createDraggable() {
             Number(toCollectionId)!,
           )
         }
-        await refresh()
+        await refreshCollections()
       },
     })
   })
@@ -230,79 +208,13 @@ function onEdit(child: iCard) {
         title: formModel.value.title,
         description: formModel.value.description,
       })
-      await refresh()
-    },
-  })
-}
-
-function onDeleteCollection(item: Collection) {
-  dialog.error({
-    title: "Delete Collection",
-    content: "Are you sure you want to delete this collection?",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    onPositiveClick: async () => {
-      await dataManager.removeCollection(item.id)
-      await refresh()
-    },
-  })
-}
-
-function onMoveCollection(item: Collection) {
-  const spaceId = ref<number | null>(null)
-  dialog.create({
-    title: `Move ${item.title} to`,
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
-      <n-form>
-        <n-form-item label="Space">
-          <n-select
-            v-model:value={spaceId.value}
-            options={allSpaces.value.map((item) => ({
-              label: item.title,
-              value: item.id,
-            }))}
-          ></n-select>
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      if (!spaceId.value) return
-      await dataManager.moveCollectionToSpace(item.id, spaceId.value)
-      await refresh()
-    },
-  })
-}
-
-function onEditCollection(item: Collection) {
-  const formModel = ref({ title: item.title })
-  dialog.create({
-    title: "Edit Collection",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label="Title">
-          <n-input v-model:value={formModel.value.title} />
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.updateCollectionTitle(item.id, formModel.value.title)
-      await refresh()
+      await refreshCollections()
     },
   })
 }
 
 async function onDeleteCard(card: iCard) {
   await dataManager.removeCard(card.id)
-  await refresh()
+  await refreshCollections()
 }
 </script>
