@@ -21,7 +21,7 @@
       :component="FolderMoveTo"
       @click="onMoveCollection(item)"
     />
-    <TagAction />
+    <TagAction :item="item" />
     <n-icon
       size="20"
       class="mx-1.5 cursor-pointer text-primary"

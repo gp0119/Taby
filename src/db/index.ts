@@ -93,6 +93,24 @@ class dataManager {
     return db.collections.update(collectionId, { title })
   }
 
+  async addTagforCollection(collectionId: number, tagId: number) {
+    const collection = await db.collections.get(collectionId)
+    if (!collection) return
+    if (collection.labelIds.includes(tagId)) return
+    return db.collections.update(collectionId, {
+      labelIds: [...collection.labelIds, tagId],
+    })
+  }
+
+  async removeTagforCollection(collectionId: number, tagId: number) {
+    const collection = await db.collections.get(collectionId)
+    if (!collection) return
+    if (!collection.labelIds.includes(tagId)) return
+    return db.collections.update(collectionId, {
+      labelIds: collection.labelIds.filter((id) => id !== tagId),
+    })
+  }
+
   async moveCollection(collectionId: number, targetId: number) {
     const currentCollection = await db.collections.get(collectionId)
     if (!currentCollection) return
@@ -238,7 +256,11 @@ class dataManager {
         const cards = await db.cards
           .where({ collectionId: collection.id })
           .sortBy("order")
-        return { ...collection, cards }
+        const labels = await db.labels
+          .where("id")
+          .anyOf(collection.labelIds)
+          .toArray()
+        return { ...collection, cards, labels }
       }),
     )
   }

@@ -11,7 +11,7 @@ export const useTagsStore = defineStore("tags", () => {
     tags.value = fetchedTags
   }
 
-  async function addTag(tag: Label) {
+  async function addTag(tag: Omit<Label, "id">) {
     await dataManager.addLabel(tag.title, tag.color)
     await fetchTags()
   }

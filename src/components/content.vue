@@ -5,6 +5,9 @@
         v-for="item in collections"
         :key="item.id"
         class="drag-item group/item mb-[1px] bg-body-color p-7"
+        :class="{
+          'no-drag': isHoverTag,
+        }"
       >
         <div class="flex items-center justify-between pb-4 text-lg">
           <div class="flex items-center">
@@ -15,6 +18,28 @@
               :component="ChevronDownOutline"
               @click="expandStore.toggleExpand(item.id)"
             />
+            <n-space v-if="item.labels.length" class="ml-2">
+              <n-tag
+                class="group/tag"
+                v-for="tag in item.labels"
+                :key="tag.id"
+                size="small"
+                :color="{
+                  color: `${tag.color}33`,
+                  textColor: tag.color,
+                  borderColor: `${tag.color}4A`,
+                }"
+              >
+                <div class="flex items-center">
+                  {{ tag.title }}
+                  <n-icon
+                    size="12"
+                    class="hidden cursor-pointer group-hover/tag:block"
+                    :component="Close"
+                  />
+                </div>
+              </n-tag>
+            </n-space>
           </div>
           <collection-action :item="item" />
         </div>
@@ -70,7 +95,11 @@
 import card from "./card.vue"
 import collectionAction from "./collection-action.vue"
 import Sortable from "sortablejs"
-import { ChevronDownOutline, DocumentTextOutline } from "@vicons/ionicons5"
+import {
+  ChevronDownOutline,
+  DocumentTextOutline,
+  Close,
+} from "@vicons/ionicons5"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useExpandStore } from "@/store/expand.ts"
 import { faviconURL } from "@/utils"
@@ -81,6 +110,14 @@ import { useRefresh } from "@/hooks/useRresh"
 const spacesStore = useSpacesStore()
 const expandStore = useExpandStore()
 const dataManager = new DataManager()
+const isHoverTag = ref(false)
+
+provide("isHoverTag", {
+  isHoverTag,
+  setIsHoverTag: (value: boolean) => {
+    isHoverTag.value = value
+  },
+})
 
 const dialog = useDialog()
 const { refreshCollections } = useRefresh()
@@ -108,6 +145,7 @@ function createDraggable() {
     },
     animation: 150,
     ghostClass: "sortable-ghost-dashed-border",
+    filter: ".no-drag",
     onEnd: async function (evt) {
       const { newIndex, oldIndex } = evt
       let collectionId: number, targetCollectionId: number
