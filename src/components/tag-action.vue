@@ -4,9 +4,7 @@
     placement="bottom-end"
     :show-arrow="false"
     :to="false"
-    class="w-[150px]"
-    @mouseenter="setIsHoverTag(true)"
-    @mouseleave="setIsHoverTag(false)"
+    class="min-w-[150px]"
   >
     <template #trigger>
       <n-icon
@@ -16,7 +14,16 @@
         class="mx-1.5 cursor-pointer text-primary"
       />
     </template>
-    <div>
+    <template #header>
+      <n-text depth="1">
+        <span class="text-text-primary">Tags</span>
+      </n-text>
+    </template>
+    <n-scrollbar
+      class="max-h-[300px]"
+      @mouseenter="setIsHoverTag(true)"
+      @mouseleave="setIsHoverTag(false)"
+    >
       <n-space vertical v-if="tagsStore.tags.length > 0">
         <div
           class="group/tag flex items-center justify-between"
@@ -35,25 +42,27 @@
           >
           <n-icon
             size="16"
-            class="hidden cursor-pointer text-primary group-hover/tag:block"
+            class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
             title="Edit Collection"
             :component="Edit"
+            @click="onEditTag(tag)"
           />
         </div>
       </n-space>
       <div v-else class="!bg-card-color text-center text-text-secondary">
         No tags
       </div>
-    </div>
+    </n-scrollbar>
     <template #footer>
-      <n-input
-        class="w-full"
-        v-model:value="newTag.title"
-        autofocus
-        placeholder="Add tag"
-        size="tiny"
-        maxlength="10"
-      />
+      <div>
+        <n-input
+          class="w-full"
+          v-model:value="newTag.title"
+          placeholder="Add tag"
+          size="tiny"
+          maxlength="10"
+        />
+      </div>
       <div class="mt-2 flex items-center gap-1">
         <n-tag
           class="h-[20px] flex-1 cursor-pointer select-none"
@@ -76,8 +85,8 @@
   </n-popover>
 </template>
 
-<script setup lang="ts">
-import { TagGroup, Edit, Checkmark } from "@vicons/carbon"
+<script setup lang="tsx">
+import { TagGroup, Edit, Checkmark, Delete } from "@vicons/carbon"
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
 import DataManager from "@/db"
@@ -85,8 +94,6 @@ import { useRefresh } from "@/hooks/useRresh"
 const props = defineProps<{
   item: CollectionWithCards
 }>()
-
-console.log("props: ", props)
 
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
@@ -110,10 +117,12 @@ const tabColors = [
 const newTag = ref({
   title: "",
 })
+
 const { setIsHoverTag } = inject("isHoverTag") as {
   isHoverTag: boolean
   setIsHoverTag: (value: boolean) => void
 }
+
 onMounted(async () => {
   await tagsStore.fetchTags()
 })
@@ -132,6 +141,63 @@ const addTagforCollection = async (id: number) => {
 }
 const pickColor = () => {
   colorIndex.value = (colorIndex.value + 1) % tabColors.length
+}
+
+const dialog = useDialog()
+const onDeleteTag = async (id: number) => {
+  dialog.error({
+    title: "Delete Tag",
+    content: "Are you sure you want to delete this tag?",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "!bg-body-color",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    onPositiveClick: async () => {
+      await dataManager.removeLabel(id)
+      await tagsStore.fetchTags()
+      await refreshCollections()
+      dialog.destroyAll()
+    },
+  })
+}
+const onEditTag = (tag: { id: number; title: string }) => {
+  const formModel = ref({ title: tag.title })
+  dialog.create({
+    title: "Edit Tag",
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "bg-body-color",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <div>
+        <n-form model={formModel.value}>
+          <n-form-item label="Title">
+            <n-input v-model:value={formModel.value.title} />
+          </n-form-item>
+        </n-form>
+        <n-button
+          size="small"
+          secondary
+          type="error"
+          onClick={() => onDeleteTag(tag.id)}
+          v-slots={{
+            icon: () => (
+              <n-icon>
+                <Delete />
+              </n-icon>
+            ),
+          }}
+        >
+          <span>DELETE</span>
+        </n-button>
+      </div>
+    ),
+    onPositiveClick: async () => {
+      await dataManager.updateLabel(tag.id, formModel.value.title)
+      await tagsStore.fetchTags()
+      await refreshCollections()
+    },
+  })
 }
 </script>
 

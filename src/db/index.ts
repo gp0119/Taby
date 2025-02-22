@@ -160,11 +160,23 @@ class dataManager {
   }
 
   async removeLabel(id: number) {
+    if (!id) return
+    const collections = await db.collections
+      .where("labelIds")
+      .anyOf(id)
+      .toArray()
+    await Promise.all(
+      collections.map(async (collection) => {
+        await db.collections.update(collection.id, {
+          labelIds: collection.labelIds.filter((labelId) => labelId !== id),
+        })
+      }),
+    )
     return db.labels.delete(id)
   }
 
-  async updateLabel(id: number, title: string, color: string) {
-    return db.labels.update(id, { title, color })
+  async updateLabel(id: number, title: string, color?: string) {
+    return db.labels.update(id, { title, ...(color && { color }) })
   }
 
   async addCard(card: Pick<Card, "title" | "url" | "collectionId">) {

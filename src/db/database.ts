@@ -3,7 +3,7 @@ import { Card, Collection, Label, Space } from "@/type.ts"
 import { uploadAll } from "@/sync/gistSync.ts"
 import { debounce } from "lodash-es"
 
-const SYNC_INTERVAL = 1000 * 30
+const SYNC_INTERVAL = 1000 * 10
 const syncToGist = debounce(async () => {
   const { accessToken, gistId } = await chrome.storage.sync.get([
     "accessToken",
@@ -29,7 +29,6 @@ class DataBase extends Dexie {
       cards:
         "++id, title, url, customTitle, order, customDescription, collectionId, [collectionId+order], createdAt, modifiedAt",
     })
-    console.log("init")
     this.initializeDefaultData()
     this.addHooks()
   }
@@ -54,12 +53,14 @@ class DataBase extends Dexie {
     const tables = [this.spaces, this.collections, this.labels, this.cards]
     tables.forEach((table) => {
       table.hook("creating", function (_primKey, obj) {
+        console.log("creating", obj)
         const now = Date.now()
         obj.createdAt = now
         obj.modifiedAt = now
         syncToGist()
       })
       table.hook("updating", function (modifications, _primKey, _obj) {
+        console.log("updating", modifications)
         if (typeof modifications === "object") {
           // @ts-ignore
           modifications.modifiedAt = Date.now()

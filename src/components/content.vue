@@ -9,7 +9,14 @@
           'no-drag': isHoverTag,
         }"
       >
-        <div class="flex items-center justify-between pb-4 text-lg">
+        <div
+          class="flex items-center justify-between pb-4 text-lg"
+          v-show="
+            !tagsStore.selectedTagId ||
+            (tagsStore.selectedTagId &&
+              item.labelIds.includes(tagsStore.selectedTagId))
+          "
+        >
           <div class="flex items-center">
             <span class="select-none text-text-primary">{{ item.title }}</span>
             <n-icon
@@ -33,6 +40,7 @@
                 <div class="flex items-center">
                   {{ tag.title }}
                   <n-icon
+                    @click.stop="onDeleteTagFromCollection(item.id, tag.id)"
                     size="12"
                     class="hidden cursor-pointer group-hover/tag:block"
                     :component="Close"
@@ -92,6 +100,7 @@
 </template>
 
 <script setup lang="tsx">
+import { useTagsStore } from "@/store/tags.ts"
 import card from "./card.vue"
 import collectionAction from "./collection-action.vue"
 import Sortable from "sortablejs"
@@ -111,6 +120,7 @@ const spacesStore = useSpacesStore()
 const expandStore = useExpandStore()
 const dataManager = new DataManager()
 const isHoverTag = ref(false)
+const tagsStore = useTagsStore()
 
 provide("isHoverTag", {
   isHoverTag,
@@ -122,12 +132,25 @@ provide("isHoverTag", {
 const dialog = useDialog()
 const { refreshCollections } = useRefresh()
 
-const collections = computed(() => spacesStore.collections)
+const collections = computed(() => {
+  if (!tagsStore.selectedTagId) return spacesStore.collections
+  return spacesStore.collections.filter((item) =>
+    item.labelIds.includes(tagsStore.selectedTagId),
+  )
+})
 
 onMounted(async () => {
   await refreshCollections()
   createDraggable()
 })
+
+const onDeleteTagFromCollection = async (
+  collectionId: number,
+  tagId: number,
+) => {
+  await dataManager.removeTagforCollection(collectionId, tagId)
+  await refreshCollections()
+}
 
 watch(
   () => collections.value.length,
