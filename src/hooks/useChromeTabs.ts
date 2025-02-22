@@ -64,11 +64,23 @@ export function useChromeTabs() {
     return chrome.tabs.update(child.id, { active: true })
   }
 
+  async function openTab(url: string) {
+    return chrome.tabs.create({ url: url })
+  }
+
+  async function openTabs(urls: string[]) {
+    urls.forEach((url) => {
+      chrome.tabs.create({ url })
+    })
+  }
+
   return {
     tabs,
     getTabs,
     removeTab,
     moveTab,
     activeTab,
+    openTab,
+    openTabs,
   }
 }

@@ -2,7 +2,21 @@
   <div
     class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 py-2.5 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
-    <span class="select-none text-xl text-primary">{{ title }}</span>
+    <div class="flex items-center gap-4">
+      <span class="shrink-0 select-none text-xl text-primary">{{ title }}</span>
+      <n-select
+        v-model:value="innerSelectedTag"
+        tag
+        :options="tagsStore.collectionsTags"
+        placeholder="Select a tag"
+        size="tiny"
+        value-field="id"
+        label-field="title"
+        :render-label="renderTagLabel"
+        clearable
+        class="w-[200px]"
+      />
+    </div>
     <n-space>
       <n-button size="tiny" type="primary" @click="onAddCollection">
         <span>ADD COLLECTION</span>
@@ -36,6 +50,7 @@
 
 <script setup lang="tsx">
 import { useSpacesStore } from "@/store/spaces.ts"
+import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
 import { Add, Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
@@ -59,8 +74,37 @@ const renderLabel = (option: SelectOption | SelectGroupOption) => {
   return <div class="h-4 w-4" style={`background: ${option.color}`}></div>
 }
 
+const tagsStore = useTagsStore()
+
 const spacesStore = useSpacesStore()
+
 const dataManager = new DataManager()
+
+onMounted(async () => {
+  await tagsStore.fetchCollectionsTags()
+})
+
+const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
+  return (
+    <n-tag
+      size="small"
+      color={{
+        color: `${option.color}33`,
+        textColor: option.color,
+        borderColor: `${option.color}4A`,
+      }}
+    >
+      {option.title}
+    </n-tag>
+  )
+}
+
+const innerSelectedTag = computed({
+  get: () => tagsStore.selectedTagId,
+  set: (value) => {
+    tagsStore.setSelectedTagId(value)
+  },
+})
 
 const dialog = useDialog()
 function onAddCollection() {

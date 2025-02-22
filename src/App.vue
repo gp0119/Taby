@@ -47,7 +47,6 @@
 </template>
 
 <script setup lang="ts">
-import { useSpacesStore } from "@/store/spaces.ts"
 import { useThemeStore } from "@/store/theme.ts"
 import { downloadAll } from "@/sync/gistSync.ts"
 import navs from "./components/navs.vue"
@@ -55,7 +54,7 @@ import leftAside from "./components/left-aside.vue"
 import rightAside from "./components/right-aside.vue"
 import content from "./components/content.vue"
 import { GlobalThemeOverrides } from "naive-ui"
-
+import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
 
 themeStore.setThemeProperty()
@@ -82,12 +81,7 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   },
 }))
 
-const spacesStore = useSpacesStore()
-
-const refresh = async () => {
-  await spacesStore.fetchSpaces()
-  await spacesStore.fetchCollections(spacesStore.activeId)
-}
+const { refreshSpaces, refreshCollections } = useRefresh()
 
 async function autoSync() {
   const result = await chrome.storage.sync.get(["accessToken", "gistId"])
@@ -96,14 +90,16 @@ async function autoSync() {
   const lastSyncTime = localStorage.getItem("lastSyncTime")
   if (!lastSyncTime) {
     await downloadAll(accessToken, gistId)
-    await refresh()
+    await refreshSpaces()
+    await refreshCollections()
     localStorage.setItem("lastSyncTime", Date.now() + "")
     return
   } else {
     const now = Date.now()
     if (now - Number(lastSyncTime) > 1000 * 60 * 60) {
       await downloadAll(accessToken, gistId)
-      await refresh()
+      await refreshSpaces()
+      await refreshCollections()
       localStorage.setItem("lastSyncTime", Date.now() + "")
     }
   }

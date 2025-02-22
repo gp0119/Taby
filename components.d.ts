@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Card: typeof import('./src/components/card.vue')['default']
+    CollectionAction: typeof import('./src/components/collection-action.vue')['default']
     Content: typeof import('./src/components/content.vue')['default']
     LeftAside: typeof import('./src/components/left-aside.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
@@ -30,7 +31,10 @@ declare module 'vue' {
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
     NSpace: typeof import('naive-ui')['NSpace']
+    NTag: typeof import('naive-ui')['NTag']
+    NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
     RightAside: typeof import('./src/components/right-aside.vue')['default']
+    TagAction: typeof import('./src/components/tag-action.vue')['default']
   }
 }

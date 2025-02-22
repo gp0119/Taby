@@ -41,8 +41,8 @@ export interface Card extends BaseEntity {
 }
 
 export interface CollectionWithCards extends Collection {
-  isExpanded?: boolean
   cards: Card[]
+  labels: Label[]
 }
 
 export interface SyncData {

@@ -44,7 +44,6 @@ export const useSpacesStore = defineStore("spaces", () => {
   async function initialize() {
     const spaces = await fetchSpaces()
     if (spaces.length > 0 && !activeId.value) {
-      console.log("setActiveSpace")
       await setActiveSpace(spaces[0].id!)
     }
   }
