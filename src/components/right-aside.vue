@@ -122,17 +122,22 @@ function createDraggable() {
         if (to.classList.contains("drag-child-area")) {
           const toParent = to.parentElement
           const { collectionid: toClollectionId } = toParent!.dataset
+          const element = itemEl.nextElementSibling
           chrome.tabs.sendMessage(
             Number(id),
             { action: "getFavicons" },
             async function (favicon) {
-              await addCard({
+              const fromCardId = await addCard({
                 title: itemEl.dataset.title!,
                 url: itemEl.dataset.url!,
                 collectionId: Number(toClollectionId),
                 favicon,
               })
               itemEl.remove()
+              if (element) {
+                const toCardId = (element as HTMLElement)?.dataset.id
+                await dataManager.moveCard(fromCardId, Number(toCardId))
+              }
               await refreshCollections()
             },
           )
@@ -158,12 +163,13 @@ async function addCard({
   collectionId: number
   favicon?: string
 }) {
-  await dataManager.addCard({
+  const id = await dataManager.addCard({
     title,
     url,
     collectionId,
     ...(favicon && { favicon }),
   })
+  return id
 }
 
 onMounted(async () => {

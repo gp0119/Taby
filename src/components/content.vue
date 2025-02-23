@@ -69,6 +69,7 @@
             <n-gi
               v-for="child in item.cards"
               :key="child.id"
+              :data-id="child.id"
               class="drag-item group/content peer"
             >
               <card
