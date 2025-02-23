@@ -47,11 +47,27 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: path.resolve(__dirname, "index.html"),
+        content: path.resolve(__dirname, "src/content/content.ts"),
       },
       output: {
         assetFileNames: "assets/[name]-[hash].[ext]", // 静态资源
         chunkFileNames: "js/[name]-[hash].js", // 代码分割中产生的 chunk
         name: "[name].js",
+        manualChunks: {
+          "vue-vendor": ["vue"],
+          "naive-vendor": ["naive-ui"],
+          "sortable-vendor": ["sortablejs"],
+          libs: ["@vueuse/core", "lodash-es", "dexie"],
+        },
+        entryFileNames: (chunkInfo) => {
+          // 入口文件
+          const baseName = path.basename(
+            chunkInfo.facadeModuleId!,
+            path.extname(chunkInfo.facadeModuleId!),
+          )
+          const saveArr = ["content", "service-worker"]
+          return `[name]/${saveArr.includes(baseName) ? baseName : chunkInfo.name}.js`
+        },
       },
     },
   },

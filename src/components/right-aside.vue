@@ -57,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+import { debounce } from "lodash-es"
 import Sortable from "sortablejs"
 import card from "./card.vue"
 import { ChevronDownOutline } from "@vicons/ionicons5"
@@ -72,13 +73,15 @@ const { refreshCollections } = useRefresh()
 async function refreshTabs() {
   await getTabs()
 }
-chrome.tabs.onUpdated.addListener(refreshTabs)
-chrome.tabs.onMoved.addListener(refreshTabs)
-chrome.tabs.onRemoved.addListener(refreshTabs)
-chrome.tabs.onAttached.addListener(refreshTabs)
 
-onMounted(async () => {
-  await getTabs()
+const debounceRefreshTabs = debounce(refreshTabs, 100)
+chrome.tabs.onUpdated.addListener(debounceRefreshTabs)
+chrome.tabs.onMoved.addListener(debounceRefreshTabs)
+chrome.tabs.onRemoved.addListener(debounceRefreshTabs)
+chrome.tabs.onAttached.addListener(debounceRefreshTabs)
+
+const debounceCreateDraggable = debounce(createDraggable, 100)
+function createDraggable() {
   Sortable.create(document.querySelector(".right-aside-area") as HTMLElement, {
     group: {
       name: "right-aside-parent",
@@ -87,7 +90,6 @@ onMounted(async () => {
     animation: 150,
     handle: ".right-aside-item",
   })
-
   const dragChildAreas = document.querySelectorAll(".right-aside-window")
   dragChildAreas.forEach((dragChildArea) => {
     Sortable.create(dragChildArea as HTMLElement, {
@@ -120,13 +122,20 @@ onMounted(async () => {
         if (to.classList.contains("drag-child-area")) {
           const toParent = to.parentElement
           const { collectionid: toClollectionId } = toParent!.dataset
-          await dataManager.addCard({
-            title: itemEl.dataset.title!,
-            url: itemEl.dataset.url!,
-            collectionId: Number(toClollectionId!),
-          })
-          itemEl.remove()
-          await refreshCollections()
+          chrome.tabs.sendMessage(
+            Number(id),
+            { action: "getFavicons" },
+            async function (favicon) {
+              await addCard({
+                title: itemEl.dataset.title!,
+                url: itemEl.dataset.url!,
+                collectionId: Number(toClollectionId),
+                favicon,
+              })
+              itemEl.remove()
+              await refreshCollections()
+            },
+          )
         } else {
           const element =
             itemEl.nextElementSibling || itemEl.previousElementSibling
@@ -136,5 +145,45 @@ onMounted(async () => {
       },
     })
   })
+}
+
+async function addCard({
+  title,
+  url,
+  collectionId,
+  favicon,
+}: {
+  title: string
+  url: string
+  collectionId: number
+  favicon?: string
+}) {
+  await dataManager.addCard({
+    title,
+    url,
+    collectionId,
+    ...(favicon && { favicon }),
+  })
+}
+
+onMounted(async () => {
+  await getTabs()
+  debounceCreateDraggable()
 })
+
+const tabsLength = computed(() => {
+  return Object.keys(tabs.value).reduce(
+    (acc, cur) => acc + tabs.value[cur].length,
+    0,
+  )
+})
+
+watch(
+  () => tabsLength.value,
+  async (newLength, oldLenth) => {
+    if (newLength <= oldLenth) return
+    await nextTick()
+    debounceCreateDraggable()
+  },
+)
 </script>

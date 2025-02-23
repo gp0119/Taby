@@ -21,13 +21,13 @@ class DataBase extends Dexie {
   constructor() {
     super("TabyDatabase")
 
-    this.version(1).stores({
+    this.version(1.1).stores({
       spaces: "++id, title, order, createdAt, modifiedAt",
       collections:
         "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, modifiedAt",
       labels: "++id, title, color, createdAt, modifiedAt",
       cards:
-        "++id, title, url, customTitle, order, customDescription, collectionId, [collectionId+order], createdAt, modifiedAt",
+        "++id, title, url, customTitle, order, favicon, customDescription, collectionId, [collectionId+order], createdAt, modifiedAt",
     })
     this.initializeDefaultData()
     this.addHooks()
@@ -53,14 +53,14 @@ class DataBase extends Dexie {
     const tables = [this.spaces, this.collections, this.labels, this.cards]
     tables.forEach((table) => {
       table.hook("creating", function (_primKey, obj) {
-        console.log("creating", obj)
+        // console.log("creating", obj)
         const now = Date.now()
         obj.createdAt = now
         obj.modifiedAt = now
         syncToGist()
       })
       table.hook("updating", function (modifications, _primKey, _obj) {
-        console.log("updating", modifications)
+        // console.log("updating", modifications)
         if (typeof modifications === "object") {
           // @ts-ignore
           modifications.modifiedAt = Date.now()

@@ -10,6 +10,7 @@ declare module 'vue' {
     Card: typeof import('./src/components/card.vue')['default']
     CollectionAction: typeof import('./src/components/collection-action.vue')['default']
     Content: typeof import('./src/components/content.vue')['default']
+    Favicon: typeof import('./src/components/favicon.vue')['default']
     LeftAside: typeof import('./src/components/left-aside.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
     Navs: typeof import('./src/components/navs.vue')['default']

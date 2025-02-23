@@ -104,17 +104,13 @@ import { useTagsStore } from "@/store/tags.ts"
 import card from "./card.vue"
 import collectionAction from "./collection-action.vue"
 import Sortable from "sortablejs"
-import {
-  ChevronDownOutline,
-  DocumentTextOutline,
-  Close,
-} from "@vicons/ionicons5"
+import { ChevronDownOutline, Close } from "@vicons/ionicons5"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useExpandStore } from "@/store/expand.ts"
-import { faviconURL } from "@/utils"
 import DataManager from "@/db"
 import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh"
+import { debounce } from "lodash-es"
 
 const spacesStore = useSpacesStore()
 const expandStore = useExpandStore()
@@ -135,13 +131,13 @@ const { refreshCollections } = useRefresh()
 const collections = computed(() => {
   if (!tagsStore.selectedTagId) return spacesStore.collections
   return spacesStore.collections.filter((item) =>
-    item.labelIds.includes(tagsStore.selectedTagId),
+    item.labelIds.includes(tagsStore.selectedTagId!),
   )
 })
 
 onMounted(async () => {
   await refreshCollections()
-  createDraggable()
+  debounceCreateDraggable()
 })
 
 const onDeleteTagFromCollection = async (
@@ -156,9 +152,11 @@ watch(
   () => collections.value.length,
   async () => {
     await refreshCollections()
-    createDraggable()
+    debounceCreateDraggable()
   },
 )
+
+const debounceCreateDraggable = debounce(createDraggable, 100)
 
 function createDraggable() {
   Sortable.create(document.querySelector(".drag-parent-area") as HTMLElement, {
@@ -223,51 +221,67 @@ function createDraggable() {
   })
 }
 
-function onHandleClick(child: any) {
-  chrome.tabs.create({ url: child.url })
+async function onHandleClick(child: any) {
+  const tab = await chrome.tabs.create({ url: child.url })
+  if (child.favicon) return
+  const tabId = tab.id!
+  chrome.tabs.onUpdated.addListener(
+    function listener(updatedTabId, changeInfo, _tab) {
+      if (updatedTabId === tabId && changeInfo.status == "complete") {
+        chrome.tabs.sendMessage(
+          tabId,
+          { action: "getFavicons" },
+          async function (favicon) {
+            console.log("favicon: ", favicon)
+            await dataManager.updateCardFavicon(child.id, favicon)
+            await refreshCollections()
+          },
+        )
+        chrome.tabs.onUpdated.removeListener(listener)
+      }
+      return true
+    },
+  )
 }
 
 function onEdit(child: iCard) {
   const formModel = ref({
     title: child.customTitle || child.title,
     description: child.customDescription || child.title,
+    favicon: child.favicon,
   })
   dialog.create({
-    title: "",
+    title: () => {
+      return <span class="ml-2.5">Edit Card</span>
+    },
     titleClass: "!text-text-primary",
     class: "bg-body-color",
     negativeText: "Cancel",
     positiveText: "Save",
     icon: () => (
-      <n-avatar
-        src={faviconURL(child.url)}
-        size={24}
-        v-slots={{
-          fallback: () => (
-            <n-icon
-              class="bg-white"
-              color="#999"
-              size="24"
-              component={DocumentTextOutline}
-            />
-          ),
-        }}
-      ></n-avatar>
+      <favicon class="block h-full w-full" type="content" child={child} />
     ),
     content: () => (
       <n-form model={formModel.value}>
-        <n-form-item label="Title">
+        <n-form-item label="Title: ">
           <n-input v-model:value={formModel.value.title} />
         </n-form-item>
-        <n-form-item label="Description">
+        <n-form-item label="Description: ">
           <n-input v-model:value={formModel.value.description} />
+        </n-form-item>
+        <n-form-item label="URL: ">
+          <n-input v-model:value={child.url} disabled />
+        </n-form-item>
+        <n-form-item label="Favicon: ">
+          <n-input v-model:value={formModel.value.favicon} />
         </n-form-item>
       </n-form>
     ),
     onPositiveClick: async () => {
-      await dataManager.updateCardTitleAndDescription(child.id, {
+      await dataManager.updateCard(child.id, {
         title: formModel.value.title,
         description: formModel.value.description,
+        favicon: formModel.value.favicon,
       })
       await refreshCollections()
     },

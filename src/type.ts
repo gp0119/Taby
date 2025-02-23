@@ -38,6 +38,7 @@ export interface Card extends BaseEntity {
   collectionId: number
   order: number
   windowId?: number
+  favicon?: string
 }
 
 export interface CollectionWithCards extends Collection {

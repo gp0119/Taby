@@ -179,7 +179,9 @@ class dataManager {
     return db.labels.update(id, { title, ...(color && { color }) })
   }
 
-  async addCard(card: Pick<Card, "title" | "url" | "collectionId">) {
+  async addCard(
+    card: Pick<Card, "title" | "url" | "collectionId" | "favicon">,
+  ) {
     const lastCard = await db.cards
       .where(["collectionId+order"])
       .between(
@@ -199,14 +201,22 @@ class dataManager {
     return db.cards.delete(id)
   }
 
-  updateCardTitleAndDescription(
+  updateCard(
     id: number,
-    { title, description }: { title?: string; description?: string },
+    {
+      title,
+      description,
+      favicon,
+    }: { title?: string; description?: string; favicon?: string },
   ) {
     return db.cards.update(id, {
       customTitle: title,
       customDescription: description,
+      favicon,
     })
+  }
+  async updateCardFavicon(id: number, favicon: string) {
+    return db.cards.update(id, { favicon })
   }
 
   async moveCard(cardId: number, targetId: number) {
