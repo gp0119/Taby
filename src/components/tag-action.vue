@@ -1,9 +1,9 @@
 <template>
   <n-popover
     trigger="hover"
+    :to="false"
     placement="bottom-end"
     :show-arrow="false"
-    :to="false"
     class="min-w-[150px]"
   >
     <template #trigger>
@@ -64,17 +64,7 @@
         />
       </div>
       <div class="mt-2 flex items-center gap-1">
-        <n-tag
-          class="h-[20px] flex-1 cursor-pointer select-none"
-          @click="pickColor"
-          size="small"
-          :color="{
-            color: `${tabColors[colorIndex]}33`,
-            textColor: tabColors[colorIndex],
-            borderColor: `${tabColors[colorIndex]}4A`,
-          }"
-          >change color</n-tag
-        >
+        <color-select v-model:value="selectedColor" />
         <n-button size="tiny" @click="addTag">
           <template #icon>
             <n-icon :component="Checkmark"></n-icon>
@@ -86,6 +76,8 @@
 </template>
 
 <script setup lang="tsx">
+import { COLOR_LIST } from "@/utils/constants.ts"
+import ColorSelect from "@components/color-select.vue"
 import { TagGroup, Edit, Checkmark, Delete } from "@vicons/carbon"
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
@@ -99,21 +91,7 @@ const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 
 const tagsStore = useTagsStore()
-const colorIndex = ref(0)
-const tabColors = [
-  "#219ebc",
-  "#606c38",
-  "#e63946",
-  "#f72585",
-  "#457b9d",
-  "#3a0ca3",
-  "#4361ee",
-  "#264653",
-  "#2a9d8f",
-  "#7209b7",
-  "#f4a261",
-  "#e76f51",
-]
+const selectedColor = ref(COLOR_LIST[0])
 const newTag = ref({
   title: "",
 })
@@ -130,17 +108,13 @@ const addTag = () => {
   if (newTag.value.title === "") return
   tagsStore.addTag({
     title: newTag.value.title,
-    color: tabColors[colorIndex.value],
+    color: selectedColor.value,
   })
   newTag.value.title = ""
-  colorIndex.value = 0
 }
 const addTagforCollection = async (id: number) => {
   await dataManager.addTagforCollection(props.item.id, id)
   await refreshCollections()
-}
-const pickColor = () => {
-  colorIndex.value = (colorIndex.value + 1) % tabColors.length
 }
 
 const dialog = useDialog()
@@ -160,8 +134,8 @@ const onDeleteTag = async (id: number) => {
     },
   })
 }
-const onEditTag = (tag: { id: number; title: string }) => {
-  const formModel = ref({ title: tag.title })
+const onEditTag = (tag: { id: number; title: string; color: string }) => {
+  const formModel = ref({ title: tag.title, color: tag.color })
   dialog.create({
     title: "Edit Tag",
     titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
@@ -171,29 +145,37 @@ const onEditTag = (tag: { id: number; title: string }) => {
     content: () => (
       <div>
         <n-form model={formModel.value}>
-          <n-form-item label="Title">
-            <n-input v-model:value={formModel.value.title} />
+          <n-form-item label="Title" class="!mb-1">
+            <n-input v-model:value={formModel.value.title} size="small" />
           </n-form-item>
         </n-form>
-        <n-button
-          size="small"
-          secondary
-          type="error"
-          onClick={() => onDeleteTag(tag.id)}
-          v-slots={{
-            icon: () => (
-              <n-icon>
-                <Delete />
-              </n-icon>
-            ),
-          }}
-        >
-          <span>DELETE</span>
-        </n-button>
+        <div class="flex items-center gap-1">
+          <color-select v-model:value={formModel.value.color} class="flex-1" />
+          <n-button
+            size="tiny"
+            secondary
+            class="flex-1"
+            type="error"
+            onClick={() => onDeleteTag(tag.id)}
+            v-slots={{
+              icon: () => (
+                <n-icon>
+                  <Delete />
+                </n-icon>
+              ),
+            }}
+          >
+            <span>DELETE</span>
+          </n-button>
+        </div>
       </div>
     ),
     onPositiveClick: async () => {
-      await dataManager.updateLabel(tag.id, formModel.value.title)
+      await dataManager.updateLabel(
+        tag.id,
+        formModel.value.title,
+        formModel.value.color,
+      )
       await tagsStore.fetchTags()
       await refreshCollections()
     },

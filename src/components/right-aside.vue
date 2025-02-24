@@ -72,9 +72,11 @@ const { refreshCollections } = useRefresh()
 
 async function refreshTabs() {
   await getTabs()
+  console.log("tabs: ", tabs)
 }
 
 const debounceRefreshTabs = debounce(refreshTabs, 100)
+
 chrome.tabs.onUpdated.addListener(debounceRefreshTabs)
 chrome.tabs.onMoved.addListener(debounceRefreshTabs)
 chrome.tabs.onRemoved.addListener(debounceRefreshTabs)

@@ -58,7 +58,6 @@
 </template>
 
 <script setup lang="tsx">
-import { useTagsStore } from "@/store/tags.ts"
 import {
   Add,
   SyncSharp,
