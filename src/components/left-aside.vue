@@ -26,7 +26,11 @@
         :key="item.title"
         @click="onHandleSpaceClick(item)"
       >
-        <n-icon size="18" :component="StorefrontOutline" />
+        <n-icon size="18">
+          <component
+            :is="item.icon ? ICON_LIST[item.icon] : StorefrontOutline"
+          />
+        </n-icon>
         <span class="select-none px-1">{{ item.title }}</span>
       </div>
     </div>
@@ -58,6 +62,7 @@
 </template>
 
 <script setup lang="tsx">
+import { ICON_LIST } from "@/utils/constants.ts"
 import {
   Add,
   SyncSharp,
@@ -74,6 +79,7 @@ import { FormInst } from "naive-ui"
 import { uploadAll, downloadAll } from "@/sync/gistSync"
 import Sortable from "sortablejs"
 import { useRefresh } from "@/hooks/useRresh"
+import IconSelect from "./icon-select.vue"
 
 const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
@@ -118,7 +124,7 @@ const dialog = useDialog()
 const message = useMessage()
 
 function onAddSpace() {
-  const formModel = ref({ title: "" })
+  const formModel = ref({ title: "", icon: "" })
   dialog.create({
     title: () => {
       return <span>Add Space</span>
@@ -132,12 +138,16 @@ function onAddSpace() {
         <n-form-item label="Title">
           <n-input v-model:value={formModel.value.title} />
         </n-form-item>
+        <n-form-item label="Icon">
+          <IconSelect v-model:value={formModel.value.icon} />
+        </n-form-item>
       </n-form>
     ),
     onPositiveClick: async () => {
       if (!formModel.value.title) return
       await dataManager.addSpace({
         title: formModel.value.title,
+        icon: formModel.value.icon,
       })
       await spacesStore.initialize()
     },

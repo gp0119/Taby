@@ -16,6 +16,7 @@ export interface iCard extends BaseEntity {
 export interface Space extends BaseEntity {
   title: string
   order: number
+  icon?: string
 }
 
 export interface Collection extends BaseEntity {

@@ -40,8 +40,8 @@ class dataManager {
     )
   }
 
-  async updateSpaceTitle(id: number, title: string) {
-    return db.spaces.update(id, { title })
+  async updateSpaceTitle(id: number, title: string, icon?: string) {
+    return db.spaces.update(id, { title, ...(icon && { icon }) })
   }
 
   async moveSpace(id: number, targetId: number) {

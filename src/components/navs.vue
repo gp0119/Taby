@@ -56,6 +56,7 @@ import { Add, Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
 import DataManager from "@/db"
 import { SelectOption, SelectGroupOption } from "naive-ui"
+import IconSelect from "./icon-select.vue"
 
 const { themeColor, theme, setTheme } = useThemeStore()
 const currentTheme = ref(theme)
@@ -141,8 +142,13 @@ const title = computed(
     spacesStore.spaces.find((item) => item.id === spacesStore.activeId)?.title,
 )
 
+const icon = computed(
+  () =>
+    spacesStore.spaces.find((item) => item.id === spacesStore.activeId)?.icon,
+)
+
 function onEditSpace() {
-  const formModel = ref({ title: title.value })
+  const formModel = ref({ title: title.value, icon: icon.value })
   dialog.create({
     title: () => {
       return <span>Edit Space</span>
@@ -158,21 +164,25 @@ function onEditSpace() {
             <n-input v-model:value={formModel.value.title} />
           </n-form-item>
         </n-form>
-        <n-button
-          size="small"
-          secondary
-          type="error"
-          onClick={() => onDeleteSpace()}
-          v-slots={{
-            icon: () => (
-              <n-icon>
-                <Delete />
-              </n-icon>
-            ),
-          }}
-        >
-          <span>DELETE SPACE</span>
-        </n-button>
+        <div class="flex items-center gap-1">
+          <IconSelect v-model:value={formModel.value.icon} class="flex-1" />
+          <n-button
+            size="tiny"
+            class="flex-1"
+            secondary
+            type="error"
+            onClick={() => onDeleteSpace()}
+            v-slots={{
+              icon: () => (
+                <n-icon>
+                  <Delete />
+                </n-icon>
+              ),
+            }}
+          >
+            <span>DELETE SPACE</span>
+          </n-button>
+        </div>
       </div>
     ),
     onPositiveClick: async () => {
@@ -180,6 +190,7 @@ function onEditSpace() {
       await dataManager.updateSpaceTitle(
         spacesStore.activeId,
         formModel.value.title,
+        formModel.value.icon,
       )
       await spacesStore.fetchSpaces()
     },

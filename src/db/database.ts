@@ -22,9 +22,9 @@ class DataBase extends Dexie {
     super("TabyDatabase")
 
     this.version(1.1).stores({
-      spaces: "++id, title, order, createdAt, modifiedAt",
+      spaces: "++id, title, order, createdAt, modifiedAt, icon",
       collections:
-        "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, modifiedAt",
+        "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, modifiedAt, icon",
       labels: "++id, title, color, createdAt, modifiedAt",
       cards:
         "++id, title, url, customTitle, order, favicon, customDescription, collectionId, [collectionId+order], createdAt, modifiedAt",

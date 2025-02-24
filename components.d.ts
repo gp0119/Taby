@@ -12,6 +12,8 @@ declare module 'vue' {
     ColorSelect: typeof import('./src/components/color-select.vue')['default']
     Content: typeof import('./src/components/content.vue')['default']
     Favicon: typeof import('./src/components/favicon.vue')['default']
+    GetIcon: typeof import('./src/components/get-icon.vue')['default']
+    IconSelect: typeof import('./src/components/icon-select.vue')['default']
     LeftAside: typeof import('./src/components/left-aside.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
     Navs: typeof import('./src/components/navs.vue')['default']
