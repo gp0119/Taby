@@ -1,4 +1,3 @@
-console.log("content script loaded")
 const getFavicons = async () => {
   const iconLinks = document.querySelectorAll('link[rel*="icon"]')
   const url = window.location.href
@@ -9,7 +8,6 @@ const getFavicons = async () => {
     const hrefList = Array.from(iconLinks).map((link) =>
       link.getAttribute("href"),
     )
-    console.log("hrefList: ", hrefList)
     let firstUrl
     const icoList = hrefList.filter((item) => item?.includes(".ico"))
     if (icoList.length) {
