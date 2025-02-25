@@ -22,13 +22,6 @@
       @click="onMoveCollection(item)"
     />
     <TagAction :item="item" />
-    <n-icon
-      size="20"
-      class="mx-1.5 cursor-pointer text-primary"
-      title="Delete Collection"
-      :component="Delete"
-      @click="onDeleteCollection(item)"
-    />
   </div>
 </template>
 
@@ -61,8 +54,22 @@ function onEditCollection(item: CollectionWithCards) {
     positiveText: "Save",
     content: () => (
       <n-form model={formModel.value}>
-        <n-form-item label="Title">
-          <n-input v-model:value={formModel.value.title} />
+        <n-form-item label="Title" class="!text-text-primary">
+          <n-input-group>
+            <n-input v-model:value={formModel.value.title} />
+            <n-button
+              secondary
+              type="error"
+              onClick={() => onDeleteCollection(item)}
+              v-slots={{
+                icon: () => (
+                  <n-icon>
+                    <Delete />
+                  </n-icon>
+                ),
+              }}
+            ></n-button>
+          </n-input-group>
         </n-form-item>
       </n-form>
     ),

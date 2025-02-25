@@ -1,7 +1,11 @@
 <template>
   <n-popover trigger="hover" content-class="!p-0">
     <template #trigger>
-      <n-button secondary size="tiny"> Choose Icon </n-button>
+      <n-button>
+        <template #icon>
+          <n-icon size="18" :component="ICON_LIST[selectIcon]" />
+        </template>
+      </n-button>
     </template>
     <n-scrollbar class="max-h-[100px] w-[160px]">
       <n-space wrap size="small" align="center">

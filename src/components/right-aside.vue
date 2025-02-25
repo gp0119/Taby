@@ -57,13 +57,13 @@
 </template>
 
 <script setup lang="ts">
+import DataManager from "@/db"
+import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
+import { useRefresh } from "@/hooks/useRresh"
+import { ChevronDownOutline } from "@vicons/ionicons5"
 import { debounce } from "lodash-es"
 import Sortable from "sortablejs"
 import card from "./card.vue"
-import { ChevronDownOutline } from "@vicons/ionicons5"
-import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
-import DataManager from "@/db"
-import { useRefresh } from "@/hooks/useRresh"
 
 const dataManager = new DataManager()
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
@@ -72,7 +72,6 @@ const { refreshCollections } = useRefresh()
 
 async function refreshTabs() {
   await getTabs()
-  console.log("tabs: ", tabs)
 }
 
 const debounceRefreshTabs = debounce(refreshTabs, 100)
@@ -165,13 +164,12 @@ async function addCard({
   collectionId: number
   favicon?: string
 }) {
-  const id = await dataManager.addCard({
+  return dataManager.addCard({
     title,
     url,
     collectionId,
     ...(favicon && { favicon }),
   })
-  return id
 }
 
 onMounted(async () => {

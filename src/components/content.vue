@@ -290,7 +290,19 @@ function onEdit(child: iCard) {
 }
 
 async function onDeleteCard(card: iCard) {
-  await dataManager.removeCard(card.id)
-  await refreshCollections()
+  dialog.create({
+    title: () => {
+      return <span class="ml-2.5">Delete Card</span>
+    },
+    titleClass: "!text-text-primary",
+    class: "bg-body-color",
+    negativeText: "Cancel",
+    positiveText: "Delete",
+    content: () => <div>Are you sure you want to delete this card?</div>,
+    onPositiveClick: async () => {
+      await dataManager.removeCard(card.id)
+      await refreshCollections()
+    },
+  })
 }
 </script>

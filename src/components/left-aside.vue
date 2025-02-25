@@ -124,7 +124,7 @@ const dialog = useDialog()
 const message = useMessage()
 
 function onAddSpace() {
-  const formModel = ref({ title: "", icon: "" })
+  const formModel = ref({ title: "", icon: "StorefrontOutline" })
   dialog.create({
     title: () => {
       return <span>Add Space</span>
@@ -136,10 +136,10 @@ function onAddSpace() {
     content: () => (
       <n-form model={formModel.value}>
         <n-form-item label="Title">
-          <n-input v-model:value={formModel.value.title} />
-        </n-form-item>
-        <n-form-item label="Icon">
-          <IconSelect v-model:value={formModel.value.icon} />
+          <n-input-group>
+            <IconSelect v-model:value={formModel.value.icon} />
+            <n-input v-model:value={formModel.value.title} />
+          </n-input-group>
         </n-form-item>
       </n-form>
     ),

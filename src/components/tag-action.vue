@@ -16,7 +16,7 @@
     </template>
     <template #header>
       <n-text depth="1">
-        <span class="text-text-primary">Tags</span>
+        <span class="font-bold text-text-primary">Tags</span>
       </n-text>
     </template>
     <n-scrollbar
@@ -54,23 +54,21 @@
       </div>
     </n-scrollbar>
     <template #footer>
-      <div>
+      <n-input-group>
+        <color-select size="tiny" v-model:value="selectedColor" />
         <n-input
-          class="w-full"
+          class="!w-[100px]"
           v-model:value="newTag.title"
           placeholder="Add tag"
           size="tiny"
           maxlength="10"
         />
-      </div>
-      <div class="mt-2 flex items-center gap-1">
-        <color-select v-model:value="selectedColor" />
         <n-button size="tiny" @click="addTag">
           <template #icon>
             <n-icon :component="Checkmark"></n-icon>
           </template>
         </n-button>
-      </div>
+      </n-input-group>
     </template>
   </n-popover>
 </template>
@@ -146,28 +144,24 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
       <div>
         <n-form model={formModel.value}>
           <n-form-item label="Title" class="!mb-1">
-            <n-input v-model:value={formModel.value.title} size="small" />
+            <color-select v-model:value={formModel.value.color} />
+            <n-input-group>
+              <n-input v-model:value={formModel.value.title} />
+              <n-button
+                secondary
+                type="error"
+                onClick={() => onDeleteTag(tag.id)}
+                v-slots={{
+                  icon: () => (
+                    <n-icon>
+                      <Delete />
+                    </n-icon>
+                  ),
+                }}
+              />
+            </n-input-group>
           </n-form-item>
         </n-form>
-        <div class="flex items-center gap-1">
-          <color-select v-model:value={formModel.value.color} class="flex-1" />
-          <n-button
-            size="tiny"
-            secondary
-            class="flex-1"
-            type="error"
-            onClick={() => onDeleteTag(tag.id)}
-            v-slots={{
-              icon: () => (
-                <n-icon>
-                  <Delete />
-                </n-icon>
-              ),
-            }}
-          >
-            <span>DELETE</span>
-          </n-button>
-        </div>
       </div>
     ),
     onPositiveClick: async () => {

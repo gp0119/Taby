@@ -36,7 +36,6 @@ export function useChromeTabs() {
             },
           ]
         }
-        console.log("acc: ", acc)
         return acc
       }, {})
   }

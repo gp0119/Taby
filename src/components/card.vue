@@ -83,6 +83,7 @@ function onHandleEdit() {
 
 .card-title {
   @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
+  @apply group-[.right-aside-item]/aside:font-light;
 }
 .delete-button {
   @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;

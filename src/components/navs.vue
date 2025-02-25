@@ -160,29 +160,25 @@ function onEditSpace() {
     content: () => (
       <div>
         <n-form model={formModel.value}>
-          <n-form-item label="Space Title: " class="!text-text-primary">
-            <n-input v-model:value={formModel.value.title} />
+          <n-form-item class="!text-text-primary">
+            <n-input-group>
+              <IconSelect v-model:value={formModel.value.icon} />
+              <n-input v-model:value={formModel.value.title} />
+              <n-button
+                secondary
+                type="error"
+                onClick={() => onDeleteSpace()}
+                v-slots={{
+                  icon: () => (
+                    <n-icon>
+                      <Delete />
+                    </n-icon>
+                  ),
+                }}
+              ></n-button>
+            </n-input-group>
           </n-form-item>
         </n-form>
-        <div class="flex items-center gap-1">
-          <IconSelect v-model:value={formModel.value.icon} class="flex-1" />
-          <n-button
-            size="tiny"
-            class="flex-1"
-            secondary
-            type="error"
-            onClick={() => onDeleteSpace()}
-            v-slots={{
-              icon: () => (
-                <n-icon>
-                  <Delete />
-                </n-icon>
-              ),
-            }}
-          >
-            <span>DELETE SPACE</span>
-          </n-button>
-        </div>
       </div>
     ),
     onPositiveClick: async () => {

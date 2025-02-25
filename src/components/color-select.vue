@@ -1,18 +1,18 @@
 <template>
   <n-popover trigger="hover" content-class="!p-0">
     <template #trigger>
-      <n-tag
-        class="flex-center h-[20px] flex-1 cursor-pointer select-none"
-        size="small"
-        :color="{
-          color: `${selectedColor}33`,
-          textColor: selectedColor,
-          borderColor: `${selectedColor}4A`,
-        }"
-        >Change Color</n-tag
+      <n-button
+        :size="size"
+        :color="`${selectedColor}33`"
+        :text-color="selectedColor"
+        :style="`border-color: ${selectedColor}4A; border-width: 1px; border-style: solid;`"
       >
+        <template #icon>
+          <n-icon size="18" :component="ColorPalette" />
+        </template>
+      </n-button>
     </template>
-    <n-scrollbar class="max-h-[100px] w-[160px]">
+    <n-scrollbar class="max-h-[100px] w-[160px] bg-body-color">
       <n-space wrap size="small" align="center">
         <div
           v-for="color in COLOR_LIST"
@@ -34,8 +34,14 @@
 
 <script setup lang="ts">
 import { COLOR_LIST } from "@/utils/constants.ts"
-import { Checkmark } from "@vicons/carbon"
+import { Checkmark, ColorPalette } from "@vicons/carbon"
 
+defineProps({
+  size: {
+    type: String,
+    default: "medium",
+  },
+})
 const selectedColor = defineModel("value", {
   type: String,
   default: COLOR_LIST[0],
