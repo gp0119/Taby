@@ -1,5 +1,11 @@
 <template>
-  <n-avatar :src="innerFavicon" class="card-avatar card-size">
+  <n-avatar
+    :img-props="{
+      crossorigin: 'anonymous',
+    }"
+    :src="innerFavicon"
+    class="card-avatar card-size"
+  >
     <template #fallback>
       <div class="card-size flex-center bg-hover-color">
         <span class="text-text-primary">{{ firstLetter }}</span>
