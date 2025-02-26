@@ -16,7 +16,6 @@ export const useSearchModal = () => {
   const searchCardsFromDb = debounce(async () => {
     currentIndex.value = 0
     cards.value = await dataManager.getCardsByTitleOrUrl(searchValue.value)
-    console.log("cards.value: ", cards.value)
   }, 300)
 
   const stopEnter = useEventListener(document, "keydown", (e) => {

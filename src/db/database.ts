@@ -42,6 +42,7 @@ class DataBase extends Dexie {
           order: 1000,
           createdAt: Date.now(),
           modifiedAt: Date.now(),
+          icon: "StorefrontOutline",
         })
       } catch (error) {
         console.error("初始化默认数据失败:", error)

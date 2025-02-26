@@ -230,7 +230,6 @@ const cleanup = useEventListener(window, "keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "f") {
     e.preventDefault()
     e.stopPropagation()
-    console.log("openSearchModal")
     openModal()
   }
 })
