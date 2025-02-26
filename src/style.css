@@ -3,15 +3,20 @@
 @tailwind utilities;
 
 @layer utilities {
-    .flex-center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 @layer components {
-    .sortable-ghost-dashed-border {
-        @apply border border-dashed border-primary rounded;
-    }
+  .sortable-ghost-dashed-border {
+    @apply rounded border border-dashed border-primary;
+  }
 }

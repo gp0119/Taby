@@ -159,6 +159,26 @@ class dataManager {
     return db.labels.add({ title, color })
   }
 
+  async getCardsByTitleOrUrl(titleOrUrl: string) {
+    if (!titleOrUrl) return []
+    const searchText = titleOrUrl.toLowerCase()
+
+    const searchInText = (text?: string) => {
+      if (!text) return false
+      return text?.toLowerCase().includes(searchText) ?? false
+    }
+
+    return db.cards
+      .filter(
+        (card) =>
+          searchInText(card.title) ||
+          searchInText(card.url) ||
+          searchInText(card.customTitle) ||
+          searchInText(card.customDescription),
+      )
+      .toArray()
+  }
+
   async removeLabel(id: number) {
     if (!id) return
     const collections = await db.collections

@@ -7,7 +7,7 @@
     class="card-avatar card-size"
   >
     <template #fallback>
-      <div class="card-size flex-center bg-hover-color">
+      <div class="card-size flex-center h-full bg-hover-color">
         <span class="text-text-primary">{{ firstLetter }}</span>
       </div>
     </template>
@@ -36,7 +36,7 @@ const innerFavicon = computed(() => {
 
 <style scoped>
 .card-avatar {
-  @apply mr-2.5 flex-shrink-0 bg-white sepia-base;
+  @apply mr-2.5 inline-block flex-shrink-0 bg-white sepia-base;
 }
 .card-size {
   @apply group-[.drag-item]/content:h-[24px] group-[.drag-item]/content:w-[24px];

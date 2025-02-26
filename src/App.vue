@@ -1,8 +1,8 @@
 <template>
-  <Suspense>
-    <n-config-provider :theme-overrides="themeOverrides" class="h-full">
-      <n-dialog-provider>
-        <n-message-provider>
+  <n-config-provider :theme-overrides="themeOverrides" class="h-full">
+    <n-dialog-provider>
+      <n-message-provider>
+        <n-modal-provider>
           <n-layout has-sider class="h-full" content-class="bg-body-color">
             <n-layout-sider
               :width="200"
@@ -37,13 +37,10 @@
               </n-layout-sider>
             </n-layout>
           </n-layout>
-        </n-message-provider>
-      </n-dialog-provider>
-    </n-config-provider>
-    <template #fallback>
-      <div class="bg-primary">Loading...</div>
-    </template>
-  </Suspense>
+        </n-modal-provider>
+      </n-message-provider>
+    </n-dialog-provider>
+  </n-config-provider>
 </template>
 
 <script setup lang="ts">
@@ -56,7 +53,6 @@ import content from "./components/content.vue"
 import { GlobalThemeOverrides } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
-
 themeStore.setThemeProperty()
 
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
@@ -82,7 +78,6 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
 }))
 
 const { refreshSpaces, refreshCollections } = useRefresh()
-
 async function autoSync() {
   const result = await chrome.storage.sync.get(["accessToken", "gistId"])
   const { accessToken, gistId } = result
@@ -104,5 +99,6 @@ async function autoSync() {
     }
   }
 }
+
 autoSync()
 </script>

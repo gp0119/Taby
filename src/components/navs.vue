@@ -4,12 +4,18 @@
   >
     <div class="flex items-center gap-4">
       <span class="shrink-0 select-none text-xl text-primary">{{ title }}</span>
+      <div
+        class="h-[30px] w-[220px] cursor-pointer select-none whitespace-nowrap rounded border bg-card-color px-2 text-xs leading-[30px] text-[#C2C2C2]"
+        @click="openModal"
+      >
+        Press Ctrl/Command + F to search
+      </div>
       <n-select
+        size="small"
         v-model:value="innerSelectedTag"
         tag
         :options="tagsStore.collectionsTags"
         placeholder="Select a tag"
-        size="tiny"
         value-field="id"
         label-field="title"
         :render-label="renderTagLabel"
@@ -17,7 +23,7 @@
         class="w-[200px]"
       />
     </div>
-    <n-space>
+    <n-space class="flex-shrink-0">
       <n-button size="tiny" type="primary" @click="onAddCollection">
         <span>ADD COLLECTION</span>
         <template #icon>
@@ -57,10 +63,13 @@ import { Delete } from "@vicons/carbon"
 import DataManager from "@/db"
 import { SelectOption, SelectGroupOption } from "naive-ui"
 import IconSelect from "./icon-select.vue"
-
+import { useEventListener } from "@vueuse/core"
+import { useSearchModal } from "@/hooks/useSearchModal"
 const { themeColor, theme, setTheme } = useThemeStore()
+
 const currentTheme = ref(theme)
 
+const { openModal } = useSearchModal()
 const themeOptions = Object.keys(themeColor).map((key) => ({
   label: key,
   value: key,
@@ -216,4 +225,17 @@ function onDeleteSpace() {
     },
   })
 }
+
+const cleanup = useEventListener(window, "keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log("openSearchModal")
+    openModal()
+  }
+})
+
+onUnmounted(() => {
+  cleanup()
+})
 </script>
