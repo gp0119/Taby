@@ -59,11 +59,11 @@
 <script setup lang="ts">
 import DataManager from "@/db"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
-import { useRefresh } from "@/hooks/useRresh"
+import { useRefresh } from "@/hooks/useRresh.ts"
 import { ChevronDownOutline } from "@vicons/ionicons5"
 import { debounce } from "lodash-es"
 import Sortable from "sortablejs"
-import card from "./card.vue"
+import card from "@components/card.vue"
 
 const dataManager = new DataManager()
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()

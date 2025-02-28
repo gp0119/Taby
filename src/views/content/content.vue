@@ -102,15 +102,15 @@
 
 <script setup lang="tsx">
 import { useTagsStore } from "@/store/tags.ts"
-import card from "./card.vue"
-import collectionAction from "./collection-action.vue"
+import card from "@components/card.vue"
+import collectionAction from "./components/collection-action.vue"
 import Sortable from "sortablejs"
 import { ChevronDownOutline, Close } from "@vicons/ionicons5"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useExpandStore } from "@/store/expand.ts"
 import DataManager from "@/db"
 import { Card as iCard } from "@/type.ts"
-import { useRefresh } from "@/hooks/useRresh"
+import { useRefresh } from "@/hooks/useRresh.ts"
 import { debounce } from "lodash-es"
 
 const spacesStore = useSpacesStore()

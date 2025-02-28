@@ -26,14 +26,14 @@
 </template>
 
 <script setup lang="tsx">
-import { CollectionWithCards } from "@/type"
+import { CollectionWithCards } from "@/type.ts"
 import { FolderMoveTo, Delete, Edit, Launch } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import DataManager from "@/db"
-import { useSpacesStore } from "@/store/spaces"
-import { useRefresh } from "@/hooks/useRresh"
-import { useChromeTabs } from "@/hooks/useChromeTabs"
-import TagAction from "@/components/tag-action.vue"
+import { useSpacesStore } from "@/store/spaces.ts"
+import { useRefresh } from "@/hooks/useRresh.ts"
+import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
+import TagAction from "@components/tag-action.vue"
 const dialog = useDialog()
 defineProps<{
   item: CollectionWithCards

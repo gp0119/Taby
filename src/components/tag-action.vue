@@ -19,11 +19,7 @@
         <span class="font-bold text-text-primary">Tags</span>
       </n-text>
     </template>
-    <n-scrollbar
-      class="max-h-[300px]"
-      @mouseenter="setIsHoverTag(true)"
-      @mouseleave="setIsHoverTag(false)"
-    >
+    <n-scrollbar class="max-h-[300px]">
       <n-space vertical v-if="tagsStore.tags.length > 0">
         <div
           class="group/tag flex items-center justify-between"

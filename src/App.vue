@@ -46,10 +46,10 @@
 <script setup lang="ts">
 import { useThemeStore } from "@/store/theme.ts"
 import { downloadAll } from "@/sync/gistSync.ts"
-import navs from "./components/navs.vue"
-import leftAside from "./components/left-aside.vue"
-import rightAside from "./components/right-aside.vue"
-import content from "./components/content.vue"
+import navs from "@/views/navs/navs.vue"
+import leftAside from "@/views/left-aside/left-aside.vue"
+import rightAside from "@/views/right-aside/right-aside.vue"
+import content from "@/views/content/index.vue"
 import { GlobalThemeOverrides } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()

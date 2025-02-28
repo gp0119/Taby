@@ -71,15 +71,15 @@ import {
 } from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
-import logo from "../assets/72.png"
+import logo from "@/assets/72.png"
 import DanaManager from "@/db"
-import { CollectionWithCards, Space } from "@/type"
+import { CollectionWithCards, Space } from "@/type.ts"
 import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
 import { FormInst } from "naive-ui"
-import { uploadAll, downloadAll } from "@/sync/gistSync"
+import { uploadAll, downloadAll } from "@/sync/gistSync.ts"
 import Sortable from "sortablejs"
-import { useRefresh } from "@/hooks/useRresh"
-import IconSelect from "./icon-select.vue"
+import { useRefresh } from "@/hooks/useRresh.ts"
+import IconSelect from "@components/icon-select.vue"
 
 const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()

@@ -62,9 +62,9 @@ import { Add, Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
 import DataManager from "@/db"
 import { SelectOption, SelectGroupOption } from "naive-ui"
-import IconSelect from "./icon-select.vue"
+import IconSelect from "@components/icon-select.vue"
 import { useEventListener } from "@vueuse/core"
-import { useSearchModal } from "@/hooks/useSearchModal"
+import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 const { themeColor, theme, setTheme } = useThemeStore()
 
 const currentTheme = ref(theme)

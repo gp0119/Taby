@@ -17,6 +17,6 @@
 
 @layer components {
   .sortable-ghost-dashed-border {
-    @apply rounded border border-dashed border-primary;
+    @apply !border-primary !border !border-dashed ;
   }
 }

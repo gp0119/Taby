@@ -8,16 +8,13 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Card: typeof import('./src/components/card.vue')['default']
-    CollectionAction: typeof import('./src/components/collection-action.vue')['default']
     ColorSelect: typeof import('./src/components/color-select.vue')['default']
-    Content: typeof import('./src/components/content.vue')['default']
     Favicon: typeof import('./src/components/favicon.vue')['default']
-    GetIcon: typeof import('./src/components/get-icon.vue')['default']
     IconSelect: typeof import('./src/components/icon-select.vue')['default']
-    LeftAside: typeof import('./src/components/left-aside.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
-    Navs: typeof import('./src/components/navs.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
+    NCollapse: typeof import('naive-ui')['NCollapse']
+    NCollapseItem: typeof import('naive-ui')['NCollapseItem']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NForm: typeof import('naive-ui')['NForm']
@@ -40,7 +37,6 @@ declare module 'vue' {
     NTag: typeof import('naive-ui')['NTag']
     NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
-    RightAside: typeof import('./src/components/right-aside.vue')['default']
     TagAction: typeof import('./src/components/tag-action.vue')['default']
   }
 }
