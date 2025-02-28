@@ -166,21 +166,34 @@ function onChange({ file }: { file: UploadSettledFileInfo }) {
         lists: CollectionWithCards[]
       } = JSON.parse(event.target?.result as string)
       for (const list of lists.lists) {
+        const labelIds: number[] = []
+        await Promise.all(
+          list.labels.map(async (item) => {
+            const labelId = await dataManager.getOrCreateLabelWithTitle(
+              item.title,
+            )
+            if (labelId) {
+              labelIds.push(labelId)
+            }
+          }),
+        )
         const collectionId = (await dataManager.addCollection({
           title: list.title,
           spaceId: activeSpaceId.value,
-          labelIds: [],
+          labelIds,
         })) as number
         await dataManager.batchAddCards(
-          list.cards.map((item, index) => {
-            return {
-              ...item,
-              customTitle: item.customTitle || item.title,
-              customDescription: item.customDescription || item.title,
-              collectionId,
-              order: (index + 1) * 1000,
-            }
-          }),
+          list.cards
+            .filter((item) => item.url !== "/note.html")
+            .map((item, index) => {
+              return {
+                ...item,
+                customTitle: item.customTitle || item.title,
+                customDescription: item.customDescription || item.title,
+                collectionId,
+                order: (index + 1) * 1000,
+              }
+            }),
         )
         await refreshCollections()
       }

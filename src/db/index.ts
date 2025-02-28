@@ -1,3 +1,4 @@
+import { COLOR_LIST } from "@/utils/constants.ts"
 import Dexie from "dexie"
 import { isUndef } from "@/utils/is.ts"
 import { Card, Collection, CollectionWithCards, Space } from "@/type.ts"
@@ -69,6 +70,7 @@ class dataManager {
   }
 
   async addCollection(collection: Omit<Collection, "id" | "order">) {
+    console.log("collection: ", collection)
     const lastCollection = await db.collections
       .where("[spaceId+order]")
       .between(
@@ -157,6 +159,16 @@ class dataManager {
 
   async addLabel(title: string, color: string) {
     return db.labels.add({ title, color })
+  }
+
+  async getOrCreateLabelWithTitle(title: string) {
+    const label = await db.labels.where("title").equals(title).first()
+    if (label) return label.id
+    const randomIndex = Math.floor(Math.random() * COLOR_LIST.length)
+    return (await db.labels.add({
+      title,
+      color: COLOR_LIST[randomIndex],
+    })) as number
   }
 
   async getCardsByTitleOrUrl(titleOrUrl: string) {
