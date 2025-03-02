@@ -38,8 +38,4 @@ const innerFavicon = computed(() => {
 .card-avatar {
   @apply mr-2.5 inline-block flex-shrink-0 bg-white sepia-base;
 }
-.card-size {
-  @apply group-[.drag-item]/content:h-[24px] group-[.drag-item]/content:w-[24px];
-  @apply group-[.right-aside-item]/aside:h-[20px] group-[.right-aside-item]/aside:w-[20px];
-}
 </style>

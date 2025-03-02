@@ -1,25 +1,28 @@
 <template>
-  <div class="!hidden items-center group-hover/item:!flex">
+  <div
+    class="hidden items-center group-hover/item:flex"
+    :class="{ '!flex': isShowTagAction }"
+  >
     <n-icon
       size="20"
       class="mx-1.5 cursor-pointer text-primary"
       title="Open Collection"
       :component="Launch"
-      @click="onOpenCollection(item)"
+      @click.stop="onOpenCollection(item)"
     />
     <n-icon
       size="20"
       class="mx-1.5 cursor-pointer text-primary"
       title="Edit Collection"
       :component="Edit"
-      @click="onEditCollection(item)"
+      @click.stop="onEditCollection(item)"
     />
     <n-icon
       size="20"
       class="mx-1.5 cursor-pointer text-primary"
       title="Move Collection"
       :component="FolderMoveTo"
-      @click="onMoveCollection(item)"
+      @click.stop="onMoveCollection(item)"
     />
     <TagAction :item="item" />
   </div>
@@ -33,8 +36,9 @@ import DataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
-import TagAction from "@components/tag-action.vue"
+import TagAction from "./tag-action.vue"
 const dialog = useDialog()
+
 defineProps<{
   item: CollectionWithCards
 }>()
@@ -44,6 +48,15 @@ const spacesStore = useSpacesStore()
 const allSpaces = computed(() => spacesStore.spaces)
 const { refreshCollections } = useRefresh()
 const { openTabs } = useChromeTabs()
+const isShowTagAction = ref(false)
+
+provide("isShowTagAction", {
+  isShowTagAction,
+  setIsShowTagAction: (value: boolean) => {
+    isShowTagAction.value = value
+  },
+})
+
 function onEditCollection(item: CollectionWithCards) {
   const formModel = ref({ title: item.title })
   dialog.create({

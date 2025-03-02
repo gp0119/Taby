@@ -1,16 +1,18 @@
 <template>
   <n-popover
     trigger="hover"
-    :to="false"
     placement="bottom-end"
     :show-arrow="false"
     class="min-w-[150px]"
+    :show="isShowTagAction"
+    @update:show="setIsShowTagAction"
   >
     <template #trigger>
       <n-icon
         size="20"
         title="Tag"
         :component="TagGroup"
+        @click.stop="() => {}"
         class="mx-1.5 cursor-pointer text-primary"
       />
     </template>
@@ -85,14 +87,14 @@ const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 
 const tagsStore = useTagsStore()
-const selectedColor = ref(COLOR_LIST[0])
+const selectedColor = ref<string>(COLOR_LIST[0])
 const newTag = ref({
   title: "",
 })
 
-const { setIsHoverTag } = inject("isHoverTag") as {
-  isHoverTag: boolean
-  setIsHoverTag: (value: boolean) => void
+const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
+  isShowTagAction: boolean
+  setIsShowTagAction: (value: boolean) => void
 }
 
 onMounted(async () => {

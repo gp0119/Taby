@@ -17,22 +17,13 @@
         />
       </div>
     </div>
-    <div class="space-container flex-1 px-4">
-      <div
-        class="space-item flex cursor-pointer items-center py-2 font-medium text-text-primary"
-        v-for="item in allSpaces"
-        :data-id="item.id"
-        :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
-        :key="item.title"
-        @click="onHandleSpaceClick(item)"
-      >
-        <n-icon size="18">
-          <component
-            :is="item.icon ? ICON_LIST[item.icon] : StorefrontOutline"
-          />
-        </n-icon>
-        <span class="select-none px-1">{{ item.title }}</span>
-      </div>
+    <div class="space-container flex-1 px-2">
+      <SpaceWrapper
+        :spaces="allSpaces"
+        :active-space-id="activeSpaceId"
+        @click="onHandleSpaceClick"
+        @drag-end="onDragEnd"
+      />
     </div>
     <div class="px-2.5 py-4">
       <n-space vertical>
@@ -62,13 +53,7 @@
 </template>
 
 <script setup lang="tsx">
-import { ICON_LIST } from "@/utils/constants.ts"
-import {
-  Add,
-  SyncSharp,
-  StorefrontOutline,
-  LogoGithub,
-} from "@vicons/ionicons5"
+import { Add, SyncSharp, LogoGithub } from "@vicons/ionicons5"
 import { DocumentImport } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "@/assets/72.png"
@@ -77,9 +62,10 @@ import { CollectionWithCards, Space } from "@/type.ts"
 import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
 import { FormInst } from "naive-ui"
 import { uploadAll, downloadAll } from "@/sync/gistSync.ts"
-import Sortable from "sortablejs"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import IconSelect from "@components/icon-select.vue"
+import SpaceWrapper from "./components/space-wrapper.vue"
+import { SortableEvent } from "vue-draggable-plus"
 
 const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
@@ -93,31 +79,19 @@ onMounted(async () => {
   setTimeout(async () => {
     await init()
   }, 100)
-  createDraggable()
 })
 
 const allSpaces = computed(() => spacesStore.spaces)
 const activeSpaceId = computed(() => spacesStore.activeId)
 
-const createDraggable = () => {
-  Sortable.create(document.querySelector(".space-container") as HTMLElement, {
-    animation: 150,
-    handle: ".space-item",
-    ghostClass: "sortable-ghost-dashed-border",
-    onEnd: async (evt) => {
-      const { item: itemEl } = evt
-      const element = itemEl.nextElementSibling || itemEl.previousElementSibling
-      const currentSpaceId = itemEl.getAttribute("data-id")
-      const targetSpaceId = element?.getAttribute("data-id")
-      if (currentSpaceId && targetSpaceId) {
-        await dataManager.moveSpace(
-          Number(currentSpaceId),
-          Number(targetSpaceId),
-        )
-        await refreshSpaces()
-      }
-    },
-  })
+const onDragEnd = async (evt: SortableEvent) => {
+  console.log("evt: ", evt)
+  const { item: itemEl, oldIndex, newIndex } = evt
+  const element = itemEl.nextElementSibling
+  console.log("element: ", element)
+  const currentSpaceId = itemEl.getAttribute("data-id")
+  await dataManager.moveSpace(Number(currentSpaceId), oldIndex!, newIndex!)
+  await refreshSpaces()
 }
 
 const dialog = useDialog()

@@ -7,7 +7,7 @@ import { db } from "./database.ts"
 class dataManager {
   ORDER_STEP: number
   constructor() {
-    this.ORDER_STEP = 10
+    this.ORDER_STEP = 1000
   }
 
   async getAllSpaces() {
@@ -45,21 +45,12 @@ class dataManager {
     return db.spaces.update(id, { title, ...(icon && { icon }) })
   }
 
-  async moveSpace(id: number, targetId: number) {
+  async moveSpace(spaceId: number, oldIndex: number, newIndex: number) {
+    const currentSpace = await db.spaces.get(spaceId)
+    if (!currentSpace) return
     const allSpaces = await db.spaces.orderBy("order").toArray()
-    let currentSpace, currentIndex, targetIndex
-    for (const [index, space] of allSpaces.entries()) {
-      if (space.id === id) {
-        currentSpace = space
-        currentIndex = index
-      }
-      if (space.id === targetId) {
-        targetIndex = index
-      }
-    }
-    if (isUndef(currentIndex) || isUndef(targetIndex)) return
-    allSpaces.splice(currentIndex, 1)
-    allSpaces.splice(targetIndex, 0, currentSpace!)
+    allSpaces.splice(oldIndex, 1)
+    allSpaces.splice(newIndex, 0, currentSpace)
     await Promise.all(
       allSpaces.map(async (space, index) => {
         await db.spaces.update(space.id, {
@@ -213,17 +204,43 @@ class dataManager {
 
   async addCard(
     card: Pick<Card, "title" | "url" | "collectionId" | "favicon">,
+    targetIndex?: number,
   ) {
-    const lastCard = await db.cards
-      .where(["collectionId+order"])
+    const cards = await db.cards
+      .where("[collectionId+order]")
       .between(
         [card.collectionId, Dexie.minKey],
         [card.collectionId, Dexie.maxKey],
       )
-      .last()
+      .toArray()
+
+    // 如果没有指定位置或者集合为空，添加到末尾
+    if (typeof targetIndex === "undefined" || cards.length === 0) {
+      const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
+      return db.cards.add({
+        ...card,
+        order: lastOrder + this.ORDER_STEP,
+        customTitle: card.title,
+        customDescription: card.title,
+      })
+    }
+
+    // 在指定位置插入
+    const newOrder = (targetIndex + 1) * this.ORDER_STEP
+
+    // 更新目标位置后所有卡片的顺序
+    await Promise.all(
+      cards.slice(targetIndex).map(async (existingCard, index) => {
+        await db.cards.update(existingCard.id, {
+          order: newOrder + (index + 1) * this.ORDER_STEP,
+        })
+      }),
+    )
+
+    // 添加新卡片
     return db.cards.add({
       ...card,
-      order: lastCard ? lastCard.order + this.ORDER_STEP : 1000,
+      order: newOrder,
       customTitle: card.title,
       customDescription: card.title,
     })
@@ -251,28 +268,15 @@ class dataManager {
     return db.cards.update(id, { favicon })
   }
 
-  async moveCard(cardId: number, targetId: number) {
+  async moveCard(cardId: number, oldIndex: number, newIndex: number) {
     const currentCard = await db.cards.get(cardId)
     if (!currentCard) return
     const allCards = await db.cards
       .where("[collectionId+order]")
-      .between(
-        [currentCard.collectionId, Dexie.minKey],
-        [currentCard.collectionId, Dexie.maxKey],
-      )
+      .between([cardId, Dexie.minKey], [cardId, Dexie.maxKey])
       .toArray()
-    let targetIndex, currentIndex
-    for (const [index, card] of allCards.entries()) {
-      if (card.id === cardId) {
-        currentIndex = index
-      }
-      if (card.id === targetId) {
-        targetIndex = index
-      }
-    }
-    if (isUndef(currentIndex) || isUndef(targetIndex)) return
-    allCards.splice(currentIndex, 1)
-    allCards.splice(targetIndex, 0, currentCard)
+    allCards.splice(oldIndex, 1)
+    allCards.splice(newIndex, 0, currentCard)
     await Promise.all(
       allCards.map(async (card, index) => {
         await db.cards.update(card.id, {
@@ -282,20 +286,47 @@ class dataManager {
     )
   }
 
-  async moveCardToCollection(cardId: number, targetCollectionId: number) {
+  async moveCardToCollection(
+    cardId: number,
+    targetCollectionId: number,
+    targetIndex?: number,
+  ) {
     const currentCard = await db.cards.get(cardId)
     if (!currentCard) return
-    const lastCard = await db.cards
-      .where(["collectionId+order"])
+
+    const targetCards = await db.cards
+      .where("[collectionId+order]")
       .between(
         [targetCollectionId, Dexie.minKey],
         [targetCollectionId, Dexie.maxKey],
       )
-      .last()
-    await db.cards.update(cardId, {
-      collectionId: Number(targetCollectionId),
-      order: lastCard ? lastCard.order + this.ORDER_STEP : 1000,
-    })
+      .toArray()
+
+    if (typeof targetIndex === "undefined") {
+      const lastOrder =
+        targetCards.length > 0 ? targetCards[targetCards.length - 1].order : 0
+      return db.cards.update(cardId, {
+        collectionId: targetCollectionId,
+        order: lastOrder + this.ORDER_STEP,
+      })
+    }
+
+    targetCards.splice(targetIndex, 0, currentCard)
+
+    await Promise.all(
+      targetCards.map(async (card, index) => {
+        if (card.id === cardId) {
+          await db.cards.update(cardId, {
+            collectionId: targetCollectionId,
+            order: (index + 1) * this.ORDER_STEP,
+          })
+        } else {
+          await db.cards.update(card.id, {
+            order: (index + 1) * this.ORDER_STEP,
+          })
+        }
+      }),
+    )
   }
 
   async getCollectionWithCards(
@@ -321,6 +352,10 @@ class dataManager {
 
   async batchAddCards(cards: Omit<Card, "id">[]) {
     return db.cards.bulkAdd(cards)
+  }
+
+  async getCard(cardId: number) {
+    return await db.cards.get(cardId)
   }
 }
 

@@ -78,30 +78,23 @@ function onHandleEdit() {
 }
 .card-header {
   @apply relative flex items-center rounded-md border-0 border-b border-solid px-4 py-3;
-  @apply group-[.right-aside-item]/aside:p-2;
 }
 
 .card-title {
   @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
-  @apply group-[.right-aside-item]/aside:font-light;
 }
 .delete-button {
   @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;
-  @apply group-[.drag-item]/content:-top-1.5;
-  @apply group-[.right-aside-item]/aside:top-2.5;
 }
 .card-title-wrapper {
   @apply relative p-2.5;
-  @apply group-[.right-aside-item]/aside:hidden;
 }
 .copy-button {
   @apply absolute right-6 hidden rounded-full bg-primary hover:opacity-70;
   @apply group-hover/content:flex group-hover/content:animate-scale-in;
-  @apply group-[.drag-item]/content:-bottom-2;
 }
 .edit-button {
   @apply absolute -right-2.5 hidden rounded-full bg-primary hover:opacity-70;
   @apply group-hover/content:flex group-hover/content:animate-scale-in;
-  @apply group-[.drag-item]/content:-bottom-2;
 }
 </style>

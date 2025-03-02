@@ -1,7 +1,7 @@
 <template>
-  <n-space v-if="labels.length" class="ml-2">
+  <n-space v-if="labels.length" class="ml-3">
     <n-tag
-      class="group/tag"
+      class="group/tag px-2"
       v-for="tag in labels"
       :key="tag.id"
       size="small"
@@ -16,7 +16,7 @@
         <n-icon
           @click.stop="onDeleteTagFromCollection(tag.id)"
           size="12"
-          class="hidden cursor-pointer group-hover/tag:block"
+          class="absolute -right-1 -top-1 hidden cursor-pointer rounded-full bg-primary text-white group-hover/tag:block"
           :component="Close"
         />
       </div>

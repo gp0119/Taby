@@ -1,29 +1,38 @@
 <template>
-  <n-grid
-    :x-gap="20"
-    :y-gap="20"
-    ref="cardsWrapperRef"
-    cols="1 400:2 600:3 800:4 1000:5 1200:6 1400:7 1600:8 1800:9 2000:10 2200:11 2400:12"
-    class="min-h-[50px] has-[.drag-item]:border-none"
-    :class="{
-      'rounded border border-dashed border-gray-300': !cards.length,
+  <VueDraggable
+    v-model="innerCard"
+    :group="{
+      name: 'content-card',
+      put: ['content-card', 'aside-card'],
     }"
+    class="card-wrapper"
+    item-key="id"
+    :data-collectionid="collectionId"
+    handle=".card-item"
+    ghost-class="sortable-ghost-dashed-border"
+    @end="onDragEnd"
   >
-    <n-gi
-      v-for="card in cards"
-      :key="card.id"
-      :data-id="card.id"
-      class="drag-item group/content peer"
-    >
+    <template v-if="cards.length">
       <Card
+        v-for="card in cards"
+        :key="card.id"
+        :data-id="card.id"
+        class="card-item group/content peer"
         type="content"
         :child="card"
         @click="onHandleClick(card)"
         @delete="onDeleteCard(card)"
         @edit="onEdit(card)"
       />
-    </n-gi>
-  </n-grid>
+    </template>
+    <template v-else>
+      <div
+        class="empty-text col-span-full text-center leading-[90px] text-gray-300 peer-[.card-item]:hidden"
+      >
+        This collection is empty. Drag tabs here
+      </div>
+    </template>
+  </VueDraggable>
 </template>
 
 <script setup lang="tsx">
@@ -31,16 +40,18 @@ import DataManager from "@/db"
 import Card from "@components/card.vue"
 import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import Sortable from "sortablejs"
+import { VueDraggable } from "vue-draggable-plus"
 
-defineProps<{
+const props = defineProps<{
   cards: iCard[]
+  collectionId: number
 }>()
+
+const innerCard = ref<iCard[]>(props.cards)
 
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const dialog = useDialog()
-const cardsWrapperRef = useTemplateRef<any>("cardsWrapperRef")
 
 async function onHandleClick(child: any) {
   const tab = await chrome.tabs.create({ url: child.url })
@@ -126,53 +137,44 @@ function onEdit(child: iCard) {
   })
 }
 
-const createCardsDragable = () => {
-  console.log("cardsWrapperRef: ", cardsWrapperRef.value)
-  if (!cardsWrapperRef.value) return
-  Sortable.create(cardsWrapperRef.value._.refs.contentEl, {
-    group: {
-      name: "nested-child",
-      put: ["nested-child", "right-aside-child"],
-    },
-    animation: 150,
-    handle: ".drag-item",
-    ghostClass: "sortable-ghost-dashed-border",
-    onMove: function (evt) {
-      // evt.to 是目标容器
-      if (evt.to.classList.contains("right-aside-window")) {
-        return false // 阻止移动到这个区域
-      }
-    },
-    onEnd: async function (evt) {
-      // const { from, to, oldIndex, newIndex } = evt
-      // const { collectionid: fromCollectionId } = from.dataset
-      // const { collectionid: toCollectionId } = to.dataset
-      // let fromCardId: number, toCardId: number
-      // collections.value?.forEach((item) => {
-      //   if (item.id === Number(fromCollectionId)) {
-      //     fromCardId = item.cards[oldIndex!]?.id
-      //   }
-      //   if (item.id === Number(toCollectionId)) {
-      //     toCardId = item.cards[newIndex!]?.id
-      //   }
-      // })
-      // if (fromCollectionId === toCollectionId) {
-      //   await dataManager.moveCard(fromCardId!, toCardId!)
-      // } else {
-      //   await dataManager.moveCardToCollection(
-      //     fromCardId!,
-      //     Number(toCollectionId)!,
-      //   )
-      // }
-      // await refreshCollections()
-    },
-  })
+const onDragEnd = async (evt: any) => {
+  const { from, to, item, oldIndex, newIndex } = evt
+  const { collectionid: fromCollectionId } = from.dataset
+  const { collectionid: toCollectionId } = to.dataset
+  const fromCardId = item.getAttribute("data-id")
+  if (fromCollectionId === toCollectionId) {
+    await dataManager.moveCard(Number(fromCardId), oldIndex!, newIndex!)
+  } else {
+    await dataManager.moveCardToCollection(
+      Number(fromCardId),
+      Number(toCollectionId)!,
+      newIndex,
+    )
+    item.remove()
+  }
+  await refreshCollections()
+}
+</script>
+
+<style scoped>
+.card-wrapper {
+  @apply grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-5 pt-2;
 }
 
-onMounted(() => {
-  console.log("createCardsDragable")
-  nextTick(() => {
-    createCardsDragable()
-  })
-})
-</script>
+.card-wrapper :deep(.card-size) {
+  height: 24px;
+  width: 24px;
+}
+
+.card-wrapper :deep(.delete-button) {
+  top: -8px;
+}
+
+.card-wrapper :deep(.copy-button) {
+  bottom: -10px;
+}
+
+.card-wrapper :deep(.edit-button) {
+  bottom: -10px;
+}
+</style>
