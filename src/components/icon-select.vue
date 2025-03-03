@@ -1,5 +1,10 @@
 <template>
-  <n-popover trigger="hover" content-class="!p-0">
+  <n-popover
+    trigger="hover"
+    content-class="!p-0"
+    :to="false"
+    v-model:show="show"
+  >
     <template #trigger>
       <n-button>
         <template #icon>
@@ -28,6 +33,7 @@
 <script setup lang="ts">
 import { ICON_LIST } from "@/utils/constants.ts"
 
+const show = ref(false)
 const selectIcon = defineModel("value", {
   type: String,
   default: "StorefrontOutline",
@@ -35,5 +41,6 @@ const selectIcon = defineModel("value", {
 
 const pick = (key: string | number) => {
   selectIcon.value = key as string
+  show.value = false
 }
 </script>

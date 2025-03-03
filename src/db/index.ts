@@ -273,7 +273,10 @@ class dataManager {
     if (!currentCard) return
     const allCards = await db.cards
       .where("[collectionId+order]")
-      .between([cardId, Dexie.minKey], [cardId, Dexie.maxKey])
+      .between(
+        [currentCard.collectionId, Dexie.minKey],
+        [currentCard.collectionId, Dexie.maxKey],
+      )
       .toArray()
     allCards.splice(oldIndex, 1)
     allCards.splice(newIndex, 0, currentCard)

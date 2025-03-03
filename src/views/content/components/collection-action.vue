@@ -30,7 +30,8 @@
 
 <script setup lang="tsx">
 import { CollectionWithCards } from "@/type.ts"
-import { FolderMoveTo, Delete, Edit, Launch } from "@vicons/carbon"
+import IconSelect from "@components/icon-select.vue"
+import { FolderMoveTo, Delete, Edit, Launch, Add } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import DataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
@@ -104,12 +105,14 @@ function onDeleteCollection(item: CollectionWithCards) {
     onPositiveClick: async () => {
       await dataManager.removeCollection(item.id)
       await refreshCollections()
+      dialog.destroyAll()
     },
   })
 }
 
 function onMoveCollection(item: CollectionWithCards) {
   const spaceId = ref<number | null>(null)
+  const formModel = ref({ title: "", icon: "StorefrontOutline" })
   dialog.create({
     title: `Move ${item.title} to`,
     titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
@@ -125,7 +128,40 @@ function onMoveCollection(item: CollectionWithCards) {
               label: item.title,
               value: item.id,
             }))}
-          ></n-select>
+            v-slots={{
+              action: () => {
+                return (
+                  <n-input-group>
+                    <IconSelect v-model:value={formModel.value.icon} />
+                    <n-input
+                      v-model:value={formModel.value.title}
+                      placeholder="create a new space"
+                    />
+                    <n-button
+                      secondary
+                      type="primary"
+                      onClick={async () => {
+                        if (!formModel.value.title) return
+                        await dataManager.addSpace({
+                          title: formModel.value.title,
+                          icon: formModel.value.icon,
+                        })
+                        formModel.value.title = ""
+                        await spacesStore.fetchSpaces()
+                      }}
+                      v-slots={{
+                        icon: () => (
+                          <n-icon>
+                            <Add />
+                          </n-icon>
+                        ),
+                      }}
+                    ></n-button>
+                  </n-input-group>
+                )
+              },
+            }}
+          />
         </n-form-item>
       </n-form>
     ),

@@ -1,4 +1,3 @@
-import { isNewTabPage } from "@/utils"
 import { Card } from "@/type.ts"
 
 export function useChromeTabs() {
@@ -8,11 +7,21 @@ export function useChromeTabs() {
 
   async function getTabs() {
     const res = await chrome.tabs.query({})
-    tabs.value = res
-      .filter((item) => !isNewTabPage(item.url as string))
-      .reduce((acc: { [key: string]: Card[] }, cur) => {
-        if (acc[cur.windowId]) {
-          acc[cur.windowId].push({
+    tabs.value = res.reduce((acc: { [key: string]: Card[] }, cur) => {
+      if (acc[cur.windowId]) {
+        acc[cur.windowId].push({
+          title: cur.title || "",
+          url: cur.url || "",
+          customTitle: "",
+          customDescription: "",
+          windowId: cur.windowId,
+          id: cur.id as number,
+          collectionId: 0,
+          order: 0,
+        })
+      } else {
+        acc[cur.windowId] = [
+          {
             title: cur.title || "",
             url: cur.url || "",
             customTitle: "",
@@ -21,23 +30,11 @@ export function useChromeTabs() {
             id: cur.id as number,
             collectionId: 0,
             order: 0,
-          })
-        } else {
-          acc[cur.windowId] = [
-            {
-              title: cur.title || "",
-              url: cur.url || "",
-              customTitle: "",
-              customDescription: "",
-              windowId: cur.windowId,
-              id: cur.id as number,
-              collectionId: 0,
-              order: 0,
-            },
-          ]
-        }
-        return acc
-      }, {})
+          },
+        ]
+      }
+      return acc
+    }, {})
   }
 
   function removeTab(tabId: number | undefined) {
@@ -53,7 +50,6 @@ export function useChromeTabs() {
     index: number,
     windowId: number,
   ) {
-    console.log("moveTab: ", tabId, index, windowId)
     if (!tabId) return
     await chrome.tabs.move(tabId, { index, windowId })
     await getTabs()

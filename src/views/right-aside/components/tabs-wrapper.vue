@@ -22,6 +22,7 @@
         :data-index="index"
         class="group/aside right-aside-item"
         type="right-aside"
+        :class="{ hidden: isNewTabPage(tab.url) }"
         :child="tab"
         @delete="removeTab(tab.id)"
         @click="activeTab(tab)"
@@ -34,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { isNewTabPage } from "@/utils"
 import { VueDraggable, SortableEvent } from "vue-draggable-plus"
 import type Sortable from "sortablejs"
 import type { Card as iCard } from "@/type.ts"

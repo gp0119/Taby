@@ -1,5 +1,5 @@
 <template>
-  <n-popover trigger="hover" content-class="!p-0">
+  <n-popover trigger="hover" content-class="!p-0" v-model:show="show">
     <template #trigger>
       <n-button
         :size="size"
@@ -42,6 +42,8 @@ defineProps({
     default: "medium",
   },
 })
+
+const show = ref(false)
 const selectedColor = defineModel("value", {
   type: String,
   default: COLOR_LIST[0],
@@ -49,5 +51,6 @@ const selectedColor = defineModel("value", {
 
 const pickColor = (color: string) => {
   selectedColor.value = color
+  show.value = false
 }
 </script>

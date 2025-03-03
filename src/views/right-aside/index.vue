@@ -85,9 +85,7 @@ const onDragEnd = async (evt: SortableEvent) => {
       },
     )
   } else {
-    const element = itemEl.nextElementSibling || itemEl.previousElementSibling
-    const { index } = (element as HTMLElement)?.dataset || { index: 0 }
-    await moveTab(Number(id), Number(index), Number(windowid))
+    await moveTab(Number(id), Number(newIndex), Number(windowid))
     await refreshTabs()
   }
 }
