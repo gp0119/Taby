@@ -77,9 +77,13 @@ const spacesStore = useSpacesStore()
 
 const dataManager = new DataManager()
 
-onMounted(async () => {
-  await tagsStore.fetchCollectionsTags()
-})
+watch(
+  () => spacesStore.activeId,
+  () => {
+    tagsStore.fetchCollectionsTags()
+  },
+  { immediate: true },
+)
 
 const dialog = useDialog()
 function onAddCollection() {
