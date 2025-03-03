@@ -15,6 +15,10 @@
   }
 }
 
+body {
+  overflow: hidden;
+}
+
 @layer components {
   .sortable-ghost-dashed-border {
     @apply !border-primary !border !border-dashed ;

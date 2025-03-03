@@ -1,6 +1,7 @@
 import DataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Label } from "@/type"
+import { useToggle } from "@vueuse/core"
 import { defineStore } from "pinia"
 
 export const useTagsStore = defineStore("tags", () => {
@@ -8,7 +9,8 @@ export const useTagsStore = defineStore("tags", () => {
   const spacesStore = useSpacesStore()
   const tags = ref<Label[]>([])
   const collectionsTags = ref<Label[]>([])
-  const selectedTagId = ref<number | null>(null)
+  const selectedTag = ref<Label | null>(null)
+  const [isTagOpen, toggleTagOpen] = useToggle()
 
   async function fetchTags() {
     tags.value = await dataManager.getLabels()
@@ -43,8 +45,12 @@ export const useTagsStore = defineStore("tags", () => {
     )
   }
 
-  function setSelectedTagId(id: number | null) {
-    selectedTagId.value = id
+  function setSelectedTag(tag: Label | null) {
+    selectedTag.value = tag
+  }
+
+  function resetSelectedTag() {
+    selectedTag.value = null
   }
 
   return {
@@ -55,7 +61,10 @@ export const useTagsStore = defineStore("tags", () => {
     updateTag,
     collectionsTags,
     fetchCollectionsTags,
-    selectedTagId,
-    setSelectedTagId,
+    selectedTag,
+    setSelectedTag,
+    isTagOpen,
+    toggleTagOpen,
+    resetSelectedTag,
   }
 })

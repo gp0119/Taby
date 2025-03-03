@@ -4,7 +4,7 @@
       v-if="collections?.length"
       :items="collections"
       :min-item-size="100"
-      style="height: calc(100vh - 50px); overflow-y: scroll"
+      style="height: calc(100vh - 100px); overflow-y: scroll"
       :prerender="10"
     >
       <template #default="{ item, index, active }">
@@ -38,6 +38,7 @@
 
 <script setup lang="ts">
 import { useDraggableStore } from "@/store/draggable.ts"
+import { useSortStore } from "@/store/sort.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import TitleDragable from "@/views/content/components/title-draggable.vue"
@@ -48,20 +49,39 @@ import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
+const sortStore = useSortStore()
 const draggableStore = useDraggableStore()
 
-watch(
-  () => draggableStore.draggable,
-  (newVal) => {
-    console.log("newVal: ", newVal)
-  },
-)
-
 const collections = computed(() => {
-  if (!tagsStore.selectedTagId) return spacesStore.collections
-  return spacesStore.collections.filter((item) =>
-    item.labelIds.includes(tagsStore.selectedTagId!),
-  )
+  let sortedCollections = [...spacesStore.collections]
+  if (tagsStore.selectedTag) {
+    sortedCollections = [...spacesStore.collections].filter((item) =>
+      item.labelIds.includes(tagsStore.selectedTag.id),
+    )
+  }
+  if (sortStore.order) {
+    return [...sortedCollections].sort((a, b) => {
+      if (sortStore.sort === "Title") {
+        const collator = new Intl.Collator("zh")
+        const compareResult = collator.compare(a.title, b.title)
+        return sortStore.order === "asc" ? compareResult : -compareResult
+      } else if (sortStore.sort === "CreatedAt") {
+        return sortStore.order === "asc"
+          ? a.createdAt - b.createdAt
+          : b.createdAt - a.createdAt
+      } else if (sortStore.sort === "Draggable") {
+        return a.order - b.order
+      }
+      return sortStore.order === "asc"
+        ? a[sortStore.sort] > b[sortStore.sort]
+          ? 1
+          : -1
+        : a[sortStore.sort] < b[sortStore.sort]
+          ? 1
+          : -1
+    })
+  }
+  return sortedCollections
 })
 </script>
 <style scoped>

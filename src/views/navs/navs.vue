@@ -1,38 +1,12 @@
 <template>
   <div
-    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 py-2.5 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex items-center gap-4">
       <span class="shrink-0 select-none text-xl text-primary">{{ title }}</span>
-      <div
-        class="h-[30px] w-[220px] cursor-pointer select-none whitespace-nowrap rounded border bg-card-color px-2 text-xs leading-[30px] text-[#C2C2C2]"
-        @click="openModal"
+      <span class="text-text-secondary"
+        >{{ spacesStore.collections.length }} Collections</span
       >
-        Press Ctrl/Command + F to search
-      </div>
-      <n-select
-        size="small"
-        v-model:value="innerSelectedTag"
-        tag
-        :options="tagsStore.collectionsTags"
-        placeholder="Select a tag"
-        value-field="id"
-        label-field="title"
-        :render-label="renderTagLabel"
-        clearable
-        class="w-[200px]"
-      />
-      <n-switch
-        v-model:value="draggableStore.draggable"
-        @update-value="draggableStore.setDraggable"
-      >
-        <template #checked>
-          <span class="text-xs">Draggable</span>
-        </template>
-        <template #unchecked>
-          <span class="text-xs">Draggable</span>
-        </template>
-      </n-switch>
     </div>
     <n-space class="flex-shrink-0">
       <n-button size="tiny" type="primary" @click="onAddCollection">
@@ -63,26 +37,25 @@
       </n-select>
     </n-space>
   </div>
+  <nav-action />
 </template>
 
 <script setup lang="tsx">
-import { useDraggableStore } from "@/store/draggable.ts"
+import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
+import NavAction from "@/views/navs/components/nav-action.vue"
 import { Add, Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
 import DataManager from "@/db"
+import { useEventListener } from "@vueuse/core"
 import { SelectOption, SelectGroupOption } from "naive-ui"
 import IconSelect from "@components/icon-select.vue"
-import { useEventListener } from "@vueuse/core"
-import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 const { themeColor, theme, setTheme } = useThemeStore()
-const draggableStore = useDraggableStore()
 
 const currentTheme = ref(theme)
 
-const { openModal } = useSearchModal()
 const themeOptions = Object.keys(themeColor).map((key) => ({
   label: key,
   value: key,
@@ -105,28 +78,6 @@ const dataManager = new DataManager()
 
 onMounted(async () => {
   await tagsStore.fetchCollectionsTags()
-})
-
-const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
-  return (
-    <n-tag
-      size="small"
-      color={{
-        color: `${option.color}33`,
-        textColor: option.color,
-        borderColor: `${option.color}4A`,
-      }}
-    >
-      {option.title}
-    </n-tag>
-  )
-}
-
-const innerSelectedTag = computed({
-  get: () => tagsStore.selectedTagId,
-  set: (value) => {
-    tagsStore.setSelectedTagId(value)
-  },
 })
 
 const dialog = useDialog()
@@ -239,6 +190,7 @@ function onDeleteSpace() {
   })
 }
 
+const { openModal } = useSearchModal()
 const cleanup = useEventListener(window, "keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "f") {
     e.preventDefault()
@@ -246,7 +198,6 @@ const cleanup = useEventListener(window, "keydown", (e) => {
     openModal()
   }
 })
-
 onUnmounted(() => {
   cleanup()
 })

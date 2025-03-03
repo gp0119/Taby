@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-50px)] overflow-y-auto">
+  <div class="h-[calc(100vh-100px)] overflow-y-auto">
     <VueDraggable
       :model-value="collections"
       item-key="id"
@@ -46,8 +46,6 @@ const { refreshCollections } = useRefresh()
 const onDragEnd = async (event: any) => {
   const { newIndex, oldIndex, item } = event
   const collectionId = item.getAttribute("data-id")
-  console.log("newIndex: ", newIndex)
-  console.log("oldIndex: ", oldIndex)
   await dataManager.moveCollection(Number(collectionId), oldIndex, newIndex)
   await refreshCollections()
 }
