@@ -3,7 +3,7 @@ import { Card, Collection, Label, Space } from "@/type.ts"
 import { uploadAll } from "@/sync/gistSync.ts"
 import { debounce } from "lodash-es"
 
-const SYNC_INTERVAL = 1000 * 10
+const SYNC_INTERVAL = 1000
 const syncToGist = debounce(async () => {
   const { accessToken, gistId } = await chrome.storage.sync.get([
     "accessToken",
