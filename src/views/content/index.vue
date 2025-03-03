@@ -31,6 +31,7 @@
     <div v-else class="bg-body-color py-16 text-center text-2xl text-gray-400">
       No collections shared with this space yet.
     </div>
+    <BottomDrawer />
   </template>
   <template v-else>
     <title-dragable :collections="collections" />
@@ -47,6 +48,7 @@ import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller"
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
 import CollectionCollapse from "./components/collection-collapse.vue"
 import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
+import BottomDrawer from "./components/bottom-drawer.vue"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()

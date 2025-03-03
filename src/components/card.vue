@@ -1,7 +1,23 @@
 <template>
-  <div class="card" @click="onHandleClick">
+  <div class="card group/card" @click="onHandleClick">
     <div class="card-header">
-      <favicon :type="type" :child="child" />
+      <div
+        class="hidden h-[24px] w-[24px] items-center group-hover/card:flex"
+        :class="{ '!flex': selectIds.includes(child.id) }"
+        @click.stop="() => {}"
+      >
+        <n-checkbox
+          :checked="selectIds.includes(child.id)"
+          size="large"
+          @update:checked="onHandleCheckbox"
+        />
+      </div>
+      <favicon
+        :type="type"
+        :child="child"
+        v-if="!selectIds.includes(child.id)"
+        class="group-hover/card:hidden"
+      />
       <span class="card-title">{{ child.customTitle || child.title }}</span>
       <!--   删除按钮   -->
       <n-icon-wrapper
@@ -49,10 +65,10 @@ import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
 
-const props = defineProps<{ child: Card; type: string }>()
+const props = defineProps<{ child: Card; type: string; selectIds: number[] }>()
 const { copy, isSupported } = useClipboard()
 
-const emit = defineEmits(["delete", "click", "copy", "edit"])
+const emit = defineEmits(["delete", "click", "copy", "edit", "check"])
 
 function onHandleClick() {
   emit("click")
@@ -68,6 +84,10 @@ function onHandleCopy() {
 
 function onHandleEdit() {
   emit("edit")
+}
+
+function onHandleCheckbox(checked: boolean) {
+  emit("check", checked)
 }
 </script>
 <style scoped>

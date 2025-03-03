@@ -20,9 +20,11 @@
         class="card-item group/content peer"
         type="content"
         :child="card"
+        :select-ids="batchSelectStore.selectedCardIds"
         @click="onHandleClick(card)"
         @delete="onDeleteCard(card)"
         @edit="onEdit(card)"
+        @check="onHandleCheckbox($event, card)"
       />
     </template>
     <template v-else>
@@ -41,6 +43,7 @@ import Card from "@components/card.vue"
 import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
+import { useBatchSelectStore } from "@/store/batch-select"
 
 defineProps<{
   cards: iCard[]
@@ -49,6 +52,8 @@ defineProps<{
 
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
+const batchSelectStore = useBatchSelectStore()
+
 const dialog = useDialog()
 
 async function onHandleClick(child: any) {
@@ -151,6 +156,15 @@ const onDragEnd = async (evt: any) => {
     item.remove()
   }
   await refreshCollections()
+}
+
+function onHandleCheckbox(checked: boolean, card: iCard) {
+  console.log("checked: ", checked)
+  if (checked) {
+    batchSelectStore.addSelectedCardId(card.id)
+  } else {
+    batchSelectStore.removeSelectedCardId(card.id)
+  }
 }
 </script>
 
