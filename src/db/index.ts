@@ -59,8 +59,11 @@ class dataManager {
     )
   }
 
+  async getAllCollections() {
+    return db.collections.orderBy("order").toArray()
+  }
+
   async addCollection(collection: Omit<Collection, "id" | "order">) {
-    console.log("collection: ", collection)
     const lastCollection = await db.collections
       .where("[spaceId+order]")
       .between(

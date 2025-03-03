@@ -4,7 +4,8 @@
   >
     <div class="flex items-center gap-4">
       <span class="shrink-0 select-none text-xl text-primary">{{ title }}</span>
-      <span class="text-text-secondary"
+      <span class="h-[16px] w-[1px] bg-primary"></span>
+      <span class="text-primary"
         >{{ spacesStore.collections.length }} Collections</span
       >
     </div>

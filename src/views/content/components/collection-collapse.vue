@@ -39,11 +39,21 @@ import { ChevronForward } from "@vicons/ionicons5"
 import { CollectionWithCards } from "@/type"
 import CollectionAction from "./collection-action.vue"
 import Tags from "./tags.vue"
-import { useLocalStorage } from "@vueuse/core"
+import { useExpandStore } from "@/store/expand"
 
 const props = defineProps<{
   collection: CollectionWithCards
 }>()
 
-const isOpen = useLocalStorage(`collection-${props.collection.id}-open`, true)
+const expandStore = useExpandStore()
+const isOpen = computed({
+  get: () => expandStore.isCollectionExpanded(props.collection.id),
+  set: (value) => {
+    if (value) {
+      expandStore.toggleCollection(props.collection.id)
+    } else {
+      expandStore.toggleCollection(props.collection.id)
+    }
+  },
+})
 </script>

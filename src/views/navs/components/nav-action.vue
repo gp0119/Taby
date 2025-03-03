@@ -54,7 +54,6 @@
           <template v-if="tagsStore.selectedTag">
             <n-tag
               size="small"
-              v-if="innerSelectedTag !== 0"
               :color="{
                 color: `${tagsStore.selectedTag.color}33`,
                 textColor: `${tagsStore.selectedTag.color}`,
@@ -78,7 +77,7 @@
           </n-icon>
         </n-button>
       </n-dropdown>
-      <n-button quaternary type="primary">
+      <n-button quaternary type="primary" @click="expandStore.expandAll">
         <template #icon>
           <n-icon size="20">
             <RowExpand />
@@ -86,7 +85,7 @@
         </template>
         Expand All
       </n-button>
-      <n-button quaternary type="primary">
+      <n-button quaternary type="primary" @click="expandStore.collapseAll">
         <template #icon>
           <n-icon size="20">
             <RowCollapse />
@@ -134,15 +133,18 @@ import {
   RowExpand,
   RowCollapse,
 } from "@vicons/carbon"
+import { useExpandStore } from "@/store/expand"
+import { Label } from "@/type"
 
 const { openModal } = useSearchModal()
 const draggableStore = useDraggableStore()
 
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
+const expandStore = useExpandStore()
 
 const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
-  return option.color ? (
+  return option.title !== "Clear Filter" ? (
     <n-tag
       size="small"
       color={{
@@ -154,12 +156,12 @@ const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
       {option.title}
     </n-tag>
   ) : (
-    <span>{option.title}</span>
+    <span class="text-primary">{option.title}</span>
   )
 }
 
 const renderSortLabel = (option: SelectOption | SelectGroupOption) => {
-  const order = option.key.split("-")[1]
+  const order = (option.key as string).split("-")[1]
   return (
     <span>
       {order === "desc" ? (
@@ -182,14 +184,16 @@ const tagOptions = computed(() => {
     color: tag.color,
   }))
   options.unshift({
-    title: "All",
+    title: "Clear Filter",
     id: 0,
+    key: 0,
+    color: "#000000",
   })
   return options
 })
 
-const handleTagSelect = (key: string, option: SelectOption) => {
-  if (option.title === "All") {
+const handleTagSelect = (_key: string, option: Label) => {
+  if (option.title === "Clear Filter") {
     tagsStore.setSelectedTag(null)
     return
   }
@@ -201,4 +205,8 @@ const handleSortSelect = (key: string) => {
   sortStore.setSort(sort)
   sortStore.setOrder(order ?? null)
 }
+
+onMounted(async () => {
+  await expandStore.initExpandedCollections()
+})
 </script>

@@ -4,7 +4,8 @@
       v-if="collections?.length"
       :items="collections"
       :min-item-size="100"
-      style="height: calc(100vh - 100px); overflow-y: scroll"
+      class="h-[calc(100vh-100px)] overflow-y-auto"
+      style="scrollbar-width: thin; scrollbar-color: #d1d5db transparent"
       :prerender="10"
     >
       <template #default="{ item, index, active }">
@@ -54,9 +55,9 @@ const draggableStore = useDraggableStore()
 
 const collections = computed(() => {
   let sortedCollections = [...spacesStore.collections]
-  if (tagsStore.selectedTag) {
+  if (tagsStore.selectedTag?.id) {
     sortedCollections = [...spacesStore.collections].filter((item) =>
-      item.labelIds.includes(tagsStore.selectedTag.id),
+      item.labelIds.includes(tagsStore.selectedTag!.id),
     )
   }
   if (sortStore.order) {
@@ -67,16 +68,18 @@ const collections = computed(() => {
         return sortStore.order === "asc" ? compareResult : -compareResult
       } else if (sortStore.sort === "CreatedAt") {
         return sortStore.order === "asc"
-          ? a.createdAt - b.createdAt
-          : b.createdAt - a.createdAt
+          ? (a.createdAt ?? 0) - (b.createdAt ?? 0)
+          : (b.createdAt ?? 0) - (a.createdAt ?? 0)
       } else if (sortStore.sort === "Draggable") {
         return a.order - b.order
       }
       return sortStore.order === "asc"
-        ? a[sortStore.sort] > b[sortStore.sort]
+        ? (a[sortStore.sort as keyof typeof a] ?? 0) >
+          (b[sortStore.sort as keyof typeof b] ?? 0)
           ? 1
           : -1
-        : a[sortStore.sort] < b[sortStore.sort]
+        : (a[sortStore.sort as keyof typeof a] ?? 0) <
+            (b[sortStore.sort as keyof typeof b] ?? 0)
           ? 1
           : -1
     })

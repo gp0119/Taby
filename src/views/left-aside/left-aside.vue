@@ -85,10 +85,7 @@ const allSpaces = computed(() => spacesStore.spaces)
 const activeSpaceId = computed(() => spacesStore.activeId)
 
 const onDragEnd = async (evt: SortableEvent) => {
-  console.log("evt: ", evt)
   const { item: itemEl, oldIndex, newIndex } = evt
-  const element = itemEl.nextElementSibling
-  console.log("element: ", element)
   const currentSpaceId = itemEl.getAttribute("data-id")
   await dataManager.moveSpace(Number(currentSpaceId), oldIndex!, newIndex!)
   await refreshSpaces()
