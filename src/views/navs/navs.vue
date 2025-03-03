@@ -22,6 +22,17 @@
         clearable
         class="w-[200px]"
       />
+      <n-switch
+        v-model:value="draggableStore.draggable"
+        @update-value="draggableStore.setDraggable"
+      >
+        <template #checked>
+          <span class="text-xs">Draggable</span>
+        </template>
+        <template #unchecked>
+          <span class="text-xs">Draggable</span>
+        </template>
+      </n-switch>
     </div>
     <n-space class="flex-shrink-0">
       <n-button size="tiny" type="primary" @click="onAddCollection">
@@ -55,6 +66,7 @@
 </template>
 
 <script setup lang="tsx">
+import { useDraggableStore } from "@/store/draggable.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
@@ -66,6 +78,7 @@ import IconSelect from "@components/icon-select.vue"
 import { useEventListener } from "@vueuse/core"
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 const { themeColor, theme, setTheme } = useThemeStore()
+const draggableStore = useDraggableStore()
 
 const currentTheme = ref(theme)
 

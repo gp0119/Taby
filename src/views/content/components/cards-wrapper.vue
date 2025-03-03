@@ -1,6 +1,6 @@
 <template>
   <VueDraggable
-    v-model="innerCard"
+    :model-value="cards"
     :group="{
       name: 'content-card',
       put: ['content-card', 'aside-card'],
@@ -42,12 +42,10 @@ import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
 
-const props = defineProps<{
+defineProps<{
   cards: iCard[]
   collectionId: number
 }>()
-
-const innerCard = ref<iCard[]>(props.cards)
 
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()

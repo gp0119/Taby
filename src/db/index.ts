@@ -1,6 +1,5 @@
 import { COLOR_LIST } from "@/utils/constants.ts"
 import Dexie from "dexie"
-import { isUndef } from "@/utils/is.ts"
 import { Card, Collection, CollectionWithCards, Space } from "@/type.ts"
 import { db } from "./database.ts"
 
@@ -104,24 +103,18 @@ class dataManager {
     })
   }
 
-  async moveCollection(collectionId: number, targetId: number) {
+  async moveCollection(
+    collectionId: number,
+    oldIndex: number,
+    newIndex: number,
+  ) {
     const currentCollection = await db.collections.get(collectionId)
     if (!currentCollection) return
     const allCollections = await db.collections
       .where({ spaceId: currentCollection.spaceId })
       .sortBy("order")
-    let targetIndex, currentIndex
-    for (const [index, collection] of allCollections.entries()) {
-      if (collection.id === collectionId) {
-        currentIndex = index
-      }
-      if (collection.id === targetId) {
-        targetIndex = index
-      }
-    }
-    if (isUndef(currentIndex) || isUndef(targetIndex)) return
-    allCollections.splice(currentIndex, 1)
-    allCollections.splice(targetIndex, 0, currentCollection)
+    allCollections.splice(oldIndex, 1)
+    allCollections.splice(newIndex, 0, currentCollection)
     await Promise.all(
       allCollections.map(async (collection, index) => {
         await db.collections.update(collection.id, {
