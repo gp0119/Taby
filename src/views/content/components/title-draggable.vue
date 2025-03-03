@@ -20,7 +20,7 @@
             <n-icon size="20" class="mr-2">
               <ChevronForward />
             </n-icon>
-            <span class="text-lg font-medium text-gray-900">{{
+            <span class="text-lg font-medium text-text-primary">{{
               collection.title
             }}</span>
           </div>

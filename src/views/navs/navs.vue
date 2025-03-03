@@ -3,11 +3,15 @@
     class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex items-center gap-4">
-      <span class="shrink-0 select-none text-xl text-primary">{{ title }}</span>
-      <span class="h-[16px] w-[1px] bg-primary"></span>
-      <span class="text-primary"
-        >{{ spacesStore.collections.length }} Collections</span
-      >
+      <template v-if="title">
+        <span class="shrink-0 select-none text-xl text-text-primary">{{
+          title
+        }}</span>
+        <span class="h-[16px] w-[1px] bg-primary"></span>
+        <span class="text-text-secondary"
+          >{{ spacesStore.collections.length }} Collections</span
+        >
+      </template>
     </div>
     <n-space class="flex-shrink-0">
       <n-button size="tiny" type="primary" @click="onAddCollection">

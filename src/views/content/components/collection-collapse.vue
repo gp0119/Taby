@@ -12,7 +12,7 @@
           >
             <ChevronForward />
           </n-icon>
-          <span class="cursor-pointer text-lg font-medium text-gray-900">{{
+          <span class="cursor-pointer text-lg font-medium text-text-primary">{{
             collection.title
           }}</span>
         </div>
