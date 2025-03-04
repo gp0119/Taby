@@ -17,7 +17,7 @@
         v-for="card in cards"
         :key="card.id"
         :data-id="card.id"
-        class="card-item group/content peer"
+        class="card-item group/content"
         type="content"
         :child="card"
         :select-ids="batchSelectStore.selectedCardIds"
@@ -29,7 +29,7 @@
     </template>
     <template v-else>
       <div
-        class="empty-text col-span-full text-center leading-[90px] text-gray-300 peer-[.card-item]:hidden"
+        class="empty-text col-span-full text-center leading-[90px] text-gray-300 peer-[.right-aside-item]:hidden"
       >
         This collection is empty. Drag tabs here
       </div>

@@ -20,7 +20,7 @@
         :data-url="tab.url"
         :data-title="tab.title"
         :data-index="index"
-        class="group/aside right-aside-item"
+        class="group/aside right-aside-item peer"
         type="right-aside"
         :class="{ hidden: isNewTabPage(tab.url) }"
         :child="tab"

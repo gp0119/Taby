@@ -69,7 +69,7 @@ import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
 
-const props = defineProps<{ child: Card; type: string; selectIds: number[] }>()
+const props = defineProps<{ child: Card; type: string; selectIds?: number[] }>()
 const { copy, isSupported } = useClipboard()
 
 const emit = defineEmits(["delete", "click", "copy", "edit", "check"])
