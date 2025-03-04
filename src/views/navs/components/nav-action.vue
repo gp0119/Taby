@@ -83,7 +83,7 @@
             <RowExpand />
           </n-icon>
         </template>
-        Expand All
+        Expand
       </n-button>
       <n-button quaternary type="primary" @click="expandStore.collapseAll">
         <template #icon>
@@ -91,7 +91,7 @@
             <RowCollapse />
           </n-icon>
         </template>
-        Collapse All
+        Collapse
       </n-button>
       <n-switch
         v-model:value="draggableStore.draggable"

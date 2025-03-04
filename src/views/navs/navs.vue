@@ -7,8 +7,8 @@
         <span class="shrink-0 select-none text-xl text-text-primary">{{
           title
         }}</span>
-        <span class="h-[16px] w-[1px] bg-primary"></span>
-        <span class="text-text-secondary"
+        <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
+        <span class="font-thin text-text-secondary"
           >{{ spacesStore.collections.length }} Collections</span
         >
       </template>
