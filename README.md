@@ -1,30 +1,81 @@
-# Taby - 标签页管理扩展
+<div align="center">
+  <img src="src/assets/128.png" alt="Taby Logo" width="128" height="128">
+  <h1>Taby</h1>
+  <p><strong>简洁而强大的新标签页扩展</strong></p>
+  <p><strong>A simple yet powerful new tab extension</strong></p>
 
-一个简单而强大的 Chrome 标签页管理扩展。
+  <p>
+    <img src="https://img.shields.io/github/stars/gp0119/Taby?style=flat-square" alt="Stars">
+    <img src="https://img.shields.io/github/license/gp0119/Taby?style=flat-square" alt="License">
+    <img src="https://img.shields.io/badge/Vue-3-brightgreen?style=flat-square" alt="Vue 3">
+    <img src="https://img.shields.io/badge/TypeScript-blue?style=flat-square" alt="TypeScript">
+  </p>
+</div>
 
-## 功能特点
+## 📖 简介 | Introduction
 
-- 🗂️ 标签页分组管理
-- 🔄 拖拽排序
-- 💾 本地数据持久化
-- ☁️ GitHub Gist 同步
-- 📱 响应式布局
-- 🌈 主题切换
-- 🔍 全局搜索功能
-- 🔖 标签筛选
+Taby 是一款简约而功能丰富的浏览器新标签页扩展，旨在提升您的浏览体验和工作效率。个性化您的新标签页，轻松访问常用网站，并获取实用工具。
 
-## 安装扩展
+## ✨ 特性 | Features
 
-前往谷歌应用商店安装：[Taby](https://chromewebstore.google.com/detail/taby/iifpdfmdgnaogfbdlbmekdphicaaipod)
+- 🗂️ **标签页分组管理** - 将网站按类别整理，井然有序
+- 🔄 **拖拽排序** - 自由调整标签和分组顺序
+- 💾 **本地数据持久化** - 无需担心数据丢失
+- ☁️ **GitHub Gist 同步** - 跨设备同步您的设置与数据
+- 📱 **响应式布局** - 完美适配各种屏幕尺寸
+- 🌈 **主题切换** - 多种主题可供选择
+- 🔍 **全局搜索功能** - 快速找到您需要的内容
+- 🔖 **标签筛选** - 轻松筛选和管理您的标签
+- 🌙 **暗黑模式** - 保护您的眼睛
+- 🎨 **简洁美观的界面** - 现代化设计，视觉享受
 
-## 数据同步
+## 📷 截图 | Screenshots
 
-支持通过 GitHub Gist 进行数据同步：
+<div align="center">
+  <img src="screenshots/pink.png" alt="Taby Light Mode" width="600">
+    <br>
+    <br>
+  <img src="screenshots/purple.png" alt="Taby Dark Mode" width="600">
+</div>
 
-1. [创建 GitHub Personal Access Token](https://github.com/settings/tokens)
-2. 在扩展中配置 Token
-3. 点击同步按钮即可进行数据备份/恢复
+## 🚀 安装 | Installation
 
-## 许可证
+### 浏览器应用商店 | Browser Extension Stores
 
-MIT
+- [Chrome Web Store](https://github.com/gp0119/Taby/releases)
+
+### 手动安装 | Manual Installation
+
+1. 下载最新版本的 [release](https://github.com/gp0119/Taby/releases)
+2. 解压下载的文件
+3. 在浏览器中转到扩展页面:
+    - Chrome: `chrome://extensions/`
+4. 启用开发者模式
+5. 点击 "加载已解压的扩展" 并选择解压后的文件夹
+
+## 🛠️ 开发 | Development
+
+```bash
+# 克隆仓库
+git clone https://github.com/gp0119/Taby.git
+
+# 进入项目目录
+cd Taby
+
+# 安装依赖
+npm install
+
+# 开发环境运行
+npm run watch-build
+
+# 构建生产版本
+npm run build
+```
+
+## 🤝 贡献 | Contributing
+
+欢迎贡献！请随时提交 Pull Request 或创建 Issue。
+
+## 📄 许可 | License
+
+[MIT](LICENSE)
