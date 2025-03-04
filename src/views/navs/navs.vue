@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-8 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex items-center gap-4">
       <template v-if="title">

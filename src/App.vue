@@ -3,7 +3,11 @@
     <n-dialog-provider>
       <n-message-provider>
         <n-modal-provider>
-          <n-layout has-sider class="h-full" content-class="bg-body-color">
+          <n-layout
+            has-sider
+            class="h-full [&_.n-layout-toggle-button]:!top-[25px] [&_.n-layout-toggle-button]:shadow-base"
+            content-class="bg-body-color"
+          >
             <n-layout-sider
               :width="200"
               :collapsed-width="30"
