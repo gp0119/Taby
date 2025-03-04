@@ -1,3 +1,4 @@
+import { isUndef } from "@/utils/is.ts"
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
 import { Collection } from "@/type"
@@ -5,38 +6,38 @@ import DataManager from "@/db"
 
 export const useExpandStore = defineStore("expand", () => {
   const dataManager = new DataManager()
-  const expandedCollections = useLocalStorage<number[]>(
-    "expanded-collections",
-    [],
-  )
+  const expandedCollections = useLocalStorage<{
+    [key: number]: boolean
+  }>("expanded-collections", {})
 
   const toggleCollection = (collectionId: number) => {
-    const index = expandedCollections.value.indexOf(collectionId)
-    if (index === -1) {
-      expandedCollections.value.push(collectionId)
+    if (isUndef(expandedCollections.value[collectionId])) {
+      expandedCollections.value[collectionId] = false
     } else {
-      expandedCollections.value.splice(index, 1)
+      expandedCollections.value[collectionId] =
+        !expandedCollections.value[collectionId]
     }
   }
 
   const isCollectionExpanded = (collectionId: number) => {
-    return expandedCollections.value.includes(collectionId)
+    return isUndef(expandedCollections.value[collectionId])
+      ? true
+      : expandedCollections.value[collectionId]
   }
 
-  const expandAll = async () => {
+  const expandAll = () => {
+    expandedCollections.value = {}
+  }
+
+  const collapseAll = async () => {
     const collections: Collection[] = await dataManager.getAllCollections()
-    expandedCollections.value = collections.map((item) => item.id)
-  }
-
-  const collapseAll = () => {
-    expandedCollections.value = []
-  }
-
-  const initExpandedCollections = async () => {
-    if (expandedCollections.value.length === 0) {
-      const collections: Collection[] = await dataManager.getAllCollections()
-      expandedCollections.value = collections.map((item) => item.id)
-    }
+    expandedCollections.value = collections.reduce(
+      (acc: { [key: number]: boolean }, item) => {
+        acc[item.id] = false
+        return acc
+      },
+      {},
+    )
   }
 
   return {
@@ -45,6 +46,5 @@ export const useExpandStore = defineStore("expand", () => {
     isCollectionExpanded,
     expandAll,
     collapseAll,
-    initExpandedCollections,
   }
 })

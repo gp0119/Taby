@@ -205,8 +205,4 @@ const handleSortSelect = (key: string) => {
   sortStore.setSort(sort)
   sortStore.setOrder(order ?? null)
 }
-
-onMounted(async () => {
-  await expandStore.initExpandedCollections()
-})
 </script>
