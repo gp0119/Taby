@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Card: typeof import('./src/components/card.vue')['default']
+    CollectionSelect: typeof import('./src/components/collection-select.vue')['default']
     ColorSelect: typeof import('./src/components/color-select.vue')['default']
     Favicon: typeof import('./src/components/favicon.vue')['default']
     IconSelect: typeof import('./src/components/icon-select.vue')['default']
@@ -16,8 +17,6 @@ declare module 'vue' {
     NCheckbox: typeof import('naive-ui')['NCheckbox']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
-    NDrawer: typeof import('naive-ui')['NDrawer']
-    NDrawerContent: typeof import('naive-ui')['NDrawerContent']
     NDropdown: typeof import('naive-ui')['NDropdown']
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
@@ -31,6 +30,8 @@ declare module 'vue' {
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NModalProvider: typeof import('naive-ui')['NModalProvider']
     NPopover: typeof import('naive-ui')['NPopover']
+    NRadioButton: typeof import('naive-ui')['NRadioButton']
+    NRadioGroup: typeof import('naive-ui')['NRadioGroup']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
     NSpace: typeof import('naive-ui')['NSpace']
@@ -38,5 +39,7 @@ declare module 'vue' {
     NTag: typeof import('naive-ui')['NTag']
     NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
+    SelectWrapper: typeof import('./src/components/select-wrapper.vue')['default']
+    SpaceSelect: typeof import('./src/components/space-select.vue')['default']
   }
 }

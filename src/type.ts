@@ -54,3 +54,10 @@ export interface SyncData {
   cards: Card[]
   timestamp: number
 }
+
+export interface iOption {
+  label: string
+  value: number
+}
+export type iOptions = iOption[]
+export type movePosition = "HEAD" | "END"

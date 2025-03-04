@@ -46,6 +46,7 @@
 </template>
 
 <script setup lang="tsx">
+import { useRefresh } from "@/hooks/useRresh.ts"
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
@@ -78,6 +79,7 @@ const renderLabel = (option: SelectOption | SelectGroupOption) => {
 const tagsStore = useTagsStore()
 
 const spacesStore = useSpacesStore()
+const { refreshCollections } = useRefresh()
 
 const dataManager = new DataManager()
 
@@ -114,7 +116,7 @@ function onAddCollection() {
         spaceId: spacesStore.activeId,
         labelIds: [],
       })
-      await spacesStore.fetchCollections(spacesStore.activeId)
+      await refreshCollections()
     },
   })
 }

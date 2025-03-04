@@ -34,6 +34,7 @@ export const useTagsStore = defineStore("tags", () => {
   async function fetchCollectionsTags() {
     const allTags = await dataManager.getLabels()
     const collections = await spacesStore.fetchCollections(spacesStore.activeId)
+    spacesStore.setCollections(collections)
     const collectionsTagIds = new Set()
     collections.forEach((collection) => {
       collection.labelIds.forEach((labelId) => {

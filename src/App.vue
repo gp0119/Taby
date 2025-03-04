@@ -75,6 +75,13 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   Form: {
     labelTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
   },
+  Radio: {
+    buttonColor: themeStore.themeColor[themeStore.theme].cardBackground,
+    buttonTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
+    buttonColorActive: themeStore.themeColor[themeStore.theme].primary,
+    buttonBorderColorActive: themeStore.themeColor[themeStore.theme].primary,
+    buttonTextColorActive: "#fff",
+  },
 }))
 
 const { refreshSpaces, refreshCollections } = useRefresh()

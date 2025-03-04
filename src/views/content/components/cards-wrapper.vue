@@ -159,7 +159,6 @@ const onDragEnd = async (evt: any) => {
 }
 
 function onHandleCheckbox(checked: boolean, card: iCard) {
-  console.log("checked: ", checked)
   if (checked) {
     batchSelectStore.addSelectedCardId(card.id)
   } else {

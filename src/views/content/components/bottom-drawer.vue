@@ -10,7 +10,7 @@
     >
       <div
         v-if="show"
-        class="fixed bottom-3 left-1/2 z-10 w-[800px] -translate-x-1/2 rounded-xl bg-card-color shadow-base transition-all duration-300 ease-in-out"
+        class="shadow-base-lg fixed bottom-3 left-1/2 z-10 w-[800px] -translate-x-1/2 rounded-xl bg-card-color transition-all duration-300 ease-in-out"
       >
         <div class="relative px-4 py-6">
           <n-icon
@@ -21,7 +21,7 @@
           />
           <div class="flex-center gap-3">
             <span class="text-lg text-text-secondary">
-              select {{ batchSelectStore.selectedCardIds.length }} tags
+              Select {{ batchSelectStore.selectedCardIds.length }} Tags
             </span>
             <n-button secondary type="primary" @click="onHandleMove">
               <template #icon>
@@ -42,13 +42,22 @@
   </teleport>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import { useEditDialog } from "@/hooks/useEditDialog.tsx"
+import { useRefresh } from "@/hooks/useRresh.ts"
+import { useSpacesStore } from "@/store/spaces.ts"
+import { movePosition } from "@/type.ts"
 import { ref } from "vue"
 import { useBatchSelectStore } from "@/store/batch-select"
 import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
+import DataManager from "@/db"
 
 const show = ref(false)
 const batchSelectStore = useBatchSelectStore()
+const dataManager = new DataManager()
+const { refreshCollections } = useRefresh()
+const spacesStore = useSpacesStore()
 
 const closeDrawer = () => {
   show.value = false
@@ -62,11 +71,70 @@ watch(
   },
 )
 
-const onHandleDelete = () => {
-  console.log("delete")
+const { open } = useEditDialog()
+const { open: onDeleteComfirm } = useDeleteDialog()
+const onHandleMove = () => {
+  const formModel = ref<{
+    spaceId: number | null
+    collectionId: number | null
+    position: movePosition
+  }>({
+    spaceId: spacesStore.activeId,
+    collectionId: null,
+    position: "END",
+  })
+  open({
+    title: "Move",
+    renderContenr: () => {
+      return (
+        <n-form model={formModel.value}>
+          <n-form-item label="Space">
+            <space-select v-model:value={formModel.value.spaceId} />
+          </n-form-item>
+          <n-form-item label="Collection">
+            <collection-select
+              v-model:value={formModel.value.collectionId}
+              space-id={formModel.value.spaceId}
+            />
+          </n-form-item>
+          <n-radio-group
+            class="w-full"
+            v-model:value={formModel.value.position}
+          >
+            <n-radio-button class="w-1/2 text-center" value="HEAD">
+              Move to the HEAD
+            </n-radio-button>
+            <n-radio-button class="w-1/2 text-center" value="END">
+              Move to the END
+            </n-radio-button>
+          </n-radio-group>
+        </n-form>
+      )
+    },
+    onPositiveClick: async () => {
+      if (!formModel.value.collectionId) return
+      await dataManager.batchUpdateCards(
+        batchSelectStore.selectedCardIds,
+        {
+          collectionId: formModel.value.collectionId!,
+        },
+        formModel.value.position,
+      )
+      await refreshCollections()
+      closeDrawer()
+    },
+  })
 }
 
-const onHandleMove = () => {
-  console.log("move")
+const onHandleDelete = async () => {
+  onDeleteComfirm({
+    title: "Delete",
+    content: "Are you sure you want to delete these tags?",
+    onPositiveClick: async () => {
+      await dataManager.batchDeleteCards(batchSelectStore.selectedCardIds)
+      await refreshCollections()
+      closeDrawer()
+    },
+  })
 }
 </script>

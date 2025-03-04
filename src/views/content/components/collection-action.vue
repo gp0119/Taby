@@ -30,11 +30,9 @@
 
 <script setup lang="tsx">
 import { CollectionWithCards } from "@/type.ts"
-import IconSelect from "@components/icon-select.vue"
-import { FolderMoveTo, Delete, Edit, Launch, Add } from "@vicons/carbon"
+import { FolderMoveTo, Delete, Edit, Launch } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import DataManager from "@/db"
-import { useSpacesStore } from "@/store/spaces.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import TagAction from "./tag-action.vue"
@@ -45,8 +43,6 @@ defineProps<{
 }>()
 
 const dataManager = new DataManager()
-const spacesStore = useSpacesStore()
-const allSpaces = computed(() => spacesStore.spaces)
 const { refreshCollections } = useRefresh()
 const { openTabs } = useChromeTabs()
 const isShowTagAction = ref(false)
@@ -112,7 +108,6 @@ function onDeleteCollection(item: CollectionWithCards) {
 
 function onMoveCollection(item: CollectionWithCards) {
   const spaceId = ref<number | null>(null)
-  const formModel = ref({ title: "", icon: "StorefrontOutline" })
   dialog.create({
     title: `Move ${item.title} to`,
     titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
@@ -122,46 +117,7 @@ function onMoveCollection(item: CollectionWithCards) {
     content: () => (
       <n-form>
         <n-form-item label="Space">
-          <n-select
-            v-model:value={spaceId.value}
-            options={allSpaces.value.map((item) => ({
-              label: item.title,
-              value: item.id,
-            }))}
-            v-slots={{
-              action: () => {
-                return (
-                  <n-input-group>
-                    <IconSelect v-model:value={formModel.value.icon} />
-                    <n-input
-                      v-model:value={formModel.value.title}
-                      placeholder="create a new space"
-                    />
-                    <n-button
-                      secondary
-                      type="primary"
-                      onClick={async () => {
-                        if (!formModel.value.title) return
-                        await dataManager.addSpace({
-                          title: formModel.value.title,
-                          icon: formModel.value.icon,
-                        })
-                        formModel.value.title = ""
-                        await spacesStore.fetchSpaces()
-                      }}
-                      v-slots={{
-                        icon: () => (
-                          <n-icon>
-                            <Add />
-                          </n-icon>
-                        ),
-                      }}
-                    ></n-button>
-                  </n-input-group>
-                )
-              },
-            }}
-          />
+          <space-select v-model={spaceId.value} />
         </n-form-item>
       </n-form>
     ),

@@ -1,6 +1,12 @@
 import { COLOR_LIST } from "@/utils/constants.ts"
 import Dexie from "dexie"
-import { Card, Collection, CollectionWithCards, Space } from "@/type.ts"
+import {
+  Card,
+  Collection,
+  CollectionWithCards,
+  movePosition,
+  Space,
+} from "@/type.ts"
 import { db } from "./database.ts"
 
 class dataManager {
@@ -326,6 +332,40 @@ class dataManager {
         }
       }),
     )
+  }
+
+  async batchUpdateCards(
+    cardIds: number[],
+    updateData: Partial<Card>,
+    position?: movePosition,
+  ) {
+    const toCollections = await db.cards
+      .where("[collectionId+order]")
+      .between(
+        [updateData.collectionId!, Dexie.minKey],
+        [updateData.collectionId!, Dexie.maxKey],
+      )
+      .toArray()
+    const moveingCards = await db.cards.where("id").anyOf(cardIds).toArray()
+    if (position === "HEAD") {
+      toCollections.unshift(...moveingCards)
+    } else if (position === "END") {
+      toCollections.push(...moveingCards)
+    }
+    await Promise.all(
+      toCollections.map(async (card, index) => {
+        await db.cards.update(card.id, {
+          ...(cardIds.includes(card.id) && {
+            ...updateData,
+          }),
+          order: (index + 1) * this.ORDER_STEP,
+        })
+      }),
+    )
+  }
+
+  async batchDeleteCards(cardIds: number[]) {
+    return db.cards.bulkDelete(cardIds)
   }
 
   async getCollectionWithCards(

@@ -1,13 +1,17 @@
 <template>
-  <div class="card group/card" @click="onHandleClick">
+  <div
+    class="card group/card"
+    :class="{ '!shadow-base-lg': selectIds?.includes(child.id) }"
+    @click="onHandleClick"
+  >
     <div class="card-header">
       <div
-        class="hidden h-[24px] w-[24px] items-center group-hover/card:flex"
-        :class="{ '!flex': selectIds.includes(child.id) }"
+        class="mr-2.5 hidden h-[24px] w-[24px] items-center justify-center group-hover/card:flex"
+        :class="{ '!flex': selectIds?.includes(child.id) }"
         @click.stop="() => {}"
       >
         <n-checkbox
-          :checked="selectIds.includes(child.id)"
+          :checked="selectIds?.includes(child.id)"
           size="large"
           @update:checked="onHandleCheckbox"
         />
@@ -15,7 +19,7 @@
       <favicon
         :type="type"
         :child="child"
-        v-if="!selectIds.includes(child.id)"
+        v-if="!selectIds?.includes(child.id)"
         class="group-hover/card:hidden"
       />
       <span class="card-title">{{ child.customTitle || child.title }}</span>

@@ -26,9 +26,7 @@ export const useSpacesStore = defineStore("spaces", () => {
 
   async function fetchCollections(spaceId: number) {
     try {
-      const items = await dataManager.getCollectionWithCards(spaceId)
-      collections.value = items
-      return items
+      return dataManager.getCollectionWithCards(spaceId)
     } catch (error) {
       console.error(`Failed to fetch collections for space ${spaceId}:`, error)
       return []
@@ -38,6 +36,10 @@ export const useSpacesStore = defineStore("spaces", () => {
   async function setActiveSpace(id: number) {
     activeId.value = id
     await fetchCollections(id)
+  }
+
+  function setCollections(_collections: CollectionWithCards[]) {
+    collections.value = _collections
   }
 
   // 初始化方法
@@ -58,5 +60,6 @@ export const useSpacesStore = defineStore("spaces", () => {
     fetchCollections,
     setActiveSpace,
     initialize,
+    setCollections,
   }
 })
