@@ -13,7 +13,7 @@ defineProps<{
   options: iOptions
 }>()
 
-const id = defineModel<string>("modelValue", {
-  default: "",
+const id = defineModel<number | null>("modelValue", {
+  default: null,
 })
 </script>

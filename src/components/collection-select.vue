@@ -28,8 +28,8 @@ import DataManager from "@/db"
 const props = defineProps<{
   spaceId: number
 }>()
-const id = defineModel<string>("modelValue", {
-  default: "",
+const id = defineModel<number | null>("modelValue", {
+  default: null,
 })
 const spacesStore = useSpacesStore()
 const options = ref<iOptions>([])
