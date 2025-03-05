@@ -86,14 +86,13 @@ class DataBase extends Dexie {
   }
 
   async exportBySpaceId(spaceIds: number[]) {
-    const spaces = await this.spaces.where("id").anyOf(spaceIds).toArray()
+    const spaces = await this.spaces.where("id").anyOf(spaceIds).sortBy("order")
     return Promise.all(
       spaces.map(async (space) => {
         const { createdAt, modifiedAt, id, order, ...restSpace } = space
         const collections = await this.collections
-          .where("spaceId")
-          .equals(space.id)
-          .toArray()
+          .where({ spaceId: id })
+          .sortBy("order")
         const spaceCollections = await Promise.all(
           collections.map(async (collection) => {
             const collectionLabels = await this.labels
@@ -101,9 +100,8 @@ class DataBase extends Dexie {
               .anyOf(collection.labelIds)
               .toArray()
             const collectionCards = await this.cards
-              .where("collectionId")
-              .equals(collection.id)
-              .toArray()
+              .where({ collectionId: collection.id })
+              .sortBy("order")
             return {
               ...collection,
               labels: collectionLabels.map(
