@@ -51,6 +51,7 @@ import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
+import { movePosition } from "@/type.ts"
 import NavAction from "@/views/navs/components/nav-action.vue"
 import { Add, Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
@@ -93,7 +94,10 @@ watch(
 
 const dialog = useDialog()
 function onAddCollection() {
-  const formModel = ref({ title: "" })
+  const formModel = ref<{
+    title: string
+    position: movePosition
+  }>({ title: "", position: "END" })
   dialog.create({
     title: () => {
       return <span>Add Collection</span>
@@ -107,15 +111,26 @@ function onAddCollection() {
         <n-form-item label="Title">
           <n-input v-model:value={formModel.value.title} />
         </n-form-item>
+        <n-radio-group class="w-full" v-model:value={formModel.value.position}>
+          <n-radio-button class="w-1/2 text-center" value="HEAD">
+            Move to the HEAD
+          </n-radio-button>
+          <n-radio-button class="w-1/2 text-center" value="END">
+            Move to the END
+          </n-radio-button>
+        </n-radio-group>
       </n-form>
     ),
     onPositiveClick: async () => {
       if (!formModel.value.title) return
-      await dataManager.addCollection({
-        title: formModel.value.title,
-        spaceId: spacesStore.activeId,
-        labelIds: [],
-      })
+      await dataManager.addCollection(
+        {
+          title: formModel.value.title,
+          spaceId: spacesStore.activeId,
+          labelIds: [],
+        },
+        formModel.value.position,
+      )
       await refreshCollections()
     },
   })

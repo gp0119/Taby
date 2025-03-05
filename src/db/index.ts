@@ -69,18 +69,46 @@ class dataManager {
     return db.collections.orderBy("order").toArray()
   }
 
-  async addCollection(collection: Omit<Collection, "id" | "order">) {
-    const lastCollection = await db.collections
-      .where("[spaceId+order]")
-      .between(
-        [collection.spaceId, Dexie.minKey],
-        [collection.spaceId, Dexie.maxKey],
+  async addCollection(
+    collection: Omit<Collection, "id" | "order">,
+    position: movePosition = "END",
+  ) {
+    if (position === "HEAD") {
+      const collections = await db.collections
+        .where("[spaceId+order]")
+        .between(
+          [collection.spaceId, Dexie.minKey],
+          [collection.spaceId, Dexie.maxKey],
+        )
+        .toArray()
+      collections.unshift(collection as Collection)
+      await Promise.all(
+        collections.map(async (collection, index) => {
+          if (collection.id) {
+            await db.collections.update(collection.id, {
+              order: (index + 1) * this.ORDER_STEP,
+            })
+          } else {
+            await db.collections.add({
+              ...collection,
+              order: (index + 1) * this.ORDER_STEP,
+            })
+          }
+        }),
       )
-      .last()
-    return db.collections.add({
-      ...collection,
-      order: lastCollection ? lastCollection.order + this.ORDER_STEP : 1000,
-    })
+    } else if (position === "END") {
+      const lastCollection = await db.collections
+        .where("[spaceId+order]")
+        .between(
+          [collection.spaceId, Dexie.minKey],
+          [collection.spaceId, Dexie.maxKey],
+        )
+        .last()
+      return db.collections.add({
+        ...collection,
+        order: lastCollection ? lastCollection.order + this.ORDER_STEP : 1000,
+      })
+    }
   }
 
   async removeCollection(id: number) {
