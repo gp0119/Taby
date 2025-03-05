@@ -112,7 +112,14 @@ class DataBase extends Dexie {
                 }),
               ),
               cards: collectionCards.map(
-                ({ createdAt, modifiedAt, id, order, ...rest }) => ({
+                ({
+                  createdAt,
+                  modifiedAt,
+                  id,
+                  order,
+                  collectionId,
+                  ...rest
+                }) => ({
                   ...rest,
                 }),
               ),
@@ -122,7 +129,15 @@ class DataBase extends Dexie {
         return {
           ...restSpace,
           collections: spaceCollections.map(
-            ({ createdAt, modifiedAt, id, order, ...rest }) => ({ ...rest }),
+            ({
+              createdAt,
+              modifiedAt,
+              id,
+              order,
+              labelIds,
+              spaceId,
+              ...rest
+            }) => ({ ...rest }),
           ),
         }
       }),
