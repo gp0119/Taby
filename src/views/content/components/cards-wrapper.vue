@@ -9,6 +9,7 @@
     item-key="id"
     :data-collectionid="collectionId"
     handle=".card-item"
+    dragClass="*:!opacity-20"
     ghost-class="sortable-ghost-dashed-border"
     @end="onDragEnd"
   >
@@ -142,6 +143,7 @@ function onEdit(child: iCard) {
 
 const onDragEnd = async (evt: any) => {
   const { from, to, item, oldIndex, newIndex } = evt
+  if (oldIndex === newIndex && from === to) return
   const { collectionid: fromCollectionId } = from.dataset
   const { collectionid: toCollectionId } = to.dataset
   const fromCardId = item.getAttribute("data-id")
