@@ -421,6 +421,10 @@ class dataManager {
     return db.cards.bulkAdd(cards)
   }
 
+  async batchAddCollections(collections: Omit<Collection, "id">[]) {
+    return db.collections.bulkAdd(collections)
+  }
+
   async getCard(cardId: number) {
     return await db.cards.get(cardId)
   }

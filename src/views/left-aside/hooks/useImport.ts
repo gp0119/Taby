@@ -1,10 +1,46 @@
-import { CollectionWithCards } from "@/type.ts"
+import { Card, CollectionWithCards, Label } from "@/type.ts"
 import DanaManager from "@/db"
 import { useMessage } from "naive-ui"
-import { Card, Collection, Label, Space } from "@/type.ts"
+
+const dataManager = new DanaManager()
+async function batchAddLable(labels: Label[]) {
+  const labelIds: number[] = []
+  for (const label of labels) {
+    const labelId = await dataManager.getOrCreateLabelWithTitle(label.title)
+    if (labelId) {
+      labelIds.push(labelId)
+    }
+  }
+  return labelIds
+}
+
+async function batchAddCard(cards: Card[], collectionId: number) {
+  await dataManager.batchAddCards(
+    cards.map((card, index) => {
+      return {
+        ...card,
+        customTitle: card.customTitle || card.title,
+        customDescription: card.customDescription || card.title,
+        collectionId,
+        order: (index + 1) * 1000,
+      }
+    }),
+  )
+}
+
+async function addCollection(
+  collection: CollectionWithCards,
+  spaceId: number,
+  labelIds: number[],
+) {
+  return dataManager.addCollection({
+    title: collection.title,
+    spaceId: spaceId,
+    labelIds,
+  })
+}
 
 export function useImport() {
-  const dataManager = new DanaManager()
   const message = useMessage()
   const importFromToby = async (spaceId: number, file: Blob) => {
     return new Promise((resolve, reject) => {
@@ -16,35 +52,13 @@ export function useImport() {
             lists: CollectionWithCards[]
           } = JSON.parse(event.target?.result as string)
           for (const list of lists.lists) {
-            const labelIds: number[] = []
-            await Promise.all(
-              list.labels.map(async (item) => {
-                const labelId = await dataManager.getOrCreateLabelWithTitle(
-                  item.title,
-                )
-                if (labelId) {
-                  labelIds.push(labelId)
-                }
-              }),
-            )
-            const collectionId = (await dataManager.addCollection({
-              title: list.title,
-              spaceId: spaceId,
+            const labelIds: number[] = await batchAddLable(list.labels)
+            const collectionId = (await addCollection(
+              list,
+              spaceId,
               labelIds,
-            })) as number
-            await dataManager.batchAddCards(
-              list.cards
-                .filter((item) => item.url !== "/note.html")
-                .map((item, index) => {
-                  return {
-                    ...item,
-                    customTitle: item.customTitle || item.title,
-                    customDescription: item.customDescription || item.title,
-                    collectionId,
-                    order: (index + 1) * 1000,
-                  }
-                }),
-            )
+            )) as number
+            await batchAddCard(list.cards, collectionId)
           }
           resolve(true)
         } catch (error) {
@@ -62,43 +76,18 @@ export function useImport() {
       reader.onload = async (event) => {
         try {
           const spaces = JSON.parse(event.target?.result as string)
-          await Promise.all(
-            spaces.map(
-              async (
-                space: Space & {
-                  collections: (Collection & {
-                    cards: Card[]
-                    labels: Label[]
-                  })[]
-                },
-              ) => {
-                const spaceId = await dataManager.addSpace(space)
-                space.collections.map(async (collection) => {
-                  const labelIds: number[] = []
-                  await Promise.all(
-                    collection.labels.map(async (item) => {
-                      const labelId =
-                        await dataManager.getOrCreateLabelWithTitle(item.title)
-                      if (labelId) {
-                        labelIds.push(labelId)
-                      }
-                    }),
-                  )
-                  const collectionId = (await dataManager.addCollection({
-                    ...collection,
-                    spaceId,
-                    labelIds,
-                  })) as number
-                  collection.cards.map(async (card) => {
-                    await dataManager.addCard({
-                      ...card,
-                      collectionId,
-                    })
-                  })
-                })
-              },
-            ),
-          )
+          for (const space of spaces) {
+            const spaceId = await dataManager.addSpace(space)
+            for (const collection of space.collections) {
+              const labelIds: number[] = await batchAddLable(collection.labels)
+              const collectionId = (await addCollection(
+                space,
+                spaceId,
+                labelIds,
+              )) as number
+              await batchAddCard(collection.cards, collectionId)
+            }
+          }
           resolve(true)
         } catch (error) {
           reject(error)
