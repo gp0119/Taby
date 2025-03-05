@@ -13,12 +13,15 @@
     >
       <div class="flex items-center">
         {{ tag.title }}
-        <n-icon
-          @click.stop="onDeleteTagFromCollection(tag.id)"
+        <n-icon-wrapper
+          border-radius="10"
+          icon-color="#fff"
           size="12"
-          class="absolute -right-1 -top-1 hidden cursor-pointer rounded-full bg-primary text-white group-hover/tag:block"
-          :component="Close"
-        />
+          class="absolute -right-1 -top-1 z-10 hidden cursor-pointer group-hover/tag:block"
+          @click.stop="onDeleteTagFromCollection(tag.id)"
+        >
+          <n-icon :component="Close" />
+        </n-icon-wrapper>
       </div>
     </n-tag>
   </n-space>
