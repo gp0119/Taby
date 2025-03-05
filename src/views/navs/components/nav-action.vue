@@ -106,21 +106,26 @@
       </n-switch>
     </div>
     <div class="flex-center gap-2">
-      <div
-        class="h-[30px] w-[220px] cursor-pointer select-none whitespace-nowrap rounded border bg-card-color px-2 text-xs leading-[30px] text-[#C2C2C2]"
-        @click="openModal"
-      >
-        Press Ctrl/Command + F to search
-      </div>
+      <n-button size="small" secondary type="primary" @click="onAddCollection">
+        <span>ADD COLLECTION</span>
+        <template #icon>
+          <n-icon>
+            <Add />
+          </n-icon>
+        </template>
+      </n-button>
     </div>
   </div>
 </template>
 
 <script setup lang="tsx">
-import { useSearchModal } from "@/hooks/useSearchModal.tsx"
+import DataManager from "@/db"
+import { useRefresh } from "@/hooks/useRresh.ts"
 import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
+import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
+import { Add } from "@vicons/ionicons5"
 import { SelectGroupOption, SelectOption } from "naive-ui"
 import {
   TagGroup,
@@ -134,9 +139,8 @@ import {
   RowCollapse,
 } from "@vicons/carbon"
 import { useExpandStore } from "@/store/expand"
-import { Label } from "@/type"
+import { Label, movePosition } from "@/type"
 
-const { openModal } = useSearchModal()
 const draggableStore = useDraggableStore()
 
 const tagsStore = useTagsStore()
@@ -204,5 +208,52 @@ const handleSortSelect = (key: string) => {
   const [sort, order] = key.split("-")
   sortStore.setSort(sort)
   sortStore.setOrder(order ?? null)
+}
+
+const dialog = useDialog()
+const spacesStore = useSpacesStore()
+const dataManager = new DataManager()
+const { refreshCollections } = useRefresh()
+function onAddCollection() {
+  const formModel = ref<{
+    title: string
+    position: movePosition
+  }>({ title: "", position: "END" })
+  dialog.create({
+    title: () => {
+      return <span>Add Collection</span>
+    },
+    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
+    class: "bg-body-color",
+    negativeText: "Cancel",
+    positiveText: "Save",
+    content: () => (
+      <n-form model={formModel.value}>
+        <n-form-item label="Title">
+          <n-input v-model:value={formModel.value.title} />
+        </n-form-item>
+        <n-radio-group class="w-full" v-model:value={formModel.value.position}>
+          <n-radio-button class="w-1/2 text-center" value="HEAD">
+            Move to the HEAD
+          </n-radio-button>
+          <n-radio-button class="w-1/2 text-center" value="END">
+            Move to the END
+          </n-radio-button>
+        </n-radio-group>
+      </n-form>
+    ),
+    onPositiveClick: async () => {
+      if (!formModel.value.title) return
+      await dataManager.addCollection(
+        {
+          title: formModel.value.title,
+          spaceId: spacesStore.activeId,
+          labelIds: [],
+        },
+        formModel.value.position,
+      )
+      await refreshCollections()
+    },
+  })
 }
 </script>

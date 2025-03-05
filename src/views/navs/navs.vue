@@ -1,12 +1,17 @@
 <template>
   <div
-    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-8 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex items-center gap-4">
       <template v-if="title">
-        <span class="shrink-0 select-none text-xl text-text-primary">{{
-          title
-        }}</span>
+        <div class="flex-center">
+          <n-icon size="20" class="mr-1">
+            <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
+          </n-icon>
+          <span class="shrink-0 select-none text-xl text-text-primary">{{
+            title
+          }}</span>
+        </div>
         <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
         <span class="font-thin text-text-secondary"
           >{{ spacesStore.collections.length }} Collections</span
@@ -14,14 +19,6 @@
       </template>
     </div>
     <n-space class="flex-shrink-0">
-      <n-button size="tiny" type="primary" @click="onAddCollection">
-        <span>ADD COLLECTION</span>
-        <template #icon>
-          <n-icon>
-            <Add />
-          </n-icon>
-        </template>
-      </n-button>
       <n-icon
         size="20"
         class="cursor-pointer text-primary"
@@ -46,19 +43,16 @@
 </template>
 
 <script setup lang="tsx">
-import { useRefresh } from "@/hooks/useRresh.ts"
-import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
-import { movePosition } from "@/type.ts"
 import NavAction from "@/views/navs/components/nav-action.vue"
-import { Add, Settings } from "@vicons/ionicons5"
+import { Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
 import DataManager from "@/db"
-import { useEventListener } from "@vueuse/core"
 import { SelectOption, SelectGroupOption } from "naive-ui"
 import IconSelect from "@components/icon-select.vue"
+import { ICON_LIST } from "@/utils/constants.ts"
 const { themeColor, theme, setTheme } = useThemeStore()
 
 const currentTheme = ref(theme)
@@ -78,10 +72,8 @@ const renderLabel = (option: SelectOption | SelectGroupOption) => {
 }
 
 const tagsStore = useTagsStore()
-
 const spacesStore = useSpacesStore()
-const { refreshCollections } = useRefresh()
-
+const dialog = useDialog()
 const dataManager = new DataManager()
 
 watch(
@@ -91,50 +83,6 @@ watch(
   },
   { immediate: true },
 )
-
-const dialog = useDialog()
-function onAddCollection() {
-  const formModel = ref<{
-    title: string
-    position: movePosition
-  }>({ title: "", position: "END" })
-  dialog.create({
-    title: () => {
-      return <span>Add Collection</span>
-    },
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label="Title">
-          <n-input v-model:value={formModel.value.title} />
-        </n-form-item>
-        <n-radio-group class="w-full" v-model:value={formModel.value.position}>
-          <n-radio-button class="w-1/2 text-center" value="HEAD">
-            Move to the HEAD
-          </n-radio-button>
-          <n-radio-button class="w-1/2 text-center" value="END">
-            Move to the END
-          </n-radio-button>
-        </n-radio-group>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      if (!formModel.value.title) return
-      await dataManager.addCollection(
-        {
-          title: formModel.value.title,
-          spaceId: spacesStore.activeId,
-          labelIds: [],
-        },
-        formModel.value.position,
-      )
-      await refreshCollections()
-    },
-  })
-}
 
 const title = computed(
   () =>
@@ -215,16 +163,4 @@ function onDeleteSpace() {
     },
   })
 }
-
-const { openModal } = useSearchModal()
-const cleanup = useEventListener(window, "keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "f") {
-    e.preventDefault()
-    e.stopPropagation()
-    openModal()
-  }
-})
-onUnmounted(() => {
-  cleanup()
-})
 </script>
