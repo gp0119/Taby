@@ -5,11 +5,11 @@ export function useEditDialog() {
 
   const open = ({
     title,
-    renderContenr,
+    renderContent,
     onPositiveClick,
   }: {
     title: string
-    renderContenr: () => VNode
+    renderContent: () => VNode
     onPositiveClick: () => void
   }) => {
     dialog.create({
@@ -18,7 +18,7 @@ export function useEditDialog() {
       class: "bg-body-color",
       negativeText: "Cancel",
       positiveText: "Save",
-      content: renderContenr,
+      content: renderContent,
       onPositiveClick,
     })
   }

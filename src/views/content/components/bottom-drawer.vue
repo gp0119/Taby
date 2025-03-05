@@ -85,7 +85,7 @@ const onHandleMove = () => {
   })
   open({
     title: "Move",
-    renderContenr: () => {
+    renderContent: () => {
       return (
         <n-form model={formModel.value}>
           <n-form-item label="Space">

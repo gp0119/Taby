@@ -35,20 +35,12 @@
     </div>
     <div class="px-2.5 py-4">
       <n-space vertical>
-        <n-upload
-          @change="onChange"
-          trigger-class="w-full"
-          accept=".json"
-          :show-file-list="false"
-          :max="1"
-        >
-          <n-button class="w-full">
-            <span>导入</span>
-            <template #icon>
-              <n-icon size="18" :component="DocumentImport" />
-            </template>
-          </n-button>
-        </n-upload>
+        <n-button class="w-full" @click="onImport">
+          <span>导入</span>
+          <template #icon>
+            <n-icon size="18" :component="DocumentImport" />
+          </template>
+        </n-button>
         <n-button class="w-full" @click="onSync">
           <span>同步</span>
           <template #icon>
@@ -61,6 +53,7 @@
 </template>
 
 <script setup lang="tsx">
+import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { SyncSharp, LogoGithub } from "@vicons/ionicons5"
 import { DocumentImport, FolderAdd } from "@vicons/carbon"
@@ -69,13 +62,13 @@ import logo from "@/assets/72.png"
 import DanaManager from "@/db"
 import { CollectionWithCards, Space } from "@/type.ts"
 import { useEventListener } from "@vueuse/core"
-import { UploadSettledFileInfo } from "naive-ui/es/upload/src/public-types"
-import { FormInst } from "naive-ui"
+import { FormInst, UploadFileInfo } from "naive-ui"
 import { uploadAll, downloadAll } from "@/sync/gistSync.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import IconSelect from "@components/icon-select.vue"
 import SpaceWrapper from "./components/space-wrapper.vue"
 import { SortableEvent } from "vue-draggable-plus"
+import SpaceSelect from "@/components/space-select.vue"
 
 const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
@@ -117,6 +110,7 @@ const onDragEnd = async (evt: SortableEvent) => {
 
 const dialog = useDialog()
 const message = useMessage()
+const { open } = useEditDialog()
 
 function onAddSpace() {
   const formModel = ref({ title: "", icon: "StorefrontOutline" })
@@ -153,50 +147,81 @@ function onHandleSpaceClick(space: Space) {
   spacesStore.setActiveSpace(space.id!)
 }
 
-function onChange({ file }: { file: UploadSettledFileInfo }) {
-  const reader = new FileReader()
-  reader.onload = async (event) => {
-    try {
-      const lists: {
-        lists: CollectionWithCards[]
-      } = JSON.parse(event.target?.result as string)
-      for (const list of lists.lists) {
-        const labelIds: number[] = []
-        await Promise.all(
-          list.labels.map(async (item) => {
-            const labelId = await dataManager.getOrCreateLabelWithTitle(
-              item.title,
+function onImport() {
+  const formModel = ref<{
+    spaceId: number
+    fileList: UploadFileInfo[]
+  }>({
+    spaceId: spacesStore.activeId,
+    fileList: [],
+  })
+  open({
+    title: "Import From Toby",
+    renderContent: () => {
+      return (
+        <n-form model={formModel.value}>
+          <n-form-item label="Space">
+            <SpaceSelect v-model:value={formModel.value.spaceId} />
+          </n-form-item>
+          <n-form-item label-placement="left">
+            <n-upload
+              v-model:fileList={formModel.value.fileList}
+              accept=".json"
+              max={1}
+            >
+              <n-button>选择文件</n-button>
+            </n-upload>
+          </n-form-item>
+        </n-form>
+      )
+    },
+    onPositiveClick: () => {
+      if (!formModel.value.fileList.length) return
+      const reader = new FileReader()
+      reader.readAsText(formModel.value.fileList[0]?.file as Blob)
+      reader.onload = async (event) => {
+        try {
+          const lists: {
+            lists: CollectionWithCards[]
+          } = JSON.parse(event.target?.result as string)
+          for (const list of lists.lists) {
+            const labelIds: number[] = []
+            await Promise.all(
+              list.labels.map(async (item) => {
+                const labelId = await dataManager.getOrCreateLabelWithTitle(
+                  item.title,
+                )
+                if (labelId) {
+                  labelIds.push(labelId)
+                }
+              }),
             )
-            if (labelId) {
-              labelIds.push(labelId)
-            }
-          }),
-        )
-        const collectionId = (await dataManager.addCollection({
-          title: list.title,
-          spaceId: activeSpaceId.value,
-          labelIds,
-        })) as number
-        await dataManager.batchAddCards(
-          list.cards
-            .filter((item) => item.url !== "/note.html")
-            .map((item, index) => {
-              return {
-                ...item,
-                customTitle: item.customTitle || item.title,
-                customDescription: item.customDescription || item.title,
-                collectionId,
-                order: (index + 1) * 1000,
-              }
-            }),
-        )
-        await refreshCollections()
+            const collectionId = (await dataManager.addCollection({
+              title: list.title,
+              spaceId: formModel.value.spaceId,
+              labelIds,
+            })) as number
+            await dataManager.batchAddCards(
+              list.cards
+                .filter((item) => item.url !== "/note.html")
+                .map((item, index) => {
+                  return {
+                    ...item,
+                    customTitle: item.customTitle || item.title,
+                    customDescription: item.customDescription || item.title,
+                    collectionId,
+                    order: (index + 1) * 1000,
+                  }
+                }),
+            )
+          }
+          await refreshCollections()
+        } catch (error) {
+          message.error("文件内容不是有效的 JSON")
+        }
       }
-    } catch (error) {
-      console.error("文件内容不是有效的 JSON", error)
-    }
-  }
-  reader.readAsText(file.file as Blob)
+    },
+  })
 }
 
 function onSync() {
