@@ -41,6 +41,12 @@
             <n-icon size="18" :component="DocumentImport" />
           </template>
         </n-button>
+        <n-button class="w-full" @click="onExport">
+          <span>导出</span>
+          <template #icon>
+            <n-icon size="18" :component="DocumentExport" />
+          </template>
+        </n-button>
         <n-button class="w-full" @click="onSync">
           <span>同步</span>
           <template #icon>
@@ -55,12 +61,14 @@
 <script setup lang="tsx">
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
+import { useExport } from "@/views/left-aside/hooks/useExport.ts"
+import { useImport } from "@/views/left-aside/hooks/useImport.ts"
 import { SyncSharp, LogoGithub } from "@vicons/ionicons5"
-import { DocumentImport, FolderAdd } from "@vicons/carbon"
+import { DocumentImport, DocumentExport, FolderAdd } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "@/assets/72.png"
 import DanaManager from "@/db"
-import { CollectionWithCards, Space } from "@/type.ts"
+import { Space } from "@/type.ts"
 import { useEventListener } from "@vueuse/core"
 import { FormInst, UploadFileInfo } from "naive-ui"
 import { uploadAll, downloadAll } from "@/sync/gistSync.ts"
@@ -74,6 +82,7 @@ const spacesStore = useSpacesStore()
 const dataManager = new DanaManager()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const { openModal } = useSearchModal()
+const loadingBar = useLoadingBar()
 
 const init = async () => {
   await spacesStore.initialize()
@@ -111,6 +120,8 @@ const onDragEnd = async (evt: SortableEvent) => {
 const dialog = useDialog()
 const message = useMessage()
 const { open } = useEditDialog()
+const { importFromToby, importFromTaby } = useImport()
+const { exportFromTaby } = useExport()
 
 function onAddSpace() {
   const formModel = ref({ title: "", icon: "StorefrontOutline" })
@@ -148,6 +159,7 @@ function onHandleSpaceClick(space: Space) {
 }
 
 function onImport() {
+  const type = ref("toby")
   const formModel = ref<{
     spaceId: number
     fileList: UploadFileInfo[]
@@ -156,13 +168,25 @@ function onImport() {
     fileList: [],
   })
   open({
-    title: "Import From Toby",
+    title: "Import",
     renderContent: () => {
       return (
         <n-form model={formModel.value}>
-          <n-form-item label="Space">
-            <SpaceSelect v-model:value={formModel.value.spaceId} />
+          <n-form-item>
+            <n-radio-group class="w-full" v-model:value={type.value}>
+              <n-radio-button class="w-1/2 text-center" value="toby">
+                From Toby
+              </n-radio-button>
+              <n-radio-button class="w-1/2 text-center" value="taby">
+                From Taby
+              </n-radio-button>
+            </n-radio-group>
           </n-form-item>
+          {type.value === "toby" && (
+            <n-form-item label="Space">
+              <SpaceSelect v-model:value={formModel.value.spaceId} />
+            </n-form-item>
+          )}
           <n-form-item label-placement="left">
             <n-upload
               v-model:fileList={formModel.value.fileList}
@@ -175,51 +199,41 @@ function onImport() {
         </n-form>
       )
     },
-    onPositiveClick: () => {
+    onPositiveClick: async () => {
       if (!formModel.value.fileList.length) return
-      const reader = new FileReader()
-      reader.readAsText(formModel.value.fileList[0]?.file as Blob)
-      reader.onload = async (event) => {
-        try {
-          const lists: {
-            lists: CollectionWithCards[]
-          } = JSON.parse(event.target?.result as string)
-          for (const list of lists.lists) {
-            const labelIds: number[] = []
-            await Promise.all(
-              list.labels.map(async (item) => {
-                const labelId = await dataManager.getOrCreateLabelWithTitle(
-                  item.title,
-                )
-                if (labelId) {
-                  labelIds.push(labelId)
-                }
-              }),
-            )
-            const collectionId = (await dataManager.addCollection({
-              title: list.title,
-              spaceId: formModel.value.spaceId,
-              labelIds,
-            })) as number
-            await dataManager.batchAddCards(
-              list.cards
-                .filter((item) => item.url !== "/note.html")
-                .map((item, index) => {
-                  return {
-                    ...item,
-                    customTitle: item.customTitle || item.title,
-                    customDescription: item.customDescription || item.title,
-                    collectionId,
-                    order: (index + 1) * 1000,
-                  }
-                }),
-            )
-          }
-          await refreshCollections()
-        } catch (error) {
-          message.error("文件内容不是有效的 JSON")
-        }
+      loadingBar.start()
+      if (type.value === "toby") {
+        await importFromToby(
+          formModel.value.spaceId,
+          formModel.value.fileList[0].file!,
+        )
+      } else {
+        await importFromTaby(formModel.value.fileList[0].file!)
+        await refreshSpaces()
       }
+      await refreshCollections()
+      loadingBar.finish()
+    },
+  })
+}
+
+function onExport() {
+  const formModel = ref({
+    spaceIds: [spacesStore.activeId],
+  })
+  open({
+    title: "Export",
+    renderContent: () => {
+      return (
+        <n-form model={formModel.value}>
+          <n-form-item label="Space">
+            <SpaceSelect multiple v-model:value={formModel.value.spaceIds} />
+          </n-form-item>
+        </n-form>
+      )
+    },
+    onPositiveClick: () => {
+      exportFromTaby(formModel.value.spaceIds)
     },
   })
 }

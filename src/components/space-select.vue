@@ -1,5 +1,5 @@
 <template>
-  <select-wrapper :options="allSpaces" v-model="id">
+  <select-wrapper :options="allSpaces" :multiple="multiple" v-model="id">
     <template #action>
       <n-input-group>
         <IconSelect v-model:value="formModel.icon" />
@@ -26,9 +26,18 @@ import { Add } from "@vicons/carbon"
 import IconSelect from "@components/icon-select.vue"
 import DataManager from "@/db"
 
-const id = defineModel<number | null>("modelValue", {
+const id = defineModel<number | null | number[]>("modelValue", {
   default: null,
 })
+
+withDefaults(
+  defineProps<{
+    multiple?: boolean
+  }>(),
+  {
+    multiple: false,
+  },
+)
 
 const spacesStore = useSpacesStore()
 

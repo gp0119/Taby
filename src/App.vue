@@ -1,49 +1,53 @@
 <template>
   <n-config-provider :theme-overrides="themeOverrides" class="h-full">
-    <n-dialog-provider>
-      <n-message-provider>
-        <n-modal-provider>
-          <n-layout
-            has-sider
-            class="h-full [&_.n-layout-toggle-button]:!top-[25px] [&_.n-layout-toggle-button]:shadow-base"
-            content-class="bg-body-color"
-          >
-            <n-layout-sider
-              :width="200"
-              :collapsed-width="30"
-              content-class="bg-body-color"
-              :show-collapsed-content="false"
-              show-trigger="arrow-circle"
-              trigger-class="!bg-body-color"
-              class="border-r"
-            >
-              <left-aside />
-            </n-layout-sider>
+    <n-loading-bar-provider>
+      <n-dialog-provider>
+        <n-message-provider>
+          <n-modal-provider>
             <n-layout
-              content-class="bg-body-color"
               has-sider
-              sider-placement="right"
+              class="h-full [&_.n-layout-toggle-button]:!top-[25px] [&_.n-layout-toggle-button]:shadow-base"
+              content-class="bg-body-color"
             >
-              <n-layout-content content-class="bg-body-color  overflow-hidden">
-                <navs />
-                <content />
-              </n-layout-content>
               <n-layout-sider
-                content-class="bg-body-color"
-                class="border-l"
-                :width="250"
+                :width="200"
                 :collapsed-width="30"
+                content-class="bg-body-color"
                 :show-collapsed-content="false"
                 show-trigger="arrow-circle"
                 trigger-class="!bg-body-color"
+                class="border-r"
               >
-                <right-aside />
+                <left-aside />
               </n-layout-sider>
+              <n-layout
+                content-class="bg-body-color"
+                has-sider
+                sider-placement="right"
+              >
+                <n-layout-content
+                  content-class="bg-body-color  overflow-hidden"
+                >
+                  <navs />
+                  <content />
+                </n-layout-content>
+                <n-layout-sider
+                  content-class="bg-body-color"
+                  class="border-l"
+                  :width="250"
+                  :collapsed-width="30"
+                  :show-collapsed-content="false"
+                  show-trigger="arrow-circle"
+                  trigger-class="!bg-body-color"
+                >
+                  <right-aside />
+                </n-layout-sider>
+              </n-layout>
             </n-layout>
-          </n-layout>
-        </n-modal-provider>
-      </n-message-provider>
-    </n-dialog-provider>
+          </n-modal-provider>
+        </n-message-provider>
+      </n-dialog-provider>
+    </n-loading-bar-provider>
   </n-config-provider>
 </template>
 
@@ -85,6 +89,9 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
     buttonColorActive: themeStore.themeColor[themeStore.theme].primary,
     buttonBorderColorActive: themeStore.themeColor[themeStore.theme].primary,
     buttonTextColorActive: "#fff",
+  },
+  LoadingBar: {
+    colorLoading: "#18A058",
   },
 }))
 
