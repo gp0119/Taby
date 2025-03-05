@@ -10,7 +10,7 @@
     >
       <div
         v-if="show"
-        class="shadow-base-lg fixed bottom-3 left-1/2 z-10 w-[800px] -translate-x-1/2 rounded-xl bg-card-color transition-all duration-300 ease-in-out"
+        class="fixed bottom-3 left-1/2 z-10 w-[800px] -translate-x-1/2 rounded-xl bg-card-color shadow-base-lg transition-all duration-300 ease-in-out"
       >
         <div class="relative px-4 py-6">
           <n-icon
@@ -97,17 +97,19 @@ const onHandleMove = () => {
               space-id={formModel.value.spaceId}
             />
           </n-form-item>
-          <n-radio-group
-            class="w-full"
-            v-model:value={formModel.value.position}
-          >
-            <n-radio-button class="w-1/2 text-center" value="HEAD">
-              Move to the HEAD
-            </n-radio-button>
-            <n-radio-button class="w-1/2 text-center" value="END">
-              Move to the END
-            </n-radio-button>
-          </n-radio-group>
+          <n-form-item label="Position">
+            <n-radio-group
+              class="w-full"
+              v-model:value={formModel.value.position}
+            >
+              <n-radio-button class="w-1/2 text-center" value="HEAD">
+                Move to the HEAD
+              </n-radio-button>
+              <n-radio-button class="w-1/2 text-center" value="END">
+                Move to the END
+              </n-radio-button>
+            </n-radio-group>
+          </n-form-item>
         </n-form>
       )
     },

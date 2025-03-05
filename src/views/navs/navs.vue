@@ -18,7 +18,7 @@
         >
       </template>
     </div>
-    <n-space class="flex-shrink-0">
+    <div class="flex-center flex-shrink-0 gap-3">
       <n-icon
         size="20"
         class="cursor-pointer text-primary"
@@ -37,7 +37,7 @@
         :render-label="renderLabel"
       >
       </n-select>
-    </n-space>
+    </div>
   </div>
   <nav-action />
 </template>

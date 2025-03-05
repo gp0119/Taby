@@ -94,4 +94,10 @@ const onPull = (
 .aside-card-wrapper :deep(.card-title-wrapper) {
   display: none;
 }
+.aside-card-wrapper :deep(.checkbox) {
+  display: none !important;
+}
+.aside-card-wrapper :deep(.favicon) {
+  display: block !important;
+}
 </style>

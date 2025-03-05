@@ -232,14 +232,19 @@ function onAddCollection() {
         <n-form-item label="Title">
           <n-input v-model:value={formModel.value.title} />
         </n-form-item>
-        <n-radio-group class="w-full" v-model:value={formModel.value.position}>
-          <n-radio-button class="w-1/2 text-center" value="HEAD">
-            Move to the HEAD
-          </n-radio-button>
-          <n-radio-button class="w-1/2 text-center" value="END">
-            Move to the END
-          </n-radio-button>
-        </n-radio-group>
+        <n-form-item label="Position">
+          <n-radio-group
+            class="w-full"
+            v-model:value={formModel.value.position}
+          >
+            <n-radio-button class="w-1/2 text-center" value="HEAD">
+              Move to the HEAD
+            </n-radio-button>
+            <n-radio-button class="w-1/2 text-center" value="END">
+              Move to the END
+            </n-radio-button>
+          </n-radio-group>
+        </n-form-item>
       </n-form>
     ),
     onPositiveClick: async () => {

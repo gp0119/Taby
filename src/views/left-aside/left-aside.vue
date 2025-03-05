@@ -15,17 +15,17 @@
           Ctrl / Command + F to search
         </div>
       </div>
-      <div class="flex justify-between px-4 py-2.5">
+      <div class="flex-between border-b border-border-color px-4 py-2.5">
         <span class="select-none font-bold text-text-primary">SPACES</span>
         <n-icon
           size="18"
           class="cursor-pointer text-primary"
-          :component="Add"
+          :component="FolderAdd"
           @click="onAddSpace"
         />
       </div>
     </div>
-    <div class="space-container flex-1 px-2">
+    <div class="flex-1 p-2">
       <SpaceWrapper
         :spaces="allSpaces"
         :active-space-id="activeSpaceId"
@@ -62,8 +62,8 @@
 
 <script setup lang="tsx">
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
-import { Add, SyncSharp, LogoGithub } from "@vicons/ionicons5"
-import { DocumentImport } from "@vicons/carbon"
+import { SyncSharp, LogoGithub } from "@vicons/ionicons5"
+import { DocumentImport, FolderAdd } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "@/assets/72.png"
 import DanaManager from "@/db"

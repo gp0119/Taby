@@ -6,7 +6,7 @@
   >
     <div class="card-header">
       <div
-        class="mr-2.5 hidden h-[24px] w-[24px] items-center justify-center group-hover/card:flex"
+        class="checkbox mr-2.5 hidden h-[24px] w-[24px] items-center justify-center group-hover/card:flex"
         :class="{ '!flex': selectIds?.includes(child.id) }"
         @click.stop="() => {}"
       >
@@ -20,7 +20,7 @@
         :type="type"
         :child="child"
         v-if="!selectIds?.includes(child.id)"
-        class="group-hover/card:hidden"
+        class="favicon group-hover/card:hidden"
       />
       <span class="card-title">{{ child.customTitle || child.title }}</span>
       <!--   删除按钮   -->
