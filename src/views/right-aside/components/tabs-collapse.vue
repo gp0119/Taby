@@ -16,15 +16,21 @@
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
       <div class="overflow-hidden">
-        <div class="bg-body-color px-4 pb-4">
+        <div class="bg-body-color px-4 pb-4" v-if="!isEmpty(tabs)">
           <slot name="cards" :tabs="tabs"></slot>
         </div>
+        <template v-else>
+          <div class="py-3 text-center font-thin text-text-secondary">
+            No tabs
+          </div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { isNewTabPage } from "@/utils"
 import { ref } from "vue"
 import { ChevronForward } from "@vicons/ionicons5"
 import type { Card as iCard } from "@/type.ts"
@@ -33,6 +39,10 @@ defineProps<{
   index: number
   tabs: iCard[]
 }>()
+
+const isEmpty = (tabs: any[]) => {
+  return tabs.filter((tab) => !isNewTabPage(tab.url)).length <= 0
+}
 
 const isOpen = ref(true)
 </script>

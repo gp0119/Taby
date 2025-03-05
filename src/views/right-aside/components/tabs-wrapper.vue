@@ -11,26 +11,21 @@
     ghost-class="sortable-ghost-dashed-border"
     @end="onDragEnd"
   >
-    <template v-if="tabs.length">
-      <card
-        v-for="(tab, index) in tabs"
-        :key="tab.id"
-        :data-id="tab.id"
-        :data-windowid="windowId"
-        :data-url="tab.url"
-        :data-title="tab.title"
-        :data-index="index"
-        class="group/aside right-aside-item peer"
-        type="right-aside"
-        :class="{ hidden: isNewTabPage(tab.url) }"
-        :child="tab"
-        @delete="removeTab(tab.id)"
-        @click="activeTab(tab)"
-      />
-    </template>
-    <template v-else>
-      <div class="text-center text-text-secondary">No tabs</div>
-    </template>
+    <card
+      v-for="(tab, index) in tabs"
+      :key="tab.id"
+      :data-id="tab.id"
+      :data-windowid="windowId"
+      :data-url="tab.url"
+      :data-title="tab.title"
+      :data-index="index"
+      class="group/aside right-aside-item peer"
+      type="right-aside"
+      :class="{ hidden: isNewTabPage(tab.url) }"
+      :child="tab"
+      @delete="removeTab(tab.id)"
+      @click="activeTab(tab)"
+    />
   </VueDraggable>
 </template>
 
