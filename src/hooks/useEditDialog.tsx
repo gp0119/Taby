@@ -9,14 +9,16 @@ export function useEditDialog() {
     title,
     renderContent,
     renderAction,
+    icon,
     onPositiveClick,
     positiveText,
     negativeText,
   }: {
-    title: string
+    title: string | (() => VNode)
     renderContent: () => VNode
     renderAction?: () => VNode
-    onPositiveClick: () => void
+    onPositiveClick?: () => void
+    icon?: () => VNode
     positiveText?: string
     negativeText?: string
   }) => {
@@ -27,7 +29,8 @@ export function useEditDialog() {
       negativeText: negativeText || ft("cancel"),
       positiveText: positiveText || ft("confirm"),
       content: renderContent,
-      onPositiveClick,
+      ...(icon ? { icon } : {}),
+      ...(onPositiveClick ? { onPositiveClick } : {}),
       ...(renderAction ? { action: renderAction } : {}),
     })
   }

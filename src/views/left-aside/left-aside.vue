@@ -12,7 +12,7 @@
           class="h-[30px] w-full cursor-pointer select-none whitespace-nowrap rounded border border-border-color bg-card-color px-2 text-xs font-thin leading-[30px] text-text-secondary"
           @click="openModal"
         >
-          Ctrl / Command + F to search
+          {{ ft("placeholder-search") }}
         </div>
       </div>
       <div class="flex-between border-b border-border-color px-4 py-2.5">
@@ -133,7 +133,7 @@ function onAddSpace() {
     title: ft("add", "space"),
     renderContent: () => (
       <n-form model={formModel.value}>
-        <n-form-item label={ft("title")}>
+        <n-form-item label={`${ft("title")}:`}>
           <n-input-group>
             <IconSelect v-model:value={formModel.value.icon} />
             <n-input
@@ -184,7 +184,7 @@ function onImport() {
             </n-radio-group>
           </n-form-item>
           {type.value === "toby" && (
-            <n-form-item label={ft("space")}>
+            <n-form-item label={`${ft("space")}:`}>
               <SpaceSelect v-model:value={formModel.value.spaceId} />
             </n-form-item>
           )}
@@ -228,7 +228,7 @@ function onExport() {
     renderContent: () => {
       return (
         <n-form model={formModel.value}>
-          <n-form-item label={ft("space")}>
+          <n-form-item label={`${ft("space")}:`}>
             <SpaceSelect multiple v-model:value={formModel.value.spaceIds} />
           </n-form-item>
         </n-form>
@@ -278,13 +278,19 @@ function onSync() {
             ),
           }}
         >
-          <n-input v-model:value={formModel.value.accessToken} />
+          <n-input
+            v-model:value={formModel.value.accessToken}
+            placeholder={ft("placeholder", "access-token")}
+          />
         </n-form-item>
         <n-form-item
           path="gistId"
           v-slots={{ label: () => <span>{ft("gist-id")}:</span> }}
         >
-          <n-input v-model:value={formModel.value.gistId} />
+          <n-input
+            v-model:value={formModel.value.gistId}
+            placeholder={ft("placeholder", "gist-id")}
+          />
         </n-form-item>
       </n-form>
     ),
@@ -333,9 +339,9 @@ function onSync() {
                 await refreshCollections()
                 dialog.destroyAll()
               })
-              message.success("下载成功")
+              message.success(ft("success", "download"))
             } catch (error) {
-              message.error("下载失败")
+              message.error(ft("fail", "download"))
             }
           }}
         >

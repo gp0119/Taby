@@ -18,7 +18,7 @@
     </template>
     <template #header>
       <n-text depth="1">
-        <span class="font-bold text-text-primary">Tags</span>
+        <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
       </n-text>
     </template>
     <n-scrollbar class="max-h-[300px]">
@@ -48,7 +48,7 @@
         </div>
       </n-space>
       <div v-else class="!bg-card-color text-center text-text-secondary">
-        No tags
+        {{ ft("no-tags") }}
       </div>
     </n-scrollbar>
     <template #footer>
@@ -57,7 +57,7 @@
         <n-input
           class="!w-[100px]"
           v-model:value="newTag.title"
-          placeholder="Add tag"
+          :placeholder="ft('placeholder', 'tags')"
           size="tiny"
           maxlength="10"
         />
@@ -79,13 +79,16 @@ import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
 import DataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { useEditDialog } from "@/hooks/useEditDialog"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 const props = defineProps<{
   item: CollectionWithCards
 }>()
 
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
-
+const { ft, gt } = useHelpi18n()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
 const newTag = ref({
@@ -113,54 +116,57 @@ const addTagforCollection = async (id: number) => {
   await refreshCollections()
 }
 
-const dialog = useDialog()
-const onDeleteTag = async (id: number) => {
-  dialog.error({
-    title: "Delete Tag",
-    content: "Are you sure you want to delete this tag?",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "!bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
+const { open: openEditDialog } = useEditDialog()
+const { open: openDeleteDialog } = useDeleteDialog()
+
+const onDeleteTag = async (tag: {
+  id: number
+  title: string
+  color: string
+}) => {
+  openDeleteDialog({
+    title: ft("delete", "tags"),
+    content: () => (
+      <span
+        class="text-text-primary"
+        v-html={gt("delete-confirm", tag.title)}
+      />
+    ),
     onPositiveClick: async () => {
-      await dataManager.removeLabel(id)
+      await dataManager.removeLabel(tag.id)
       await tagsStore.fetchTags()
       await refreshCollections()
-      dialog.destroyAll()
     },
   })
 }
 const onEditTag = (tag: { id: number; title: string; color: string }) => {
   const formModel = ref({ title: tag.title, color: tag.color })
-  dialog.create({
-    title: "Edit Tag",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
-      <div>
-        <n-form model={formModel.value}>
-          <n-form-item label="Title" class="!mb-1">
-            <color-select v-model:value={formModel.value.color} />
-            <n-input-group>
-              <n-input v-model:value={formModel.value.title} />
-              <n-button
-                secondary
-                type="error"
-                onClick={() => onDeleteTag(tag.id)}
-                v-slots={{
-                  icon: () => (
-                    <n-icon>
-                      <Delete />
-                    </n-icon>
-                  ),
-                }}
-              />
-            </n-input-group>
-          </n-form-item>
-        </n-form>
-      </div>
+  openEditDialog({
+    title: ft("edit", "tags"),
+    renderContent: () => (
+      <n-form model={formModel.value}>
+        <n-form-item label={`${ft("title")}:`} class="!mb-1">
+          <color-select v-model:value={formModel.value.color} />
+          <n-input-group>
+            <n-input
+              v-model:value={formModel.value.title}
+              placeholder={ft("placeholder", "tags")}
+            />
+            <n-button
+              secondary
+              type="error"
+              onClick={() => onDeleteTag(tag)}
+              v-slots={{
+                icon: () => (
+                  <n-icon>
+                    <Delete />
+                  </n-icon>
+                ),
+              }}
+            />
+          </n-input-group>
+        </n-form-item>
+      </n-form>
     ),
     onPositiveClick: async () => {
       await dataManager.updateLabel(

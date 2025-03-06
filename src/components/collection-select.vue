@@ -1,10 +1,14 @@
 <template>
-  <select-wrapper v-model="id" :options="options">
+  <select-wrapper
+    v-model="id"
+    :options="options"
+    :placeholder="ft('select', 'collection')"
+  >
     <template #action>
       <n-input-group>
         <n-input
           v-model:value="formModel.title"
-          placeholder="create a new collection"
+          :placeholder="ft('create', 'collection')"
         />
         <n-button secondary type="primary" @click="onAddCollection">
           <template #icon>
@@ -24,7 +28,9 @@ import SelectWrapper from "@components/select-wrapper.vue"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/carbon"
 import DataManager from "@/db"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 
+const { ft } = useHelpi18n()
 const props = defineProps<{
   spaceId: number
 }>()

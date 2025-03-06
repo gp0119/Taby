@@ -8,7 +8,9 @@
       >
         <ChevronForward />
       </n-icon>
-      <span class="cursor-pointer text-gray-900">Window {{ index + 1 }}</span>
+      <span class="cursor-pointer text-gray-900">
+        {{ ft("window") }} {{ index + 1 }}
+      </span>
     </div>
 
     <div
@@ -21,7 +23,7 @@
         </div>
         <template v-else>
           <div class="py-3 text-center font-thin text-text-secondary">
-            No tabs
+            {{ ft("no-tabs") }}
           </div>
         </template>
       </div>
@@ -34,11 +36,13 @@ import { isNewTabPage } from "@/utils"
 import { ref } from "vue"
 import { ChevronForward } from "@vicons/ionicons5"
 import type { Card as iCard } from "@/type.ts"
-
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 defineProps<{
   index: number
   tabs: iCard[]
 }>()
+
+const { ft } = useHelpi18n()
 
 const isEmpty = (tabs: any[]) => {
   return tabs.filter((tab) => !isNewTabPage(tab.url)).length <= 0

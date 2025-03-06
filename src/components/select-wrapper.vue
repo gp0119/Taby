@@ -1,5 +1,10 @@
 <template>
-  <n-select v-model:value="id" :multiple="multiple" :options="options">
+  <n-select
+    v-model:value="id"
+    :multiple="multiple"
+    :options="options"
+    :placeholder="placeholder"
+  >
     <template #action>
       <slot name="action" />
     </template>
@@ -12,6 +17,7 @@ import { iOptions } from "@/type.ts"
 defineProps<{
   options: iOptions
   multiple?: boolean
+  placeholder?: string
 }>()
 
 const id = defineModel<number | null | number[]>("modelValue", {

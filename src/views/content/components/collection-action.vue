@@ -36,7 +36,11 @@ import DataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import TagAction from "./tag-action.vue"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { useEditDialog } from "@/hooks/useEditDialog.tsx"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 const dialog = useDialog()
+const { ft, gt } = useHelpi18n()
 
 defineProps<{
   item: CollectionWithCards
@@ -54,19 +58,21 @@ provide("isShowTagAction", {
   },
 })
 
+const { open: openEditDialog } = useEditDialog()
+const { open: openDeleteDialog } = useDeleteDialog()
+
 function onEditCollection(item: CollectionWithCards) {
   const formModel = ref({ title: item.title })
-  dialog.create({
-    title: "Edit Collection",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
+  openEditDialog({
+    title: ft("edit", "collection"),
+    renderContent: () => (
       <n-form model={formModel.value}>
-        <n-form-item label="Title" class="!text-text-primary">
+        <n-form-item label={`${ft("title")}:`} class="!text-text-primary">
           <n-input-group>
-            <n-input v-model:value={formModel.value.title} />
+            <n-input
+              v-model:value={formModel.value.title}
+              placeholder={ft("placeholder", "title")}
+            />
             <n-button
               secondary
               type="error"
@@ -91,32 +97,28 @@ function onEditCollection(item: CollectionWithCards) {
 }
 
 function onDeleteCollection(item: CollectionWithCards) {
-  dialog.error({
-    title: "Delete Collection",
-    content: "Are you sure you want to delete this collection?",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
+  openDeleteDialog({
+    title: ft("delete", "collection"),
+    content: () => (
+      <span
+        class="text-text-primary"
+        v-html={gt("delete-confirm", item.title)}
+      />
+    ),
     onPositiveClick: async () => {
       await dataManager.removeCollection(item.id)
       await refreshCollections()
-      dialog.destroyAll()
     },
   })
 }
 
 function onMoveCollection(item: CollectionWithCards) {
   const spaceId = ref<number | null>(null)
-  dialog.create({
-    title: `Move ${item.title} to`,
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
+  openEditDialog({
+    title: gt("move-to", item.title),
+    renderContent: () => (
       <n-form>
-        <n-form-item label="Space">
+        <n-form-item label={`${ft("space")}:`}>
           <space-select v-model={spaceId.value} />
         </n-form-item>
       </n-form>

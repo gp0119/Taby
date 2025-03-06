@@ -21,19 +21,19 @@
           />
           <div class="flex-center gap-3">
             <span class="text-lg text-text-secondary">
-              Select {{ batchSelectStore.selectedCardIds.length }} Tags
+              {{ gt("select-tags", batchSelectStore.selectedCardIds.length) }}
             </span>
             <n-button secondary type="primary" @click="onHandleMove">
               <template #icon>
                 <n-icon :size="16" :component="FolderMoveTo" />
               </template>
-              Move
+              {{ ft("move") }}
             </n-button>
             <n-button secondary type="error" @click="onHandleDelete">
               <template #icon>
                 <n-icon :size="16" :component="Delete" />
               </template>
-              Delete
+              {{ ft("delete") }}
             </n-button>
           </div>
         </div>
@@ -52,12 +52,14 @@ import { ref } from "vue"
 import { useBatchSelectStore } from "@/store/batch-select"
 import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
 import DataManager from "@/db"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const show = ref(false)
 const batchSelectStore = useBatchSelectStore()
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const spacesStore = useSpacesStore()
+const { ft, gt } = useHelpi18n()
 
 const closeDrawer = () => {
   show.value = false
@@ -84,29 +86,29 @@ const onHandleMove = () => {
     position: "END",
   })
   open({
-    title: "Move",
+    title: ft("move"),
     renderContent: () => {
       return (
         <n-form model={formModel.value}>
-          <n-form-item label="Space">
+          <n-form-item label={`${ft("space")}:`}>
             <space-select v-model:value={formModel.value.spaceId} />
           </n-form-item>
-          <n-form-item label="Collection">
+          <n-form-item label={`${ft("collection")}:`}>
             <collection-select
               v-model:value={formModel.value.collectionId}
               space-id={formModel.value.spaceId}
             />
           </n-form-item>
-          <n-form-item label="Position">
+          <n-form-item label={`${ft("position")}:`}>
             <n-radio-group
               class="w-full"
               v-model:value={formModel.value.position}
             >
               <n-radio-button class="w-1/2 text-center" value="HEAD">
-                Move to the HEAD
+                {ft("move-to-head")}
               </n-radio-button>
               <n-radio-button class="w-1/2 text-center" value="END">
-                Move to the END
+                {ft("move-to-end")}
               </n-radio-button>
             </n-radio-group>
           </n-form-item>
@@ -130,8 +132,8 @@ const onHandleMove = () => {
 
 const onHandleDelete = async () => {
   onDeleteComfirm({
-    title: "Delete",
-    content: "Are you sure you want to delete these tags?",
+    title: ft("delete", "tags"),
+    content: ft("delete-cards-confirm"),
     onPositiveClick: async () => {
       await dataManager.batchDeleteCards(batchSelectStore.selectedCardIds)
       await refreshCollections()

@@ -79,9 +79,10 @@ export function useImport() {
           for (const space of spaces) {
             const spaceId = await dataManager.addSpace(space)
             for (const collection of space.collections) {
+              console.log("collection: ", collection)
               const labelIds: number[] = await batchAddLable(collection.labels)
               const collectionId = (await addCollection(
-                space,
+                collection,
                 spaceId,
                 labelIds,
               )) as number

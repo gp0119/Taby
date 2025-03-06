@@ -7,7 +7,12 @@ export const useHelpi18n = () => {
     return t(key, { type: t(type) })
   }
 
+  const gt = (key: string, value: string | number) => {
+    return t(key, { type: value })
+  }
+
   return {
     ft,
+    gt,
   }
 }

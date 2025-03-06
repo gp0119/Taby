@@ -27,7 +27,6 @@ const currentLanguage = useLocalStorage("LANG", "zh-CN")
 const { locale } = useI18n()
 
 const changeLanguage = async (value: string) => {
-  console.log("value: ", value)
   currentLanguage.value = value
 }
 
@@ -35,8 +34,7 @@ watchEffect(() => {
   locale.value = currentLanguage.value
 })
 
-const renderLabel = (option: SelectOption | SelectGroupOption) => {
-  console.log("currentLanguage: ", currentLanguage)
+const renderLabel = (option: any) => {
   return (
     <div class={{ "text-primary": currentLanguage.value === option.key }}>
       {option.label}

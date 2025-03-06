@@ -55,6 +55,9 @@ import DataManager from "@/db"
 import { SelectOption, SelectGroupOption } from "naive-ui"
 import IconSelect from "@components/icon-select.vue"
 import { ICON_LIST } from "@/utils/constants.ts"
+import { useEditDialog } from "@/hooks/useEditDialog.tsx"
+import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 const { themeColor, theme, setTheme } = useThemeStore()
 
 const currentTheme = ref(theme)
@@ -75,7 +78,10 @@ const renderLabel = (option: SelectOption | SelectGroupOption) => {
 
 const tagsStore = useTagsStore()
 const spacesStore = useSpacesStore()
+const { open } = useEditDialog()
+const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
+const { ft, gt } = useHelpi18n()
 const dataManager = new DataManager()
 
 watch(
@@ -98,37 +104,29 @@ const icon = computed(
 
 function onEditSpace() {
   const formModel = ref({ title: title.value, icon: icon.value })
-  dialog.create({
-    title: () => {
-      return <span>Edit Space</span>
-    },
-    class: "bg-body-color",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
-      <div>
-        <n-form model={formModel.value}>
-          <n-form-item class="!text-text-primary">
-            <n-input-group>
-              <IconSelect v-model:value={formModel.value.icon} />
-              <n-input v-model:value={formModel.value.title} />
-              <n-button
-                secondary
-                type="error"
-                onClick={() => onDeleteSpace()}
-                v-slots={{
-                  icon: () => (
-                    <n-icon>
-                      <Delete />
-                    </n-icon>
-                  ),
-                }}
-              ></n-button>
-            </n-input-group>
-          </n-form-item>
-        </n-form>
-      </div>
+  open({
+    title: ft("edit", "space"),
+    renderContent: () => (
+      <n-form model={formModel.value}>
+        <n-form-item class="!text-text-primary">
+          <n-input-group>
+            <IconSelect v-model:value={formModel.value.icon} />
+            <n-input v-model:value={formModel.value.title} />
+            <n-button
+              secondary
+              type="error"
+              onClick={() => onDeleteSpace()}
+              v-slots={{
+                icon: () => (
+                  <n-icon>
+                    <Delete />
+                  </n-icon>
+                ),
+              }}
+            ></n-button>
+          </n-input-group>
+        </n-form-item>
+      </n-form>
     ),
     onPositiveClick: async () => {
       if (!formModel.value.title) return
@@ -143,20 +141,14 @@ function onEditSpace() {
 }
 
 function onDeleteSpace() {
-  dialog.error({
-    title: "Delete Space",
-    titleClass: "!text-text-primary",
-    class: "bg-body-color",
-    content: () => {
-      return (
-        <span class="text-text-primary">
-          Are you sure you want to delete{" "}
-          <span class="text-primary">{title.value}</span> this space?
-        </span>
-      )
-    },
-    negativeText: "Cancel",
-    positiveText: "Save",
+  deleteDialog({
+    title: ft("delete", "space"),
+    content: () => (
+      <span
+        class="text-text-primary"
+        v-html={gt("delete-confirm", title.value || "")}
+      />
+    ),
     onPositiveClick: async () => {
       await dataManager.removeSpace(spacesStore.activeId)
       await spacesStore.fetchSpaces()

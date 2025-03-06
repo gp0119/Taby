@@ -3,36 +3,26 @@
     <div
       class="h-[50px] select-none border-0 border-b border-solid px-3 text-right leading-[50px] text-text-primary"
     >
-      OPEN TABS
+      {{ ft("open-tabs") }}
     </div>
     <div class="right-aside-area px-3 py-4">
-      <template v-if="!Object.keys(tabs).length">
-        <div class="mb-3 rounded shadow-base">
-          <div class="flex items-center p-2.5">
-            <span class="select-none text-text-primary">Window 1</span>
-          </div>
-          <div class="p-2.5 text-gray-300 text-text-primary">No Tabs</div>
-        </div>
-      </template>
-      <template v-else>
-        <TabsCollapse
-          v-for="(item, windowId, index) in tabs"
-          :key="index"
-          :index="index"
-          :tabs="item"
-        >
-          <template #cards="{ tabs }">
-            <TabsWrapper
-              v-if="isExpanded"
-              :tabs="tabs"
-              :window-id="windowId"
-              @remove-tab="removeTab"
-              @active-tab="activeTab"
-              @drag-end="onDragEnd"
-            />
-          </template>
-        </TabsCollapse>
-      </template>
+      <TabsCollapse
+        v-for="(item, windowId, index) in tabs"
+        :key="index"
+        :index="index"
+        :tabs="item"
+      >
+        <template #cards="{ tabs }">
+          <TabsWrapper
+            v-if="isExpanded"
+            :tabs="tabs"
+            :window-id="windowId"
+            @remove-tab="removeTab"
+            @active-tab="activeTab"
+            @drag-end="onDragEnd"
+          />
+        </template>
+      </TabsCollapse>
     </div>
   </div>
 </template>
@@ -45,11 +35,13 @@ import { debounce } from "lodash-es"
 import TabsWrapper from "./components/tabs-wrapper.vue"
 import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
+
 const dataManager = new DataManager()
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
 const isExpanded = ref(true)
 const { refreshCollections } = useRefresh()
-
+const { ft } = useHelpi18n()
 async function refreshTabs() {
   await getTabs()
 }

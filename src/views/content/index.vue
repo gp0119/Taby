@@ -29,7 +29,7 @@
       </template>
     </DynamicScroller>
     <div v-else class="bg-body-color py-16 text-center text-2xl text-gray-400">
-      No collections shared with this space yet.
+      {{ ft("no-collections") }}
     </div>
     <BottomDrawer />
   </template>
@@ -49,11 +49,13 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
 import CollectionCollapse from "./components/collection-collapse.vue"
 import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
 import BottomDrawer from "./components/bottom-drawer.vue"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const draggableStore = useDraggableStore()
+const { ft } = useHelpi18n()
 
 const collections = computed(() => {
   let sortedCollections = [...spacesStore.collections]
@@ -62,28 +64,26 @@ const collections = computed(() => {
       item.labelIds.includes(tagsStore.selectedTag!.id),
     )
   }
-  if (sortStore.order) {
+  if (sortStore.sortOrder) {
     return [...sortedCollections].sort((a, b) => {
-      if (sortStore.sort === "Title") {
-        const collator = new Intl.Collator("zh")
-        const compareResult = collator.compare(a.title, b.title)
-        return sortStore.order === "asc" ? compareResult : -compareResult
-      } else if (sortStore.sort === "CreatedAt") {
-        return sortStore.order === "asc"
-          ? (a.createdAt ?? 0) - (b.createdAt ?? 0)
-          : (b.createdAt ?? 0) - (a.createdAt ?? 0)
-      } else if (sortStore.sort === "Draggable") {
-        return a.order - b.order
+      switch (sortStore.sortOrder) {
+        case "title-asc":
+          const collator = new Intl.Collator("zh")
+          const compareResult = collator.compare(a.title, b.title)
+          return compareResult
+        case "title-desc":
+          const _collator = new Intl.Collator("zh")
+          const _compareResult = _collator.compare(a.title, b.title)
+          return -_compareResult
+        case "created-at-asc":
+          return (a.createdAt ?? 0) - (b.createdAt ?? 0)
+        case "created-at-desc":
+          return (b.createdAt ?? 0) - (a.createdAt ?? 0)
+        case "draggable":
+          return a.order - b.order
+        default:
+          return 0
       }
-      return sortStore.order === "asc"
-        ? (a[sortStore.sort as keyof typeof a] ?? 0) >
-          (b[sortStore.sort as keyof typeof b] ?? 0)
-          ? 1
-          : -1
-        : (a[sortStore.sort as keyof typeof a] ?? 0) <
-            (b[sortStore.sort as keyof typeof b] ?? 0)
-          ? 1
-          : -1
     })
   }
   return sortedCollections

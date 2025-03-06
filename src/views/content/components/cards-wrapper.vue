@@ -32,7 +32,7 @@
       <div
         class="empty-text col-span-full text-center leading-[90px] text-gray-300 peer-[.right-aside-item]:hidden"
       >
-        This collection is empty. Drag tabs here
+        {{ ft("no-cards") }}
       </div>
     </template>
   </VueDraggable>
@@ -45,7 +45,10 @@ import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
 import { useBatchSelectStore } from "@/store/batch-select"
-
+import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import { useEditDialog } from "@/hooks/useEditDialog.tsx"
+import Favicon from "@/components/favicon.vue"
 defineProps<{
   cards: iCard[]
   collectionId: number
@@ -54,9 +57,10 @@ defineProps<{
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const batchSelectStore = useBatchSelectStore()
+const { ft, gt } = useHelpi18n()
 
-const dialog = useDialog()
-
+const { open: openDeleteDialog } = useDeleteDialog()
+const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(child: any) {
   const tab = await chrome.tabs.create({ url: child.url })
   if (child.favicon) return
@@ -81,15 +85,14 @@ async function onHandleClick(child: any) {
 }
 
 async function onDeleteCard(card: iCard) {
-  dialog.create({
-    title: () => {
-      return <span class="ml-2.5">Delete Card</span>
-    },
-    titleClass: "!text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Delete",
-    content: () => <div>Are you sure you want to delete this card?</div>,
+  openDeleteDialog({
+    title: ft("delete", "card"),
+    content: () => (
+      <span
+        class="text-text-primary"
+        v-html={gt("delete-confirm", card.title)}
+      />
+    ),
     onPositiveClick: async () => {
       await dataManager.removeCard(card.id)
       await refreshCollections()
@@ -103,30 +106,41 @@ function onEdit(child: iCard) {
     description: child.customDescription || child.title,
     favicon: child.favicon,
   })
-  dialog.create({
+  openEditDialog({
     title: () => {
-      return <span class="ml-2.5">Edit Card</span>
+      return (
+        <div class="flex items-center">
+          <Favicon
+            class="block h-[20px] w-[20px]"
+            type="content"
+            child={child}
+          />
+          <span>{ft("edit", "card")}</span>
+        </div>
+      )
     },
-    titleClass: "!text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    icon: () => (
-      <favicon class="block h-full w-full" type="content" child={child} />
-    ),
-    content: () => (
+    renderContent: () => (
       <n-form model={formModel.value}>
-        <n-form-item label="Title: ">
-          <n-input v-model:value={formModel.value.title} />
+        <n-form-item label={`${ft("title")}:`}>
+          <n-input
+            v-model:value={formModel.value.title}
+            placeholder={ft("placeholder", "title")}
+          />
         </n-form-item>
-        <n-form-item label="Description: ">
-          <n-input v-model:value={formModel.value.description} />
+        <n-form-item label={`${ft("description")}:`}>
+          <n-input
+            v-model:value={formModel.value.description}
+            placeholder={ft("placeholder", "description")}
+          />
         </n-form-item>
-        <n-form-item label="URL: ">
+        <n-form-item label={`${ft("url")}:`}>
           <n-input v-model:value={child.url} disabled />
         </n-form-item>
-        <n-form-item label="Favicon: ">
-          <n-input v-model:value={formModel.value.favicon} />
+        <n-form-item label={`${ft("favicon")}:`}>
+          <n-input
+            v-model:value={formModel.value.favicon}
+            placeholder={ft("placeholder", "favicon")}
+          />
         </n-form-item>
       </n-form>
     ),
@@ -134,9 +148,7 @@ function onEdit(child: iCard) {
       await dataManager.updateCard(child.id, {
         title: formModel.value.title,
         description: formModel.value.description,
-        favicon: formModel.value.favicon,
       })
-      await refreshCollections()
     },
   })
 }

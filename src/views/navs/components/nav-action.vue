@@ -3,6 +3,7 @@
     class="flex h-[50px] justify-between border-0 border-b border-solid px-4"
   >
     <div class="flex-center">
+      <!--   排序   -->
       <n-dropdown
         trigger="click"
         :options="sortStore.sortOptions"
@@ -13,10 +14,22 @@
       >
         <n-button quaternary type="primary">
           <template #icon>
-            <n-icon size="20" v-if="sortStore.order === 'desc'">
+            <n-icon
+              size="20"
+              v-if="
+                sortStore.sortOrder === 'title-desc' ||
+                sortStore.sortOrder === 'created-at-desc'
+              "
+            >
               <ChevronSortUp />
             </n-icon>
-            <n-icon size="20" v-else-if="sortStore.order === 'asc'">
+            <n-icon
+              size="20"
+              v-else-if="
+                sortStore.sortOrder === 'title-asc' ||
+                sortStore.sortOrder === 'created-at-asc'
+              "
+            >
               <ChevronSortDown />
             </n-icon>
             <n-icon size="20" v-else>
@@ -24,7 +37,7 @@
             </n-icon>
           </template>
           <span class="w-[60px] text-ellipsis">{{
-            sortStore.sort ?? "Sort"
+            ft(sortStore.sortOrder ?? "draggable")
           }}</span>
           <n-icon
             size="20"
@@ -35,6 +48,7 @@
           </n-icon>
         </n-button>
       </n-dropdown>
+      <!--   标签   -->
       <n-dropdown
         trigger="click"
         :options="tagOptions"
@@ -66,7 +80,7 @@
             </n-tag>
           </template>
           <template v-else>
-            <div class="w-[60px] text-ellipsis">Tag Filter</div>
+            <div class="w-[60px] text-ellipsis">{{ ft("tag-filter") }}</div>
           </template>
           <n-icon
             size="20"
@@ -77,37 +91,39 @@
           </n-icon>
         </n-button>
       </n-dropdown>
+      <!--   展开   -->
       <n-button quaternary type="primary" @click="expandStore.expandAll">
         <template #icon>
           <n-icon size="20">
             <RowExpand />
           </n-icon>
         </template>
-        Expand
+        {{ ft("expand-all") }}
       </n-button>
+
       <n-button quaternary type="primary" @click="expandStore.collapseAll">
         <template #icon>
           <n-icon size="20">
             <RowCollapse />
           </n-icon>
         </template>
-        Collapse
+        {{ ft("collapse-all") }}
       </n-button>
       <n-switch
         v-model:value="draggableStore.draggable"
         @update-value="draggableStore.setDraggable"
       >
         <template #checked>
-          <span class="text-xs">Draggable</span>
+          <span class="text-xs">{{ ft("disable-drag") }}</span>
         </template>
         <template #unchecked>
-          <span class="text-xs">Draggable</span>
+          <span class="text-xs">{{ ft("enable-drag") }}</span>
         </template>
       </n-switch>
     </div>
     <div class="flex-center gap-2">
       <n-button size="small" secondary type="primary" @click="onAddCollection">
-        <span>ADD COLLECTION</span>
+        <span>{{ ft("add", "collection") }}</span>
         <template #icon>
           <n-icon>
             <Add />
@@ -140,15 +156,17 @@ import {
 } from "@vicons/carbon"
 import { useExpandStore } from "@/store/expand"
 import { Label, movePosition } from "@/type"
-
+import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
+import { useEditDialog } from "@/hooks/useEditDialog"
 const draggableStore = useDraggableStore()
 
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const expandStore = useExpandStore()
+const { ft } = useHelpi18n()
 
 const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
-  return option.title !== "Clear Filter" ? (
+  return option.id !== 0 ? (
     <n-tag
       size="small"
       color={{
@@ -160,17 +178,16 @@ const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
       {option.title}
     </n-tag>
   ) : (
-    <span class="text-primary">{option.title}</span>
+    <span class="text-primary">{ft("clear-label")}</span>
   )
 }
 
 const renderSortLabel = (option: SelectOption | SelectGroupOption) => {
-  const order = (option.key as string).split("-")[1]
   return (
     <span>
-      {order === "desc" ? (
+      {option.key === "title-desc" || option.key === "created-at-desc" ? (
         <n-icon size="12" component={ArrowUp} />
-      ) : order === "asc" ? (
+      ) : option.key === "title-asc" || option.key === "created-at-asc" ? (
         <n-icon size="12" component={ArrowDown} />
       ) : (
         <n-icon size="12" component={ChevronSort} />
@@ -188,7 +205,7 @@ const tagOptions = computed(() => {
     color: tag.color,
   }))
   options.unshift({
-    title: "Clear Filter",
+    title: ft("clear-label"),
     id: 0,
     key: 0,
     color: "#000000",
@@ -197,7 +214,7 @@ const tagOptions = computed(() => {
 })
 
 const handleTagSelect = (_key: string, option: Label) => {
-  if (option.title === "Clear Filter") {
+  if (option.id === 0) {
     tagsStore.setSelectedTag(null)
     return
   }
@@ -205,43 +222,38 @@ const handleTagSelect = (_key: string, option: Label) => {
 }
 
 const handleSortSelect = (key: string) => {
-  const [sort, order] = key.split("-")
-  sortStore.setSort(sort)
-  sortStore.setOrder(order ?? null)
+  sortStore.setSortOrder(key)
 }
 
-const dialog = useDialog()
 const spacesStore = useSpacesStore()
 const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
+const { open } = useEditDialog()
 function onAddCollection() {
   const formModel = ref<{
     title: string
     position: movePosition
   }>({ title: "", position: "END" })
-  dialog.create({
-    title: () => {
-      return <span>Add Collection</span>
-    },
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    class: "bg-body-color",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
+  open({
+    title: ft("add", "collection"),
+    renderContent: () => (
       <n-form model={formModel.value}>
-        <n-form-item label="Title">
-          <n-input v-model:value={formModel.value.title} />
+        <n-form-item label={`${ft("title")}:`}>
+          <n-input
+            v-model:value={formModel.value.title}
+            placeholder={ft("placeholder", "title")}
+          />
         </n-form-item>
-        <n-form-item label="Position">
+        <n-form-item label={`${ft("position")}:`}>
           <n-radio-group
             class="w-full"
             v-model:value={formModel.value.position}
           >
             <n-radio-button class="w-1/2 text-center" value="HEAD">
-              Move to the HEAD
+              {ft("move-to-head")}
             </n-radio-button>
             <n-radio-button class="w-1/2 text-center" value="END">
-              Move to the END
+              {ft("move-to-end")}
             </n-radio-button>
           </n-radio-group>
         </n-form-item>

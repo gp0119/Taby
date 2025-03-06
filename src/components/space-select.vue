@@ -1,5 +1,10 @@
 <template>
-  <select-wrapper :options="allSpaces" :multiple="multiple" v-model="id">
+  <select-wrapper
+    :options="allSpaces"
+    :multiple="multiple"
+    v-model="id"
+    :placeholder="ft('select', 'space')"
+  >
     <template #action>
       <n-input-group>
         <IconSelect v-model:value="formModel.icon" />
