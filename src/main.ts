@@ -9,7 +9,7 @@ import enUS from "./i18n/en-US.ts"
 const pinia = createPinia()
 const app = createApp(App)
 const i18n = createI18n({
-  locale: "zh-CN",
+  locale: "en-US",
   legacy: false,
   globalInjection: true,
   messages: {

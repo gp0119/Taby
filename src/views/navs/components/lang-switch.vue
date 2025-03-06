@@ -23,7 +23,7 @@ const options = [
   { label: "简体中文", key: "zh-CN" },
 ]
 
-const currentLanguage = useLocalStorage("LANG", "zh-CN")
+const currentLanguage = useLocalStorage("LANG", "en-US")
 const { locale } = useI18n()
 
 const changeLanguage = async (value: string) => {
