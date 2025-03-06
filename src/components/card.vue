@@ -97,11 +97,11 @@ function onHandleCheckbox(checked: boolean) {
 <style scoped>
 .card {
   @apply w-full cursor-pointer rounded-md bg-card-color shadow-base;
-  @apply group-hover/aside:bg-hover-color;
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
   @apply relative flex items-center rounded-md border-0 border-b border-solid px-4 py-3;
+  @apply group-hover/aside:bg-hover-color;
 }
 
 .card-title {
