@@ -5,7 +5,7 @@
         <IconSelect v-model:value="formModel.icon" />
         <n-input
           v-model:value="formModel.title"
-          placeholder="create a new space"
+          :placeholder="ft('create', 'space')"
         />
         <n-button secondary type="primary" @click="onAddSpace">
           <template #icon>
@@ -20,12 +20,14 @@
 </template>
 
 <script setup lang="ts">
+import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import SelectWrapper from "@components/select-wrapper.vue"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/carbon"
 import IconSelect from "@components/icon-select.vue"
 import DataManager from "@/db"
 
+const { ft } = useHelpi18n()
 const id = defineModel<number | null | number[]>("modelValue", {
   default: null,
 })

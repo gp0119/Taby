@@ -26,6 +26,7 @@
       >
         <Settings />
       </n-icon>
+      <LangSwitch />
       <n-select
         size="tiny"
         :show-checkmark="false"
@@ -46,6 +47,7 @@
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
+import LangSwitch from "./components/lang-switch.vue"
 import NavAction from "@/views/navs/components/nav-action.vue"
 import { Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"

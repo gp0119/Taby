@@ -2,9 +2,20 @@ import { createApp } from "vue"
 import "./style.css"
 import App from "./App.vue"
 import { createPinia } from "pinia"
+import { createI18n } from "vue-i18n"
+import zhCN from "./i18n/zh-CN.ts"
+import enUS from "./i18n/en-US.ts"
 
 const pinia = createPinia()
 const app = createApp(App)
-app.use(pinia)
+const i18n = createI18n({
+  locale: "zh-CN",
+  legacy: false,
+  globalInjection: true,
+  messages: {
+    "zh-CN": zhCN,
+    "en-US": enUS,
+  },
+})
 
-app.mount("#app")
+app.use(pinia).use(i18n).mount("#app")

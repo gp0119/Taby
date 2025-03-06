@@ -16,7 +16,9 @@
         </div>
       </div>
       <div class="flex-between border-b border-border-color px-4 py-2.5">
-        <span class="select-none font-bold text-text-primary">SPACES</span>
+        <span class="select-none font-bold text-text-primary">{{
+          ft("space")
+        }}</span>
         <n-icon
           size="18"
           class="cursor-pointer text-primary"
@@ -36,19 +38,19 @@
     <div class="px-2.5 py-4">
       <n-space vertical>
         <n-button class="w-full" @click="onImport">
-          <span>导入</span>
+          <span>{{ ft("import") }}</span>
           <template #icon>
             <n-icon size="18" :component="DocumentImport" />
           </template>
         </n-button>
         <n-button class="w-full" @click="onExport">
-          <span>导出</span>
+          <span>{{ ft("export") }}</span>
           <template #icon>
             <n-icon size="18" :component="DocumentExport" />
           </template>
         </n-button>
         <n-button class="w-full" @click="onSync">
-          <span>同步</span>
+          <span>{{ ft("sync") }}</span>
           <template #icon>
             <n-icon size="18" :component="SyncSharp" />
           </template>
@@ -60,6 +62,7 @@
 
 <script setup lang="tsx">
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
+import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { useExport } from "@/views/left-aside/hooks/useExport.ts"
 import { useImport } from "@/views/left-aside/hooks/useImport.ts"
@@ -83,6 +86,7 @@ const dataManager = new DanaManager()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const { openModal } = useSearchModal()
 const loadingBar = useLoadingBar()
+const { ft } = useHelpi18n()
 
 const init = async () => {
   await spacesStore.initialize()
@@ -125,20 +129,17 @@ const { exportFromTaby } = useExport()
 
 function onAddSpace() {
   const formModel = ref({ title: "", icon: "StorefrontOutline" })
-  dialog.create({
-    title: () => {
-      return <span>Add Space</span>
-    },
-    class: "bg-body-color",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
+  open({
+    title: ft("add", "space"),
+    renderContent: () => (
       <n-form model={formModel.value}>
-        <n-form-item label="Title">
+        <n-form-item label={ft("title")}>
           <n-input-group>
             <IconSelect v-model:value={formModel.value.icon} />
-            <n-input v-model:value={formModel.value.title} />
+            <n-input
+              v-model:value={formModel.value.title}
+              placeholder={ft("placeholder", "title")}
+            />
           </n-input-group>
         </n-form-item>
       </n-form>
@@ -168,22 +169,22 @@ function onImport() {
     fileList: [],
   })
   open({
-    title: "Import",
+    title: ft("import"),
     renderContent: () => {
       return (
         <n-form model={formModel.value}>
           <n-form-item>
             <n-radio-group class="w-full" v-model:value={type.value}>
               <n-radio-button class="w-1/2 text-center" value="toby">
-                From Toby
+                {ft("import-from", "toby")}
               </n-radio-button>
               <n-radio-button class="w-1/2 text-center" value="taby">
-                From Taby
+                {ft("import-from", "taby")}
               </n-radio-button>
             </n-radio-group>
           </n-form-item>
           {type.value === "toby" && (
-            <n-form-item label="Space">
+            <n-form-item label={ft("space")}>
               <SpaceSelect v-model:value={formModel.value.spaceId} />
             </n-form-item>
           )}
@@ -193,7 +194,7 @@ function onImport() {
               accept=".json"
               max={1}
             >
-              <n-button>选择文件</n-button>
+              <n-button>{ft("select-file")}</n-button>
             </n-upload>
           </n-form-item>
         </n-form>
@@ -212,6 +213,7 @@ function onImport() {
         await refreshSpaces()
       }
       await refreshCollections()
+      message.success(ft("success", "import"))
       loadingBar.finish()
     },
   })
@@ -222,11 +224,11 @@ function onExport() {
     spaceIds: [spacesStore.activeId],
   })
   open({
-    title: "Export",
+    title: ft("export"),
     renderContent: () => {
       return (
         <n-form model={formModel.value}>
-          <n-form-item label="Space">
+          <n-form-item label={ft("space")}>
             <SpaceSelect multiple v-model:value={formModel.value.spaceIds} />
           </n-form-item>
         </n-form>
@@ -255,13 +257,9 @@ function onSync() {
   const formRules = {
     accessToken: [{ required: true, message: "AccessToken is required" }],
   }
-  dialog.create({
-    class: "bg-body-color",
-    title: "sync witn github",
-    titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-    negativeText: "Cancel",
-    positiveText: "Save",
-    content: () => (
+  open({
+    title: ft("sync-with", "gist"),
+    renderContent: () => (
       <n-form
         ref={(el: FormInst) => (formRef.value = el)}
         model={formModel.value}
@@ -269,37 +267,28 @@ function onSync() {
         require-mark-placement="left"
       >
         <n-form-item
-          label="AccessToken:"
           path="accessToken"
           label-style="width: 100%"
           v-slots={{
             label: () => (
-              <div>
-                <span>AccessToken:</span>
-                <a
-                  href="https://github.com/settings/tokens"
-                  class="ml-2.5"
-                  target="_blank"
-                >
-                  <n-icon size="12" component={LogoGithub} />{" "}
-                  <span class="text-blue-500">Get AccessToken</span>
-                </a>
-              </div>
+              <a href="https://github.com/settings/tokens" target="_blank">
+                <n-icon size="12" component={LogoGithub} />{" "}
+                <span class="text-blue-500">{ft("access-token")}:</span>
+              </a>
             ),
           }}
         >
           <n-input v-model:value={formModel.value.accessToken} />
         </n-form-item>
         <n-form-item
-          label="GistId:"
           path="gistId"
-          v-slots={{ label: () => <span>GistId:</span> }}
+          v-slots={{ label: () => <span>{ft("gist-id")}:</span> }}
         >
           <n-input v-model:value={formModel.value.gistId} />
         </n-form-item>
       </n-form>
     ),
-    action: () => (
+    renderAction: () => (
       <n-space>
         <n-button
           type="primary"
@@ -316,15 +305,15 @@ function onSync() {
                   accessToken: formModel.value.accessToken,
                   gistId: res,
                 })
-                message.success("同步成功")
+                message.success(ft("success", "upload"))
                 dialog.destroyAll()
               } catch (error) {
-                message.error("上传失败")
+                message.error(ft("success", "upload"))
               }
             })
           }}
         >
-          上传本地
+          {ft("upload-local")}
         </n-button>
         <n-button
           size="small"
@@ -350,7 +339,7 @@ function onSync() {
             }
           }}
         >
-          下载远程
+          {ft("download-remote")}
         </n-button>
       </n-space>
     ),
