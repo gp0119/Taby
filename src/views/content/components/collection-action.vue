@@ -39,7 +39,6 @@ import TagAction from "./tag-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
 
 defineProps<{

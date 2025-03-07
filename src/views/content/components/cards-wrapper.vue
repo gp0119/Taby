@@ -5,7 +5,7 @@
       name: 'content-card',
       put: ['content-card', 'aside-card'],
     }"
-    class="card-wrapper"
+    class="card-wrapper group/wrapper"
     item-key="id"
     :data-collectionid="collectionId"
     handle=".card-item"
@@ -13,28 +13,22 @@
     ghost-class="sortable-ghost-dashed-border"
     @end="onDragEnd"
   >
-    <template v-if="cards.length">
-      <Card
-        v-for="card in cards"
-        :key="card.id"
-        :data-id="card.id"
-        class="card-item group/content"
-        type="content"
-        :child="card"
-        :select-ids="batchSelectStore.selectedCardIds"
-        @click="onHandleClick(card)"
-        @delete="onDeleteCard(card)"
-        @edit="onEdit(card)"
-        @check="onHandleCheckbox($event, card)"
-      />
-    </template>
-    <template v-else>
-      <div
-        class="empty-text col-span-full text-center leading-[90px] text-gray-300 peer-[.right-aside-item]:hidden"
-      >
-        {{ ft("no-cards") }}
-      </div>
-    </template>
+    <Card
+      v-for="card in cards"
+      :key="card.id"
+      :data-id="card.id"
+      class="card-item group/content"
+      type="content"
+      :child="card"
+      :select-ids="batchSelectStore.selectedCardIds"
+      @click="onHandleClick(card)"
+      @delete="onDeleteCard(card)"
+      @edit="onEdit(card)"
+      @check="onHandleCheckbox($event, card)"
+    />
+    <div class="empty-text">
+      {{ ft("no-cards") }}
+    </div>
   </VueDraggable>
 </template>
 
@@ -185,7 +179,10 @@ function onHandleCheckbox(checked: boolean, card: iCard) {
 .card-wrapper {
   @apply grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-5 pt-2;
 }
-
+.empty-text {
+  @apply col-span-full text-center leading-[90px] text-gray-300;
+  @apply group-has-[.card-item]/wrapper:hidden group-has-[.right-aside-item]/wrapper:hidden;
+}
 .card-wrapper :deep(.card-size) {
   height: 24px;
   width: 24px;
