@@ -95,6 +95,7 @@ function onEditCollection(item: CollectionWithCards) {
   })
 }
 
+const dialog = useDialog()
 function onDeleteCollection(item: CollectionWithCards) {
   openDeleteDialog({
     title: ft("delete", "collection"),
@@ -107,6 +108,7 @@ function onDeleteCollection(item: CollectionWithCards) {
     onPositiveClick: async () => {
       await dataManager.removeCollection(item.id)
       await refreshCollections()
+      dialog.destroyAll()
     },
   })
 }
