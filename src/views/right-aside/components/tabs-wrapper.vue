@@ -4,7 +4,7 @@
     :group="{
       name: 'aside-card',
       put: false,
-      pull: onPull,
+      pull: 'clone',
     }"
     item-key="id"
     class="aside-card-wrapper flex flex-col gap-3"
@@ -32,7 +32,6 @@
 <script setup lang="ts">
 import { isNewTabPage } from "@/utils"
 import { VueDraggable, SortableEvent } from "vue-draggable-plus"
-import type Sortable from "sortablejs"
 import type { Card as iCard } from "@/type.ts"
 import card from "@components/card.vue"
 
@@ -58,18 +57,6 @@ const activeTab = (tab: iCard) => {
 
 const onDragEnd = (e: SortableEvent) => {
   emit("dragEnd", e)
-}
-
-const onPull = (
-  _to: Sortable,
-  _from: Sortable,
-  dragEl: HTMLElement,
-  _event: SortableEvent,
-): "clone" | boolean => {
-  if (dragEl.classList.contains("card-wrapper")) {
-    return "clone"
-  }
-  return true
 }
 </script>
 <style scoped>

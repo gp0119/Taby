@@ -54,10 +54,11 @@ export default defineConfig({
         chunkFileNames: "js/[name]-[hash].js", // 代码分割中产生的 chunk
         name: "[name].js",
         manualChunks: {
-          "vue-vendor": ["vue"],
           "naive-vendor": ["naive-ui"],
-          "sortable-vendor": ["sortablejs"],
-          libs: ["@vueuse/core", "lodash-es", "dexie"],
+          "sortable-vendor": ["vue-draggable-plus"],
+          "vue-virtual-vendor": ["vue-virtual-scroller"],
+          "dexie-vendor": ["dexie"],
+          libs: ["vue", "@vueuse/core", "lodash-es"],
         },
         entryFileNames: (chunkInfo) => {
           // 入口文件
