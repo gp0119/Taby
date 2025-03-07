@@ -4,6 +4,7 @@
       crossorigin: 'anonymous',
     }"
     :src="innerFavicon"
+    lazy
     class="card-avatar card-size"
   >
     <template #fallback>
@@ -11,12 +12,22 @@
         <span class="text-text-primary">{{ firstLetter }}</span>
       </div>
     </template>
+    <template #placeholder>
+      <div class="card-size flex-center h-full">
+        <n-icon
+          class="text-text-secondary"
+          size="24"
+          :component="DocumentUnknown"
+        />
+      </div>
+    </template>
   </n-avatar>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import { Card } from "@/type.ts"
 import { getFaviconFromCache, getGoogleFavicon } from "@/utils"
+import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{
   type: string
@@ -36,6 +47,6 @@ const innerFavicon = computed(() => {
 
 <style scoped>
 .card-avatar {
-  @apply mr-2.5 inline-block flex-shrink-0 bg-white sepia-base;
+  @apply mr-2.5 inline-block flex-shrink-0 bg-transparent sepia-base;
 }
 </style>
