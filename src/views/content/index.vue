@@ -39,17 +39,17 @@
 </template>
 
 <script setup lang="ts">
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
+import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
 import TitleDragable from "@/views/content/components/title-draggable.vue"
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller"
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
-import CollectionCollapse from "./components/collection-collapse.vue"
-import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
 import BottomDrawer from "./components/bottom-drawer.vue"
-import { useHelpi18n } from "@/hooks/useHelpi18n"
+import CollectionCollapse from "./components/collection-collapse.vue"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
@@ -68,13 +68,11 @@ const collections = computed(() => {
     return [...sortedCollections].sort((a, b) => {
       switch (sortStore.sortOrder) {
         case "title-asc":
-          const collator = new Intl.Collator("zh")
-          const compareResult = collator.compare(a.title, b.title)
-          return compareResult
         case "title-desc":
-          const _collator = new Intl.Collator("zh")
-          const _compareResult = _collator.compare(a.title, b.title)
-          return -_compareResult
+          const collator = new Intl.Collator("zh")
+          return sortStore.sortOrder === "title-asc"
+            ? collator.compare(a.title, b.title)
+            : -collator.compare(a.title, b.title)
         case "created-at-asc":
           return (a.createdAt ?? 0) - (b.createdAt ?? 0)
         case "created-at-desc":
@@ -89,8 +87,3 @@ const collections = computed(() => {
   return sortedCollections
 })
 </script>
-<style scoped>
-.n-collapse :deep(.n-collapse-item) {
-  border: none;
-}
-</style>

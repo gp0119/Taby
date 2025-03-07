@@ -408,10 +408,13 @@ class dataManager {
         const cards = await db.cards
           .where({ collectionId: collection.id })
           .sortBy("order")
-        const labels = await db.labels
-          .where("id")
-          .anyOf(collection.labelIds)
-          .toArray()
+        const labels = []
+        for (const labelId of collection.labelIds) {
+          const label = await db.labels.get(labelId)
+          if (label) {
+            labels.push(label)
+          }
+        }
         return { ...collection, cards, labels }
       }),
     )
