@@ -36,7 +36,7 @@
               <ChevronSort />
             </n-icon>
           </template>
-          <span class="w-[60px] text-ellipsis">{{
+          <span class="w-[60px] text-ellipsis leading-6">{{
             ft(sortStore.sortOrder ?? "draggable")
           }}</span>
           <n-icon
