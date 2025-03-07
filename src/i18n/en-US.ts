@@ -8,11 +8,11 @@ export default {
   export: "Export",
   import: "Import",
   upload: "Upload",
+  download: "Download",
   "upload-local": "Upload Local",
   "download-remote": "Download Remote",
   "access-token": "AccessToken",
   "gist-id": "GistId",
-  download: "Download",
   sync: "Sync",
   "sync-with": "Sync with {type}",
   "drag-to-sort": "Drag to Sort",
@@ -55,7 +55,7 @@ export default {
   "no-collections": "No collections, please add one.",
   "no-cards": "This collection is empty. Drag tabs here",
   "placeholder-search": "Press Ctrl/Cmd + F to search",
-  "delete-space-confirm":
+  "delete-confirm":
     "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
   "delete-cards-confirm": "Are you sure you want to delete these tags?",
   "select-tags": "Selected {type} tags",
@@ -63,4 +63,7 @@ export default {
   "no-tabs": "No tabs",
   "open-tabs": "Opened Tabs",
   window: "Window",
+  search: "Search",
+  "search-placeholder": "Please enter title or link",
+  "no-search-result": "No search results",
 }

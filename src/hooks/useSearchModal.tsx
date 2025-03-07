@@ -1,3 +1,4 @@
+import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useModal, NInput, NScrollbar, NIcon } from "naive-ui"
 import DataManager from "@/db"
 import { debounce } from "lodash"
@@ -17,6 +18,7 @@ export const useSearchModal = () => {
     currentIndex.value = 0
     cards.value = await dataManager.getCardsByTitleOrUrl(searchValue.value)
   }, 300)
+  const { ft } = useHelpi18n()
 
   const stopEnter = useEventListener(document, "keydown", (e) => {
     if (e.key === "Enter") {
@@ -54,7 +56,7 @@ export const useSearchModal = () => {
   })
 
   async function onHandleClick(child: any) {
-    await modal.destroyAll()
+    modal.destroyAll()
     await new Promise((resolve) => setTimeout(resolve, 300))
     const tab = await chrome.tabs.create({ url: child.url })
     if (child.favicon) return
@@ -83,7 +85,7 @@ export const useSearchModal = () => {
       closable: false,
       autoFocus: true,
       preset: "card",
-      title: () => <span class="text-text-primary">Search</span>,
+      title: () => <span class="text-text-primary">{ft("search")}</span>,
       style:
         "position: fixed; top: 200px; left: 50%; transform: translateX(-50%);",
       // maskClosable: false,
@@ -95,7 +97,7 @@ export const useSearchModal = () => {
               size="large"
               v-model:value={searchValue.value}
               on-input={searchCardsFromDb}
-              placeholder="search by title or url"
+              placeholder={ft("search-placeholder")}
               v-slots={{
                 prefix: () => <NIcon component={SearchOutline} />,
               }}
@@ -142,7 +144,7 @@ export const useSearchModal = () => {
             ) : (
               <div class="flex-center h-full pt-2.5 text-text-secondary">
                 <NIcon component={SearchOutline} />
-                <span class="ml-1.5">No results found</span>
+                <span class="ml-1.5">{ft("no-search-result")}</span>
               </div>
             )}
           </NScrollbar>

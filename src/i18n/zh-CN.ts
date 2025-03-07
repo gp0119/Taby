@@ -44,8 +44,8 @@ export default {
   "disable-drag": "关闭拖拽",
   edit: "编辑{type}",
   add: "添加{type}",
-  create: "创建一个新的{type}",
   delete: "删除{type}",
+  create: "创建一个新的{type}",
   placeholder: "请输入{type}",
   select: "请选择{type}",
   "import-from": "从 {type} 导入",
@@ -62,4 +62,7 @@ export default {
   "no-tabs": "这里没有标签",
   "open-tabs": "打开的标签",
   window: "窗口",
+  search: "搜索",
+  "search-placeholder": "请输入标题或链接",
+  "no-search-result": "没有搜索结果",
 }
