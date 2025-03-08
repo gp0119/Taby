@@ -230,7 +230,7 @@ class DataBase extends Dexie {
         await this.spaces.bulkPut(data.spaces)
         await this.collections.bulkPut(data.collections)
         await this.labels.bulkPut(data.labels)
-        await this.favicons.bulkPut(data.favicons)
+        await this.favicons.bulkPut(data.favicons || [])
         await this.cards.bulkPut(data.cards)
         this.modifiedTables.clear()
       },

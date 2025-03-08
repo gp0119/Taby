@@ -102,6 +102,7 @@ class GistManager {
           ? JSON.parse(decompressFromUTF16(favicons.content))
           : [],
       }
+      console.log("new remoteData: ", remoteData)
       return remoteData
     } else {
       const compressedContent = res.files["taby-backup.json"].content
@@ -109,6 +110,7 @@ class GistManager {
       const remoteData: SyncData = JSON.parse(
         decompressFromUTF16(compressedContent),
       )
+      console.log("old remoteData: ", remoteData)
       return remoteData
     }
   }

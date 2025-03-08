@@ -49,6 +49,7 @@ class SyncManager {
       id = gistId
     }
     const data = await GistManager.downloadAll(token!, id!)
+    console.log("data: ", data)
     await db.importData(data)
     return data
   }
