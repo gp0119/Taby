@@ -85,8 +85,8 @@ const { ft, gt } = useHelpi18n()
 
 watch(
   () => spacesStore.activeId,
-  () => {
-    tagsStore.fetchCollectionsTags()
+  async () => {
+    await tagsStore.fetchCollectionsTags()
   },
   { immediate: true },
 )

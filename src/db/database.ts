@@ -1,5 +1,5 @@
-import Dexie, { EntityTable } from "dexie"
-import { Card, Collection, Label, Space, SyncData } from "@/type.ts"
+import Dexie, { EntityTable, Transaction } from "dexie"
+import { Card, Collection, Favicon, Label, Space, SyncData } from "@/type.ts"
 import syncManager from "@/sync/syncManager.ts"
 
 class DataBase extends Dexie {
@@ -9,18 +9,35 @@ class DataBase extends Dexie {
   collections!: EntityTable<Collection, "id">
   labels!: EntityTable<Label, "id">
   cards!: EntityTable<Card, "id">
+  favicons!: EntityTable<Favicon, "id">
   constructor() {
     super("TabyDatabase")
-    this.version(1.1).stores({
-      spaces: "++id, title, order, createdAt, modifiedAt, icon",
-      collections:
-        "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, modifiedAt, icon",
-      labels: "++id, title, color, createdAt, modifiedAt",
-      cards:
-        "++id, title, url, customTitle, order, favicon, customDescription, collectionId, [collectionId+order], createdAt, modifiedAt",
-    })
+    this.version(1.8)
+      .stores({
+        spaces: "++id, title, order, createdAt, modifiedAt, icon",
+        collections:
+          "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, modifiedAt, icon",
+        labels: "++id, title, color, createdAt, modifiedAt",
+        cards:
+          "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt, modifiedAt",
+        favicons: "++id, url",
+      })
+      .upgrade((tx: Transaction) => {
+        this.handleCards(tx)
+      })
     this.initializeDefaultData()
     this.addHooks()
+  }
+
+  async handleCards(tx: Transaction) {
+    tx.table("cards")
+      .toCollection()
+      .modify(async (card: any) => {
+        card.description = ""
+        card.title = card.customTitle || card.title
+        delete card.customDescription
+        delete card.customTitle
+      })
   }
 
   public static getInstance(): DataBase {
@@ -61,22 +78,25 @@ class DataBase extends Dexie {
       { table: this.collections, name: "collections" },
       { table: this.labels, name: "labels" },
       { table: this.cards, name: "cards" },
+      { table: this.favicons, name: "favicons" },
     ]
     const self = this
     tableMapping.forEach(({ table, name }) => {
       table.hook("creating", function (_primKey, obj) {
-        // console.log("creating", obj)
-        const now = Date.now()
-        obj.createdAt = now
-        obj.modifiedAt = now
+        if (!(name === "favicons" || name === "labels")) {
+          const now = Date.now()
+          obj.createdAt = now
+          obj.modifiedAt = now
+        }
         self.modifiedTables.add(name)
         self.triggerUpload()
       })
-      table.hook("updating", function (modifications, _primKey, _obj) {
-        // console.log("updating", modifications)
+      table.hook("updating", function (modifications: any, _primKey, _obj) {
         if (typeof modifications === "object") {
           // @ts-ignore
-          modifications.modifiedAt = Date.now()
+          if (!(name === "favicons" || name === "labels")) {
+            modifications.modifiedAt = Date.now()
+          }
           self.modifiedTables.add(name)
           self.triggerUpload()
         }
@@ -106,11 +126,13 @@ class DataBase extends Dexie {
     const collections = await this.collections.toArray()
     const labels = await this.labels.toArray()
     const cards = await this.cards.toArray()
+    const favicons = await this.favicons.toArray()
     return {
       spaces,
       collections,
       labels,
       cards,
+      favicons,
     }
   }
 
@@ -156,8 +178,17 @@ class DataBase extends Dexie {
               labels: collectionLabels.map((label) =>
                 this.stripMetadata(label),
               ),
-              cards: collectionCards.map((card) =>
-                this.stripMetadata(card, ["order", "collectionId"]),
+              cards: await Promise.all(
+                collectionCards.map(async (card) => {
+                  const faviconId = card.faviconId
+                  const favicon = faviconId
+                    ? await this.favicons.get(faviconId)
+                    : ""
+                  return {
+                    ...this.stripMetadata(card, ["order", "collectionId"]),
+                    favicon: favicon ? favicon.url : "",
+                  }
+                }),
               ),
             }
           }),

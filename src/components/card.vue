@@ -22,7 +22,7 @@
         v-if="!selectIds?.includes(child.id)"
         class="favicon group-hover/card:hidden"
       />
-      <span class="card-title">{{ child.customTitle || child.title }}</span>
+      <span class="card-title">{{ child.title }}</span>
       <!--   删除按钮   -->
       <n-icon-wrapper
         :size="16"
@@ -37,7 +37,7 @@
       <div
         class="select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light text-text-secondary"
       >
-        {{ child.customDescription || child.title }}
+        {{ child.description || child.title }}
       </div>
       <!--   复制按钮   -->
       <n-icon-wrapper

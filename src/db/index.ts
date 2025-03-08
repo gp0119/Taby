@@ -214,8 +214,7 @@ class DataManager {
         (card) =>
           searchInText(card.title) ||
           searchInText(card.url) ||
-          searchInText(card.customTitle) ||
-          searchInText(card.customDescription),
+          searchInText(card.description),
       )
       .toArray()
   }
@@ -241,7 +240,7 @@ class DataManager {
   }
 
   async addCard(
-    card: Pick<Card, "title" | "url" | "collectionId" | "favicon">,
+    card: Pick<Card, "title" | "url" | "collectionId" | "faviconId">,
     targetIndex?: number,
   ) {
     const cards = await db.cards
@@ -257,9 +256,8 @@ class DataManager {
       const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
       return db.cards.add({
         ...card,
+        description: "",
         order: lastOrder + this.ORDER_STEP,
-        customTitle: card.title,
-        customDescription: card.title,
       })
     }
 
@@ -279,8 +277,7 @@ class DataManager {
     return db.cards.add({
       ...card,
       order: newOrder,
-      customTitle: card.title,
-      customDescription: card.title,
+      description: "",
     })
   }
 
@@ -293,17 +290,18 @@ class DataManager {
     {
       title,
       description,
-      favicon,
-    }: { title?: string; description?: string; favicon?: string },
+      faviconId,
+    }: { title?: string; description?: string; faviconId?: number },
   ) {
     return db.cards.update(id, {
-      customTitle: title,
-      customDescription: description,
-      favicon,
+      title,
+      description,
+      faviconId,
     })
   }
   async updateCardFavicon(id: number, favicon: string) {
-    return db.cards.update(id, { favicon })
+    const faviconId = await this.addFavicon(favicon)
+    return db.cards.update(id, { faviconId })
   }
 
   async moveCard(cardId: number, oldIndex: number, newIndex: number) {
@@ -423,7 +421,23 @@ class DataManager {
             labels.push(label)
           }
         }
-        return { ...collection, cards, labels }
+        const faviconIds = cards
+          .map((card) => card.faviconId)
+          .filter((id): id is number => id !== null && id !== undefined)
+        const favicons =
+          faviconIds.length > 0
+            ? await db.favicons.where("id").anyOf(faviconIds).toArray()
+            : []
+        const faviconMap = new Map(
+          favicons.map((favicon) => [favicon.id, favicon.url]),
+        )
+        const cardsWithFavicon = cards.map((card) => ({
+          ...card,
+          favicon: card.faviconId
+            ? faviconMap.get(card.faviconId) || null
+            : null,
+        }))
+        return { ...collection, cards: cardsWithFavicon, labels }
       }),
     )
   }
@@ -432,12 +446,14 @@ class DataManager {
     return db.cards.bulkAdd(cards)
   }
 
-  async batchAddCollections(collections: Omit<Collection, "id">[]) {
-    return db.collections.bulkAdd(collections)
+  async addFavicon(url: string) {
+    const isExist = await db.favicons.where("url").equals(url).first()
+    if (isExist) return isExist.id
+    return db.favicons.add({ url })
   }
 
-  async getCard(cardId: number) {
-    return await db.cards.get(cardId)
+  async getFaviconById(id: number) {
+    return db.favicons.get(id)
   }
 }
 

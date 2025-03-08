@@ -156,6 +156,7 @@ function onAddSpace() {
 
 function onHandleSpaceClick(space: Space) {
   spacesStore.setActiveSpace(space.id!)
+  refreshCollections()
 }
 
 function onImport() {
@@ -313,7 +314,7 @@ function onSync() {
                 message.success(ft("success", "upload"))
                 dialog.destroyAll()
               } catch (error) {
-                message.error(ft("success", "upload"))
+                message.error(ft("fail", "upload"))
               }
             })
           }}
@@ -336,9 +337,9 @@ function onSync() {
                 })
                 await refreshSpaces()
                 await refreshCollections()
+                message.success(ft("success", "download"))
                 dialog.destroyAll()
               })
-              message.success(ft("success", "download"))
             } catch (error) {
               message.error(ft("fail", "download"))
             }

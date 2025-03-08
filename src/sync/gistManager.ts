@@ -65,6 +65,7 @@ class GistManager {
       if (value)
         files[key] = { content: compressToUTF16(JSON.stringify(value)) }
     })
+
     return this.request({
       endpoint: `/gists/${gistId}`,
       method: "PATCH",
@@ -87,14 +88,7 @@ class GistManager {
       token,
     })
     // 兼容老数据
-    if (res.files["taby-backup.json"].content) {
-      const compressedContent = res.files["taby-backup.json"].content
-      if (!compressedContent) throw new Error("远程数据为空")
-      const remoteData: SyncData = JSON.parse(
-        decompressFromUTF16(compressedContent),
-      )
-      return remoteData
-    } else {
+    if (!res.files["taby-backup.json"]) {
       const { spaces, collections, labels, cards } = res.files
       const remoteData: SyncData = {
         spaces: JSON.parse(decompressFromUTF16(spaces.content)),
@@ -102,6 +96,13 @@ class GistManager {
         labels: JSON.parse(decompressFromUTF16(labels.content)),
         cards: JSON.parse(decompressFromUTF16(cards.content)),
       }
+      return remoteData
+    } else {
+      const compressedContent = res.files["taby-backup.json"].content
+      if (!compressedContent) throw new Error("远程数据为空")
+      const remoteData: SyncData = JSON.parse(
+        decompressFromUTF16(compressedContent),
+      )
       return remoteData
     }
   }

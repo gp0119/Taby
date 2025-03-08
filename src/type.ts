@@ -7,8 +7,8 @@ interface BaseEntity {
 export interface iCard extends BaseEntity {
   title: string
   url: string
-  customTitle?: string
-  customDescription?: string
+  description: string
+  faviconId?: number
   windowId?: number
   oldIndex?: number
 }
@@ -34,17 +34,25 @@ export interface Label extends BaseEntity {
 export interface Card extends BaseEntity {
   title: string
   url: string
-  customTitle: string
-  customDescription: string
+  description: string
   collectionId: number
   order: number
   windowId?: number
-  favicon?: string
+  faviconId?: number
 }
 
 export interface CollectionWithCards extends Collection {
-  cards: Card[]
+  cards: CardWithFavicon[]
   labels: Label[]
+}
+
+export interface Favicon {
+  id: number
+  url: string
+}
+
+export interface CardWithFavicon extends Card {
+  favicon: string | null
 }
 
 export interface SyncData {

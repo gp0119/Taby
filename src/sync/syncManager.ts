@@ -6,7 +6,7 @@ import { debounce } from "lodash-es"
 
 class SyncManager {
   private static instance: SyncManager
-  SYNC_INTERVAL = 1000
+  SYNC_INTERVAL = 1000 * 3
   AUTO_DOWNLOAD_INTERVAL = 1000 * 60 * 60
 
   constructor() {}
@@ -47,7 +47,6 @@ class SyncManager {
       id = gistId
     }
     const data = await GistManager.downloadAll(token!, id!)
-    if (!data) return
     await db.importData(data)
     return data
   }

@@ -34,7 +34,6 @@ export const useSpacesStore = defineStore("spaces", () => {
 
   async function setActiveSpace(id: number) {
     activeId.value = id
-    await fetchCollections(id)
   }
 
   function setCollections(_collections: CollectionWithCards[]) {

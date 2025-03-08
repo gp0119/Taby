@@ -132,7 +132,7 @@ export const useSearchModal = () => {
                           )}
                         ></span>
                         <span class="mx-2 inline-block h-[16px] w-[1px] bg-text-secondary"></span>
-                        <span>{card.customDescription}</span>
+                        <span>{card.description}</span>
                       </span>
                       <div class="text-ellipsis text-xs font-light text-text-secondary">
                         {card.url}

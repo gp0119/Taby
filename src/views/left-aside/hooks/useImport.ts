@@ -1,6 +1,6 @@
+import dataManager from "@/db"
 import { Card, CollectionWithCards, Label } from "@/type.ts"
 import { useMessage } from "naive-ui"
-import dataManager from "@/db"
 
 async function batchAddLable(labels: Label[]) {
   const labelIds: number[] = []
@@ -17,9 +17,12 @@ async function batchAddCard(cards: Card[], collectionId: number) {
   await dataManager.batchAddCards(
     cards.map((card, index) => {
       return {
-        ...card,
-        customTitle: card.customTitle || card.title,
-        customDescription: card.customDescription || card.title,
+        title: card.title,
+        url: card.url,
+        ...(card.faviconId && {
+          faviconId: card.faviconId,
+        }),
+        description: card.description || "",
         collectionId,
         order: (index + 1) * 1000,
       }
@@ -41,6 +44,7 @@ async function addCollection(
 
 export function useImport() {
   const message = useMessage()
+
   const importFromToby = async (spaceId: number, file: Blob) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -62,7 +66,7 @@ export function useImport() {
           resolve(true)
         } catch (error) {
           reject(error)
-          message.error("文件内容不是有效的 JSON")
+          message.error("请检查是否为有效的 Toby 导出文件")
         }
       }
     })
@@ -78,20 +82,24 @@ export function useImport() {
           for (const space of spaces) {
             const spaceId = await dataManager.addSpace(space)
             for (const collection of space.collections) {
-              console.log("collection: ", collection)
               const labelIds: number[] = await batchAddLable(collection.labels)
               const collectionId = (await addCollection(
                 collection,
                 spaceId,
                 labelIds,
               )) as number
+              for (const card of collection.cards) {
+                if (card.favicon) {
+                  card.faviconId = await dataManager.addFavicon(card.favicon)
+                }
+              }
               await batchAddCard(collection.cards, collectionId)
             }
           }
           resolve(true)
         } catch (error) {
           reject(error)
-          message.error("文件内容不是有效的 JSON")
+          message.error("请检查是否为有效的 Taby 导出文件")
         }
       }
     })

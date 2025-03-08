@@ -12,8 +12,7 @@ export function useChromeTabs() {
         acc[cur.windowId].push({
           title: cur.title || "",
           url: cur.url || "",
-          customTitle: "",
-          customDescription: "",
+          description: "",
           windowId: cur.windowId,
           id: cur.id as number,
           collectionId: 0,
@@ -24,8 +23,7 @@ export function useChromeTabs() {
           {
             title: cur.title || "",
             url: cur.url || "",
-            customTitle: "",
-            customDescription: "",
+            description: "",
             windowId: cur.windowId,
             id: cur.id as number,
             collectionId: 0,

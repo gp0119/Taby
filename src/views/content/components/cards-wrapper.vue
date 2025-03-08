@@ -35,7 +35,7 @@
 <script setup lang="tsx">
 import dataManager from "@/db"
 import Card from "@components/card.vue"
-import { Card as iCard } from "@/type.ts"
+import { Card as iCard, CardWithFavicon } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
 import { useBatchSelectStore } from "@/store/batch-select"
@@ -44,7 +44,7 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import Favicon from "@/components/favicon.vue"
 defineProps<{
-  cards: iCard[]
+  cards: CardWithFavicon[]
   collectionId: number
 }>()
 
@@ -93,10 +93,10 @@ async function onDeleteCard(card: iCard) {
   })
 }
 
-function onEdit(child: iCard) {
+function onEdit(child: CardWithFavicon) {
   const formModel = ref({
-    title: child.customTitle || child.title,
-    description: child.customDescription || child.title,
+    title: child.title,
+    description: child.description,
     favicon: child.favicon,
   })
   openEditDialog({
@@ -142,6 +142,7 @@ function onEdit(child: iCard) {
         title: formModel.value.title,
         description: formModel.value.description,
       })
+      await refreshCollections()
     },
   })
 }
