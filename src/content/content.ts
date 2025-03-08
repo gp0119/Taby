@@ -3,7 +3,6 @@ const getFavicons = async () => {
   const url = window.location.href
   const origin = new URL(url).origin
   const href = new URL(url).href
-  const defaultGoogleFavicon = `https://www.google.com/s2/favicons?domain=${origin}&sz=32`
   if (iconLinks.length) {
     const hrefList = Array.from(iconLinks).map((link) =>
       link.getAttribute("href"),
@@ -35,7 +34,7 @@ const getFavicons = async () => {
     console.log("Error checking favicon.ico:", error)
   }
 
-  return defaultGoogleFavicon
+  return undefined
 }
 
 function joinPath(...segments: string[]) {
