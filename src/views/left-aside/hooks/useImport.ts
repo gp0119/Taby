@@ -80,7 +80,10 @@ export function useImport() {
         try {
           const spaces = JSON.parse(event.target?.result as string)
           for (const space of spaces) {
-            const spaceId = await dataManager.addSpace(space)
+            const spaceId = await dataManager.addSpace({
+              title: space.title,
+              icon: space.icon,
+            })
             for (const collection of space.collections) {
               const labelIds: number[] = await batchAddLable(collection.labels)
               const collectionId = (await addCollection(
