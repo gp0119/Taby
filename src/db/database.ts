@@ -48,13 +48,14 @@ class DataBase extends Dexie {
   }
 
   private async createDefaultSpace() {
-    return this.spaces.add({
+    await this.spaces.add({
       title: "My Collections",
       order: 1000,
       createdAt: Date.now(),
       modifiedAt: Date.now(),
       icon: "StorefrontOutline",
     })
+    this.modifiedTables.clear()
   }
 
   private async initializeDefaultData() {
@@ -69,7 +70,6 @@ class DataBase extends Dexie {
   }
 
   async triggerUpload() {
-    if (this.modifiedTables.size === 0) return
     await syncManager.triggerUpload()
   }
 
@@ -219,15 +219,17 @@ class DataBase extends Dexie {
     collections: Collection[]
     labels: Label[]
     cards: Card[]
+    favicons: Favicon[]
   }) {
     this.transaction(
       "rw",
-      [this.spaces, this.collections, this.labels, this.cards],
+      [this.spaces, this.collections, this.labels, this.cards, this.favicons],
       async () => {
         await this.clearData()
         await this.spaces.bulkPut(data.spaces)
         await this.collections.bulkPut(data.collections)
         await this.labels.bulkPut(data.labels)
+        await this.favicons.bulkPut(data.favicons)
         await this.cards.bulkPut(data.cards)
         this.modifiedTables.clear()
       },

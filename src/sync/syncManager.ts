@@ -2,7 +2,7 @@ import { db } from "@/db/database.ts"
 import GistManager from "@/sync/gistManager.ts"
 import { SyncData } from "@/type.ts"
 import { SYNC_GIST_ID, SYNC_GIST_TOKEN } from "@/utils/constants.ts"
-import { debounce } from "lodash-es"
+import { debounce, isEmpty } from "lodash-es"
 
 class SyncManager {
   private static instance: SyncManager
@@ -36,6 +36,8 @@ class SyncManager {
       id = gistId
     }
     const modifiedData: Partial<SyncData> = await db.getModifiedTables()
+    console.log("modifiedData: ", modifiedData)
+    if (isEmpty(modifiedData)) return
     await GistManager.uploadAll(token!, modifiedData, id)
   }, this.SYNC_INTERVAL)
 

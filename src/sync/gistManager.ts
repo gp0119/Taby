@@ -80,6 +80,7 @@ class GistManager {
         collections: { content: string }
         labels: { content: string }
         cards: { content: string }
+        favicons: { content: string }
         "taby-backup.json": { content: string }
       }
     }>({
@@ -89,12 +90,17 @@ class GistManager {
     })
     // 兼容老数据
     if (!res.files["taby-backup.json"]) {
-      const { spaces, collections, labels, cards } = res.files
+      const { spaces, collections, labels, cards, favicons } = res.files
       const remoteData: SyncData = {
-        spaces: JSON.parse(decompressFromUTF16(spaces.content)),
-        collections: JSON.parse(decompressFromUTF16(collections.content)),
-        labels: JSON.parse(decompressFromUTF16(labels.content)),
-        cards: JSON.parse(decompressFromUTF16(cards.content)),
+        spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
+        collections: collections
+          ? JSON.parse(decompressFromUTF16(collections.content))
+          : [],
+        labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
+        cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
+        favicons: favicons
+          ? JSON.parse(decompressFromUTF16(favicons.content))
+          : [],
       }
       return remoteData
     } else {

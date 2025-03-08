@@ -60,6 +60,7 @@ export interface SyncData {
   collections: Collection[]
   labels: Label[]
   cards: Card[]
+  favicons: Favicon[]
 }
 
 export interface iOption {
