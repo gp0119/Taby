@@ -27,7 +27,7 @@ import { iOptions } from "@/type.ts"
 import SelectWrapper from "@components/select-wrapper.vue"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/carbon"
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const { ft } = useHelpi18n()
@@ -59,7 +59,6 @@ watch(
   { immediate: true },
 )
 
-const dataManager = new DataManager()
 const onAddCollection = async () => {
   if (formModel.value.title === "") return
   await dataManager.addCollection({

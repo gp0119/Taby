@@ -52,7 +52,6 @@ export interface SyncData {
   collections: Collection[]
   labels: Label[]
   cards: Card[]
-  timestamp: number
 }
 
 export interface iOption {

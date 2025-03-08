@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { useThemeStore } from "@/store/theme.ts"
-import { downloadAll } from "@/sync/gistSync.ts"
+import syncManager from "@/sync/syncManager.ts"
 import navs from "@/views/navs/navs.vue"
 import leftAside from "@/views/left-aside/left-aside.vue"
 import rightAside from "@/views/right-aside/index.vue"
@@ -97,25 +97,9 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
 
 const { refreshSpaces, refreshCollections } = useRefresh()
 async function autoSync() {
-  const result = await chrome.storage.sync.get(["accessToken", "gistId"])
-  const { accessToken, gistId } = result
-  if (!accessToken || !gistId) return
-  const lastSyncTime = localStorage.getItem("lastSyncTime")
-  if (!lastSyncTime) {
-    await downloadAll(accessToken, gistId)
-    await refreshSpaces()
-    await refreshCollections()
-    localStorage.setItem("lastSyncTime", Date.now() + "")
-    return
-  } else {
-    const now = Date.now()
-    if (now - Number(lastSyncTime) > 1000 * 60 * 60) {
-      await downloadAll(accessToken, gistId)
-      await refreshSpaces()
-      await refreshCollections()
-      localStorage.setItem("lastSyncTime", Date.now() + "")
-    }
-  }
+  await syncManager.autoDownload()
+  await refreshSpaces()
+  await refreshCollections()
 }
 
 autoSync()

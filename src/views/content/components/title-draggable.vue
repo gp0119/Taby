@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { ChevronForward } from "@vicons/ionicons5"
 import { CollectionWithCards } from "@/type"
@@ -43,7 +43,6 @@ defineProps<{
   collections: CollectionWithCards[]
 }>()
 
-const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 
 const onDragEnd = async (event: any) => {

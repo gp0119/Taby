@@ -77,7 +77,7 @@ import ColorSelect from "@components/color-select.vue"
 import { TagGroup, Edit, Checkmark, Delete } from "@vicons/carbon"
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog"
@@ -86,7 +86,6 @@ const props = defineProps<{
   item: CollectionWithCards
 }>()
 
-const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const { ft, gt } = useHelpi18n()
 const tagsStore = useTagsStore()

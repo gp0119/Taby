@@ -135,7 +135,7 @@
 </template>
 
 <script setup lang="tsx">
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
@@ -226,7 +226,7 @@ const handleSortSelect = (key: string) => {
 }
 
 const spacesStore = useSpacesStore()
-const dataManager = new DataManager()
+
 const { refreshCollections } = useRefresh()
 const { open } = useEditDialog()
 function onAddCollection() {

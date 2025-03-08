@@ -1,10 +1,9 @@
 import { defineStore } from "pinia"
 import { useLocalStorage } from "@vueuse/core"
 import type { CollectionWithCards, Space } from "@/type"
-import DataManager from "@/db"
+import dataManager from "@/db"
 
 export const useSpacesStore = defineStore("spaces", () => {
-  const dataManager = new DataManager()
   const spaces = ref<Space[]>([])
   const collections = ref<CollectionWithCards[]>([])
   const activeId = useLocalStorage<number>("activeSpaceId", 1)

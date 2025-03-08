@@ -2,10 +2,9 @@ import { isUndef } from "@/utils/is.ts"
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
 import { Collection } from "@/type"
-import DataManager from "@/db"
+import dataManager from "@/db"
 
 export const useExpandStore = defineStore("expand", () => {
-  const dataManager = new DataManager()
   const expandedCollections = useLocalStorage<{
     [key: number]: boolean
   }>("expanded-collections", {})

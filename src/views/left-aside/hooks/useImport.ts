@@ -1,8 +1,7 @@
 import { Card, CollectionWithCards, Label } from "@/type.ts"
-import DanaManager from "@/db"
 import { useMessage } from "naive-ui"
+import dataManager from "@/db"
 
-const dataManager = new DanaManager()
 async function batchAddLable(labels: Label[]) {
   const labelIds: number[] = []
   for (const label of labels) {

@@ -70,19 +70,18 @@ import { SyncSharp, LogoGithub } from "@vicons/ionicons5"
 import { DocumentImport, DocumentExport, FolderAdd } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "@/assets/72.png"
-import DanaManager from "@/db"
 import { Space } from "@/type.ts"
 import { useEventListener } from "@vueuse/core"
 import { FormInst, UploadFileInfo } from "naive-ui"
-import { uploadAll, downloadAll } from "@/sync/gistSync.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import IconSelect from "@components/icon-select.vue"
 import SpaceWrapper from "./components/space-wrapper.vue"
 import { SortableEvent } from "vue-draggable-plus"
 import SpaceSelect from "@/components/space-select.vue"
+import dataManager from "@/db"
+import syncManager from "@/sync/syncManager.ts"
 
 const spacesStore = useSpacesStore()
-const dataManager = new DanaManager()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const { openModal } = useSearchModal()
 const loadingBar = useLoadingBar()
@@ -303,13 +302,13 @@ function onSync() {
           onClick={() => {
             formRef.value?.validate().then(async () => {
               try {
-                const res = await uploadAll(
+                const gistId = await syncManager.uploadNow(
                   formModel.value.accessToken,
                   formModel.value.gistId,
                 )
                 await chrome.storage.sync.set({
                   accessToken: formModel.value.accessToken,
-                  gistId: res,
+                  gistId,
                 })
                 message.success(ft("success", "upload"))
                 dialog.destroyAll()
@@ -327,7 +326,7 @@ function onSync() {
           onClick={() => {
             try {
               formRef.value?.validate().then(async () => {
-                await downloadAll(
+                await syncManager.triggerDownload(
                   formModel.value.accessToken,
                   formModel.value.gistId,
                 )

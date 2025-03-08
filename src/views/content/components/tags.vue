@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { Label } from "@/type.ts"
 import { Close } from "@vicons/ionicons5"
@@ -38,7 +38,6 @@ const props = defineProps<{
   collectionId: number
 }>()
 
-const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const onDeleteTagFromCollection = async (tagId: number) => {
   await dataManager.removeTagforCollection(props.collectionId, tagId)

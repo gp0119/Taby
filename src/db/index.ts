@@ -9,10 +9,18 @@ import {
 } from "@/type.ts"
 import { db } from "./database.ts"
 
-class dataManager {
+class DataManager {
+  private static instance: DataManager
   ORDER_STEP: number
   constructor() {
     this.ORDER_STEP = 1000
+  }
+
+  public static getInstance(): DataManager {
+    if (!DataManager.instance) {
+      DataManager.instance = new DataManager()
+    }
+    return DataManager.instance
   }
 
   async getAllSpaces() {
@@ -433,4 +441,4 @@ class dataManager {
   }
 }
 
-export default dataManager
+export default DataManager.getInstance()

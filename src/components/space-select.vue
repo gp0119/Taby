@@ -30,7 +30,7 @@ import SelectWrapper from "@components/select-wrapper.vue"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/carbon"
 import IconSelect from "@components/icon-select.vue"
-import DataManager from "@/db"
+import dataManager from "@/db"
 
 const { ft } = useHelpi18n()
 const id = defineModel<number | null | number[]>("modelValue", {
@@ -60,7 +60,6 @@ const formModel = ref({
   icon: "StorefrontOutline",
 })
 
-const dataManager = new DataManager()
 const onAddSpace = async () => {
   if (formModel.value.title === "") return
   await dataManager.addSpace(formModel.value)

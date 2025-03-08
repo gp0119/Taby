@@ -51,12 +51,12 @@ import { movePosition } from "@/type.ts"
 import { ref } from "vue"
 import { useBatchSelectStore } from "@/store/batch-select"
 import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const show = ref(false)
 const batchSelectStore = useBatchSelectStore()
-const dataManager = new DataManager()
+
 const { refreshCollections } = useRefresh()
 const spacesStore = useSpacesStore()
 const { ft, gt } = useHelpi18n()

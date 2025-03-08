@@ -1,11 +1,10 @@
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Label } from "@/type"
 import { useToggle } from "@vueuse/core"
 import { defineStore } from "pinia"
 
 export const useTagsStore = defineStore("tags", () => {
-  const dataManager = new DataManager()
   const spacesStore = useSpacesStore()
   const tags = ref<Label[]>([])
   const collectionsTags = ref<Label[]>([])

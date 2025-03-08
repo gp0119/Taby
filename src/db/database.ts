@@ -1,26 +1,16 @@
 import Dexie, { EntityTable } from "dexie"
-import { Card, Collection, Label, Space } from "@/type.ts"
-import { uploadAll } from "@/sync/gistSync.ts"
-import { debounce } from "lodash-es"
-
-const SYNC_INTERVAL = 1000 * 30
-const syncToGist = debounce(async () => {
-  const { accessToken, gistId } = await chrome.storage.sync.get([
-    "accessToken",
-    "gistId",
-  ])
-  if (!accessToken || !gistId) return
-  await uploadAll(accessToken, gistId)
-}, SYNC_INTERVAL)
+import { Card, Collection, Label, Space, SyncData } from "@/type.ts"
+import syncManager from "@/sync/syncManager.ts"
 
 class DataBase extends Dexie {
+  private static instance: DataBase
+  modifiedTables: Set<string> = new Set()
   spaces!: EntityTable<Space, "id">
   collections!: EntityTable<Collection, "id">
   labels!: EntityTable<Label, "id">
   cards!: EntityTable<Card, "id">
   constructor() {
     super("TabyDatabase")
-
     this.version(1.1).stores({
       spaces: "++id, title, order, createdAt, modifiedAt, icon",
       collections:
@@ -33,43 +23,82 @@ class DataBase extends Dexie {
     this.addHooks()
   }
 
+  public static getInstance(): DataBase {
+    if (!DataBase.instance) {
+      DataBase.instance = new DataBase()
+    }
+    return DataBase.instance
+  }
+
+  private async createDefaultSpace() {
+    return this.spaces.add({
+      title: "My Collections",
+      order: 1000,
+      createdAt: Date.now(),
+      modifiedAt: Date.now(),
+      icon: "StorefrontOutline",
+    })
+  }
+
   private async initializeDefaultData() {
     const spaceCount = await this.spaces.count()
     if (spaceCount === 0) {
       try {
-        await this.spaces.add({
-          title: "My Collections",
-          order: 1000,
-          createdAt: Date.now(),
-          modifiedAt: Date.now(),
-          icon: "StorefrontOutline",
-        })
+        await this.createDefaultSpace()
       } catch (error) {
         console.error("初始化默认数据失败:", error)
       }
     }
   }
 
+  async triggerUpload() {
+    await syncManager.triggerUpload()
+  }
+
   addHooks() {
-    const tables = [this.spaces, this.collections, this.labels, this.cards]
-    tables.forEach((table) => {
+    const tableMapping = [
+      { table: this.spaces, name: "spaces" },
+      { table: this.collections, name: "collections" },
+      { table: this.labels, name: "labels" },
+      { table: this.cards, name: "cards" },
+    ]
+    const self = this
+    tableMapping.forEach(({ table, name }) => {
       table.hook("creating", function (_primKey, obj) {
         // console.log("creating", obj)
         const now = Date.now()
         obj.createdAt = now
         obj.modifiedAt = now
-        syncToGist()
+        self.modifiedTables.add(name)
+        self.triggerUpload()
       })
       table.hook("updating", function (modifications, _primKey, _obj) {
         // console.log("updating", modifications)
         if (typeof modifications === "object") {
           // @ts-ignore
           modifications.modifiedAt = Date.now()
-          syncToGist()
+          self.modifiedTables.add(name)
+          self.triggerUpload()
         }
         return modifications
       })
+      table.hook("deleting", function () {
+        self.modifiedTables.add(name)
+        self.triggerUpload()
+      })
     })
+  }
+
+  async getModifiedTables() {
+    const modifiedData: Partial<SyncData> = {}
+    for (const tableName of this.modifiedTables) {
+      const table = this[tableName as keyof DataBase]
+      modifiedData[tableName as keyof SyncData] = await (
+        table as EntityTable<any, any>
+      ).toArray()
+    }
+    this.modifiedTables.clear()
+    return modifiedData
   }
 
   async exportData() {
@@ -85,58 +114,58 @@ class DataBase extends Dexie {
     }
   }
 
+  private stripMetadata<
+    T extends { createdAt?: number; modifiedAt?: number; id?: number },
+  >(obj: T, additionalFields: (keyof T)[] = []): Partial<T> {
+    const { createdAt, modifiedAt, id, ...rest } = obj
+    const result = { ...rest } as Partial<T>
+    additionalFields.forEach((field) => {
+      if (field in result) {
+        delete result[field]
+      }
+    })
+    return result
+  }
+
   async exportBySpaceId(spaceIds: number[]) {
     const spaces = await this.spaces.where("id").anyOf(spaceIds).sortBy("order")
     return Promise.all(
       spaces.map(async (space) => {
-        const { createdAt, modifiedAt, id, order, ...restSpace } = space
+        const spaceData = this.stripMetadata(space, ["order"])
         const collections = await this.collections
-          .where({ spaceId: id })
+          .where({ spaceId: space.id })
           .sortBy("order")
+
         const spaceCollections = await Promise.all(
           collections.map(async (collection) => {
             const collectionLabels = await this.labels
               .where("id")
               .anyOf(collection.labelIds)
               .toArray()
+
             const collectionCards = await this.cards
               .where({ collectionId: collection.id })
               .sortBy("order")
+
             return {
-              ...collection,
-              labels: collectionLabels.map(
-                ({ createdAt, modifiedAt, id, ...rest }) => ({
-                  ...rest,
-                }),
+              ...this.stripMetadata(collection, [
+                "order",
+                "labelIds",
+                "spaceId",
+              ]),
+              labels: collectionLabels.map((label) =>
+                this.stripMetadata(label),
               ),
-              cards: collectionCards.map(
-                ({
-                  createdAt,
-                  modifiedAt,
-                  id,
-                  order,
-                  collectionId,
-                  ...rest
-                }) => ({
-                  ...rest,
-                }),
+              cards: collectionCards.map((card) =>
+                this.stripMetadata(card, ["order", "collectionId"]),
               ),
             }
           }),
         )
+
         return {
-          ...restSpace,
-          collections: spaceCollections.map(
-            ({
-              createdAt,
-              modifiedAt,
-              id,
-              order,
-              labelIds,
-              spaceId,
-              ...rest
-            }) => ({ ...rest }),
-          ),
+          ...spaceData,
+          collections: spaceCollections,
         }
       }),
     )
@@ -157,12 +186,19 @@ class DataBase extends Dexie {
     labels: Label[]
     cards: Card[]
   }) {
-    await this.clearData()
-    await this.spaces.bulkAdd(data.spaces)
-    await this.collections.bulkAdd(data.collections)
-    await this.labels.bulkAdd(data.labels)
-    await this.cards.bulkAdd(data.cards)
+    this.transaction(
+      "rw",
+      [this.spaces, this.collections, this.labels, this.cards],
+      async () => {
+        await this.clearData()
+        await this.spaces.bulkPut(data.spaces)
+        await this.collections.bulkPut(data.collections)
+        await this.labels.bulkPut(data.labels)
+        await this.cards.bulkPut(data.cards)
+        this.modifiedTables.clear()
+      },
+    )
   }
 }
 
-export const db = new DataBase()
+export const db = DataBase.getInstance()

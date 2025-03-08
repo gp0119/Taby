@@ -51,7 +51,7 @@ import LangSwitch from "./components/lang-switch.vue"
 import NavAction from "@/views/navs/components/nav-action.vue"
 import { Settings } from "@vicons/ionicons5"
 import { Delete } from "@vicons/carbon"
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { SelectOption, SelectGroupOption } from "naive-ui"
 import IconSelect from "@components/icon-select.vue"
 import { ICON_LIST } from "@/utils/constants.ts"
@@ -82,7 +82,6 @@ const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
-const dataManager = new DataManager()
 
 watch(
   () => spacesStore.activeId,

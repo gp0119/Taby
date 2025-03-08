@@ -32,7 +32,7 @@
 import { CollectionWithCards } from "@/type.ts"
 import { FolderMoveTo, Delete, Edit, Launch } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import TagAction from "./tag-action.vue"
@@ -45,7 +45,6 @@ defineProps<{
   item: CollectionWithCards
 }>()
 
-const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const { openTabs } = useChromeTabs()
 const isShowTagAction = ref(false)

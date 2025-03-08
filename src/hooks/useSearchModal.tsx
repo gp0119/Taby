@@ -1,6 +1,6 @@
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useModal, NInput, NScrollbar, NIcon } from "naive-ui"
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { debounce } from "lodash"
 import { Card } from "@/type"
 import Favicon from "@/components/favicon.vue"
@@ -11,7 +11,7 @@ export const useSearchModal = () => {
   const searchValue = ref("")
   const modal = useModal()
   const { refreshCollections } = useRefresh()
-  const dataManager = new DataManager()
+
   const cards = ref<Card[]>([])
   const currentIndex = ref(0)
   const searchCardsFromDb = debounce(async () => {

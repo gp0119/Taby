@@ -186,3 +186,7 @@ export const ICON_LIST: Record<string, Component> = {
   MedalOutline,
   MailOpenOutline,
 } as const
+
+export const GITHUB_API = "https://api.github.com"
+export const SYNC_GIST_ID = "gistId"
+export const SYNC_GIST_TOKEN = "accessToken"

@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="tsx">
-import DataManager from "@/db"
+import dataManager from "@/db"
 import Card from "@components/card.vue"
 import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
@@ -48,7 +48,6 @@ defineProps<{
   collectionId: number
 }>()
 
-const dataManager = new DataManager()
 const { refreshCollections } = useRefresh()
 const batchSelectStore = useBatchSelectStore()
 const { ft, gt } = useHelpi18n()

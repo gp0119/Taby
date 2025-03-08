@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import DataManager from "@/db"
+import dataManager from "@/db"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { debounce } from "lodash-es"
@@ -37,7 +37,6 @@ import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 
-const dataManager = new DataManager()
 const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
 const isExpanded = ref(true)
 const { refreshCollections } = useRefresh()
