@@ -69,6 +69,7 @@ class DataBase extends Dexie {
   }
 
   async triggerUpload() {
+    if (this.modifiedTables.size === 0) return
     await syncManager.triggerUpload()
   }
 
@@ -83,6 +84,7 @@ class DataBase extends Dexie {
     const self = this
     tableMapping.forEach(({ table, name }) => {
       table.hook("creating", function (_primKey, obj) {
+        console.log("creating", name, obj)
         if (!(name === "favicons" || name === "labels")) {
           const now = Date.now()
           obj.createdAt = now
@@ -92,6 +94,7 @@ class DataBase extends Dexie {
         self.triggerUpload()
       })
       table.hook("updating", function (modifications: any, _primKey, _obj) {
+        console.log("updating", name, modifications)
         if (typeof modifications === "object") {
           // @ts-ignore
           if (!(name === "favicons" || name === "labels")) {
