@@ -205,6 +205,16 @@ class DataBase extends Dexie {
     )
   }
 
+  async clearData() {
+    await Promise.all([
+      this.spaces.clear(),
+      this.collections.clear(),
+      this.labels.clear(),
+      this.cards.clear(),
+      this.favicons.clear(),
+    ])
+  }
+
   async importData(data: {
     spaces: Space[]
     collections: Collection[]
@@ -216,6 +226,7 @@ class DataBase extends Dexie {
       "rw",
       [this.spaces, this.collections, this.labels, this.cards, this.favicons],
       async () => {
+        await this.clearData()
         await this.spaces.bulkPut(data.spaces)
         await this.collections.bulkPut(data.collections)
         await this.labels.bulkPut(data.labels)
