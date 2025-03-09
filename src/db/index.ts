@@ -141,20 +141,32 @@ class DataManager {
   }
 
   async addTagforCollection(collectionId: number, tagId: number) {
-    const collection = await db.collections.get(collectionId)
-    if (!collection) return
-    if (collection.labelIds.includes(tagId)) return
-    return db.collections.update(collectionId, {
-      labelIds: [...collection.labelIds, tagId],
+    return db.transaction("rw", db.collections, async () => {
+      const collection = await db.collections.get(collectionId)
+      if (!collection) return
+
+      const labelIdSet = new Set(collection.labelIds)
+      if (labelIdSet.has(tagId)) return
+
+      labelIdSet.add(tagId)
+      return db.collections.update(collectionId, {
+        labelIds: Array.from(labelIdSet),
+      })
     })
   }
 
   async removeTagforCollection(collectionId: number, tagId: number) {
-    const collection = await db.collections.get(collectionId)
-    if (!collection) return
-    if (!collection.labelIds.includes(tagId)) return
-    return db.collections.update(collectionId, {
-      labelIds: collection.labelIds.filter((id) => id !== tagId),
+    return db.transaction("rw", db.collections, async () => {
+      const collection = await db.collections.get(collectionId)
+      if (!collection) return
+
+      const labelIdSet = new Set(collection.labelIds)
+      if (!labelIdSet.has(tagId)) return
+
+      labelIdSet.delete(tagId)
+      return db.collections.update(collectionId, {
+        labelIds: Array.from(labelIdSet),
+      })
     })
   }
 
@@ -391,33 +403,93 @@ class DataManager {
     updateData: Partial<Card>,
     position?: movePosition,
   ) {
-    const toCollections = await db.cards
-      .where("[collectionId+order]")
-      .between(
-        [updateData.collectionId!, Dexie.minKey],
-        [updateData.collectionId!, Dexie.maxKey],
-      )
-      .toArray()
-    const moveingCards = await db.cards.where("id").anyOf(cardIds).toArray()
-    if (position === "HEAD") {
-      toCollections.unshift(...moveingCards)
-    } else if (position === "END") {
-      toCollections.push(...moveingCards)
-    }
-    await Promise.all(
-      toCollections.map(async (card, index) => {
-        await db.cards.update(card.id, {
-          ...(cardIds.includes(card.id) && {
-            ...updateData,
+    return db.transaction("rw", db.cards, async () => {
+      if (updateData.collectionId !== undefined) {
+        const toCollections = await db.cards
+          .where("[collectionId+order]")
+          .between(
+            [updateData.collectionId, Dexie.minKey],
+            [updateData.collectionId, Dexie.maxKey],
+          )
+          .toArray()
+
+        const movingCards = await db.cards.where("id").anyOf(cardIds).toArray()
+
+        if (position === "HEAD") {
+          toCollections.unshift(...movingCards)
+        } else if (position === "END" || position === undefined) {
+          toCollections.push(...movingCards)
+        }
+
+        const cardIdSet = new Set(cardIds)
+
+        await Promise.all(
+          toCollections.map(async (card, index) => {
+            await db.cards.update(card.id, {
+              ...(cardIdSet.has(card.id) && {
+                ...updateData,
+              }),
+              order: (index + 1) * this.ORDER_STEP,
+            })
           }),
-          order: (index + 1) * this.ORDER_STEP,
-        })
-      }),
-    )
+        )
+      }
+    })
   }
 
   async batchDeleteCards(cardIds: number[]) {
-    return db.cards.bulkDelete(cardIds)
+    await db.transaction("rw", db.cards, async () => {
+      await db.cards.bulkDelete(cardIds)
+    })
+  }
+
+  async batchUpdateCollections(
+    collectionIds: number[],
+    updateData: Partial<Collection>,
+    position?: movePosition,
+  ) {
+    return db.transaction("rw", db.collections, async () => {
+      if (updateData.spaceId !== undefined) {
+        const toSpaces = await db.collections
+          .where("[spaceId+order]")
+          .between(
+            [updateData.spaceId, Dexie.minKey],
+            [updateData.spaceId, Dexie.maxKey],
+          )
+          .toArray()
+
+        const movingCollections = await db.collections
+          .where("id")
+          .anyOf(collectionIds)
+          .toArray()
+
+        if (position === "HEAD") {
+          toSpaces.unshift(...movingCollections)
+        } else if (position === "END" || position === undefined) {
+          toSpaces.push(...movingCollections)
+        }
+
+        const collectionIdSet = new Set(collectionIds)
+
+        await Promise.all(
+          toSpaces.map(async (collection, index) => {
+            await db.collections.update(collection.id, {
+              ...(collectionIdSet.has(collection.id) && {
+                ...updateData,
+              }),
+              order: (index + 1) * this.ORDER_STEP,
+            })
+          }),
+        )
+      }
+    })
+  }
+
+  async batchDeleteCollections(collectionIds: number[]) {
+    await db.transaction("rw", db.collections, db.cards, async () => {
+      await db.cards.where("collectionId").anyOf(collectionIds).delete()
+      await db.collections.bulkDelete(collectionIds)
+    })
   }
 
   async getCollectionWithCards(

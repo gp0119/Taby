@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 
-export const useBatchSelectStore = defineStore("batch-select", () => {
+export const useBatchCardStore = defineStore("batch-card", () => {
   const selectedCardIds = ref<number[]>([])
 
   const addSelectedCardId = (id: number) => {

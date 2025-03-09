@@ -31,10 +31,11 @@
     <div v-else class="bg-body-color py-16 text-center text-2xl text-gray-400">
       {{ ft("no-collections") }}
     </div>
-    <BottomDrawer />
+    <BatchCardAction />
   </template>
   <template v-else>
     <title-dragable :collections="collections" />
+    <BatchCollectionAction />
   </template>
 </template>
 
@@ -48,8 +49,9 @@ import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
 import TitleDragable from "@/views/content/components/title-draggable.vue"
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller"
 import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
-import BottomDrawer from "./components/bottom-drawer.vue"
+import BatchCardAction from "./components/batch-card-action.vue"
 import CollectionCollapse from "./components/collection-collapse.vue"
+import BatchCollectionAction from "./components/batch-collection-action.vue"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()

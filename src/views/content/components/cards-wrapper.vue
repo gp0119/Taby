@@ -20,7 +20,7 @@
       class="card-item group/content"
       type="content"
       :child="card"
-      :select-ids="batchSelectStore.selectedCardIds"
+      :select-ids="batchCardStore.selectedCardIds"
       @click="onHandleClick(card)"
       @delete="onDeleteCard(card)"
       @edit="onEdit(card)"
@@ -38,7 +38,7 @@ import Card from "@components/card.vue"
 import { Card as iCard, CardWithFavicon } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
-import { useBatchSelectStore } from "@/store/batch-select"
+import { useBatchCardStore } from "@/store/batch-card"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
@@ -49,7 +49,7 @@ defineProps<{
 }>()
 
 const { refreshCollections } = useRefresh()
-const batchSelectStore = useBatchSelectStore()
+const batchCardStore = useBatchCardStore()
 const { ft, gt } = useHelpi18n()
 
 const { open: openDeleteDialog } = useDeleteDialog()
@@ -168,9 +168,9 @@ const onDragEnd = async (evt: any) => {
 
 function onHandleCheckbox(checked: boolean, card: iCard) {
   if (checked) {
-    batchSelectStore.addSelectedCardId(card.id)
+    batchCardStore.addSelectedCardId(card.id)
   } else {
-    batchSelectStore.removeSelectedCardId(card.id)
+    batchCardStore.removeSelectedCardId(card.id)
   }
 }
 </script>

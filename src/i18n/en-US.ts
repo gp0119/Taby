@@ -58,7 +58,8 @@ export default {
   "delete-confirm":
     "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
   "delete-cards-confirm": "Are you sure you want to delete these tags?",
-  "select-tags": "Selected {type} tags",
+  "select-cards": "Selected {type} cards",
+  "select-collections": "Selected {type} collections",
   tab: "Tab",
   "no-tabs": "No tabs",
   "open-tabs": "Opened Tabs",

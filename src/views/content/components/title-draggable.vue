@@ -17,9 +17,16 @@
       >
         <div class="flex-center select-none">
           <div class="flex-center">
-            <n-icon size="20" class="mr-2">
-              <ChevronForward />
-            </n-icon>
+            <n-checkbox
+              class="mr-2"
+              size="large"
+              :checked="
+                batchCollectionStore.selectedCollectionIds.includes(
+                  collection.id,
+                )
+              "
+              @update:checked="onHandleCheckbox($event, collection.id)"
+            />
             <span class="text-lg font-medium text-text-primary">{{
               collection.title
             }}</span>
@@ -34,11 +41,12 @@
 <script setup lang="ts">
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { ChevronForward } from "@vicons/ionicons5"
 import { CollectionWithCards } from "@/type"
 import Tags from "./tags.vue"
 import { VueDraggable } from "vue-draggable-plus"
+import { useBatchCollectionStore } from "@/store/batch-collection"
 
+const batchCollectionStore = useBatchCollectionStore()
 defineProps<{
   collections: CollectionWithCards[]
 }>()
@@ -51,6 +59,14 @@ const onDragEnd = async (event: any) => {
   const collectionId = item.getAttribute("data-id")
   await dataManager.moveCollection(Number(collectionId), oldIndex, newIndex)
   await refreshCollections()
+}
+
+const onHandleCheckbox = (checked: boolean, collectionId: number) => {
+  if (checked) {
+    batchCollectionStore.addSelectedCollectionId(collectionId)
+  } else {
+    batchCollectionStore.removeSelectedCollectionId(collectionId)
+  }
 }
 </script>
 
