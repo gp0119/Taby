@@ -19,12 +19,11 @@ async function batchAddCard(cards: Card[], collectionId: number) {
       return {
         title: card.title,
         url: card.url,
-        ...(card.faviconId && {
-          faviconId: card.faviconId,
-        }),
+        faviconId: card.faviconId,
         description: card.description || "",
         collectionId,
         order: (index + 1) * 1000,
+        createdAt: Date.now(),
       }
     }),
   )
@@ -45,7 +44,7 @@ async function addCollection(
 export function useImport() {
   const message = useMessage()
 
-  const importFromToby = async (spaceId: number, file: Blob) => {
+  const importFromToby = async (file: Blob) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.readAsText(file)
@@ -54,6 +53,10 @@ export function useImport() {
           const lists: {
             lists: CollectionWithCards[]
           } = JSON.parse(event.target?.result as string)
+          const spaceId = await dataManager.addSpace({
+            title: "From Toby",
+            icon: "StorefrontOutline",
+          })
           for (const list of lists.lists) {
             const labelIds: number[] = await batchAddLable(list.labels)
             const collectionId = (await addCollection(

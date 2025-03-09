@@ -12,14 +12,14 @@ class DataBase extends Dexie {
   favicons!: EntityTable<Favicon, "id">
   constructor() {
     super("TabyDatabase")
-    this.version(1.8)
+    this.version(2)
       .stores({
-        spaces: "++id, title, order, createdAt, modifiedAt, icon",
+        spaces: "++id, title, order, createdAt, icon",
         collections:
-          "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, modifiedAt, icon",
-        labels: "++id, title, color, createdAt, modifiedAt",
+          "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
+        labels: "++id, title, color",
         cards:
-          "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt, modifiedAt",
+          "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
         favicons: "++id, url",
       })
       .upgrade((tx: Transaction) => {
@@ -83,27 +83,15 @@ class DataBase extends Dexie {
     ]
     const self = this
     tableMapping.forEach(({ table, name }) => {
-      table.hook("creating", function (_primKey, obj) {
-        console.log("creating", name, obj)
-        if (!(name === "favicons" || name === "labels")) {
-          const now = Date.now()
-          obj.createdAt = now
-          obj.modifiedAt = now
-        }
+      table.hook("creating", function () {
+        // console.log("creating", name, obj)
         self.modifiedTables.add(name)
         self.triggerUpload()
       })
-      table.hook("updating", function (modifications: any, _primKey, _obj) {
-        console.log("updating", name, modifications)
-        if (typeof modifications === "object") {
-          // @ts-ignore
-          if (!(name === "favicons" || name === "labels")) {
-            modifications.modifiedAt = Date.now()
-          }
-          self.modifiedTables.add(name)
-          self.triggerUpload()
-        }
-        return modifications
+      table.hook("updating", function () {
+        console.log("updating")
+        self.modifiedTables.add(name)
+        self.triggerUpload()
       })
       table.hook("deleting", function () {
         self.modifiedTables.add(name)
@@ -131,11 +119,40 @@ class DataBase extends Dexie {
     const cards = await this.cards.toArray()
     const favicons = await this.favicons.toArray()
     return {
-      spaces,
-      collections,
-      labels,
-      cards,
-      favicons,
+      spaces: spaces.map((space) => ({
+        id: space.id,
+        title: space.title,
+        icon: space.icon,
+        order: space.order,
+        createdAt: space.createdAt,
+      })),
+      collections: collections.map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+        spaceId: collection.spaceId,
+        order: collection.order,
+        labelIds: collection.labelIds,
+        createdAt: collection.createdAt,
+      })),
+      labels: labels.map((label) => ({
+        id: label.id,
+        title: label.title,
+        color: label.color,
+      })),
+      cards: cards.map((card) => ({
+        id: card.id,
+        title: card.title,
+        url: card.url,
+        order: card.order,
+        faviconId: card.faviconId,
+        description: card.description,
+        collectionId: card.collectionId,
+        createdAt: card.createdAt,
+      })),
+      favicons: favicons.map((favicon) => ({
+        id: favicon.id,
+        url: favicon.url,
+      })),
     }
   }
 
@@ -227,11 +244,45 @@ class DataBase extends Dexie {
       [this.spaces, this.collections, this.labels, this.cards, this.favicons],
       async () => {
         await this.clearData()
-        await this.spaces.bulkPut(data.spaces)
-        await this.collections.bulkPut(data.collections)
-        await this.labels.bulkPut(data.labels)
+        await this.spaces.bulkPut(
+          data.spaces.map((space) => ({
+            id: space.id,
+            title: space.title,
+            icon: space.icon,
+            order: space.order || 0,
+            createdAt: space.createdAt || Date.now(),
+          })),
+        )
+        await this.collections.bulkPut(
+          data.collections.map((collection) => ({
+            id: collection.id,
+            title: collection.title,
+            spaceId: collection.spaceId,
+            order: collection.order || 0,
+            labelIds: collection.labelIds || [],
+            createdAt: collection.createdAt || Date.now(),
+          })),
+        )
+        await this.labels.bulkPut(
+          data.labels.map((label) => ({
+            id: label.id,
+            title: label.title,
+            color: label.color,
+          })),
+        )
         await this.favicons.bulkPut(data.favicons || [])
-        await this.cards.bulkPut(data.cards)
+        await this.cards.bulkPut(
+          data.cards.map((card) => ({
+            id: card.id,
+            title: card.title,
+            url: card.url,
+            order: card.order || 0,
+            description: card.description || "",
+            collectionId: card.collectionId || 0,
+            faviconId: card.faviconId || 0,
+            createdAt: card.createdAt || Date.now(),
+          })),
+        )
         this.modifiedTables.clear()
       },
     )

@@ -1,11 +1,12 @@
 import { COLOR_LIST } from "@/utils/constants.ts"
-import Dexie from "dexie"
+import Dexie, { InsertType } from "dexie"
 import {
   Card,
   Collection,
   CollectionWithCards,
   movePosition,
   Space,
+  Label,
 } from "@/type.ts"
 import { db } from "./database.ts"
 
@@ -27,11 +28,14 @@ class DataManager {
     return db.spaces.orderBy("order").toArray()
   }
 
-  async addSpace(space: Omit<Space, "id" | "order">) {
+  async addSpace(space: InsertType<Space, "id" | "order">) {
     const lastSpace = await db.spaces.orderBy("order").last()
+    const { title, icon } = space
     return db.spaces.add({
-      ...space,
+      title: title || "",
+      ...(icon && { icon }),
       order: lastSpace ? lastSpace.order + this.ORDER_STEP : this.ORDER_STEP,
+      createdAt: Date.now(),
     })
   }
 
@@ -98,8 +102,11 @@ class DataManager {
             })
           } else {
             await db.collections.add({
-              ...collection,
+              title: collection.title || "",
+              spaceId: collection.spaceId,
+              labelIds: collection.labelIds,
               order: (index + 1) * this.ORDER_STEP,
+              createdAt: Date.now(),
             })
           }
         }),
@@ -113,8 +120,11 @@ class DataManager {
         )
         .last()
       return db.collections.add({
-        ...collection,
+        title: collection.title || "",
+        spaceId: collection.spaceId,
+        labelIds: collection.labelIds,
         order: lastCollection ? lastCollection.order + this.ORDER_STEP : 1000,
+        createdAt: Date.now(),
       })
     }
   }
@@ -255,9 +265,13 @@ class DataManager {
     if (typeof targetIndex === "undefined" || cards.length === 0) {
       const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
       return db.cards.add({
-        ...card,
+        title: card.title || "",
+        url: card.url || "",
+        collectionId: card.collectionId,
+        faviconId: card.faviconId,
         description: "",
         order: lastOrder + this.ORDER_STEP,
+        createdAt: Date.now(),
       })
     }
 
@@ -275,9 +289,13 @@ class DataManager {
 
     // 添加新卡片
     return db.cards.add({
-      ...card,
-      order: newOrder,
+      title: card.title || "",
+      url: card.url || "",
+      collectionId: card.collectionId,
+      faviconId: card.faviconId,
       description: "",
+      order: newOrder,
+      createdAt: Date.now(),
     })
   }
 
@@ -291,7 +309,7 @@ class DataManager {
       title,
       description,
       faviconId,
-    }: { title?: string; description?: string; faviconId?: number },
+    }: { title: string; description?: string; faviconId?: number },
   ) {
     return db.cards.update(id, {
       title,
@@ -409,35 +427,29 @@ class DataManager {
       .where("[spaceId+order]")
       .between([spaceId, Dexie.minKey], [spaceId, Dexie.maxKey])
       .toArray()
+
+    const labels = await db.labels.toArray()
+    const labelMap = new Map(labels.map((label) => [label.id, label]))
+    const favicons = await db.favicons.toArray()
+    const faviconMap = new Map(
+      favicons.map((favicon) => [favicon.id, favicon.url]),
+    )
     return await Promise.all(
       collections.map(async (collection) => {
         const cards = await db.cards
           .where({ collectionId: collection.id })
           .sortBy("order")
-        const labels = []
-        for (const labelId of collection.labelIds) {
-          const label = await db.labels.get(labelId)
-          if (label) {
-            labels.push(label)
-          }
-        }
-        const faviconIds = cards
-          .map((card) => card.faviconId)
-          .filter((id): id is number => id !== null && id !== undefined)
-        const favicons =
-          faviconIds.length > 0
-            ? await db.favicons.where("id").anyOf(faviconIds).toArray()
-            : []
-        const faviconMap = new Map(
-          favicons.map((favicon) => [favicon.id, favicon.url]),
-        )
         const cardsWithFavicon = cards.map((card) => ({
           ...card,
-          favicon: card.faviconId
-            ? faviconMap.get(card.faviconId) || null
-            : null,
+          favicon: card.faviconId ? faviconMap.get(card.faviconId) || "" : "",
         }))
-        return { ...collection, cards: cardsWithFavicon, labels }
+        return {
+          ...collection,
+          cards: cardsWithFavicon,
+          labels: (collection.labelIds || [])
+            .map((labelId) => labelMap.get(labelId))
+            .filter((label): label is Label => label !== undefined),
+        }
       }),
     )
   }

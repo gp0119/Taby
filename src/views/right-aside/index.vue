@@ -63,12 +63,16 @@ const onDragEnd = async (evt: SortableEvent) => {
       async function (favicon) {
         const title = itemEl.getAttribute("data-title") as string
         const url = itemEl.getAttribute("data-url") as string
+        let faviconId = null
+        if (favicon) {
+          faviconId = await dataManager.addFavicon(favicon)
+        }
         await dataManager.addCard(
           {
             title,
             url,
             collectionId: Number(toClollectionId),
-            ...(favicon && { favicon }),
+            ...(faviconId && { faviconId }),
           },
           newIndex!,
         )

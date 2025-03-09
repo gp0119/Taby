@@ -183,11 +183,6 @@ function onImport() {
               </n-radio-button>
             </n-radio-group>
           </n-form-item>
-          {type.value === "toby" && (
-            <n-form-item label={`${ft("space")}:`}>
-              <SpaceSelect v-model:value={formModel.value.spaceId} />
-            </n-form-item>
-          )}
           <n-form-item label-placement="left">
             <n-upload
               v-model:fileList={formModel.value.fileList}
@@ -204,14 +199,11 @@ function onImport() {
       if (!formModel.value.fileList.length) return
       loadingBar.start()
       if (type.value === "toby") {
-        await importFromToby(
-          formModel.value.spaceId,
-          formModel.value.fileList[0].file!,
-        )
+        await importFromToby(formModel.value.fileList[0].file!)
       } else {
         await importFromTaby(formModel.value.fileList[0].file!)
-        await refreshSpaces()
       }
+      await refreshSpaces()
       await refreshCollections()
       message.success(ft("success", "import"))
       loadingBar.finish()

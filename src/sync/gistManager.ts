@@ -89,7 +89,7 @@ class GistManager {
       token,
     })
     // 兼容老数据
-    if (!res.files["taby-backup.json"]) {
+    if (res.files.spaces || res.files.collections) {
       const { spaces, collections, labels, cards, favicons } = res.files
       const remoteData: SyncData = {
         spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],

@@ -23,7 +23,7 @@ class SyncManager {
   }
 
   uploadNow = async (token: string, id?: string) => {
-    const data = await db.exportData()
+    const data: Partial<SyncData> = await db.exportData()
     if (!data) return
     return GistManager.uploadAll(token!, data, id)
   }
