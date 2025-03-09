@@ -6,7 +6,7 @@ import { debounce, isEmpty } from "lodash-es"
 
 class SyncManager {
   private static instance: SyncManager
-  SYNC_INTERVAL = 1000 * 3
+  SYNC_INTERVAL = 1000 * 10
   AUTO_DOWNLOAD_INTERVAL = 1000 * 60 * 60
 
   constructor() {}
