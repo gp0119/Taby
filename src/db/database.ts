@@ -171,6 +171,12 @@ class DataBase extends Dexie {
 
   async exportBySpaceId(spaceIds: number[]) {
     const spaces = await this.spaces.where("id").anyOf(spaceIds).sortBy("order")
+    const labels = await this.labels.toArray()
+    const labelsMap = new Map(labels.map((label) => [label.id, label]))
+    const favicons = await this.favicons.toArray()
+    const faviconsMap = new Map(
+      favicons.map((favicon) => [favicon.id, favicon.url]),
+    )
     return Promise.all(
       spaces.map(async (space) => {
         const spaceData = this.stripMetadata(space, ["order"])
@@ -180,11 +186,6 @@ class DataBase extends Dexie {
 
         const spaceCollections = await Promise.all(
           collections.map(async (collection) => {
-            const collectionLabels = await this.labels
-              .where("id")
-              .anyOf(collection.labelIds)
-              .toArray()
-
             const collectionCards = await this.cards
               .where({ collectionId: collection.id })
               .sortBy("order")
@@ -195,18 +196,21 @@ class DataBase extends Dexie {
                 "labelIds",
                 "spaceId",
               ]),
-              labels: collectionLabels.map((label) =>
-                this.stripMetadata(label),
-              ),
+              labels: collection.labelIds.map((labelId) => {
+                const label = labelsMap.get(labelId)
+                return label ? this.stripMetadata(label) : null
+              }),
               cards: await Promise.all(
                 collectionCards.map(async (card) => {
-                  const faviconId = card.faviconId
-                  const favicon = faviconId
-                    ? await this.favicons.get(faviconId)
-                    : ""
                   return {
-                    ...this.stripMetadata(card, ["order", "collectionId"]),
-                    favicon: favicon ? favicon.url : "",
+                    ...this.stripMetadata(card, [
+                      "order",
+                      "collectionId",
+                      "faviconId",
+                    ]),
+                    favicon: card.faviconId
+                      ? faviconsMap.get(card.faviconId)
+                      : "",
                   }
                 }),
               ),
