@@ -329,6 +329,7 @@ class DataManager {
       faviconId,
     })
   }
+
   async updateCardFavicon(id: number, favicon: string) {
     const faviconId = await this.addFavicon(favicon)
     return db.cards.update(id, { faviconId })

@@ -138,9 +138,14 @@ function onEdit(child: CardWithFavicon) {
       </n-form>
     ),
     onPositiveClick: async () => {
+      let faviconId
+      if (formModel.value.favicon) {
+        faviconId = await dataManager.addFavicon(formModel.value.favicon)
+      }
       await dataManager.updateCard(child.id, {
         title: formModel.value.title,
         description: formModel.value.description,
+        faviconId,
       })
       await refreshCollections()
     },

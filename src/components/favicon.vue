@@ -25,13 +25,13 @@
 </template>
 
 <script setup lang="tsx">
-import { Card } from "@/type.ts"
+import { CardWithFavicon } from "@/type.ts"
 import { getFaviconFromCache, getGoogleFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{
   type: string
-  child: Card
+  child: CardWithFavicon
 }>()
 
 const firstLetter = props.child.title?.charAt(0).toUpperCase()
