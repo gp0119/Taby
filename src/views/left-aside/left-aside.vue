@@ -328,6 +328,7 @@ function onSync() {
                   gistId: formModel.value.gistId,
                 })
                 await refreshSpaces()
+                await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
                 await refreshCollections()
                 message.success(ft("success", "download"))
                 dialog.destroyAll()
