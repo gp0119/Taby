@@ -44,6 +44,7 @@
 </template>
 
 <script setup lang="tsx">
+import { useRefresh } from "@/hooks/useRresh.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
@@ -82,6 +83,7 @@ const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
+const { refreshSpaces, refreshCollections } = useRefresh()
 
 watch(
   () => spacesStore.activeId,
@@ -150,8 +152,9 @@ function onDeleteSpace() {
     ),
     onPositiveClick: async () => {
       await dataManager.removeSpace(spacesStore.activeId)
-      await spacesStore.fetchSpaces()
       await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
+      await refreshSpaces()
+      await refreshCollections()
       dialog.destroyAll()
     },
   })

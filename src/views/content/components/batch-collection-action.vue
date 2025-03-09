@@ -52,7 +52,6 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useDraggableStore } from "@/store/draggable.ts"
-import { useSpacesStore } from "@/store/spaces.ts"
 import { movePosition } from "@/type.ts"
 import { ref } from "vue"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
@@ -65,7 +64,6 @@ const batchCollectionStore = useBatchCollectionStore()
 const draggableStore = useDraggableStore()
 
 const { refreshCollections } = useRefresh()
-const spacesStore = useSpacesStore()
 const { ft, gt } = useHelpi18n()
 
 const closeDrawer = () => {
@@ -88,7 +86,7 @@ const onHandleMove = () => {
     spaceId: number | null
     position: movePosition
   }>({
-    spaceId: spacesStore.activeId,
+    spaceId: null,
     position: "END",
   })
   open({
