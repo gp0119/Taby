@@ -11,6 +11,9 @@
     handle=".card-item"
     dragClass="*:!opacity-20"
     ghost-class="sortable-ghost-dashed-border"
+    :animation="150"
+    :delay="100"
+    :delayOnTouchOnly="true"
     @end="onDragEnd"
   >
     <Card
