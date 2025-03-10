@@ -1,9 +1,6 @@
 <template>
   <template v-if="!draggableStore.draggable">
-    <div
-      v-if="!collections?.length"
-      class="h-[calc(100vh-100px)] overflow-y-auto"
-    >
+    <div v-if="loading" class="h-[calc(100vh-100px)] overflow-y-auto">
       <div
         v-for="i in 5"
         :key="i"
@@ -79,6 +76,10 @@ const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const draggableStore = useDraggableStore()
 const { ft } = useHelpi18n()
+
+const { loading } = inject("loading", {
+  loading: false,
+})
 
 const zhCollator = new Intl.Collator("zh")
 

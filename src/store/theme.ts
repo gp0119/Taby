@@ -68,6 +68,7 @@ export const useThemeStore = defineStore("theme", () => {
 
   const setTheme = (value: string) => {
     theme.value = value
+    setThemeProperty()
   }
 
   const setThemeProperty = () => {

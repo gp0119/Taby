@@ -61,7 +61,6 @@ import content from "@/views/content/index.vue"
 import { GlobalThemeOverrides } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
-themeStore.setThemeProperty()
 
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
@@ -96,11 +95,18 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
 }))
 
 const { refreshSpaces, refreshCollections } = useRefresh()
-async function autoSync() {
+
+const loading = ref(true)
+
+provide("loading", {
+  loading,
+})
+
+onMounted(async () => {
+  themeStore.setThemeProperty()
   await syncManager.autoDownload()
   await refreshSpaces()
   await refreshCollections()
-}
-
-autoSync()
+  loading.value = false
+})
 </script>
