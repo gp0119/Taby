@@ -2,6 +2,7 @@
   <n-avatar
     :img-props="{
       crossorigin: 'anonymous',
+      referrerpolicy: 'no-referrer',
     }"
     :src="innerFavicon"
     lazy
