@@ -532,9 +532,10 @@ class DataManager {
   }
 
   async addFavicon(url: string) {
-    const isExist = await db.favicons.where("url").equals(url).first()
+    let _url = url.trim()
+    const isExist = await db.favicons.where("url").equals(_url).first()
     if (isExist) return isExist.id
-    return db.favicons.add({ url })
+    return db.favicons.add({ url: _url })
   }
 
   async getFaviconById(id: number) {
