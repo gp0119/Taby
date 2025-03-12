@@ -143,7 +143,7 @@ function onEdit(child: CardWithFavicon) {
     onPositiveClick: async () => {
       let faviconId
       if (formModel.value.favicon) {
-        faviconId = await dataManager.addFavicon(formModel.value.favicon)
+        faviconId = await dataManager.addFavicon(formModel.value.favicon.trim())
       }
       await dataManager.updateCard(child.id, {
         title: formModel.value.title,
