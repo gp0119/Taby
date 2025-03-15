@@ -17,10 +17,10 @@ async function batchAddCard(cards: Card[], collectionId: number) {
   await dataManager.batchAddCards(
     cards.map((card, index) => {
       return {
-        title: card.title,
+        title: card.customTitle || card.title,
         url: card.url,
         faviconId: card.faviconId,
-        description: card.description || "",
+        description: card.customDescription || card.description || "",
         collectionId,
         order: (index + 1) * 1000,
         createdAt: Date.now(),

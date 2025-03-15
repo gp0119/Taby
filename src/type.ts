@@ -33,6 +33,8 @@ export interface Label extends BaseEntity {
 
 export interface Card extends BaseEntity {
   title: string
+  customTitle?: string
+  customDescription?: string
   url: string
   description: string
   collectionId: number

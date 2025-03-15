@@ -295,10 +295,10 @@ class DataBase extends Dexie {
         await this.cards.bulkPut(
           data.cards.map((card) => ({
             id: card.id,
-            title: card.title,
+            title: card.customTitle || card.title,
             url: card.url,
             order: card.order || 0,
-            description: card.description || "",
+            description: card.customDescription || card.description || "",
             collectionId: card.collectionId || 0,
             faviconId: card.faviconId || 0,
             createdAt: card.createdAt || Date.now(),
