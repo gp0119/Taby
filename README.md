@@ -42,7 +42,7 @@ Taby 是一款简约而功能丰富的浏览器新标签页扩展，旨在提升
 
 ### 浏览器应用商店 | Browser Extension Stores
 
-- [Chrome Web Store](https://github.com/gp0119/Taby/releases)
+- [Chrome Web Store](https://chromewebstore.google.com/detail/taby/iifpdfmdgnaogfbdlbmekdphicaaipod)
 
 ### 手动安装 | Manual Installation
 
