@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@octokit/rest": "^21.1.1",
     "@vicons/carbon": "^0.13.0",
     "@vicons/ionicons5": "^0.13.0",
     "@vueuse/core": "^12.8.2",
