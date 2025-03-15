@@ -1,13 +1,13 @@
 import { db } from "@/db/database.ts"
 import GistManager from "@/sync/gistManager.ts"
-import { SyncData } from "@/type.ts"
+import { SyncData, SyncTokenData } from "@/type.ts"
 import { SYNC_GIST_ID, SYNC_GIST_TOKEN } from "@/utils/constants.ts"
 import { debounce, isEmpty } from "lodash-es"
 
 class SyncManager {
   private static instance: SyncManager
-  SYNC_INTERVAL = 1000 * 10
-  AUTO_DOWNLOAD_INTERVAL = 1000 * 60 * 60
+  SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
+  AUTO_DOWNLOAD_INTERVAL = 1000 * 60 * 60 * 3 // 3 hours
 
   constructor() {}
 
@@ -18,8 +18,15 @@ class SyncManager {
     return SyncManager.instance
   }
 
-  getToken = async () => {
-    return chrome.storage.sync.get([SYNC_GIST_TOKEN, SYNC_GIST_ID])
+  getToken = async (): Promise<SyncTokenData> => {
+    const result = await chrome.storage.sync.get([
+      SYNC_GIST_TOKEN,
+      SYNC_GIST_ID,
+    ])
+    return {
+      accessToken: result[SYNC_GIST_TOKEN],
+      gistId: result[SYNC_GIST_ID],
+    }
   }
 
   uploadNow = async (token: string, id?: string) => {
@@ -28,18 +35,26 @@ class SyncManager {
     return GistManager.uploadAll(token!, data, id)
   }
 
-  triggerUpload = debounce(async (token?: string, id?: string) => {
-    if (!token) {
-      const { accessToken, gistId } = await this.getToken()
-      if (!accessToken || !gistId) return
-      token = accessToken
-      id = gistId
-    }
-    const modifiedData: Partial<SyncData> = await db.getModifiedTables()
-    console.log("modifiedData: ", modifiedData)
-    if (isEmpty(modifiedData)) return
-    await GistManager.uploadAll(token!, modifiedData, id)
-  }, this.SYNC_INTERVAL)
+  triggerUpload = debounce(
+    async (token?: string, id?: string) => {
+      if (!token) {
+        const { accessToken, gistId } = await this.getToken()
+        if (!accessToken || !gistId) return
+        token = accessToken
+        id = gistId
+      }
+      const modifiedData: Partial<SyncData> = await db.getModifiedTables()
+      console.log("modifiedData: ", modifiedData)
+      if (isEmpty(modifiedData)) return
+      await GistManager.uploadAll(token!, modifiedData, id)
+      await db.clearModifiedTable()
+    },
+    this.SYNC_INTERVAL,
+    {
+      leading: false,
+      trailing: true,
+    },
+  )
 
   triggerDownload = async (token?: string, id?: string) => {
     if (!token) {
@@ -49,23 +64,29 @@ class SyncManager {
       id = gistId
     }
     const data = await GistManager.downloadAll(token!, id!)
-    console.log("data: ", data)
     await db.importData(data)
+    localStorage.setItem("lastSyncTime", Date.now() + "")
     return data
   }
 
-  autoDownload = async () => {
+  autoSync = async () => {
     const { accessToken, gistId } = await this.getToken()
     if (!accessToken || !gistId) return
+    const modifiedTables = localStorage.getItem("modifiedTables")
     const lastSyncTime = localStorage.getItem("lastSyncTime")
-    if (!lastSyncTime) {
-      await this.triggerDownload()
-      localStorage.setItem("lastSyncTime", Date.now() + "")
-      return
+    if (modifiedTables) {
+      const tables = JSON.parse(modifiedTables)
+      if (tables.length > 0) {
+        await this.triggerUpload(accessToken, gistId)
+      }
     } else {
-      if (Date.now() - Number(lastSyncTime) > this.AUTO_DOWNLOAD_INTERVAL) {
+      if (!lastSyncTime) {
         await this.triggerDownload()
-        localStorage.setItem("lastSyncTime", Date.now() + "")
+        return
+      } else {
+        if (Date.now() - Number(lastSyncTime) > this.AUTO_DOWNLOAD_INTERVAL) {
+          await this.triggerDownload()
+        }
       }
     }
   }

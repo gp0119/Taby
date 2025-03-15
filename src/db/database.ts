@@ -55,7 +55,20 @@ class DataBase extends Dexie {
       modifiedAt: Date.now(),
       icon: "StorefrontOutline",
     })
+    await this.clearModifiedTable()
+  }
+
+  async addModifiedTable(tableName: string) {
+    this.modifiedTables.add(tableName)
+    localStorage.setItem(
+      "modifiedTables",
+      JSON.stringify([...this.modifiedTables]),
+    )
+  }
+
+  async clearModifiedTable() {
     this.modifiedTables.clear()
+    localStorage.removeItem("modifiedTables")
   }
 
   private async initializeDefaultData() {
@@ -85,16 +98,17 @@ class DataBase extends Dexie {
     tableMapping.forEach(({ table, name }) => {
       table.hook("creating", function () {
         // console.log("creating", name, obj)
-        self.modifiedTables.add(name)
+        self.addModifiedTable(name)
         self.triggerUpload()
       })
       table.hook("updating", function () {
-        console.log("updating")
-        self.modifiedTables.add(name)
+        // console.log("updating")
+        self.addModifiedTable(name)
         self.triggerUpload()
       })
       table.hook("deleting", function () {
-        self.modifiedTables.add(name)
+        // console.log("deleting")
+        self.addModifiedTable(name)
         self.triggerUpload()
       })
     })
@@ -102,13 +116,16 @@ class DataBase extends Dexie {
 
   async getModifiedTables() {
     const modifiedData: Partial<SyncData> = {}
-    for (const tableName of this.modifiedTables) {
+    const modifiedTables = JSON.parse(
+      localStorage.getItem("modifiedTables") || "[]",
+    )
+    console.log("modifiedTables: ", modifiedTables)
+    for (const tableName of modifiedTables) {
       const table = this[tableName as keyof DataBase]
       modifiedData[tableName as keyof SyncData] = await (
         table as EntityTable<any, any>
       ).toArray()
     }
-    this.modifiedTables.clear()
     return modifiedData
   }
 
@@ -287,7 +304,7 @@ class DataBase extends Dexie {
             createdAt: card.createdAt || Date.now(),
           })),
         )
-        this.modifiedTables.clear()
+        await this.clearModifiedTable()
       },
     )
   }

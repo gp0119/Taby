@@ -104,7 +104,7 @@ provide("loading", {
 
 onMounted(async () => {
   themeStore.setThemeProperty()
-  await syncManager.autoDownload()
+  await syncManager.autoSync()
   await refreshSpaces()
   await refreshCollections()
   loading.value = false

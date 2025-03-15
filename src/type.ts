@@ -67,5 +67,9 @@ export interface iOption {
   label: string
   value: number
 }
+export interface SyncTokenData {
+  accessToken: string | undefined
+  gistId: string | undefined
+}
 export type iOptions = iOption[]
 export type movePosition = "HEAD" | "END"
