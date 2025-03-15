@@ -1,7 +1,7 @@
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useModal, NInput, NScrollbar, NIcon } from "naive-ui"
 import dataManager from "@/db"
-import { debounce } from "lodash"
+import { debounce } from "lodash-es"
 import { CardWithFavicon } from "@/type"
 import Favicon from "@/components/favicon.vue"
 import { SearchOutline } from "@vicons/ionicons5"
