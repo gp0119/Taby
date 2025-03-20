@@ -69,6 +69,7 @@ async function onHandleClick(child: any) {
           { action: "getFavicons" },
           async function (favicon) {
             console.log("favicon: ", favicon)
+            if (!favicon) return
             await dataManager.updateCardFavicon(child.id, favicon)
             await refreshCollections()
           },
