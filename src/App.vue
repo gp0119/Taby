@@ -61,6 +61,7 @@ import content from "@/views/content/index.vue"
 import { GlobalThemeOverrides } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
+import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
@@ -104,6 +105,20 @@ provide("loading", {
 
 onMounted(async () => {
   themeStore.setThemeProperty()
+  const result = await chrome.storage.sync.get([
+    SYNC_GIST_TOKEN,
+    SYNC_GIST_ID,
+    SYNC_TYPE,
+  ])
+  if (result.syncType) {
+    localStorage.setItem("syncType", result.syncType)
+  }
+  if (result.accessToken) {
+    localStorage.setItem("accessToken", result.accessToken)
+  }
+  if (result.gistId) {
+    localStorage.setItem("gistId", result.gistId)
+  }
   await syncManager.autoSync()
   await refreshSpaces()
   await refreshCollections()

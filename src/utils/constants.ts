@@ -188,5 +188,7 @@ export const ICON_LIST: Record<string, Component> = {
 } as const
 
 export const GITHUB_API = "https://api.github.com"
+export const GITEE_API = "https://gitee.com/api/v5"
 export const SYNC_GIST_ID = "gistId"
 export const SYNC_GIST_TOKEN = "accessToken"
+export const SYNC_TYPE = "syncType"

@@ -66,4 +66,6 @@ export default {
   search: "搜索",
   "search-placeholder": "请输入标题或链接",
   "no-search-result": "没有搜索结果",
+  "sync-type": "同步类型",
+  "sync-with-gist": "使用 Gist 同步",
 }

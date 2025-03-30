@@ -67,4 +67,6 @@ export default {
   search: "Search",
   "search-placeholder": "Please enter title or link",
   "no-search-result": "No search results",
+  "sync-type": "Sync Type",
+  "sync-with-gist": "Sync with Gist",
 }

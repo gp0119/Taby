@@ -1,8 +1,17 @@
 import { SyncData } from "@/type.ts"
-import { GITHUB_API } from "@/utils/constants.ts"
+import {
+  GITHUB_API,
+  GITEE_API,
+  SYNC_TYPE,
+  SYNC_GIST_TOKEN,
+  SYNC_GIST_ID,
+} from "@/utils/constants.ts"
 import { compressToUTF16, decompressFromUTF16 } from "lz-string"
 
 class GistManager {
+  private API = GITHUB_API
+  private ACCESS_TOKEN = ""
+  private GIST_ID = ""
   private static instance: GistManager
   public static getInstance(): GistManager {
     if (!GistManager.instance) {
@@ -10,21 +19,30 @@ class GistManager {
     }
     return GistManager.instance
   }
-
-  constructor() {}
+  constructor() {
+    const syncType = localStorage.getItem(SYNC_TYPE)
+    const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
+    const gistId = localStorage.getItem(SYNC_GIST_ID)
+    if (syncType === "gitee") {
+      this.API = GITEE_API
+    } else {
+      this.API = GITHUB_API
+    }
+    this.ACCESS_TOKEN = accessToken || ""
+    this.GIST_ID = gistId || ""
+  }
 
   async request<T>(options: {
     endpoint: string
     method: "GET" | "POST" | "PATCH" | "DELETE"
-    token: string
     body?: any
   }): Promise<T> {
-    const { endpoint, method, token, body } = options
-    const response = await fetch(`${GITHUB_API}${endpoint}`, {
+    const { endpoint, method, body } = options
+    const response = await fetch(`${this.API}${endpoint}`, {
       method,
       headers: {
         Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${this.ACCESS_TOKEN}`,
         "Content-Type": "application/json",
         "X-GitHub-Api-Version": "2022-11-28",
       },
@@ -36,14 +54,13 @@ class GistManager {
     }
     return (await response.json()) as T
   }
-  async createGist(token: string, data: SyncData) {
+  async createGist(data: SyncData) {
     const { spaces, collections, labels, cards } = data
     const res = await this.request<{
       id: string
     }>({
       endpoint: "/gists",
       method: "POST",
-      token,
       body: {
         description: "Taby Backup",
         public: false,
@@ -59,7 +76,7 @@ class GistManager {
     })
     return res.id
   }
-  async updateGist(token: string, gistId: string, data: Partial<SyncData>) {
+  async updateGist(data: Partial<SyncData>) {
     const files: { [key: string]: { content: string } } = {}
     Object.entries(data).forEach(([key, value]) => {
       if (value)
@@ -67,13 +84,12 @@ class GistManager {
     })
 
     return this.request({
-      endpoint: `/gists/${gistId}`,
+      endpoint: `/gists/${this.GIST_ID}`,
       method: "PATCH",
-      token,
       body: { files },
     })
   }
-  async fetchGist(token: string, gistId: string) {
+  async fetchGist() {
     const res = await this.request<{
       files: {
         spaces: { content: string }
@@ -84,9 +100,8 @@ class GistManager {
         "taby-backup.json": { content: string }
       }
     }>({
-      endpoint: `/gists/${gistId}`,
+      endpoint: `/gists/${this.GIST_ID}`,
       method: "GET",
-      token,
     })
     // 兼容老数据
     if (res.files.spaces || res.files.collections) {
@@ -114,16 +129,16 @@ class GistManager {
       return remoteData
     }
   }
-  async uploadAll(token: string, data: Partial<SyncData>, gistId?: string) {
-    if (!gistId) {
-      gistId = await this.createGist(token, data as SyncData)
+  async uploadAll(data: Partial<SyncData>) {
+    if (!this.GIST_ID) {
+      this.GIST_ID = await this.createGist(data as SyncData)
     } else {
-      await this.updateGist(token, gistId, data)
+      await this.updateGist(data)
     }
-    return gistId
+    return this.GIST_ID
   }
-  async downloadAll(token: string, gistId: string) {
-    return await this.fetchGist(token, gistId)
+  async downloadAll() {
+    return await this.fetchGist()
   }
 }
 

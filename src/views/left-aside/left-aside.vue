@@ -49,7 +49,7 @@
             <n-icon size="18" :component="DocumentExport" />
           </template>
         </n-button>
-        <n-button class="w-full" @click="onSync">
+        <n-button class="w-full" @click="showSyncDialog = true">
           <span>{{ ft("sync") }}</span>
           <template #icon>
             <n-icon size="18" :component="SyncSharp" />
@@ -58,6 +58,7 @@
       </n-space>
     </div>
   </div>
+  <SyncDialog v-model:show="showSyncDialog" />
 </template>
 
 <script setup lang="tsx">
@@ -80,7 +81,7 @@ import { SortableEvent } from "vue-draggable-plus"
 import SpaceSelect from "@/components/space-select.vue"
 import dataManager from "@/db"
 import syncManager from "@/sync/syncManager.ts"
-
+import SyncDialog from "./components/sync-dialog.vue"
 const spacesStore = useSpacesStore()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const { openModal } = useSearchModal()
@@ -90,6 +91,8 @@ const { ft } = useHelpi18n()
 const init = async () => {
   await spacesStore.initialize()
 }
+
+const showSyncDialog = ref(false)
 
 const cleanup = useEventListener(window, "keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "f") {
@@ -229,119 +232,6 @@ function onExport() {
     onPositiveClick: () => {
       exportFromTaby(formModel.value.spaceIds)
     },
-  })
-}
-
-function onSync() {
-  const formRef = ref<FormInst | null>(null)
-  const formModel = ref({
-    gistId: "",
-    accessToken: "",
-  })
-  chrome.storage.sync.get(["accessToken", "gistId"], (result) => {
-    if (result.accessToken) {
-      formModel.value.accessToken = result.accessToken
-    }
-    if (result.gistId) {
-      formModel.value.gistId = result.gistId
-    }
-  })
-  const formRules = {
-    accessToken: [{ required: true, message: "AccessToken is required" }],
-  }
-  open({
-    title: ft("sync-with", "gist"),
-    renderContent: () => (
-      <n-form
-        ref={(el: FormInst) => (formRef.value = el)}
-        model={formModel.value}
-        rules={formRules}
-        require-mark-placement="left"
-      >
-        <n-form-item
-          path="accessToken"
-          label-style="width: 100%"
-          v-slots={{
-            label: () => (
-              <a href="https://github.com/settings/tokens" target="_blank">
-                <n-icon size="12" component={LogoGithub} />{" "}
-                <span class="text-blue-500">{ft("access-token")}:</span>
-              </a>
-            ),
-          }}
-        >
-          <n-input
-            v-model:value={formModel.value.accessToken}
-            placeholder={ft("placeholder", "access-token")}
-          />
-        </n-form-item>
-        <n-form-item
-          path="gistId"
-          v-slots={{ label: () => <span>{ft("gist-id")}:</span> }}
-        >
-          <n-input
-            v-model:value={formModel.value.gistId}
-            placeholder={ft("placeholder", "gist-id")}
-          />
-        </n-form-item>
-      </n-form>
-    ),
-    renderAction: () => (
-      <n-space>
-        <n-button
-          type="primary"
-          size="small"
-          disabled={!formModel.value.accessToken}
-          onClick={() => {
-            formRef.value?.validate().then(async () => {
-              try {
-                const gistId = await syncManager.uploadNow(
-                  formModel.value.accessToken,
-                  formModel.value.gistId,
-                )
-                await chrome.storage.sync.set({
-                  accessToken: formModel.value.accessToken,
-                  gistId,
-                })
-                message.success(ft("success", "upload"))
-                dialog.destroyAll()
-              } catch (error) {
-                message.error(ft("fail", "upload"))
-              }
-            })
-          }}
-        >
-          {ft("upload-local")}
-        </n-button>
-        <n-button
-          size="small"
-          disabled={!(formModel.value.accessToken && formModel.value.gistId)}
-          onClick={() => {
-            try {
-              formRef.value?.validate().then(async () => {
-                await syncManager.triggerDownload(
-                  formModel.value.accessToken,
-                  formModel.value.gistId,
-                )
-                await chrome.storage.sync.set({
-                  accessToken: formModel.value.accessToken,
-                  gistId: formModel.value.gistId,
-                })
-                await refreshSpaces()
-                await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
-                await refreshCollections()
-                message.success(ft("success", "download"))
-                dialog.destroyAll()
-              })
-            } catch (error) {
-              message.error(ft("fail", "download"))
-            }
-          }}
-        >
-          {ft("download-remote")}
-        </n-button>
-      </n-space>
-    ),
   })
 }
 </script>
