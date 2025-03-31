@@ -69,7 +69,25 @@ class GistManager {
     return (await response.json()) as T
   }
   async createGist(data: SyncData) {
-    const { spaces, collections, labels, cards } = data
+    const { spaces, collections, labels, cards, favicons } = data
+    const files: { [key: string]: { content: string } } = {}
+    if (spaces && spaces.length > 0) {
+      files.spaces = { content: compressToUTF16(JSON.stringify(spaces)) }
+    }
+    if (collections && collections.length > 0) {
+      files.collections = {
+        content: compressToUTF16(JSON.stringify(collections)),
+      }
+    }
+    if (cards && cards.length > 0) {
+      files.cards = { content: compressToUTF16(JSON.stringify(cards)) }
+    }
+    if (labels && labels.length > 0) {
+      files.labels = { content: compressToUTF16(JSON.stringify(labels)) }
+    }
+    if (favicons && favicons.length > 0) {
+      files.favicons = { content: compressToUTF16(JSON.stringify(favicons)) }
+    }
     const res = await this.request<{
       id: string
     }>({
@@ -78,14 +96,7 @@ class GistManager {
       body: {
         description: "Taby Backup",
         public: false,
-        files: {
-          spaces: { content: compressToUTF16(JSON.stringify(spaces)) },
-          collections: {
-            content: compressToUTF16(JSON.stringify(collections)),
-          },
-          labels: { content: compressToUTF16(JSON.stringify(labels)) },
-          cards: { content: compressToUTF16(JSON.stringify(cards)) },
-        },
+        files,
       },
     })
     return res.id

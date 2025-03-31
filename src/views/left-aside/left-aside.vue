@@ -123,7 +123,6 @@ const onDragEnd = async (evt: SortableEvent) => {
   await refreshSpaces()
 }
 
-const dialog = useDialog()
 const message = useMessage()
 const { open } = useEditDialog()
 const { importFromToby, importFromTaby } = useImport()

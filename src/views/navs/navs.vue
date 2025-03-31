@@ -152,8 +152,8 @@ function onDeleteSpace() {
     ),
     onPositiveClick: async () => {
       await dataManager.removeSpace(spacesStore.activeId)
-      await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
       await refreshSpaces()
+      await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
       await refreshCollections()
       dialog.destroyAll()
     },
