@@ -93,6 +93,7 @@ const rules = ref({
 })
 const formRef = ref<FormInst | null>(null)
 const message = useMessage()
+
 const handleSyncTypeChange = debounce((value: string) => {
   chrome.storage.sync.set({ [SYNC_TYPE]: value })
   localStorage.setItem(SYNC_TYPE, value)
@@ -100,22 +101,31 @@ const handleSyncTypeChange = debounce((value: string) => {
   formModel.value.gistId = ""
   localStorage.setItem(SYNC_GIST_TOKEN, "")
   localStorage.setItem(SYNC_GIST_ID, "")
+  syncManager.setEnv(SYNC_TYPE, value)
+  syncManager.setEnv(SYNC_GIST_TOKEN, "")
+  syncManager.setEnv(SYNC_GIST_ID, "")
 }, 1000)
+
 const handleAccessTokenChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_TOKEN, value)
+  syncManager.setEnv(SYNC_GIST_TOKEN, value)
 }, 1000)
+
 const handleGistIdChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_ID, value)
+  syncManager.setEnv(SYNC_GIST_ID, value)
 }, 1000)
 
 const handleUpload = () => {
   formRef.value?.validate().then(async () => {
     try {
+      const gistId = await syncManager.uploadAll()
+      formModel.value.gistId = gistId as string
+      localStorage.setItem(SYNC_GIST_ID, gistId as string)
       await chrome.storage.sync.set({
         [SYNC_GIST_TOKEN]: formModel.value.accessToken,
+        [SYNC_GIST_ID]: gistId as string,
       })
-      const gistId = await syncManager.uploadNow()
-      formModel.value.gistId = gistId as string
       message.success(ft("success", "upload"))
       show.value = false
     } catch (error) {
@@ -123,15 +133,16 @@ const handleUpload = () => {
     }
   })
 }
+
 const handleDownload = () => {
   formRef.value?.validate().then(async () => {
     try {
       formRef.value?.validate().then(async () => {
+        await syncManager.triggerDownload()
         await chrome.storage.sync.set({
           [SYNC_GIST_TOKEN]: formModel.value.accessToken,
           [SYNC_GIST_ID]: formModel.value.gistId,
         })
-        await syncManager.triggerDownload()
         await refreshSpaces()
         await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
         await refreshCollections()

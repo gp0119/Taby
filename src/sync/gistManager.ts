@@ -20,6 +20,10 @@ class GistManager {
     return GistManager.instance
   }
   constructor() {
+    this.getEnv()
+  }
+
+  getEnv() {
     const syncType = localStorage.getItem(SYNC_TYPE)
     const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
     const gistId = localStorage.getItem(SYNC_GIST_ID)
@@ -30,6 +34,16 @@ class GistManager {
     }
     this.ACCESS_TOKEN = accessToken || ""
     this.GIST_ID = gistId || ""
+  }
+
+  setEnv(key: string, value: string) {
+    if (key === SYNC_TYPE) {
+      this.API = value === "gitee" ? GITEE_API : GITHUB_API
+    } else if (key === SYNC_GIST_TOKEN) {
+      this.ACCESS_TOKEN = value
+    } else if (key === SYNC_GIST_ID) {
+      this.GIST_ID = value
+    }
   }
 
   async request<T>(options: {
@@ -129,7 +143,8 @@ class GistManager {
       return remoteData
     }
   }
-  async uploadAll(data: Partial<SyncData>) {
+
+  async uploadData(data: Partial<SyncData>) {
     if (!this.GIST_ID) {
       this.GIST_ID = await this.createGist(data as SyncData)
     } else {
@@ -137,6 +152,7 @@ class GistManager {
     }
     return this.GIST_ID
   }
+
   async downloadAll() {
     return await this.fetchGist()
   }

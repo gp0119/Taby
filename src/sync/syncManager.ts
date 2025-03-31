@@ -27,10 +27,14 @@ class SyncManager {
     }
   }
 
-  uploadNow = async () => {
+  setEnv(key: string, value: string) {
+    GistManager.setEnv(key, value)
+  }
+
+  uploadAll = async () => {
     const data: Partial<SyncData> = await db.exportData()
     if (!data) return
-    return GistManager.uploadAll(data)
+    return GistManager.uploadData(data)
   }
 
   triggerUpload = debounce(
@@ -38,7 +42,7 @@ class SyncManager {
       const modifiedData: Partial<SyncData> = await db.getModifiedTables()
       console.log("modifiedData: ", modifiedData)
       if (isEmpty(modifiedData)) return
-      await GistManager.uploadAll(modifiedData)
+      await GistManager.uploadData(modifiedData)
       await db.clearModifiedTable()
     },
     this.SYNC_INTERVAL,
