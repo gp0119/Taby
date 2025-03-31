@@ -34,7 +34,9 @@ class SyncManager {
   uploadAll = async () => {
     const data: Partial<SyncData> = await db.exportData()
     if (!data) return
-    return GistManager.uploadData(data)
+    const result = await GistManager.uploadData(data)
+    await db.clearModifiedTable()
+    return result
   }
 
   triggerUpload = debounce(
