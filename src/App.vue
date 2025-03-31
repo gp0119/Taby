@@ -112,6 +112,18 @@ onMounted(async () => {
   ])
   if (result.syncType) {
     localStorage.setItem("syncType", result.syncType)
+  } else {
+    if (/^ghp_/.test(result.accessToken)) {
+      chrome.storage.sync.set({
+        [SYNC_TYPE]: "github",
+      })
+      localStorage.setItem("syncType", "github")
+    } else {
+      chrome.storage.sync.set({
+        [SYNC_TYPE]: "gitee",
+      })
+      localStorage.setItem("syncType", "gitee")
+    }
   }
   if (result.accessToken) {
     localStorage.setItem("accessToken", result.accessToken)
