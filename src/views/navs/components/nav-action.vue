@@ -5,7 +5,7 @@
     <div class="flex-center">
       <!--   排序   -->
       <n-dropdown
-        trigger="click"
+        trigger="hover"
         :options="sortStore.sortOptions"
         @select="handleSortSelect"
         :render-label="renderSortLabel"
@@ -50,7 +50,7 @@
       </n-dropdown>
       <!--   标签   -->
       <n-dropdown
-        trigger="click"
+        trigger="hover"
         :options="tagOptions"
         :render-label="renderTagLabel"
         key-field="id"
