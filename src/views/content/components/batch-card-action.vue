@@ -10,19 +10,24 @@
     >
       <div
         v-if="show"
-        class="fixed bottom-3 left-1/2 z-10 w-[800px] -translate-x-1/2 rounded-xl bg-card-color shadow-base-lg transition-all duration-300 ease-in-out"
+        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 w-[440px] -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
+        @mousedown="onMouseDown"
+        :style="{
+          left: clientX,
+        }"
       >
+        <n-icon
+          class="absolute right-1.5 top-1 z-10 cursor-pointer text-gray-400"
+          :size="20"
+          :component="Close"
+          @click="closeDrawer"
+        />
         <div class="relative px-4 py-6">
-          <n-icon
-            class="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer"
-            :size="24"
-            :component="Close"
-            @click="closeDrawer"
-          />
           <div class="flex-center gap-3">
-            <span class="text-lg text-text-secondary">
-              {{ gt("select-cards", batchCardStore.selectedCardIds.length) }}
-            </span>
+            <div
+              class="select-none text-text-secondary"
+              v-html="gt('select-cards', batchCardStore.selectedCardIds.length)"
+            ></div>
             <n-button secondary type="primary" @click="onHandleMove">
               <template #icon>
                 <n-icon :size="16" :component="FolderMoveTo" />
@@ -53,6 +58,7 @@ import { useBatchCardStore } from "@/store/batch-card"
 import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { throttle } from "lodash-es"
 
 const show = ref(false)
 const batchCardStore = useBatchCardStore()
@@ -72,6 +78,35 @@ watch(
     show.value = batchCardStore.selectedCardIds.length > 0
   },
 )
+
+const clientX = ref("50%")
+const onMouseDown = (e: MouseEvent) => {
+  const startX = e.clientX
+  const startLeft =
+    clientX.value === "50%" ? window.innerWidth / 2 : parseInt(clientX.value)
+
+  const onMouseMove = throttle((e: MouseEvent) => {
+    const deltaX = e.clientX - startX
+    let newLeft = startLeft + deltaX
+
+    const halfWidth = 220
+    const minX = halfWidth
+    const maxX = window.innerWidth - halfWidth
+
+    if (newLeft < minX) newLeft = minX
+    if (newLeft > maxX) newLeft = maxX
+
+    clientX.value = `${newLeft}px`
+  }, 16)
+
+  const onMouseUp = () => {
+    document.removeEventListener("mousemove", onMouseMove)
+    document.removeEventListener("mouseup", onMouseUp)
+  }
+
+  document.addEventListener("mousemove", onMouseMove)
+  document.addEventListener("mouseup", onMouseUp)
+}
 
 const { open } = useEditDialog()
 const { open: onDeleteComfirm } = useDeleteDialog()
