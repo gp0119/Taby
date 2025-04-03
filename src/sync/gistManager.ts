@@ -51,6 +51,9 @@ class GistManager {
     method: "GET" | "POST" | "PATCH" | "DELETE"
     body?: any
   }): Promise<T> {
+    if (!this.ACCESS_TOKEN) {
+      throw new Error("未设置 Token")
+    }
     const { endpoint, method, body } = options
     const response = await fetch(`${this.API}${endpoint}`, {
       method,
