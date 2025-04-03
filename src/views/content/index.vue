@@ -1,15 +1,6 @@
 <template>
   <template v-if="!draggableStore.draggable">
-    <div v-if="loading" class="h-[calc(100vh-100px)] overflow-y-auto">
-      <div
-        v-for="i in 5"
-        :key="i"
-        class="w-full animate-pulse border-b border-border-color p-4"
-      >
-        <div class="mb-4 h-6 w-1/3 rounded bg-gray-200"></div>
-        <div class="h-20 w-full rounded bg-gray-100"></div>
-      </div>
-    </div>
+    <SkeletonContent v-if="loading" />
     <DynamicScroller
       v-else-if="collections?.length"
       :items="collections"
@@ -70,7 +61,7 @@ import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
 import BatchCardAction from "./components/batch-card-action.vue"
 import CollectionCollapse from "./components/collection-collapse.vue"
 import BatchCollectionAction from "./components/batch-collection-action.vue"
-
+import SkeletonContent from "@/components/skeleton-content.vue"
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
