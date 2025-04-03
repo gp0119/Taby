@@ -12,7 +12,7 @@
         :show="sortStore.isSortOpen"
         @update:show="sortStore.toggleSortOpen"
       >
-        <n-button quaternary type="primary">
+        <n-button quaternary :focusable="false" type="primary" class="!px-2">
           <template #icon>
             <n-icon
               size="20"
@@ -33,7 +33,7 @@
               <ChevronSortDown />
             </n-icon>
             <n-icon size="20" v-else>
-              <ChevronSort />
+              <Draggable />
             </n-icon>
           </template>
           <span class="w-[60px] text-ellipsis leading-6">
@@ -59,15 +59,15 @@
         :show="tagsStore.isTagOpen"
         @update:show="tagsStore.toggleTagOpen"
       >
-        <n-button quaternary type="primary">
+        <n-button quaternary :focusable="false" type="primary" class="!px-2">
           <template #icon>
-            <n-icon size="20" class="mr-1">
+            <n-icon size="20">
               <TagGroup />
             </n-icon>
           </template>
           <template v-if="tagsStore.selectedTag">
             <Tag
-              titleClass="w-[50px] text-ellipsis"
+              titleClass="w-[60px] text-ellipsis"
               :tag="tagsStore.selectedTag"
               :closeable="false"
             />
@@ -84,50 +84,78 @@
           </n-icon>
         </n-button>
       </n-dropdown>
-      <!--   展开   -->
-      <n-button quaternary type="primary" @click="expandStore.expandAll">
+      <!--   展开 收起  -->
+      <n-button
+        quaternary
+        :focusable="false"
+        type="primary"
+        @click="onToggleExpandAll"
+        class="!px-2"
+      >
         <template #icon>
           <n-icon size="20">
-            <RowExpand />
+            <RowCollapse v-if="expandStore.isCollapseAll" />
+            <RowExpand v-else />
           </n-icon>
         </template>
-        {{ ft("expand-all") }}
+        <div class="w-[60px] text-ellipsis">
+          {{
+            !expandStore.isCollapseAll ? ft("expand-all") : ft("collapse-all")
+          }}
+        </div>
       </n-button>
 
-      <n-button quaternary type="primary" @click="expandStore.collapseAll">
-        <template #icon>
-          <n-icon size="20">
-            <RowCollapse />
-          </n-icon>
-        </template>
-        {{ ft("collapse-all") }}
-      </n-button>
-
-      <n-switch
-        class="mr-2"
-        v-model:value="draggableStore.draggable"
-        @update-value="draggableStore.setDraggable"
+      <n-popover
+        trigger="hover"
+        :show-arrow="false"
+        placement="bottom"
+        @update:show="showMore = $event"
       >
-        <template #checked>
-          <span class="text-xs">{{ ft("disable-drag") }}</span>
+        <template #trigger>
+          <n-button quaternary :focusable="false" type="primary" class="!px-2">
+            <template #icon>
+              <n-icon size="20">
+                <List />
+              </n-icon>
+            </template>
+            <span>More</span>
+            <n-icon
+              size="20"
+              class="transition-transform duration-300"
+              :class="{ 'rotate-90': showMore }"
+            >
+              <ChevronRight />
+            </n-icon>
+          </n-button>
         </template>
-        <template #unchecked>
-          <span class="text-xs">{{ ft("enable-drag") }}</span>
-        </template>
-      </n-switch>
+        <template #default>
+          <div class="flex flex-col items-start gap-y-2 py-1.5">
+            <n-switch
+              v-model:value="draggableStore.draggable"
+              @update-value="draggableStore.setDraggable"
+            >
+              <template #checked>
+                <span class="text-xs">{{ ft("disable-drag") }}</span>
+              </template>
+              <template #unchecked>
+                <span class="text-xs">{{ ft("enable-drag") }}</span>
+              </template>
+            </n-switch>
 
-      <n-switch
-        class="mr-2"
-        v-model:value="duplicateCardStore.isFindDuplicate"
-        @update-value="duplicateCardStore.setIsFindDuplicate"
-      >
-        <template #checked>
-          <span class="text-xs">{{ ft("disable-duplicate") }}</span>
+            <n-switch
+              v-model:value="duplicateCardStore.isFindDuplicate"
+              @update-value="duplicateCardStore.setIsFindDuplicate"
+            >
+              <template #checked>
+                <span class="text-xs">{{ ft("disable-duplicate") }}</span>
+              </template>
+              <template #unchecked>
+                <span class="text-xs">{{ ft("enable-duplicate") }}</span>
+              </template>
+            </n-switch>
+          </div>
         </template>
-        <template #unchecked>
-          <span class="text-xs">{{ ft("enable-duplicate") }}</span>
-        </template>
-      </n-switch>
+      </n-popover>
     </div>
     <div class="flex-center gap-2">
       <n-button size="small" secondary type="primary" @click="onAddCollection">
@@ -149,18 +177,19 @@ import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
-import { Add } from "@vicons/carbon"
 import { SelectGroupOption, SelectOption } from "naive-ui"
 import {
   TagGroup,
   ChevronRight,
-  ChevronSort,
   ChevronSortDown,
   ChevronSortUp,
   ArrowUp,
   ArrowDown,
   RowExpand,
   RowCollapse,
+  List,
+  Draggable,
+  Add,
 } from "@vicons/carbon"
 import { useExpandStore } from "@/store/expand"
 import { Label, movePosition } from "@/type"
@@ -176,6 +205,7 @@ const sortStore = useSortStore()
 const expandStore = useExpandStore()
 const { ft } = useHelpi18n()
 
+const showMore = ref(false)
 const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
   return <Tag tag={option as unknown as Label} />
 }
@@ -188,11 +218,19 @@ const renderSortLabel = (option: SelectOption | SelectGroupOption) => {
       ) : option.key === "title-asc" || option.key === "created-at-asc" ? (
         <n-icon size="12" component={ArrowDown} />
       ) : (
-        <n-icon size="12" component={ChevronSort} />
+        <n-icon size="12" component={Draggable} />
       )}
       <span> {option.label}</span>
     </span>
   )
+}
+
+const onToggleExpandAll = () => {
+  if (!expandStore.isCollapseAll) {
+    expandStore.expandAll()
+  } else {
+    expandStore.collapseAll()
+  }
 }
 
 const tagOptions = computed(() => {

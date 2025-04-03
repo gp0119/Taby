@@ -16,9 +16,9 @@
         </div>
       </div>
       <div class="flex-between border-b border-border-color px-4 py-2.5">
-        <span class="select-none font-bold text-text-primary">{{
-          ft("space")
-        }}</span>
+        <span class="select-none font-bold text-text-primary">
+          {{ ft("space") }}
+        </span>
         <n-icon
           size="18"
           class="cursor-pointer text-primary"
@@ -37,19 +37,23 @@
     </div>
     <div class="px-2.5 py-4">
       <n-space vertical>
-        <n-button class="w-full" @click="onImport">
+        <n-button class="w-full" @click="onImport" :focusable="false">
           <span>{{ ft("import") }}</span>
           <template #icon>
             <n-icon size="18" :component="DocumentImport" />
           </template>
         </n-button>
-        <n-button class="w-full" @click="onExport">
+        <n-button class="w-full" @click="onExport" :focusable="false">
           <span>{{ ft("export") }}</span>
           <template #icon>
             <n-icon size="18" :component="DocumentExport" />
           </template>
         </n-button>
-        <n-button class="w-full" @click="showSyncDialog = true">
+        <n-button
+          class="w-full"
+          @click="showSyncDialog = true"
+          :focusable="false"
+        >
           <span>{{ ft("sync") }}</span>
           <template #icon>
             <n-icon size="18" :component="SyncSharp" />
@@ -81,12 +85,14 @@ import { SortableEvent } from "vue-draggable-plus"
 import SpaceSelect from "@/components/space-select.vue"
 import dataManager from "@/db"
 import SyncDialog from "./components/sync-dialog.vue"
+import { useDuplicateCardStore } from "@/store/duplicate-card"
+
 const spacesStore = useSpacesStore()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const { openModal } = useSearchModal()
 const loadingBar = useLoadingBar()
 const { ft } = useHelpi18n()
-
+const duplicateCardStore = useDuplicateCardStore()
 const init = async () => {
   await spacesStore.initialize()
 }
@@ -158,6 +164,7 @@ function onAddSpace() {
 function onHandleSpaceClick(space: Space) {
   spacesStore.setActiveSpace(space.id!)
   refreshCollections()
+  duplicateCardStore.clearDuplicateCards()
 }
 
 function onImport() {

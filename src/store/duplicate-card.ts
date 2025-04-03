@@ -1,5 +1,7 @@
 import { defineStore } from "pinia"
 import { Card } from "@/type"
+import { useDraggableStore } from "./draggable"
+import { useExpandStore } from "./expand"
 export const useDuplicateCardStore = defineStore("duplicateCard", {
   state: (): {
     isFindDuplicate: boolean
@@ -18,9 +20,6 @@ export const useDuplicateCardStore = defineStore("duplicateCard", {
     },
     currentDuplicateCount: (state) => {
       if (!state.isFindDuplicate) return 0
-      console.log(state.duplicateCards)
-      console.log(Array.from(state.duplicateCards.values()))
-      console.log(Array.from(state.duplicateCards.values())[state.currentIndex])
       return Array.from(state.duplicateCards.values())[state.currentIndex]
         ?.length
     },
@@ -28,6 +27,10 @@ export const useDuplicateCardStore = defineStore("duplicateCard", {
   actions: {
     setIsFindDuplicate(isFindDuplicate: boolean) {
       this.isFindDuplicate = isFindDuplicate
+      if (isFindDuplicate) {
+        useDraggableStore().setDraggable(false)
+        useExpandStore().expandAll()
+      }
     },
     addDuplicateCard(card: Card) {
       if (this.duplicateCards.has(card.url)) {

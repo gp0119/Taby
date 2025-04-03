@@ -9,7 +9,6 @@ export const useDuplicateCard = () => {
     collections.forEach((collection) => {
       collection.cards.forEach((child) => {
         if (duplicateHash[child.url]) {
-          console.log("child: ", child)
           if (!duplicateCardStore.duplicateCards.has(child.url)) {
             duplicateCardStore.addDuplicateCard(duplicateHash[child.url])
           }
@@ -19,10 +18,6 @@ export const useDuplicateCard = () => {
         }
       })
     })
-    console.log(
-      "duplicateCardStore.duplicateCards: ",
-      duplicateCardStore.duplicateCards,
-    )
   }
 
   const showPrevious = () => {
