@@ -66,18 +66,11 @@
             </n-icon>
           </template>
           <template v-if="tagsStore.selectedTag">
-            <n-tag
-              size="small"
-              :color="{
-                color: `${tagsStore.selectedTag.color}33`,
-                textColor: `${tagsStore.selectedTag.color}`,
-                borderColor: `${tagsStore.selectedTag.color}4A`,
-              }"
-            >
-              <div class="w-[46px] text-ellipsis">
-                {{ tagsStore.selectedTag.title }}
-              </div>
-            </n-tag>
+            <Tag
+              titleClass="w-[50px] text-ellipsis"
+              :tag="tagsStore.selectedTag"
+              :closeable="false"
+            />
           </template>
           <template v-else>
             <div class="w-[60px] text-ellipsis">{{ ft("tag-filter") }}</div>
@@ -158,28 +151,16 @@ import { useExpandStore } from "@/store/expand"
 import { Label, movePosition } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useEditDialog } from "@/hooks/useEditDialog"
-const draggableStore = useDraggableStore()
+import Tag from "@/components/tag.vue"
 
+const draggableStore = useDraggableStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const expandStore = useExpandStore()
 const { ft } = useHelpi18n()
 
 const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
-  return option.id !== 0 ? (
-    <n-tag
-      size="small"
-      color={{
-        color: `${option.color}33`,
-        textColor: option.color,
-        borderColor: `${option.color}4A`,
-      }}
-    >
-      {option.title}
-    </n-tag>
-  ) : (
-    <span class="text-primary">{ft("clear-label")}</span>
-  )
+  return <Tag tag={option as unknown as Label} />
 }
 
 const renderSortLabel = (option: SelectOption | SelectGroupOption) => {

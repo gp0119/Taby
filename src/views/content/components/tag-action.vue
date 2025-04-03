@@ -28,16 +28,11 @@
           v-for="tag in tagsStore.tags"
           :key="tag.id"
         >
-          <n-tag
-            size="small"
-            :color="{
-              color: `${tag.color}33`,
-              textColor: tag.color,
-              borderColor: `${tag.color}4A`,
-            }"
+          <Tag
+            :tag="tag"
+            :closeable="false"
             @click="addTagforCollection(tag.id)"
-            >{{ tag.title }}</n-tag
-          >
+          />
           <n-icon
             size="16"
             class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
@@ -82,6 +77,8 @@ import { useRefresh } from "@/hooks/useRresh"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
+import Tag from "@/components/tag.vue"
+
 const props = defineProps<{
   item: CollectionWithCards
 }>()
