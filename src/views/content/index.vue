@@ -4,7 +4,7 @@
     <DynamicScroller
       v-else-if="collections?.length"
       :items="collections"
-      :min-item-size="100"
+      :min-item-size="160"
       class="dynamic-scroller-optimize h-[calc(100vh-100px)] overflow-y-auto"
       style="scrollbar-width: thin; scrollbar-color: #d1d5db transparent"
       :prerender="5"
@@ -62,6 +62,7 @@ import BatchCardAction from "./components/batch-card-action.vue"
 import CollectionCollapse from "./components/collection-collapse.vue"
 import BatchCollectionAction from "./components/batch-collection-action.vue"
 import SkeletonContent from "@/components/skeleton-content.vue"
+import { Collection } from "@/type"
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
@@ -74,37 +75,38 @@ const { loading } = inject("loading", {
 
 const zhCollator = new Intl.Collator("zh")
 
-const collections = computed(() => {
+const filteredCollections = computed(() => {
   let baseCollections = spacesStore.collections
-
   if (tagsStore.selectedTag?.id) {
-    baseCollections = baseCollections.filter((item) =>
+    return baseCollections.filter((item) =>
       item.labelIds.includes(tagsStore.selectedTag!.id),
     )
   }
-
-  if (!sortStore.sortOrder) {
-    return baseCollections
-  }
-
-  return [...baseCollections].sort((a, b) => {
-    switch (sortStore.sortOrder) {
-      case "title-asc":
-      case "title-desc":
-        return sortStore.sortOrder === "title-asc"
-          ? zhCollator.compare(a.title, b.title)
-          : -zhCollator.compare(a.title, b.title)
-      case "created-at-asc":
-        return (a.createdAt ?? 0) - (b.createdAt ?? 0)
-      case "created-at-desc":
-        return (b.createdAt ?? 0) - (a.createdAt ?? 0)
-      case "draggable":
-        return a.order - b.order
-      default:
-        return 0
-    }
-  })
+  return baseCollections
 })
+
+const collections = computed(() => {
+  if (sortStore.sortOrder === "draggable") {
+    return filteredCollections.value
+  }
+  return [...filteredCollections.value].sort(sortCollections)
+})
+
+// 排序函数抽离
+function sortCollections(a: Collection, b: Collection) {
+  switch (sortStore.sortOrder) {
+    case "title-asc":
+      return zhCollator.compare(a.title, b.title)
+    case "title-desc":
+      return -zhCollator.compare(a.title, b.title)
+    case "created-at-asc":
+      return (a.createdAt ?? 0) - (b.createdAt ?? 0)
+    case "created-at-desc":
+      return (b.createdAt ?? 0) - (a.createdAt ?? 0)
+    default:
+      return 0
+  }
+}
 </script>
 
 <style scoped>
