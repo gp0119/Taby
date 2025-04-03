@@ -70,4 +70,9 @@ export default {
   "no-search-result": "没有搜索结果",
   "sync-type": "同步类型",
   "sync-with-gist": "使用 Gist 同步",
+  "enable-duplicate": "显示重复",
+  "disable-duplicate": "隐藏重复",
+  "duplicate-cards": "<span class='font-medium'>{type}</span> 个重复的 Card",
+  next: "下一个",
+  previous: "上一个",
 }

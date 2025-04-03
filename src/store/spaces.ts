@@ -37,6 +37,7 @@ export const useSpacesStore = defineStore("spaces", () => {
   }
 
   function setCollections(_collections: CollectionWithCards[]) {
+    console.log("_collections: ", _collections)
     collections.value = _collections
   }
 

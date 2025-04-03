@@ -24,6 +24,7 @@
       type="content"
       :child="card"
       :select-ids="batchCardStore.selectedCardIds"
+      :duplicateUrl="duplicateCardStore.currentDuplicateUrl"
       @click="onHandleClick(card)"
       @delete="onDeleteCard(card)"
       @edit="onEdit(card)"
@@ -46,6 +47,8 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import Favicon from "@/components/favicon.vue"
+import { useDuplicateCardStore } from "@/store/duplicate-card"
+
 defineProps<{
   cards: CardWithFavicon[]
   collectionId: number
@@ -54,6 +57,7 @@ defineProps<{
 const { refreshCollections } = useRefresh()
 const batchCardStore = useBatchCardStore()
 const { ft, gt } = useHelpi18n()
+const duplicateCardStore = useDuplicateCardStore()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()

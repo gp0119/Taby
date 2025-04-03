@@ -36,9 +36,9 @@
               <ChevronSort />
             </n-icon>
           </template>
-          <span class="w-[60px] text-ellipsis leading-6">{{
-            ft(sortStore.sortOrder ?? "draggable")
-          }}</span>
+          <span class="w-[60px] text-ellipsis leading-6">
+            {{ ft(sortStore.sortOrder ?? "draggable") }}
+          </span>
           <n-icon
             size="20"
             class="transition-transform duration-300"
@@ -102,7 +102,9 @@
         </template>
         {{ ft("collapse-all") }}
       </n-button>
+
       <n-switch
+        class="mr-2"
         v-model:value="draggableStore.draggable"
         @update-value="draggableStore.setDraggable"
       >
@@ -111,6 +113,18 @@
         </template>
         <template #unchecked>
           <span class="text-xs">{{ ft("enable-drag") }}</span>
+        </template>
+      </n-switch>
+
+      <n-switch
+        v-model:value="duplicateCardStore.isFindDuplicate"
+        @update-value="duplicateCardStore.setIsFindDuplicate"
+      >
+        <template #checked>
+          <span class="text-xs">{{ ft("disable-duplicate") }}</span>
+        </template>
+        <template #unchecked>
+          <span class="text-xs">{{ ft("enable-duplicate") }}</span>
         </template>
       </n-switch>
     </div>
@@ -125,6 +139,7 @@
       </n-button>
     </div>
   </div>
+  <DuplicateAction />
 </template>
 
 <script setup lang="tsx">
@@ -152,8 +167,11 @@ import { Label, movePosition } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import Tag from "@/components/tag.vue"
+import { useDuplicateCardStore } from "@/store/duplicate-card"
+import DuplicateAction from "./duplicate-action.vue"
 
 const draggableStore = useDraggableStore()
+const duplicateCardStore = useDuplicateCardStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const expandStore = useExpandStore()

@@ -71,4 +71,9 @@ export default {
   "no-search-result": "No search results",
   "sync-type": "Sync Type",
   "sync-with-gist": "Sync with Gist",
+  "enable-duplicate": "Show Duplicate",
+  "disable-duplicate": "Hide Duplicate",
+  "duplicate-cards": "<span class='font-medium'>{type}</span> Duplicate Cards",
+  next: "Next",
+  previous: "Prev",
 }

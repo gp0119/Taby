@@ -1,7 +1,10 @@
 <template>
   <div
     class="card group/card"
-    :class="{ '!shadow-base-lg': selectIds?.includes(child.id) }"
+    :class="{
+      '!shadow-base-lg': selectIds?.includes(child.id),
+      'duplicate-card': duplicateUrl === child.url,
+    }"
     @click="onHandleClick"
   >
     <div class="card-header">
@@ -33,10 +36,8 @@
         <n-icon color="#fff" :size="14" :component="Close" />
       </n-icon-wrapper>
     </div>
-    <div class="card-title-wrapper">
-      <div
-        class="select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light text-text-secondary"
-      >
+    <div class="card-title-wrapper relative p-2.5">
+      <div class="card-description">
         {{ child.description || child.title }}
       </div>
       <div class="bottom-button-wrapper">
@@ -75,9 +76,10 @@ const props = defineProps<{
   child: CardWithFavicon
   type: string
   selectIds?: number[]
+  duplicateUrl?: string | null
 }>()
-const { copy, isSupported } = useClipboard()
 
+const { copy, isSupported } = useClipboard()
 const emit = defineEmits(["delete", "click", "copy", "edit", "check"])
 
 function onHandleClick() {
@@ -113,11 +115,11 @@ function onHandleCheckbox(checked: boolean) {
 .card-title {
   @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
 }
+.card-description {
+  @apply select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light text-text-secondary;
+}
 .delete-button {
   @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;
-}
-.card-title-wrapper {
-  @apply relative p-2.5;
 }
 .copy-button {
   @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
@@ -128,5 +130,8 @@ function onHandleCheckbox(checked: boolean) {
 .bottom-button-wrapper {
   @apply absolute -bottom-2.5 -right-2.5 hidden items-center justify-center gap-x-3;
   @apply group-hover/content:flex;
+}
+.duplicate-card {
+  @apply bg-gradient-to-b from-primary to-card-color;
 }
 </style>
