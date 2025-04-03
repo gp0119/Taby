@@ -6,7 +6,7 @@
   >
     <div class="card-header">
       <div
-        class="checkbox mr-2.5 hidden h-[24px] w-[24px] items-center justify-center group-hover/card:flex"
+        class="checkbox mr-2.5 hidden h-[24px] w-[24px] animate-scale-in items-center justify-center group-hover/card:flex"
         :class="{ '!flex': selectIds?.includes(child.id) }"
         @click.stop="() => {}"
       >
@@ -39,25 +39,27 @@
       >
         {{ child.description || child.title }}
       </div>
-      <!--   复制按钮   -->
-      <n-icon-wrapper
-        v-if="isSupported"
-        :size="24"
-        :border-radius="24"
-        @click.stop="onHandleCopy"
-        class="copy-button"
-      >
-        <n-icon color="#fff" :size="12" :component="CopyOutline" />
-      </n-icon-wrapper>
-      <!--   编辑按钮   -->
-      <n-icon-wrapper
-        :size="24"
-        :border-radius="24"
-        class="edit-button"
-        @click.stop="onHandleEdit"
-      >
-        <n-icon color="#fff" :size="12" :component="Pen" />
-      </n-icon-wrapper>
+      <div class="bottom-button-wrapper">
+        <!--   复制按钮   -->
+        <n-icon-wrapper
+          v-if="isSupported"
+          :size="24"
+          :border-radius="24"
+          @click.stop="onHandleCopy"
+          class="copy-button"
+        >
+          <n-icon color="#fff" :size="12" :component="CopyOutline" />
+        </n-icon-wrapper>
+        <!--   编辑按钮   -->
+        <n-icon-wrapper
+          :size="24"
+          :border-radius="24"
+          class="edit-button"
+          @click.stop="onHandleEdit"
+        >
+          <n-icon color="#fff" :size="12" :component="Pen" />
+        </n-icon-wrapper>
+      </div>
     </div>
   </div>
 </template>
@@ -118,11 +120,13 @@ function onHandleCheckbox(checked: boolean) {
   @apply relative p-2.5;
 }
 .copy-button {
-  @apply absolute right-6 hidden rounded-full bg-primary hover:opacity-70;
-  @apply group-hover/content:flex group-hover/content:animate-scale-in;
+  @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
 }
 .edit-button {
-  @apply absolute -right-2.5 hidden rounded-full bg-primary hover:opacity-70;
-  @apply group-hover/content:flex group-hover/content:animate-scale-in;
+  @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
+}
+.bottom-button-wrapper {
+  @apply absolute -bottom-2.5 -right-2.5 hidden items-center justify-center gap-x-3;
+  @apply group-hover/content:flex;
 }
 </style>
