@@ -75,4 +75,6 @@ export default {
   "duplicate-cards": "<span class='font-medium'>{type}</span> 个重复的 Card",
   next: "下一个",
   previous: "上一个",
+  "current-duplicate-count":
+    "当前<span class='font-medium text-primary mx-1'>{type}</span> 个重复",
 }

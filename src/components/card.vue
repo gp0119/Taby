@@ -108,7 +108,7 @@ function onHandleCheckbox(checked: boolean) {
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
-  @apply relative flex items-center rounded-md border-0 border-b border-solid px-4 py-3;
+  @apply relative flex items-center border-0 border-b border-solid px-4 py-3;
   @apply group-hover/aside:bg-hover-color;
 }
 

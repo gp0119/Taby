@@ -16,6 +16,14 @@ export const useDuplicateCardStore = defineStore("duplicateCard", {
       return Array.from(state.duplicateCards.values())[state.currentIndex]?.[0]
         .url
     },
+    currentDuplicateCount: (state) => {
+      if (!state.isFindDuplicate) return 0
+      console.log(state.duplicateCards)
+      console.log(Array.from(state.duplicateCards.values()))
+      console.log(Array.from(state.duplicateCards.values())[state.currentIndex])
+      return Array.from(state.duplicateCards.values())[state.currentIndex]
+        ?.length
+    },
   },
   actions: {
     setIsFindDuplicate(isFindDuplicate: boolean) {
@@ -31,6 +39,7 @@ export const useDuplicateCardStore = defineStore("duplicateCard", {
     clearDuplicateCards() {
       this.duplicateCards.clear()
       this.currentIndex = 0
+      this.isFindDuplicate = false
     },
     setCurrentIndex(index: number) {
       if (index < 0) return

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-[50px] justify-between border-0 border-b border-solid px-4"
+    class="flex h-[50px] min-w-[1000px] justify-between border-0 border-b border-solid px-4"
   >
     <div class="flex-center">
       <!--   排序   -->
@@ -117,6 +117,7 @@
       </n-switch>
 
       <n-switch
+        class="mr-2"
         v-model:value="duplicateCardStore.isFindDuplicate"
         @update-value="duplicateCardStore.setIsFindDuplicate"
       >
@@ -139,7 +140,6 @@
       </n-button>
     </div>
   </div>
-  <DuplicateAction />
 </template>
 
 <script setup lang="tsx">
@@ -149,7 +149,7 @@ import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
-import { Add } from "@vicons/ionicons5"
+import { Add } from "@vicons/carbon"
 import { SelectGroupOption, SelectOption } from "naive-ui"
 import {
   TagGroup,
@@ -168,7 +168,6 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import Tag from "@/components/tag.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
-import DuplicateAction from "./duplicate-action.vue"
 
 const draggableStore = useDraggableStore()
 const duplicateCardStore = useDuplicateCardStore()
