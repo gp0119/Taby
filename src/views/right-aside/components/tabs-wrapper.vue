@@ -3,10 +3,11 @@
     :model-value="tabs"
     :group="{
       name: 'aside-card',
-      put: false,
+      put: ['aside-card'],
       pull: 'clone',
     }"
     item-key="id"
+    :data-windowid="windowId"
     class="aside-card-wrapper flex flex-col gap-3"
     ghost-class="sortable-ghost-dashed-border"
     @end="onDragEnd"

@@ -127,6 +127,10 @@ const onDragEnd = async (evt: SortableEvent) => {
         await refreshCollections()
       },
     )
+  } else if (to.classList.contains("aside-card-wrapper")) {
+    const toWindowId = to.getAttribute("data-windowid")
+    await moveTab(Number(id), Number(newIndex), Number(toWindowId))
+    await refreshTabs()
   } else {
     await moveTab(Number(id), Number(newIndex), Number(windowid))
     await refreshTabs()

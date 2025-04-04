@@ -16,15 +16,18 @@
           <div class="flex-center">
             <n-icon
               size="18"
-              class="mr-2 w-[20px] cursor-pointer text-text-secondary"
-            >
-              <Move />
-            </n-icon>
-            <span class="text-lg font-medium text-text-primary">
+              class="w-[20px] text-text-secondary"
+              :component="Move"
+            />
+            <span class="ml-2 text-lg font-medium text-text-primary">
               {{ collection.title }}
             </span>
           </div>
-          <Tags :labels="collection.labels" :collection-id="collection.id" />
+          <Tags
+            class="pointer-events-none"
+            :labels="collection.labels"
+            :collection-id="collection.id"
+          />
         </div>
       </div>
     </VueDraggable>
