@@ -55,6 +55,9 @@
           :disabled="!formModel.accessToken"
           @click="handleUpload"
         >
+          <template #icon>
+            <n-icon size="14" :component="CloudUpload" />
+          </template>
           {{ ft("upload-local") }}
         </n-button>
         <n-button
@@ -64,6 +67,9 @@
           @click="handleDownload"
           :disabled="!(formModel.accessToken && formModel.gistId)"
         >
+          <template #icon>
+            <n-icon size="14" :component="CloudDownload" />
+          </template>
           {{ ft("download-remote") }}
         </n-button>
       </div>
@@ -76,6 +82,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { FormInst, useMessage } from "naive-ui"
 import syncManager from "@/sync/syncManager.ts"
 import { LogoGithub } from "@vicons/ionicons5"
+import { CloudDownload, CloudUpload } from "@vicons/carbon"
 import { debounce } from "lodash-es"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"

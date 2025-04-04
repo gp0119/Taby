@@ -43,6 +43,7 @@ declare module 'vue' {
     NTag: typeof import('naive-ui')['NTag']
     NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
+    NUploadDragger: typeof import('naive-ui')['NUploadDragger']
     SelectWrapper: typeof import('./src/components/select-wrapper.vue')['default']
     SkeletonContent: typeof import('./src/components/skeleton-content.vue')['default']
     SpaceSelect: typeof import('./src/components/space-select.vue')['default']

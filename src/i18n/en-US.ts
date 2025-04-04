@@ -54,7 +54,7 @@ export default {
   "import-from": "Import From {type}",
   success: "{type} Success",
   fail: "{type} Fail",
-  "select-file": "Select File",
+  "select-file": "Click or drag file to this area to upload",
   "no-collections": "No collections here, please add one.",
   "no-cards": "No cards here, please drag tabs here",
   "placeholder-search": "Press Ctrl/Cmd + F to search",

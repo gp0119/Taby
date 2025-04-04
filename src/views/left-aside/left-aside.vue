@@ -37,26 +37,40 @@
     </div>
     <div class="px-2.5 py-4">
       <n-space vertical>
-        <n-button class="w-full" @click="onImport" :focusable="false">
-          <span>{{ ft("import") }}</span>
+        <n-button
+          type="primary"
+          ghost
+          class="w-full"
+          @click="onImport"
+          :focusable="false"
+        >
+          <span class="w-8">{{ ft("import") }}</span>
           <template #icon>
             <n-icon size="18" :component="DocumentImport" />
           </template>
         </n-button>
-        <n-button class="w-full" @click="onExport" :focusable="false">
-          <span>{{ ft("export") }}</span>
+        <n-button
+          type="primary"
+          ghost
+          class="w-full"
+          @click="onExport"
+          :focusable="false"
+        >
+          <span class="w-8">{{ ft("export") }}</span>
           <template #icon>
             <n-icon size="18" :component="DocumentExport" />
           </template>
         </n-button>
         <n-button
+          secondary
+          type="primary"
           class="w-full"
           @click="showSyncDialog = true"
           :focusable="false"
         >
-          <span>{{ ft("sync") }}</span>
+          <span class="w-8">{{ ft("sync") }}</span>
           <template #icon>
-            <n-icon size="18" :component="SyncSharp" />
+            <n-icon size="18" :component="CloudDataOps" />
           </template>
         </n-button>
       </n-space>
@@ -71,8 +85,13 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useSearchModal } from "@/hooks/useSearchModal.tsx"
 import { useExport } from "@/views/left-aside/hooks/useExport.ts"
 import { useImport } from "@/views/left-aside/hooks/useImport.ts"
-import { SyncSharp } from "@vicons/ionicons5"
-import { DocumentImport, DocumentExport, FolderAdd } from "@vicons/carbon"
+import {
+  DocumentImport,
+  DocumentExport,
+  FolderAdd,
+  CloudDataOps,
+  Upload,
+} from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
 import logo from "@/assets/72.png"
 import { Space } from "@/type.ts"
@@ -193,11 +212,19 @@ function onImport() {
           </n-form-item>
           <n-form-item label-placement="left">
             <n-upload
+              directory-dnd
               v-model:fileList={formModel.value.fileList}
               accept=".json"
               max={1}
             >
-              <n-button>{ft("select-file")}</n-button>
+              <n-upload-dragger class="flex flex-col items-center bg-card-color">
+                <n-icon size="32" depth="3">
+                  <Upload />
+                </n-icon>
+                <span class="mt-2.5 text-text-secondary">
+                  {ft("select-file")}
+                </span>
+              </n-upload-dragger>
             </n-upload>
           </n-form-item>
         </n-form>

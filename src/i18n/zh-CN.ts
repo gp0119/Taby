@@ -52,7 +52,7 @@ export default {
   "import-from": "从 {type} 导入",
   success: "{type}成功",
   fail: "{type}失败",
-  "select-file": "选择文件",
+  "select-file": "点击或者拖动文件到该区域来上传",
   "no-collections": "这里没有 collections,请添加",
   "no-cards": "这里是空的,请拖动标签页到这里",
   "placeholder-search": "按住 Ctrl/Cmd + F 搜索",
