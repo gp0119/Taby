@@ -33,12 +33,17 @@ export const useSearchModal = () => {
   const stopArrow = useEventListener(document, "keydown", (e) => {
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault()
-      if (currentIndex.value === 0 && e.key === "ArrowUp") return
+      if (currentIndex.value === 0 && e.key === "ArrowUp") {
+        currentIndex.value = cards.value.length - 1
+        return
+      }
       if (
         currentIndex.value === cards.value.length - 1 &&
         e.key === "ArrowDown"
-      )
+      ) {
+        currentIndex.value = 0
         return
+      }
       if (e.key === "ArrowUp") {
         currentIndex.value--
       } else if (e.key === "ArrowDown") {
