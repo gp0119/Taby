@@ -78,6 +78,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
+import { useDialog } from "naive-ui"
 
 const props = defineProps<{
   item: CollectionWithCards
@@ -114,7 +115,7 @@ const addTagforCollection = async (id: number) => {
 
 const { open: openEditDialog } = useEditDialog()
 const { open: openDeleteDialog } = useDeleteDialog()
-
+const dialog = useDialog()
 const onDeleteTag = async (tag: {
   id: number
   title: string
@@ -132,6 +133,7 @@ const onDeleteTag = async (tag: {
       await dataManager.removeLabel(tag.id)
       await tagsStore.fetchTags()
       await refreshCollections()
+      dialog.destroyAll()
     },
   })
 }
@@ -153,11 +155,7 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
               type="error"
               onClick={() => onDeleteTag(tag)}
               v-slots={{
-                icon: () => (
-                  <n-icon>
-                    <Delete />
-                  </n-icon>
-                ),
+                icon: () => <n-icon size="16" component={Delete} />,
               }}
             />
           </n-input-group>

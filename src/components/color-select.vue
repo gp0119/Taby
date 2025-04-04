@@ -8,7 +8,7 @@
         :style="`border-color: ${selectedColor}4A; border-width: 1px; border-style: solid;`"
       >
         <template #icon>
-          <n-icon size="18" :component="ColorPalette" />
+          <n-icon size="16" :component="ColorPalette" />
         </template>
       </n-button>
     </template>
