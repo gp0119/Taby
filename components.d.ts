@@ -12,6 +12,7 @@ declare module 'vue' {
     CollectionSelect: typeof import('./src/components/collection-select.vue')['default']
     ColorSelect: typeof import('./src/components/color-select.vue')['default']
     Favicon: typeof import('./src/components/favicon.vue')['default']
+    Gitee: typeof import('./src/components/gitee.vue')['default']
     IconSelect: typeof import('./src/components/icon-select.vue')['default']
     NAvatar: typeof import('naive-ui')['NAvatar']
     NButton: typeof import('naive-ui')['NButton']

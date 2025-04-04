@@ -16,6 +16,7 @@
         <n-select
           v-model:value="formModel.syncType"
           :options="syncTypeOptions"
+          :render-label="renderLabel"
           @update:value="handleSyncTypeChange"
         />
       </n-form-item>
@@ -29,7 +30,6 @@
             "
             target="_blank"
           >
-            <n-icon size="12" :component="LogoGithub" />
             <span class="text-blue-500">{{ ft("access-token") }}:</span>
           </a>
         </template>
@@ -57,7 +57,13 @@
         >
           {{ ft("upload-local") }}
         </n-button>
-        <n-button size="small" @click="handleDownload">
+        <n-button
+          ghost
+          size="small"
+          type="primary"
+          @click="handleDownload"
+          :disabled="!(formModel.accessToken && formModel.gistId)"
+        >
           {{ ft("download-remote") }}
         </n-button>
       </div>
@@ -74,6 +80,7 @@ import { debounce } from "lodash-es"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 
 const { ft } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
@@ -93,6 +100,20 @@ const rules = ref({
 })
 const formRef = ref<FormInst | null>(null)
 const message = useMessage()
+const { open } = useDeleteDialog()
+
+const renderLabel = (option: any) => {
+  return (
+    <div class="flex items-center">
+      {option.value === "gitee" ? (
+        <gitee size="14" />
+      ) : (
+        <n-icon size="14" component={LogoGithub} />
+      )}
+      <span class="ml-1">{option.label}</span>
+    </div>
+  )
+}
 
 const handleSyncTypeChange = debounce((value: string) => {
   chrome.storage.sync.set({ [SYNC_TYPE]: value })
@@ -135,23 +156,29 @@ const handleUpload = () => {
 }
 
 const handleDownload = () => {
-  formRef.value?.validate().then(async () => {
-    try {
+  open({
+    title: ft("tips-title"),
+    content: ft("download-remote-confirm"),
+    onPositiveClick: () => {
       formRef.value?.validate().then(async () => {
-        await syncManager.triggerDownload()
-        await chrome.storage.sync.set({
-          [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-          [SYNC_GIST_ID]: formModel.value.gistId,
-        })
-        await refreshSpaces()
-        await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
-        await refreshCollections()
-        message.success(ft("success", "download"))
-        show.value = false
+        try {
+          formRef.value?.validate().then(async () => {
+            await syncManager.triggerDownload()
+            await chrome.storage.sync.set({
+              [SYNC_GIST_TOKEN]: formModel.value.accessToken,
+              [SYNC_GIST_ID]: formModel.value.gistId,
+            })
+            await refreshSpaces()
+            await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
+            await refreshCollections()
+            message.success(ft("success", "download"))
+            show.value = false
+          })
+        } catch (error) {
+          message.error(ft("fail", "download"))
+        }
       })
-    } catch (error) {
-      message.error(ft("fail", "download"))
-    }
+    },
   })
 }
 

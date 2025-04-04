@@ -1,4 +1,5 @@
 export default {
+  "tips-title": "提示",
   toby: "Toby",
   taby: "Taby",
   gist: "Gist",
@@ -57,6 +58,7 @@ export default {
   "placeholder-search": "按住 Ctrl/Cmd + F 搜索",
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
   "delete-cards-confirm": "确定删除这些标签吗?",
+  "download-remote-confirm": "确定下载远程数据吗?这会覆盖本地数据,请谨慎操作",
   "select-cards": "已选择 <span class='text-primary'>{type}</span> 个 Card",
   "select-collections":
     "已选择 <span class='text-primary'>{type}</span> 个 Collection",

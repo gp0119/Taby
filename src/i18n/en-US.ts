@@ -1,4 +1,5 @@
 export default {
+  "tips-title": "Tips",
   toby: "Toby",
   taby: "Taby",
   gist: "Gist",
@@ -60,6 +61,8 @@ export default {
   "delete-confirm":
     "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
   "delete-cards-confirm": "Are you sure you want to delete these tags?",
+  "download-remote-confirm":
+    "Are you sure you want to download remote data? This will overwrite local data, please be careful.",
   "select-cards":
     "<span class='text-primary font-medium'>{type}</span> Cards Selected",
   "select-collections":
