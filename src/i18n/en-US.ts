@@ -86,4 +86,5 @@ export default {
   "merge-to": "Merge to",
   "move-to": "Move to",
   more: "More",
+  "invalid-file": "Please check if the {type} export file is valid",
 }

@@ -1,6 +1,7 @@
 import dataManager from "@/db"
 import { Card, CollectionWithCards, Label } from "@/type.ts"
 import { useMessage } from "naive-ui"
+import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 
 async function batchAddLable(labels: Label[]) {
   const labelIds: number[] = []
@@ -43,7 +44,7 @@ async function addCollection(
 
 export function useImport() {
   const message = useMessage()
-
+  const { ft } = useHelpi18n()
   const importFromToby = async (file: Blob) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -53,6 +54,9 @@ export function useImport() {
           const lists: {
             lists: CollectionWithCards[]
           } = JSON.parse(event.target?.result as string)
+          if (!lists.lists || !lists.lists.length) {
+            throw new Error(ft("invalid-file", "Toby"))
+          }
           const spaceId = await dataManager.addSpace({
             title: "From Toby",
             icon: "StorefrontOutline",
@@ -69,7 +73,7 @@ export function useImport() {
           resolve(true)
         } catch (error) {
           reject(error)
-          message.error("请检查是否为有效的 Toby 导出文件")
+          message.error(ft("invalid-file", "Toby"))
         }
       }
     })
@@ -82,6 +86,9 @@ export function useImport() {
       reader.onload = async (event) => {
         try {
           const spaces = JSON.parse(event.target?.result as string)
+          if (!spaces || !spaces.length) {
+            throw new Error(ft("invalid-file", "Taby"))
+          }
           for (const space of spaces) {
             const spaceId = await dataManager.addSpace({
               title: space.title,
@@ -105,7 +112,7 @@ export function useImport() {
           resolve(true)
         } catch (error) {
           reject(error)
-          message.error("请检查是否为有效的 Taby 导出文件")
+          message.error(ft("invalid-file", "Taby"))
         }
       }
     })

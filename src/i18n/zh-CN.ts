@@ -83,4 +83,5 @@ export default {
   "merge-to": "合并到",
   "move-to": "移动到",
   more: "更多",
+  "invalid-file": "请检查是否为有效的 {type} 导出文件",
 }
