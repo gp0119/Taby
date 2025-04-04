@@ -69,7 +69,9 @@
             />
           </template>
           <template v-else>
-            <div class="w-[60px] text-ellipsis">{{ ft("tag-filter") }}</div>
+            <div class="w-[60px] text-ellipsis leading-6">
+              {{ ft("tag-filter") }}
+            </div>
           </template>
           <n-icon
             size="20"
@@ -93,7 +95,7 @@
             :component="expandStore.isCollapseAll ? RowCollapse : RowExpand"
           />
         </template>
-        <div class="w-[60px] text-ellipsis">
+        <div class="w-[60px] text-ellipsis leading-6">
           {{
             !expandStore.isCollapseAll ? ft("expand-all") : ft("collapse-all")
           }}
@@ -113,7 +115,7 @@
                 <List />
               </n-icon>
             </template>
-            <span>{{ ft("more") }}</span>
+            <span class="leading-6">{{ ft("more") }}</span>
             <n-icon
               size="20"
               class="transition-transform duration-300"
