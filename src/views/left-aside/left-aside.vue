@@ -229,15 +229,18 @@ function onImport() {
     onPositiveClick: async () => {
       if (!formModel.value.fileList.length) return
       loadingBar.start()
-      if (type.value === "toby") {
-        await importFromToby(formModel.value.fileList[0].file!)
-      } else {
-        await importFromTaby(formModel.value.fileList[0].file!)
+      try {
+        if (type.value === "toby") {
+          await importFromToby(formModel.value.fileList[0].file!)
+        } else {
+          await importFromTaby(formModel.value.fileList[0].file!)
+        }
+        await refreshSpaces()
+        await refreshCollections()
+        message.success(ft("success", "import"))
+      } finally {
+        loadingBar.finish()
       }
-      await refreshSpaces()
-      await refreshCollections()
-      message.success(ft("success", "import"))
-      loadingBar.finish()
     },
   })
 }
