@@ -72,11 +72,11 @@ export const useThemeStore = defineStore("theme", () => {
   }
 
   const setThemeProperty = () => {
-    const root = document.documentElement
+    let root = document.documentElement
     const color = themeColor[theme.value]
 
     const cleanupFunction = () => {
-      root.style = "display: none;"
+      root.style.display = "none"
       window.removeEventListener("beforeunload", cleanupFunction)
     }
 
