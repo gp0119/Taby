@@ -3,21 +3,34 @@
     <div
       class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4"
     >
-      <span class="select-none text-text-primary">{{ ft("open-tabs") }}</span>
-      <n-button
-        secondary
-        type="primary"
-        size="small"
-        v-if="batchTabsStore.selectedTabIds.length > 0"
-        @click="onSave"
+      <span
+        class="select-none text-text-primary"
+        v-if="batchTabsStore.selectedTabIds.length === 0"
       >
-        <template #icon>
-          <n-icon size="16" class="cursor-pointer text-primary">
-            <Save />
-          </n-icon>
-        </template>
-        <span>{{ ft("save") }}</span>
-      </n-button>
+        {{ ft("open-tabs") }}
+      </span>
+      <template v-else>
+        <n-button secondary type="primary" size="small" @click="onSave">
+          <template #icon>
+            <n-icon
+              size="16"
+              class="cursor-pointer text-primary"
+              :component="Save"
+            />
+          </template>
+          <span class="w-[50px]">{{ ft("save") }}</span>
+        </n-button>
+        <n-button ghost type="primary" size="small" @click="onCancel">
+          <template #icon>
+            <n-icon
+              size="18"
+              class="cursor-pointer text-primary"
+              :component="Close"
+            />
+          </template>
+          <span class="w-[50px]">{{ ft("cancel") }}</span>
+        </n-button>
+      </template>
     </div>
     <div
       class="right-aside-area scrollbar-thin h-[calc(100vh-50px)] overflow-y-auto px-3 py-4"
@@ -56,7 +69,7 @@ import TabsWrapper from "./components/tabs-wrapper.vue"
 import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { Save } from "@vicons/carbon"
+import { Save, Close } from "@vicons/carbon"
 import type { Card as iCard } from "@/type"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
@@ -139,7 +152,7 @@ const onHandleCheckbox = (e: boolean, tab: iCard) => {
 
 const { openDialog } = useBatchMoveCardDialog()
 const onSave = async () => {
-  const { collectionId, position } = await openDialog()
+  const { collectionId, position } = await openDialog(ft("save"))
   const cardIds: number[] = []
   for (const tab of batchTabsStore.selectedTab) {
     const cardId = await dataManager.addCard({
@@ -156,6 +169,10 @@ const onSave = async () => {
     position,
   )
   await refreshCollections()
+  await batchTabsStore.clearSelectedTabs()
+}
+
+const onCancel = async () => {
   await batchTabsStore.clearSelectedTabs()
 }
 </script>

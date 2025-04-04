@@ -27,8 +27,8 @@
       class="grid transition-[grid-template-rows] duration-300 ease-in-out"
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
-      <div class="overflow-hidden">
-        <div class="bg-body-color px-4 pb-4" v-if="!isEmpty(tabs)">
+      <div class="-mt-3 overflow-hidden">
+        <div class="bg-body-color px-4 py-4" v-if="!isEmpty(tabs)">
           <slot name="cards" :tabs="tabs"></slot>
         </div>
         <template v-else>
