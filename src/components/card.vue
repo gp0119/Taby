@@ -10,7 +10,10 @@
     <div class="card-header">
       <div
         class="favicon-size mr-2.5 hidden h-[24px] w-[24px] animate-scale-in items-center justify-center group-hover/card:flex"
-        :class="{ '!flex': selectIds?.includes(child.id) }"
+        :class="{
+          '!flex': showCheckbox && selectIds?.includes(child.id),
+          '!hidden': !showCheckbox,
+        }"
         @click.stop="() => {}"
       >
         <n-checkbox
@@ -22,8 +25,11 @@
       <favicon
         :type="type"
         :child="child"
-        v-if="!selectIds?.includes(child.id)"
         class="favicon group-hover/card:hidden"
+        :class="{
+          '!hidden': selectIds?.includes(child.id),
+          '!flex': !showCheckbox,
+        }"
       />
       <span class="card-title">{{ child.title }}</span>
       <!--   删除按钮   -->
@@ -72,12 +78,16 @@ import { CardWithFavicon } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
 
-const props = defineProps<{
-  child: CardWithFavicon
-  type: string
-  selectIds?: number[]
-  duplicateUrl?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    child: CardWithFavicon
+    type: string
+    selectIds?: number[]
+    duplicateUrl?: string | null
+    showCheckbox?: boolean
+  }>(),
+  { showCheckbox: true },
+)
 
 const { copy, isSupported } = useClipboard()
 const emit = defineEmits(["delete", "click", "copy", "edit", "check"])

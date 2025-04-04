@@ -53,6 +53,10 @@
             @active-tab="activeTab"
             @drag-end="onDragEnd"
             @check="onHandleCheckbox"
+            :show-checkbox="
+              batchCollectionStore.selectedCollectionIds.length <= 0 &&
+              batchCardStore.selectedCardIds.length <= 0
+            "
           />
         </template>
       </TabsCollapse>
@@ -73,6 +77,8 @@ import { Save, Close } from "@vicons/carbon"
 import type { Card as iCard } from "@/type"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
+import { useBatchCollectionStore } from "@/store/batch-collection"
+import { useBatchCardStore } from "@/store/batch-card"
 
 const {
   tabs,
@@ -86,6 +92,9 @@ const isExpanded = ref(true)
 const { refreshCollections } = useRefresh()
 const { ft } = useHelpi18n()
 const batchTabsStore = useBatchTabsStore()
+const batchCollectionStore = useBatchCollectionStore()
+const batchCardStore = useBatchCardStore()
+
 async function refreshTabs() {
   await getTabs()
 }

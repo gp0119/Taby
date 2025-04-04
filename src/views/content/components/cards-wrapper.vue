@@ -29,6 +29,10 @@
       @delete="onDeleteCard(card)"
       @edit="onEdit(card)"
       @check="onHandleCheckbox($event, card)"
+      :show-checkbox="
+        batchCollectionStore.selectedCollectionIds.length <= 0 &&
+        batchTabsStore.selectedTabIds.length <= 0
+      "
     />
     <div class="empty-text">
       {{ ft("no-cards") }}
@@ -49,6 +53,7 @@ import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import Favicon from "@/components/favicon.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useBatchCollectionStore } from "@/store/batch-collection"
+import { useBatchTabsStore } from "@/store/batch-tabs"
 
 defineProps<{
   cards: CardWithFavicon[]
@@ -59,6 +64,8 @@ const { refreshCollections } = useRefresh()
 const batchCardStore = useBatchCardStore()
 const { ft, gt } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
+const batchCollectionStore = useBatchCollectionStore()
+const batchTabsStore = useBatchTabsStore()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
@@ -180,10 +187,8 @@ const onDragEnd = async (evt: any) => {
   await refreshCollections()
 }
 
-const batchCollectionStore = useBatchCollectionStore()
 function onHandleCheckbox(checked: boolean, card: iCard) {
   if (checked) {
-    batchCollectionStore.clearSelectedCollectionIds()
     batchCardStore.addSelectedCardId(card.id)
   } else {
     batchCardStore.removeSelectedCardId(card.id)

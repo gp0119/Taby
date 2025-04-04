@@ -28,6 +28,7 @@
       @delete="removeTab(tab.id)"
       @click="activeTab(tab)"
       @check="onHandleCheckbox($event, tab)"
+      :show-checkbox="showCheckbox"
     />
   </VueDraggable>
 </template>
@@ -42,6 +43,7 @@ defineProps<{
   tabs: any[]
   windowId: string | number
   selectedTabIds: number[]
+  showCheckbox: boolean
 }>()
 
 const emit = defineEmits<{

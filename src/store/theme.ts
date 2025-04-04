@@ -41,15 +41,15 @@ export const useThemeStore = defineStore("theme", () => {
       sepia: "0.6",
     },
     dark: {
-      primary: "#4c5ab2",
-      darkenPrimary: "#13243b",
+      primary: "#7d81da",
+      darkenPrimary: "#6568b2",
       bodyBackground: "#1A1F2B",
       cardBackground: "#292e3b",
       textPrimary: "#cbd5e1",
       textSecondary: "#94a3b8",
       borderColor: "#353f51",
       hoverColor: "#6e78b2",
-      shadowColor: "rgba(54,54,54,0.2)",
+      shadowColor: "rgba(14,17,24,0.8)",
       sepia: "0.5",
     },
     orange: {

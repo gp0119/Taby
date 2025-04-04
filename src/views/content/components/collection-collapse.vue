@@ -1,7 +1,14 @@
 <template>
-  <div class="group/item w-full border-b border-border-color">
+  <div
+    class="group/item w-full border-b border-border-color"
+    :class="{
+      'shadow-bottom': batchCollectionStore.selectedCollectionIds.includes(
+        collection.id,
+      ),
+    }"
+  >
     <div
-      class="group/collection-title flex w-full items-center justify-between bg-body-color px-6 py-3"
+      class="group/collection-title flex w-full items-center justify-between px-6 py-3"
     >
       <div class="flex-center select-none">
         <div class="flex-center relative">
@@ -11,6 +18,9 @@
               '!block': batchCollectionStore.selectedCollectionIds.includes(
                 collection.id,
               ),
+              '!hidden':
+                batchCardStore.selectedCardIds.length > 0 ||
+                batchTabsStore.selectedTabIds.length > 0,
             }"
             size="large"
             :checked="
@@ -50,7 +60,7 @@
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
       <div class="-mt-1.5 overflow-hidden">
-        <div class="bg-body-color px-5 pb-5">
+        <div class="px-5 pb-5">
           <slot name="cards" :collection="collection" />
         </div>
       </div>
@@ -66,6 +76,7 @@ import Tags from "./tags.vue"
 import { useExpandStore } from "@/store/expand"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
+import { useBatchTabsStore } from "@/store/batch-tabs"
 
 const props = defineProps<{
   collection: CollectionWithCards
@@ -73,6 +84,8 @@ const props = defineProps<{
 
 const expandStore = useExpandStore()
 const batchCollectionStore = useBatchCollectionStore()
+const batchCardStore = useBatchCardStore()
+const batchTabsStore = useBatchTabsStore()
 const isOpen = computed({
   get: () => expandStore.isCollectionExpanded(props.collection.id),
   set: (value) => {
@@ -84,10 +97,8 @@ const isOpen = computed({
   },
 })
 
-const batchCardStore = useBatchCardStore()
 const onHandleCheckbox = (checked: boolean, collectionId: number) => {
   if (checked) {
-    batchCardStore.clearSelectedCardIds()
     batchCollectionStore.addSelectedCollectionId(collectionId)
   } else {
     batchCollectionStore.removeSelectedCollectionId(collectionId)

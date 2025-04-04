@@ -6,6 +6,7 @@ export default {
       boxShadow: {
         base: "1px 1px 5px 0px var(--shadowColor)",
         "base-lg": "2px 2px 5px 5px var(--shadowColor)",
+        bottom: "0 6px 12px -4px var(--shadowColor)",
       },
       dropShadow: {
         base: "1px 2px 4px rgba(112, 112, 140, 0.15)",
