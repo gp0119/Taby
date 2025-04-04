@@ -10,6 +10,8 @@ class DataBase extends Dexie {
   labels!: EntityTable<Label, "id">
   cards!: EntityTable<Card, "id">
   favicons!: EntityTable<Favicon, "id">
+  private unloadHandler: () => void
+
   constructor() {
     super("TabyDatabase")
     this.version(2)
@@ -27,6 +29,10 @@ class DataBase extends Dexie {
       })
     this.initializeDefaultData()
     this.addHooks()
+
+    // 添加页面卸载时的清理
+    this.unloadHandler = this.cleanup.bind(this)
+    window.addEventListener("beforeunload", this.unloadHandler)
   }
 
   async handleCards(tx: Transaction) {
@@ -41,7 +47,7 @@ class DataBase extends Dexie {
   }
 
   public static getInstance(): DataBase {
-    if (!DataBase.instance) {
+    if (!DataBase.instance || DataBase.instance.isOpen() === false) {
       DataBase.instance = new DataBase()
     }
     return DataBase.instance
@@ -307,6 +313,20 @@ class DataBase extends Dexie {
         await this.clearModifiedTable()
       },
     )
+  }
+
+  async cleanup() {
+    try {
+      // 清理事件监听器
+      window.removeEventListener("beforeunload", this.unloadHandler)
+      await this.close()
+      // 清理单例实例
+      if (DataBase.instance) {
+        DataBase.instance = undefined as any
+      }
+    } catch (error) {
+      console.error("Database cleanup failed:", error)
+    }
   }
 }
 
