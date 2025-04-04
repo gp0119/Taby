@@ -217,13 +217,9 @@ function onImport() {
               accept=".json"
               max={1}
             >
-              <n-upload-dragger class="flex flex-col items-center bg-card-color">
-                <n-icon size="32" depth="3">
-                  <Upload />
-                </n-icon>
-                <span class="mt-2.5 text-text-secondary">
-                  {ft("select-file")}
-                </span>
+              <n-upload-dragger class="flex flex-col items-center bg-card-color text-text-secondary">
+                <n-icon size="32" component={Upload} />
+                <span class="mt-2.5">{ft("select-file")}</span>
               </n-upload-dragger>
             </n-upload>
           </n-form-item>
