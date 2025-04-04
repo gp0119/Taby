@@ -48,6 +48,6 @@ const innerFavicon = computed(() => {
 
 <style scoped>
 .card-avatar {
-  @apply mr-2.5 inline-block flex-shrink-0 bg-transparent sepia-base;
+  @apply mr-2.5 inline-block flex-shrink-0 select-none bg-transparent sepia-base;
 }
 </style>

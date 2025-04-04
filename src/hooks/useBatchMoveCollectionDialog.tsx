@@ -1,30 +1,24 @@
+import { movePosition } from "@/type"
 import { ref } from "vue"
-import { useSpacesStore } from "@/store/spaces.ts"
-import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { movePosition } from "@/type.ts"
-import { useEditDialog } from "@/hooks/useEditDialog"
+import { useHelpi18n } from "./useHelpi18n"
+import { useEditDialog } from "./useEditDialog"
 import SpaceSelect from "@/components/space-select.vue"
-import CollectionSelect from "@/components/collection-select.vue"
 import { NForm, NFormItem, NRadioGroup, NRadioButton } from "naive-ui"
 
-export const useBatchMoveCardDialog = () => {
-  const spacesStore = useSpacesStore()
+export const useBatchMoveCollectionDialog = () => {
   const { ft } = useHelpi18n()
   const { open } = useEditDialog()
   const formModel = ref<{
     spaceId: number | null
-    collectionId: number | null
     position: movePosition
   }>({
-    spaceId: spacesStore.activeId,
-    collectionId: null,
+    spaceId: null,
     position: "END",
   })
 
   const openDialog = (title?: string) =>
     new Promise<{
       spaceId: number | null
-      collectionId: number | null
       position: movePosition
     }>((resolve, reject) => {
       open({
@@ -34,12 +28,6 @@ export const useBatchMoveCardDialog = () => {
             <NForm model={formModel.value}>
               <NFormItem label={`${ft("space")}:`}>
                 <SpaceSelect v-model:value={formModel.value.spaceId} />
-              </NFormItem>
-              <NFormItem label={`${ft("collection")}:`}>
-                <CollectionSelect
-                  v-model:value={formModel.value.collectionId}
-                  spaceId={formModel.value.spaceId!}
-                />
               </NFormItem>
               <NFormItem label={`${ft("position")}:`}>
                 <NRadioGroup
@@ -58,7 +46,7 @@ export const useBatchMoveCardDialog = () => {
           )
         },
         onPositiveClick: async () => {
-          if (!formModel.value.collectionId) return
+          if (!formModel.value.spaceId) return
           resolve(formModel.value)
         },
         onNegativeClick: () => {
@@ -66,6 +54,7 @@ export const useBatchMoveCardDialog = () => {
         },
       })
     })
+
   return {
     openDialog,
   }

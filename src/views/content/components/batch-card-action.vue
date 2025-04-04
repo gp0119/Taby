@@ -19,7 +19,7 @@
         <div class="p-4">
           <div class="flex items-center justify-between">
             <div
-              class="select-none text-text-secondary"
+              class="select-none font-medium text-text-secondary"
               v-html="gt('select-cards', batchCardStore.selectedCardIds.length)"
             />
             <n-icon
@@ -70,7 +70,6 @@ import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { throttle } from "lodash-es"
-
 const show = ref(false)
 const batchCardStore = useBatchCardStore()
 

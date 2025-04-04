@@ -498,6 +498,18 @@ class DataManager {
     })
   }
 
+  async getCardWithCollectionIds(collectionIds: number[]) {
+    const movingCards: Card[] = []
+    for (const collectionId of collectionIds) {
+      const cards = await db.cards
+        .where("[collectionId+order]")
+        .between([collectionId, Dexie.minKey], [collectionId, Dexie.maxKey])
+        .toArray()
+      movingCards.push(...cards)
+    }
+    return movingCards
+  }
+
   async getCollectionWithCards(
     spaceId: number,
   ): Promise<CollectionWithCards[]> {

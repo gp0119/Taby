@@ -40,10 +40,10 @@
       {{ ft("no-collections") }}
     </div>
     <BatchCardAction />
+    <BatchCollectionAction />
   </template>
   <template v-else>
     <title-dragable :collections="collections" />
-    <BatchCollectionAction />
   </template>
 </template>
 
@@ -62,6 +62,7 @@ import CollectionCollapse from "./components/collection-collapse.vue"
 import BatchCollectionAction from "./components/batch-collection-action.vue"
 import SkeletonContent from "@/components/skeleton-content.vue"
 import { Collection } from "@/type"
+
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()

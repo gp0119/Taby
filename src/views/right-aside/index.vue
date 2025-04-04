@@ -7,12 +7,12 @@
       <n-button
         secondary
         type="primary"
-        size="tiny"
+        size="small"
         v-if="batchTabsStore.selectedTabIds.length > 0"
         @click="onSave"
       >
         <template #icon>
-          <n-icon size="14" class="cursor-pointer text-primary">
+          <n-icon size="16" class="cursor-pointer text-primary">
             <Save />
           </n-icon>
         </template>

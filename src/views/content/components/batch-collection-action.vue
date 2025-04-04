@@ -10,7 +10,7 @@
     >
       <div
         v-if="show"
-        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 w-[440px] -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
+        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 w-[480px] -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
         @mousedown="onMouseDown"
         :style="{
           left: clientX,
@@ -19,7 +19,7 @@
         <div class="p-4">
           <div class="flex items-center justify-between">
             <div
-              class="select-none text-text-secondary"
+              class="select-none font-medium text-text-secondary"
               v-html="
                 gt(
                   'select-collections',
@@ -50,6 +50,18 @@
             <n-button
               secondary
               class="flex-1"
+              type="primary"
+              :disabled="batchCollectionStore.selectedCollectionIds.length < 2"
+              @click="onHandleMerge"
+            >
+              <template #icon>
+                <n-icon :size="16" :component="DirectionMerge" />
+              </template>
+              {{ ft("merge") }}
+            </n-button>
+            <n-button
+              secondary
+              class="flex-1"
               type="error"
               @click="onHandleDelete"
             >
@@ -67,16 +79,17 @@
 
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useDraggableStore } from "@/store/draggable.ts"
-import { movePosition } from "@/type.ts"
 import { ref } from "vue"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
-import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
+import { FolderMoveTo, Delete, Close, DirectionMerge } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { throttle } from "lodash-es"
+import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
+import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
+
 const show = ref(false)
 const batchCollectionStore = useBatchCollectionStore()
 const draggableStore = useDraggableStore()
@@ -92,7 +105,6 @@ const closeDrawer = () => {
 watch(
   () => batchCollectionStore.selectedCollectionIds.length,
   () => {
-    console.log(111)
     show.value = batchCollectionStore.selectedCollectionIds.length > 0
   },
 )
@@ -107,7 +119,7 @@ const onMouseDown = (e: MouseEvent) => {
     const deltaX = e.clientX - startX
     let newLeft = startLeft + deltaX
 
-    const halfWidth = 220
+    const halfWidth = 240
     const minX = halfWidth
     const maxX = window.innerWidth - halfWidth
 
@@ -126,54 +138,20 @@ const onMouseDown = (e: MouseEvent) => {
   document.addEventListener("mouseup", onMouseUp)
 }
 
-const { open } = useEditDialog()
 const { open: onDeleteComfirm } = useDeleteDialog()
-const onHandleMove = () => {
-  const formModel = ref<{
-    spaceId: number | null
-    position: movePosition
-  }>({
-    spaceId: null,
-    position: "END",
-  })
-  open({
-    title: ft("move"),
-    renderContent: () => {
-      return (
-        <n-form model={formModel.value}>
-          <n-form-item label={`${ft("space")}:`}>
-            <space-select v-model:value={formModel.value.spaceId} />
-          </n-form-item>
-          <n-form-item label={`${ft("position")}:`}>
-            <n-radio-group
-              class="w-full"
-              v-model:value={formModel.value.position}
-            >
-              <n-radio-button class="w-1/2 text-center" value="HEAD">
-                {ft("move-to-head")}
-              </n-radio-button>
-              <n-radio-button class="w-1/2 text-center" value="END">
-                {ft("move-to-end")}
-              </n-radio-button>
-            </n-radio-group>
-          </n-form-item>
-        </n-form>
-      )
-    },
-    onPositiveClick: async () => {
-      if (!formModel.value.spaceId) return
-      await dataManager.batchUpdateCollections(
-        batchCollectionStore.selectedCollectionIds,
-        {
-          spaceId: formModel.value.spaceId!,
-        },
-        formModel.value.position,
-      )
-      await refreshCollections()
-      draggableStore.setDraggable(false)
-      closeDrawer()
-    },
-  })
+const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()
+const { openDialog: openMergeDialog } = useBatchMoveCardDialog()
+
+const onHandleMove = async () => {
+  const { spaceId, position } = await openMoveDialog()
+  await dataManager.batchUpdateCollections(
+    batchCollectionStore.selectedCollectionIds,
+    { spaceId: spaceId! },
+    position,
+  )
+  await refreshCollections()
+  draggableStore.setDraggable(false)
+  closeDrawer()
 }
 
 const onHandleDelete = async () => {
@@ -188,5 +166,20 @@ const onHandleDelete = async () => {
       closeDrawer()
     },
   })
+}
+
+const onHandleMerge = async () => {
+  const { collectionId, position } = await openMergeDialog(ft("merge-to"))
+  const cards = await dataManager.getCardWithCollectionIds(
+    batchCollectionStore.selectedCollectionIds,
+  )
+  const cardIds = cards.map((card) => card.id)
+  await dataManager.batchUpdateCards(
+    cardIds,
+    { collectionId: collectionId! },
+    position,
+  )
+  await refreshCollections()
+  closeDrawer()
 }
 </script>

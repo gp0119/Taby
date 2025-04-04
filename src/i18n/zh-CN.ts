@@ -28,9 +28,9 @@ export default {
   cancel: "取消",
   confirm: "确认",
   move: "移动",
-  "move-to": "移动{type}到",
-  "move-to-head": "移动到头部",
-  "move-to-end": "移动到尾部",
+  "move-type-to": "移动{type}到",
+  "move-to-head": "头部",
+  "move-to-end": "尾部",
   "expand-all": "展开全部",
   "collapse-all": "收起全部",
   draggable: "拖拽排序",
@@ -57,10 +57,9 @@ export default {
   "placeholder-search": "按住 Ctrl/Cmd + F 搜索",
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
   "delete-cards-confirm": "确定删除这些标签吗?",
-  "select-cards":
-    "已选择 <span class='text-primary font-medium'>{type}</span> 个 Card",
+  "select-cards": "已选择 <span class='text-primary'>{type}</span> 个 Card",
   "select-collections":
-    "已选择 <span class='text-primary font-medium'>{type}</span> 个 Collection",
+    "已选择 <span class='text-primary'>{type}</span> 个 Collection",
   tab: "标签页",
   "no-tabs": "这里没有标签",
   "open-tabs": "打开的标签",
@@ -78,4 +77,7 @@ export default {
   "current-duplicate-count":
     "当前<span class='font-medium text-primary mx-1'>{type}</span> 个重复",
   save: "保存",
+  merge: "合并",
+  "merge-to": "合并到",
+  "move-to": "移动到",
 }

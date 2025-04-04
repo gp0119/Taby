@@ -28,9 +28,9 @@ export default {
   cancel: "Cancel",
   confirm: "Confirm",
   move: "Move",
-  "move-to": "Move {type} to",
-  "move-to-head": "Move to Head",
-  "move-to-end": "Move to End",
+  "move-type-to": "Move {type} to",
+  "move-to-head": "Head",
+  "move-to-end": "End",
   "expand-all": "Expand",
   "collapse-all": "Collapse",
   draggable: "Draggable",
@@ -79,4 +79,7 @@ export default {
   "current-duplicate-count":
     "Current <span class='font-medium text-primary mx-1'>{type}</span> Duplicated",
   save: "Save",
+  merge: "Merge",
+  "merge-to": "Merge to",
+  "move-to": "Move to",
 }

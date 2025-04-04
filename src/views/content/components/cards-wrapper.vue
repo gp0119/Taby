@@ -48,6 +48,7 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import Favicon from "@/components/favicon.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
+import { useBatchCollectionStore } from "@/store/batch-collection"
 
 defineProps<{
   cards: CardWithFavicon[]
@@ -179,8 +180,10 @@ const onDragEnd = async (evt: any) => {
   await refreshCollections()
 }
 
+const batchCollectionStore = useBatchCollectionStore()
 function onHandleCheckbox(checked: boolean, card: iCard) {
   if (checked) {
+    batchCollectionStore.clearSelectedCollectionIds()
     batchCardStore.addSelectedCardId(card.id)
   } else {
     batchCardStore.removeSelectedCardId(card.id)
