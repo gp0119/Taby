@@ -1,6 +1,6 @@
 <template>
   <div class="rounded shadow-base">
-    <div class="flex items-center justify-between px-4 py-3">
+    <div class="group/title flex items-center justify-between px-4 py-3">
       <div class="flex items-center" @click="isOpen = !isOpen">
         <n-icon
           size="18"
@@ -15,7 +15,7 @@
       </div>
       <n-icon
         size="20"
-        class="cursor-pointer text-text-secondary"
+        class="hidden cursor-pointer text-primary group-hover/title:block"
         title="Close All Tabs"
         @click="onCloseAllTabs"
       >
