@@ -14,9 +14,7 @@
         />
         <n-button secondary type="primary" @click="onAddSpace">
           <template #icon>
-            <n-icon>
-              <Add />
-            </n-icon>
+            <n-icon :component="Add" />
           </template>
         </n-button>
       </n-input-group>

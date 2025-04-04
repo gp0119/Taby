@@ -90,6 +90,10 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
     buttonBorderColorActive: themeStore.themeColor[themeStore.theme].primary,
     buttonTextColorActive: "#fff",
   },
+  Tag: {
+    colorBordered: themeStore.themeColor[themeStore.theme].cardBackground,
+    closeIconColor: themeStore.themeColor[themeStore.theme].textPrimary,
+  },
   LoadingBar: {
     colorLoading: "#18A058",
   },
