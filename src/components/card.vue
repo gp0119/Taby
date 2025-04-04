@@ -9,7 +9,7 @@
   >
     <div class="card-header">
       <div
-        class="checkbox mr-2.5 hidden h-[24px] w-[24px] animate-scale-in items-center justify-center group-hover/card:flex"
+        class="favicon-size mr-2.5 hidden h-[24px] w-[24px] animate-scale-in items-center justify-center group-hover/card:flex"
         :class="{ '!flex': selectIds?.includes(child.id) }"
         @click.stop="() => {}"
       >

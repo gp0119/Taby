@@ -19,12 +19,14 @@
       :data-url="tab.url"
       :data-title="tab.title"
       :data-index="index"
+      :select-ids="selectedTabIds"
       class="group/aside right-aside-item"
       type="right-aside"
       :class="{ hidden: isNewTabPage(tab.url) }"
       :child="tab"
       @delete="removeTab(tab.id)"
       @click="activeTab(tab)"
+      @check="onHandleCheckbox($event, tab)"
     />
   </VueDraggable>
 </template>
@@ -38,12 +40,14 @@ import card from "@components/card.vue"
 defineProps<{
   tabs: any[]
   windowId: string | number
+  selectedTabIds: number[]
 }>()
 
 const emit = defineEmits<{
   (e: "removeTab", id: number | undefined): void
   (e: "activeTab", tab: iCard): void
   (e: "dragEnd", event: SortableEvent): void
+  (e: "check", value: boolean, tab: iCard): void
   (e: "move", event: SortableEvent): boolean | void | 1 | -1
 }>()
 
@@ -58,9 +62,13 @@ const activeTab = (tab: iCard) => {
 const onDragEnd = (e: SortableEvent) => {
   emit("dragEnd", e)
 }
+
+const onHandleCheckbox = (value: boolean, tab: iCard) => {
+  emit("check", value, tab)
+}
 </script>
 <style scoped>
-.aside-card-wrapper :deep(.card-size) {
+.aside-card-wrapper :deep(.favicon-size) {
   height: 20px;
   width: 20px;
 }
@@ -75,11 +83,5 @@ const onDragEnd = (e: SortableEvent) => {
 }
 .aside-card-wrapper :deep(.card-title-wrapper) {
   display: none;
-}
-.aside-card-wrapper :deep(.checkbox) {
-  display: none !important;
-}
-.aside-card-wrapper :deep(.favicon) {
-  display: block !important;
 }
 </style>

@@ -16,14 +16,8 @@
           left: clientX,
         }"
       >
-        <n-icon
-          class="absolute right-1.5 top-1 z-10 cursor-pointer text-gray-400"
-          :size="20"
-          :component="Close"
-          @click="closeDrawer"
-        />
-        <div class="relative px-4 py-6">
-          <div class="flex-center gap-3">
+        <div class="p-4">
+          <div class="flex items-center justify-between">
             <div
               class="select-none text-text-secondary"
               v-html="
@@ -32,14 +26,33 @@
                   batchCollectionStore.selectedCollectionIds.length,
                 )
               "
-            ></div>
-            <n-button secondary type="primary" @click="onHandleMove">
+            />
+            <n-icon
+              class="cursor-pointer text-gray-400"
+              :size="20"
+              :component="Close"
+              @click="closeDrawer"
+            />
+          </div>
+
+          <div class="mt-4 flex w-full gap-x-3">
+            <n-button
+              secondary
+              class="flex-1"
+              type="primary"
+              @click="onHandleMove"
+            >
               <template #icon>
                 <n-icon :size="16" :component="FolderMoveTo" />
               </template>
               {{ ft("move") }}
             </n-button>
-            <n-button secondary type="error" @click="onHandleDelete">
+            <n-button
+              secondary
+              class="flex-1"
+              type="error"
+              @click="onHandleDelete"
+            >
               <template #icon>
                 <n-icon :size="16" :component="Delete" />
               </template>

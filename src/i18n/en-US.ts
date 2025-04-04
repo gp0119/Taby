@@ -59,9 +59,9 @@ export default {
     "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
   "delete-cards-confirm": "Are you sure you want to delete these tags?",
   "select-cards":
-    "( Selected <span class='text-primary font-medium'>{type}</span> cards )",
+    "<span class='text-primary font-medium'>{type}</span> Cards Selected",
   "select-collections":
-    "( Selected <span class='text-primary font-medium'>{type}</span> collections )",
+    "<span class='text-primary font-medium'>{type}</span> Collections Selected",
   tab: "Tab",
   "no-tabs": "No tabs",
   "open-tabs": "Opened Tabs",
@@ -78,4 +78,5 @@ export default {
   previous: "Prev",
   "current-duplicate-count":
     "Current <span class='font-medium text-primary mx-1'>{type}</span> Duplicated",
+  save: "Save",
 }

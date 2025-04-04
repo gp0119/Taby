@@ -406,7 +406,7 @@ class DataManager {
   ) {
     return db.transaction("rw", db.cards, async () => {
       if (updateData.collectionId !== undefined) {
-        const toCollections = await db.cards
+        const allCollections = await db.cards
           .where("[collectionId+order]")
           .between(
             [updateData.collectionId, Dexie.minKey],
@@ -414,8 +414,10 @@ class DataManager {
           )
           .toArray()
 
+        const toCollections = allCollections.filter(
+          (card) => !cardIds.includes(card.id),
+        )
         const movingCards = await db.cards.where("id").anyOf(cardIds).toArray()
-
         if (position === "HEAD") {
           toCollections.unshift(...movingCards)
         } else if (position === "END" || position === undefined) {
@@ -423,7 +425,6 @@ class DataManager {
         }
 
         const cardIdSet = new Set(cardIds)
-
         await Promise.all(
           toCollections.map(async (card, index) => {
             await db.cards.update(card.id, {
@@ -451,13 +452,17 @@ class DataManager {
   ) {
     return db.transaction("rw", db.collections, async () => {
       if (updateData.spaceId !== undefined) {
-        const toSpaces = await db.collections
+        const allSpaces = await db.collections
           .where("[spaceId+order]")
           .between(
             [updateData.spaceId, Dexie.minKey],
             [updateData.spaceId, Dexie.maxKey],
           )
           .toArray()
+
+        const toSpaces = allSpaces.filter(
+          (collection) => !collectionIds.includes(collection.id),
+        )
 
         const movingCollections = await db.collections
           .where("id")

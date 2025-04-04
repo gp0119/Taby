@@ -6,15 +6,15 @@
     }"
     :src="innerFavicon"
     lazy
-    class="card-avatar card-size"
+    class="card-avatar favicon-size"
   >
     <template #fallback>
-      <div class="card-size flex-center h-full bg-hover-color">
+      <div class="favicon-size flex-center h-full bg-hover-color">
         <span class="text-text-primary">{{ firstLetter }}</span>
       </div>
     </template>
     <template #placeholder>
-      <div class="card-size flex-center h-full">
+      <div class="favicon-size flex-center h-full">
         <n-icon
           class="text-text-secondary"
           size="24"

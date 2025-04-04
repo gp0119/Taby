@@ -1,25 +1,45 @@
 <template>
   <div>
     <div
-      class="h-[50px] select-none border-0 border-b border-solid px-3 text-right leading-[50px] text-text-primary"
+      class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4"
     >
-      {{ ft("open-tabs") }}
+      <span class="select-none text-text-primary">{{ ft("open-tabs") }}</span>
+      <n-button
+        secondary
+        type="primary"
+        size="tiny"
+        v-if="batchTabsStore.selectedTabIds.length > 0"
+        @click="onSave"
+      >
+        <template #icon>
+          <n-icon size="14" class="cursor-pointer text-primary">
+            <Save />
+          </n-icon>
+        </template>
+        <span>{{ ft("save") }}</span>
+      </n-button>
     </div>
-    <div class="right-aside-area px-3 py-4">
+    <div
+      class="right-aside-area scrollbar-thin h-[calc(100vh-50px)] overflow-y-auto px-3 py-4"
+    >
       <TabsCollapse
+        class="mb-4"
         v-for="(item, windowId, index) in tabs"
         :key="index"
         :index="index"
         :tabs="item"
+        @close-all-tabs="onCloseAllTabs(windowId)"
       >
         <template #cards="{ tabs }">
           <TabsWrapper
             v-if="isExpanded"
             :tabs="tabs"
             :window-id="windowId"
+            :selected-tab-ids="batchTabsStore.selectedTabIds"
             @remove-tab="removeTab"
             @active-tab="activeTab"
             @drag-end="onDragEnd"
+            @check="onHandleCheckbox"
           />
         </template>
       </TabsCollapse>
@@ -36,16 +56,31 @@ import TabsWrapper from "./components/tabs-wrapper.vue"
 import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { Save } from "@vicons/carbon"
+import type { Card as iCard } from "@/type"
+import { useBatchTabsStore } from "@/store/batch-tabs"
+import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 
-const { tabs, getTabs, removeTab, activeTab, moveTab } = useChromeTabs()
+const {
+  tabs,
+  getTabs,
+  removeTab,
+  activeTab,
+  moveTab,
+  closeAllTabsExceptCurrent,
+} = useChromeTabs()
 const isExpanded = ref(true)
 const { refreshCollections } = useRefresh()
 const { ft } = useHelpi18n()
+const batchTabsStore = useBatchTabsStore()
 async function refreshTabs() {
   await getTabs()
 }
 
-const debounceRefreshTabs = debounce(refreshTabs, 100)
+const debounceRefreshTabs = debounce(refreshTabs, 300, {
+  leading: false,
+  trailing: true,
+})
 
 chrome.tabs.onUpdated.addListener(debounceRefreshTabs)
 chrome.tabs.onMoved.addListener(debounceRefreshTabs)
@@ -86,6 +121,41 @@ const onDragEnd = async (evt: SortableEvent) => {
 }
 
 onMounted(async () => {
-  await getTabs()
+  await debounceRefreshTabs()
 })
+
+const onCloseAllTabs = async (windowId: number | string) => {
+  await closeAllTabsExceptCurrent(Number(windowId))
+  await refreshTabs()
+}
+
+const onHandleCheckbox = (e: boolean, tab: iCard) => {
+  if (e) {
+    batchTabsStore.addSelectedTab(tab)
+  } else {
+    batchTabsStore.removeSelectedTab(tab.id)
+  }
+}
+
+const { openDialog } = useBatchMoveCardDialog()
+const onSave = async () => {
+  const { collectionId, position } = await openDialog()
+  const cardIds: number[] = []
+  for (const tab of batchTabsStore.selectedTab) {
+    const cardId = await dataManager.addCard({
+      title: tab.title,
+      url: tab.url,
+      collectionId: Number(collectionId),
+      faviconId: undefined,
+    })
+    cardIds.push(cardId)
+  }
+  await dataManager.batchUpdateCards(
+    cardIds,
+    { collectionId: collectionId! },
+    position,
+  )
+  await refreshCollections()
+  await batchTabsStore.clearSelectedTabs()
+}
 </script>

@@ -16,25 +16,38 @@
           left: clientX,
         }"
       >
-        <n-icon
-          class="absolute right-1.5 top-1 z-10 cursor-pointer text-gray-400"
-          :size="20"
-          :component="Close"
-          @click="closeDrawer"
-        />
-        <div class="relative px-4 py-6">
-          <div class="flex-center gap-3">
+        <div class="p-4">
+          <div class="flex items-center justify-between">
             <div
               class="select-none text-text-secondary"
               v-html="gt('select-cards', batchCardStore.selectedCardIds.length)"
-            ></div>
-            <n-button secondary type="primary" @click="onHandleMove">
+            />
+            <n-icon
+              class="cursor-pointer text-gray-400"
+              :size="20"
+              :component="Close"
+              @click="closeDrawer"
+            />
+          </div>
+
+          <div class="mt-4 flex w-full gap-x-3">
+            <n-button
+              secondary
+              class="flex-1"
+              type="primary"
+              @click="onHandleMove"
+            >
               <template #icon>
                 <n-icon :size="16" :component="FolderMoveTo" />
               </template>
               {{ ft("move") }}
             </n-button>
-            <n-button secondary type="error" @click="onHandleDelete">
+            <n-button
+              secondary
+              class="flex-1"
+              type="error"
+              @click="onHandleDelete"
+            >
               <template #icon>
                 <n-icon :size="16" :component="Delete" />
               </template>
@@ -49,10 +62,8 @@
 
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useEditDialog } from "@/hooks/useEditDialog.tsx"
+import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { useSpacesStore } from "@/store/spaces.ts"
-import { movePosition } from "@/type.ts"
 import { ref } from "vue"
 import { useBatchCardStore } from "@/store/batch-card"
 import { FolderMoveTo, Delete, Close } from "@vicons/carbon"
@@ -64,7 +75,6 @@ const show = ref(false)
 const batchCardStore = useBatchCardStore()
 
 const { refreshCollections } = useRefresh()
-const spacesStore = useSpacesStore()
 const { ft, gt } = useHelpi18n()
 
 const closeDrawer = () => {
@@ -108,63 +118,19 @@ const onMouseDown = (e: MouseEvent) => {
   document.addEventListener("mouseup", onMouseUp)
 }
 
-const { open } = useEditDialog()
-const { open: onDeleteComfirm } = useDeleteDialog()
-const onHandleMove = () => {
-  const formModel = ref<{
-    spaceId: number | null
-    collectionId: number | null
-    position: movePosition
-  }>({
-    spaceId: spacesStore.activeId,
-    collectionId: null,
-    position: "END",
-  })
-  open({
-    title: ft("move"),
-    renderContent: () => {
-      return (
-        <n-form model={formModel.value}>
-          <n-form-item label={`${ft("space")}:`}>
-            <space-select v-model:value={formModel.value.spaceId} />
-          </n-form-item>
-          <n-form-item label={`${ft("collection")}:`}>
-            <collection-select
-              v-model:value={formModel.value.collectionId}
-              space-id={formModel.value.spaceId}
-            />
-          </n-form-item>
-          <n-form-item label={`${ft("position")}:`}>
-            <n-radio-group
-              class="w-full"
-              v-model:value={formModel.value.position}
-            >
-              <n-radio-button class="w-1/2 text-center" value="HEAD">
-                {ft("move-to-head")}
-              </n-radio-button>
-              <n-radio-button class="w-1/2 text-center" value="END">
-                {ft("move-to-end")}
-              </n-radio-button>
-            </n-radio-group>
-          </n-form-item>
-        </n-form>
-      )
-    },
-    onPositiveClick: async () => {
-      if (!formModel.value.collectionId) return
-      await dataManager.batchUpdateCards(
-        batchCardStore.selectedCardIds,
-        {
-          collectionId: formModel.value.collectionId!,
-        },
-        formModel.value.position,
-      )
-      await refreshCollections()
-      closeDrawer()
-    },
-  })
+const { openDialog } = useBatchMoveCardDialog()
+const onHandleMove = async () => {
+  const { collectionId, position } = await openDialog()
+  await dataManager.batchUpdateCards(
+    batchCardStore.selectedCardIds,
+    { collectionId: collectionId! },
+    position,
+  )
+  await refreshCollections()
+  closeDrawer()
 }
 
+const { open: onDeleteComfirm } = useDeleteDialog()
 const onHandleDelete = async () => {
   onDeleteComfirm({
     title: ft("delete", "tags"),

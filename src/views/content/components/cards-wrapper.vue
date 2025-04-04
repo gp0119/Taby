@@ -196,7 +196,7 @@ function onHandleCheckbox(checked: boolean, card: iCard) {
   @apply col-span-full text-center leading-[90px] text-gray-300;
   @apply group-has-[.card-item]/wrapper:hidden group-has-[.right-aside-item]/wrapper:hidden;
 }
-.card-wrapper :deep(.card-size) {
+.card-wrapper :deep(.favicon-size) {
   height: 24px;
   width: 24px;
 }

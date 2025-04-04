@@ -11,6 +11,7 @@ export function useEditDialog() {
     renderAction,
     icon,
     onPositiveClick,
+    onNegativeClick,
     positiveText,
     negativeText,
   }: {
@@ -18,6 +19,7 @@ export function useEditDialog() {
     renderContent: () => VNode
     renderAction?: () => VNode
     onPositiveClick?: () => void
+    onNegativeClick?: () => void
     icon?: () => VNode
     positiveText?: string
     negativeText?: string
@@ -31,6 +33,13 @@ export function useEditDialog() {
       content: renderContent,
       ...(icon ? { icon } : {}),
       ...(onPositiveClick ? { onPositiveClick } : {}),
+      ...(onNegativeClick
+        ? {
+            onNegativeClick,
+            onClose: onNegativeClick,
+            onMaskClick: onNegativeClick,
+          }
+        : {}),
       ...(renderAction ? { action: renderAction } : {}),
     })
   }

@@ -1,16 +1,26 @@
 <template>
   <div class="rounded shadow-base">
-    <div @click="isOpen = !isOpen" class="flex items-center px-4 py-3">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="flex items-center" @click="isOpen = !isOpen">
+        <n-icon
+          size="18"
+          class="mr-1 cursor-pointer transition-transform duration-300"
+          :class="{ 'rotate-90': isOpen }"
+        >
+          <ChevronForward />
+        </n-icon>
+        <span class="cursor-pointer select-none text-gray-900">
+          {{ ft("window") }} {{ index + 1 }}
+        </span>
+      </div>
       <n-icon
         size="20"
-        class="mr-2 cursor-pointer transition-transform duration-300"
-        :class="{ 'rotate-90': isOpen }"
+        class="cursor-pointer text-text-secondary"
+        title="Close All Tabs"
+        @click="onCloseAllTabs"
       >
-        <ChevronForward />
+        <Close />
       </n-icon>
-      <span class="cursor-pointer text-gray-900">
-        {{ ft("window") }} {{ index + 1 }}
-      </span>
     </div>
 
     <div
@@ -33,8 +43,8 @@
 
 <script setup lang="ts">
 import { isNewTabPage } from "@/utils"
-import { ref } from "vue"
 import { ChevronForward } from "@vicons/ionicons5"
+import { Close } from "@vicons/carbon"
 import type { Card as iCard } from "@/type.ts"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 defineProps<{
@@ -49,4 +59,11 @@ const isEmpty = (tabs: any[]) => {
 }
 
 const isOpen = ref(true)
+
+const emit = defineEmits<{
+  (e: "closeAllTabs"): void
+}>()
+const onCloseAllTabs = () => {
+  emit("closeAllTabs")
+}
 </script>

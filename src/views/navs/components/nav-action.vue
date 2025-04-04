@@ -212,13 +212,13 @@ const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
 
 const renderSortLabel = (option: SelectOption | SelectGroupOption) => {
   return (
-    <span>
+    <span class="flex items-center gap-x-1">
       {option.key === "title-desc" || option.key === "created-at-desc" ? (
         <n-icon size="12" component={ArrowUp} />
       ) : option.key === "title-asc" || option.key === "created-at-asc" ? (
         <n-icon size="12" component={ArrowDown} />
       ) : (
-        <n-icon size="12" component={Draggable} />
+        <n-icon size="14" component={Draggable} />
       )}
       <span> {option.label}</span>
     </span>

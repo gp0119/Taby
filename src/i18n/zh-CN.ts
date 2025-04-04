@@ -58,9 +58,9 @@ export default {
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
   "delete-cards-confirm": "确定删除这些标签吗?",
   "select-cards":
-    "( 已选择 <span class='text-primary font-medium'>{type}</span> 个 Card )",
+    "已选择 <span class='text-primary font-medium'>{type}</span> 个 Card",
   "select-collections":
-    "( 已选择 <span class='text-primary font-medium'>{type}</span> 个 Collection )",
+    "已选择 <span class='text-primary font-medium'>{type}</span> 个 Collection",
   tab: "标签页",
   "no-tabs": "这里没有标签",
   "open-tabs": "打开的标签",
@@ -77,4 +77,5 @@ export default {
   previous: "上一个",
   "current-duplicate-count":
     "当前<span class='font-medium text-primary mx-1'>{type}</span> 个重复",
+  save: "保存",
 }

@@ -46,21 +46,3 @@ const onHandleSpaceClick = (item: Space) => {
   emit("click", item)
 }
 </script>
-<style scoped>
-.aside-card-wrapper :deep(.card-size) {
-  height: 20px;
-  width: 20px;
-}
-.aside-card-wrapper :deep(.card-header) {
-  padding: 8px;
-}
-.aside-card-wrapper :deep(.card-title) {
-  font-weight: 400;
-}
-.aside-card-wrapper :deep(.delete-button) {
-  top: 10px;
-}
-.aside-card-wrapper :deep(.card-title-wrapper) {
-  display: none;
-}
-</style>

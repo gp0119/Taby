@@ -33,6 +33,7 @@ export function useChromeTabs() {
       }
       return acc
     }, {})
+    // console.log("tabs.value: ", tabs.value)
   }
 
   function removeTab(tabId: number | undefined) {
@@ -69,6 +70,18 @@ export function useChromeTabs() {
     })
   }
 
+  async function closeAllTabsExceptCurrent(windowId: number) {
+    const currentTab = await chrome.tabs.getCurrent()
+    if (!currentTab) return
+    const removeTabIds: number[] = []
+    tabs.value[windowId].forEach((item) => {
+      if (item.id !== currentTab.id) {
+        removeTabIds.push(item.id)
+      }
+    })
+    await chrome.tabs.remove(removeTabIds)
+  }
+
   return {
     tabs,
     getTabs,
@@ -77,5 +90,6 @@ export function useChromeTabs() {
     activeTab,
     openTab,
     openTabs,
+    closeAllTabsExceptCurrent,
   }
 }

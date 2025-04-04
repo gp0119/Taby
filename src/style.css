@@ -18,6 +18,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+  }
 }
 
 body {
@@ -26,6 +30,6 @@ body {
 
 @layer components {
   .sortable-ghost-dashed-border {
-    @apply !border-primary !border !border-dashed ;
+    @apply !border !border-dashed !border-primary;
   }
 }
