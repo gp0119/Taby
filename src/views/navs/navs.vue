@@ -31,27 +31,6 @@
         </template>
         {{ ft("previous") }}
       </n-button>
-      <div class="flex-center select-none gap-x-3 text-text-secondary">
-        <span
-          v-html="
-            gt(
-              'current-duplicate-count',
-              duplicateCardStore.currentDuplicateCount,
-            )
-          "
-        ></span>
-        <span class="font-medium">
-          (
-          {{
-            duplicateCardStore.duplicateCards.size > 0
-              ? duplicateCardStore.currentIndex + 1
-              : 0
-          }}
-          /
-          {{ duplicateCardStore.duplicateCards.size }}
-          )
-        </span>
-      </div>
       <n-button
         secondary
         size="small"
@@ -66,6 +45,34 @@
           <n-icon :size="16" :component="NextOutline" />
         </template>
         {{ ft("next") }}
+      </n-button>
+      <div
+        class="flex-center select-none gap-x-3 font-medium text-text-secondary"
+      >
+        <span
+          v-html="
+            gt(
+              'current-duplicate-count',
+              duplicateCardStore.currentDuplicateCount,
+            )
+          "
+        ></span>
+        <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
+        <span class="font-medium">
+          {{
+            duplicateCardStore.duplicateCards.size > 0
+              ? duplicateCardStore.currentIndex + 1
+              : 0
+          }}
+          /
+          {{ duplicateCardStore.duplicateCards.size }}
+        </span>
+      </div>
+      <n-button ghost size="small" type="primary" @click="onCancel">
+        <template #icon>
+          <n-icon :size="16" :component="Close" />
+        </template>
+        {{ ft("cancel") }}
       </n-button>
     </div>
     <div class="flex-center flex-shrink-0 gap-3">
@@ -110,7 +117,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useDuplicateCard } from "@/hooks/useDuplicateCard"
-import { PreviousOutline, NextOutline } from "@vicons/carbon"
+import { PreviousOutline, NextOutline, Close } from "@vicons/carbon"
 
 const { themeColor, theme, setTheme } = useThemeStore()
 
@@ -213,5 +220,9 @@ function onDeleteSpace() {
       dialog.destroyAll()
     },
   })
+}
+
+function onCancel() {
+  duplicateCardStore.setIsFindDuplicate(false)
 }
 </script>
