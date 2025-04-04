@@ -75,9 +75,8 @@
             size="20"
             class="transition-transform duration-300"
             :class="{ 'rotate-90': tagsStore.isTagOpen }"
-          >
-            <ChevronRight />
-          </n-icon>
+            :component="ChevronRight"
+          />
         </n-button>
       </n-dropdown>
       <!--   展开 收起  -->
@@ -89,10 +88,10 @@
         class="!px-2"
       >
         <template #icon>
-          <n-icon size="20">
-            <RowCollapse v-if="expandStore.isCollapseAll" />
-            <RowExpand v-else />
-          </n-icon>
+          <n-icon
+            size="20"
+            :component="expandStore.isCollapseAll ? RowCollapse : RowExpand"
+          />
         </template>
         <div class="w-[60px] text-ellipsis">
           {{
@@ -119,9 +118,8 @@
               size="20"
               class="transition-transform duration-300"
               :class="{ 'rotate-90': showMore }"
-            >
-              <ChevronRight />
-            </n-icon>
+              :component="ChevronRight"
+            />
           </n-button>
         </template>
         <template #default>
@@ -170,9 +168,7 @@
       <n-button size="small" secondary type="primary" @click="onAddCollection">
         <span>{{ ft("add", "collection") }}</span>
         <template #icon>
-          <n-icon>
-            <Add />
-          </n-icon>
+          <n-icon size="20" :component="Add" />
         </template>
       </n-button>
     </div>
