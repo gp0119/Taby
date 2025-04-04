@@ -118,7 +118,7 @@
                 <List />
               </n-icon>
             </template>
-            <span>More</span>
+            <span>{{ ft("more") }}</span>
             <n-icon
               size="20"
               class="transition-transform duration-300"
@@ -131,26 +131,39 @@
         <template #default>
           <div class="flex flex-col items-start gap-y-2 py-1.5">
             <n-switch
+              :round="false"
               v-model:value="draggableStore.draggable"
               @update-value="draggableStore.setDraggable"
             >
+              <template #checked-icon>
+                <n-icon size="12" :component="BanOutline" />
+              </template>
+              <template #unchecked-icon>
+                <n-icon size="12" :component="Move" />
+              </template>
               <template #checked>
-                <span class="text-xs">{{ ft("disable-drag") }}</span>
+                {{ ft("disable-drag") }}
               </template>
               <template #unchecked>
-                <span class="text-xs">{{ ft("enable-drag") }}</span>
+                {{ ft("enable-drag") }}
               </template>
             </n-switch>
-
             <n-switch
+              :round="false"
               v-model:value="duplicateCardStore.isFindDuplicate"
               @update-value="duplicateCardStore.setIsFindDuplicate"
             >
+              <template #checked-icon>
+                <n-icon size="12" :component="ViewOff" />
+              </template>
+              <template #unchecked-icon>
+                <n-icon size="12" :component="View" />
+              </template>
               <template #checked>
-                <span class="text-xs">{{ ft("disable-duplicate") }}</span>
+                {{ ft("disable-duplicate") }}
               </template>
               <template #unchecked>
-                <span class="text-xs">{{ ft("enable-duplicate") }}</span>
+                {{ ft("enable-duplicate") }}
               </template>
             </n-switch>
           </div>
@@ -190,7 +203,11 @@ import {
   List,
   Draggable,
   Add,
+  Move,
+  View,
+  ViewOff,
 } from "@vicons/carbon"
+import { BanOutline } from "@vicons/ionicons5"
 import { useExpandStore } from "@/store/expand"
 import { Label, movePosition } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"

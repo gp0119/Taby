@@ -49,9 +49,9 @@
       class="grid transition-[grid-template-rows] duration-300 ease-in-out"
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
-      <div class="overflow-hidden">
-        <div class="bg-body-color px-5 pb-4">
-          <slot name="cards" :collection="collection"></slot>
+      <div class="-mt-1.5 overflow-hidden">
+        <div class="bg-body-color px-5 pb-5">
+          <slot name="cards" :collection="collection" />
         </div>
       </div>
     </div>

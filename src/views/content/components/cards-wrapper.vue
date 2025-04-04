@@ -196,7 +196,7 @@ function onHandleCheckbox(checked: boolean, card: iCard) {
   @apply grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-5 pt-2;
 }
 .empty-text {
-  @apply col-span-full text-center leading-[90px] text-gray-300;
+  @apply col-span-full text-center text-lg leading-[90px] text-gray-300;
   @apply group-has-[.card-item]/wrapper:hidden group-has-[.right-aside-item]/wrapper:hidden;
 }
 .card-wrapper :deep(.favicon-size) {

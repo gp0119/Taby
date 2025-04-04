@@ -53,7 +53,7 @@ export default {
   fail: "{type}失败",
   "select-file": "选择文件",
   "no-collections": "这里没有 collections,请添加",
-  "no-cards": "这个收藏夹是空的,请拖动标签页到这里",
+  "no-cards": "这里是空的,请拖动标签页到这里",
   "placeholder-search": "按住 Ctrl/Cmd + F 搜索",
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
   "delete-cards-confirm": "确定删除这些标签吗?",
@@ -80,4 +80,5 @@ export default {
   merge: "合并",
   "merge-to": "合并到",
   "move-to": "移动到",
+  more: "更多",
 }
