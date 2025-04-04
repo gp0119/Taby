@@ -15,26 +15,22 @@
         <n-button quaternary :focusable="false" type="primary" class="!px-2">
           <template #icon>
             <n-icon
-              size="20"
+              size="18"
               v-if="
                 sortStore.sortOrder === 'title-desc' ||
                 sortStore.sortOrder === 'created-at-desc'
               "
-            >
-              <ChevronSortUp />
-            </n-icon>
+              :component="ArrowUp"
+            />
             <n-icon
-              size="20"
+              size="18"
               v-else-if="
                 sortStore.sortOrder === 'title-asc' ||
                 sortStore.sortOrder === 'created-at-asc'
               "
-            >
-              <ChevronSortDown />
-            </n-icon>
-            <n-icon size="20" v-else>
-              <Draggable />
-            </n-icon>
+              :component="ArrowDown"
+            />
+            <n-icon size="20" v-else :component="Draggable" />
           </template>
           <span class="w-[60px] text-ellipsis leading-6">
             {{ ft(sortStore.sortOrder ?? "draggable") }}
@@ -194,8 +190,6 @@ import { SelectGroupOption, SelectOption } from "naive-ui"
 import {
   TagGroup,
   ChevronRight,
-  ChevronSortDown,
-  ChevronSortUp,
   ArrowUp,
   ArrowDown,
   RowExpand,
