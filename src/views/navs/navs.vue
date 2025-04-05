@@ -18,7 +18,10 @@
         </span>
       </template>
     </div>
-    <div v-if="duplicateCardStore.isFindDuplicate" class="flex-center gap-x-3">
+    <div
+      v-if="duplicateCardStore.isFindDuplicate"
+      class="flex-center h-full gap-x-4 rounded-lg px-6 shadow-base-lg"
+    >
       <n-button
         secondary
         size="small"
@@ -68,11 +71,10 @@
           {{ duplicateCardStore.duplicateCards.size }}
         </span>
       </div>
-      <n-button ghost size="small" type="primary" @click="onCancel">
+      <n-button secondary circle size="small" type="primary" @click="onCancel">
         <template #icon>
-          <n-icon :size="16" :component="Close" />
+          <n-icon :size="20" :component="Close" />
         </template>
-        {{ ft("cancel") }}
       </n-button>
     </div>
     <div class="flex-center flex-shrink-0 gap-3">
