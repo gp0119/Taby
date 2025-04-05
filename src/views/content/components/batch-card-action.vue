@@ -63,6 +63,7 @@ const onHandleMove = async () => {
     position,
   )
   await refreshCollections()
+  closeDrawer()
 }
 
 const { open: onDeleteComfirm } = useDeleteDialog()
