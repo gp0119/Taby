@@ -4,6 +4,7 @@
     :multiple="multiple"
     v-model="id"
     :placeholder="ft('select', 'space')"
+    :render-label="renderLabel"
   >
     <template #action>
       <n-input-group>
@@ -22,14 +23,14 @@
   </select-wrapper>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import SelectWrapper from "@components/select-wrapper.vue"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { Add } from "@vicons/carbon"
 import IconSelect from "@components/icon-select.vue"
 import dataManager from "@/db"
-
+import { ICON_LIST } from "@/utils/constants.ts"
 const { ft } = useHelpi18n()
 const id = defineModel<number | null | number[]>("modelValue", {
   default: null,
@@ -50,6 +51,7 @@ const allSpaces = computed(() =>
   spacesStore.spaces.map((space) => ({
     label: space.title,
     value: space.id,
+    icon: space.icon,
   })),
 )
 
@@ -57,6 +59,18 @@ const formModel = ref({
   title: "",
   icon: "StorefrontOutline",
 })
+
+const renderLabel = (option: any) => {
+  return (
+    <div class="flex items-center">
+      <n-icon
+        size="16"
+        component={ICON_LIST[option.icon ?? "StorefrontOutline"]}
+      />
+      <span class="ml-1">{option.label}</span>
+    </div>
+  )
+}
 
 const onAddSpace = async () => {
   if (formModel.value.title === "") return

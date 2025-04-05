@@ -1,5 +1,6 @@
 <template>
   <n-select
+    v-bind="$attrs"
     v-model:value="id"
     :multiple="multiple"
     :options="options"
