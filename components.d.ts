@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BottomAction: typeof import('./src/components/bottom-action.vue')['default']
     Card: typeof import('./src/components/card.vue')['default']
     CollectionSelect: typeof import('./src/components/collection-select.vue')['default']
     ColorSelect: typeof import('./src/components/color-select.vue')['default']

@@ -1,37 +1,10 @@
 <template>
   <div>
-    <div
-      class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-4"
+    <h1
+      class="h-[50px] select-none border-0 border-b border-solid px-4 text-right font-medium leading-[50px] text-text-primary"
     >
-      <span
-        class="select-none text-text-primary"
-        v-if="batchTabsStore.selectedTabIds.length === 0"
-      >
-        {{ ft("open-tabs") }}
-      </span>
-      <template v-else>
-        <n-button secondary type="primary" size="small" @click="onSave">
-          <template #icon>
-            <n-icon
-              size="16"
-              class="cursor-pointer text-primary"
-              :component="Save"
-            />
-          </template>
-          <span class="w-[50px]">{{ ft("save") }}</span>
-        </n-button>
-        <n-button ghost type="primary" size="small" @click="onCancel">
-          <template #icon>
-            <n-icon
-              size="18"
-              class="cursor-pointer text-primary"
-              :component="Close"
-            />
-          </template>
-          <span class="w-[50px]">{{ ft("cancel") }}</span>
-        </n-button>
-      </template>
-    </div>
+      {{ ft("open-tabs") }}
+    </h1>
     <div
       class="right-aside-area scrollbar-thin h-[calc(100vh-50px)] overflow-y-auto px-3 py-4"
     >
@@ -61,6 +34,7 @@
         </template>
       </TabsCollapse>
     </div>
+    <BatchTabAction />
   </div>
 </template>
 
@@ -73,12 +47,11 @@ import TabsWrapper from "./components/tabs-wrapper.vue"
 import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { Save, Close } from "@vicons/carbon"
 import type { Card as iCard } from "@/type"
 import { useBatchTabsStore } from "@/store/batch-tabs"
-import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
+import BatchTabAction from "./components/batch-tab-action.vue"
 
 const {
   tabs,
@@ -161,31 +134,5 @@ const onHandleCheckbox = (e: boolean, tab: iCard) => {
   } else {
     batchTabsStore.removeSelectedTab(tab.id)
   }
-}
-
-const { openDialog } = useBatchMoveCardDialog()
-const onSave = async () => {
-  const { collectionId, position } = await openDialog(ft("save"))
-  const cardIds: number[] = []
-  for (const tab of batchTabsStore.selectedTab) {
-    const cardId = await dataManager.addCard({
-      title: tab.title,
-      url: tab.url,
-      collectionId: Number(collectionId),
-      faviconId: undefined,
-    })
-    cardIds.push(cardId)
-  }
-  await dataManager.batchUpdateCards(
-    cardIds,
-    { collectionId: collectionId! },
-    position,
-  )
-  await refreshCollections()
-  await batchTabsStore.clearSelectedTabs()
-}
-
-const onCancel = async () => {
-  await batchTabsStore.clearSelectedTabs()
 }
 </script>

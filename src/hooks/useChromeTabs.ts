@@ -44,6 +44,15 @@ export function useChromeTabs() {
     return chrome.tabs.remove(tabId)
   }
 
+  function removeTabs(tabIds: number[]) {
+    Object.keys(tabs.value).forEach((key) => {
+      tabs.value[key] = tabs.value[key].filter(
+        (item) => !tabIds.includes(item.id),
+      )
+    })
+    return chrome.tabs.remove(tabIds)
+  }
+
   async function moveTab(
     tabId: number | undefined,
     index: number,
@@ -90,6 +99,7 @@ export function useChromeTabs() {
     activeTab,
     openTab,
     openTabs,
+    removeTabs,
     closeAllTabsExceptCurrent,
   }
 }

@@ -64,9 +64,10 @@ export default {
   "download-remote-confirm":
     "Are you sure you want to download remote data? This will overwrite local data, please be careful.",
   "select-cards":
-    "<span class='text-primary font-medium'>{type}</span> Cards Selected",
+    "<span class='text-primary mx-2'>{type}</span> Cards Selected",
   "select-collections":
-    "<span class='text-primary font-medium'>{type}</span> Collections Selected",
+    "<span class='text-primary mx-2'>{type}</span> Collections Selected",
+  "select-tabs": "<span class='text-primary mx-2'>{type}</span> Tabs Selected",
   tab: "Tab",
   "no-tabs": "No tabs",
   "open-tabs": "Opened Tabs",
@@ -87,4 +88,6 @@ export default {
   "move-to": "Move to",
   more: "More",
   "invalid-file": "Please check if the {type} export file is valid",
+  "save-to": "Save to",
+  "close-tabs": "Close Tabs",
 }
