@@ -89,5 +89,6 @@ export default {
   more: "More",
   "invalid-file": "Please check if the {type} export file is valid",
   "save-to": "Save to",
+  "save-tabs": "Save Tabs",
   "close-tabs": "Close Tabs",
 }

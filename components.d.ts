@@ -49,5 +49,6 @@ declare module 'vue' {
     SkeletonContent: typeof import('./src/components/skeleton-content.vue')['default']
     SpaceSelect: typeof import('./src/components/space-select.vue')['default']
     Tag: typeof import('./src/components/tag.vue')['default']
+    TopAction: typeof import('./src/components/top-action.vue')['default']
   }
 }

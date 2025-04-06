@@ -87,5 +87,6 @@ export default {
   more: "更多",
   "invalid-file": "请检查是否为有效的 {type} 导出文件",
   "save-to": "保存到",
+  "save-tabs": "保存标签",
   "close-tabs": "关闭标签",
 }

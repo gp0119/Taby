@@ -10,18 +10,24 @@
     >
       <div
         v-if="show"
-        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 w-[600px] -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
+        ref="bottomActionRef"
+        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
         @mousedown="onMouseDown"
         :style="{ left: clientX }"
       >
-        <n-icon
-          class="absolute right-4 top-4 cursor-pointer text-gray-400"
-          :size="20"
-          :component="Close"
-          @click="closeDrawer"
-        />
-        <div class="p-4">
+        <div class="flex items-center justify-between gap-x-6 px-6 py-4">
           <slot name="default" />
+          <n-button
+            secondary
+            circle
+            size="small"
+            type="primary"
+            @click="closeDrawer"
+          >
+            <template #icon>
+              <n-icon :size="20" :component="Close" />
+            </template>
+          </n-button>
         </div>
       </div>
     </transition>
@@ -40,6 +46,8 @@ const emit = defineEmits<{
   (e: "close"): void
 }>()
 
+const bottomActionRef = ref<HTMLElement>()
+
 const closeDrawer = () => {
   show.value = false
   emit("close")
@@ -53,7 +61,7 @@ const onMouseDown = (e: MouseEvent) => {
   const onMouseMove = throttle((e: MouseEvent) => {
     const deltaX = e.clientX - startX
     let newLeft = startLeft + deltaX
-    const halfWidth = 300
+    const halfWidth = (bottomActionRef.value?.offsetWidth ?? 0) / 2
     const minX = halfWidth
     const maxX = window.innerWidth - halfWidth
 

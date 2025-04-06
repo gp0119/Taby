@@ -9,32 +9,29 @@
         )
       "
     />
-    <div class="mt-4 flex w-full gap-x-3 px-6">
-      <n-button secondary class="flex-1" type="primary" @click="onHandleMove">
-        <template #icon>
-          <n-icon :size="16" :component="FolderMoveTo" />
-        </template>
-        {{ ft("move") }}
-      </n-button>
-      <n-button
-        secondary
-        class="flex-1"
-        type="primary"
-        :disabled="batchCollectionStore.selectedCollectionIds.length < 2"
-        @click="onHandleMerge"
-      >
-        <template #icon>
-          <n-icon :size="16" :component="DirectionMerge" />
-        </template>
-        {{ ft("merge") }}
-      </n-button>
-      <n-button ghost class="flex-1" type="primary" @click="onHandleDelete">
-        <template #icon>
-          <n-icon :size="16" :component="Delete" />
-        </template>
-        {{ ft("delete") }}
-      </n-button>
-    </div>
+    <n-button secondary type="primary" @click="onHandleMove">
+      <template #icon>
+        <n-icon :size="16" :component="FolderMoveTo" />
+      </template>
+      {{ ft("move") }}
+    </n-button>
+    <n-button
+      secondary
+      type="primary"
+      :disabled="batchCollectionStore.selectedCollectionIds.length < 2"
+      @click="onHandleMerge"
+    >
+      <template #icon>
+        <n-icon :size="16" :component="DirectionMerge" />
+      </template>
+      {{ ft("merge") }}
+    </n-button>
+    <n-button ghost type="primary" @click="onHandleDelete">
+      <template #icon>
+        <n-icon :size="16" :component="Delete" />
+      </template>
+      {{ ft("delete") }}
+    </n-button>
   </bottom-action>
 </template>
 

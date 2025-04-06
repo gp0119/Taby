@@ -5,20 +5,18 @@
       v-html="gt('select-tabs', batchTabsStore.selectedTabIds.length)"
     />
 
-    <div class="mt-4 flex w-full gap-x-3 px-6">
-      <n-button secondary class="flex-1" type="primary" @click="onHandleSave">
-        <template #icon>
-          <n-icon :size="16" :component="FolderMoveTo" />
-        </template>
-        {{ ft("save") }}
-      </n-button>
-      <n-button ghost class="flex-1" type="primary" @click="onHandleClose">
-        <template #icon>
-          <n-icon :size="16" :component="CloseOutline" />
-        </template>
-        {{ ft("close-tabs") }}
-      </n-button>
-    </div>
+    <n-button secondary type="primary" @click="onHandleSave">
+      <template #icon>
+        <n-icon :size="16" :component="FolderMoveTo" />
+      </template>
+      {{ ft("save-tabs") }}
+    </n-button>
+    <n-button ghost type="primary" @click="onHandleClose">
+      <template #icon>
+        <n-icon :size="16" :component="CloseOutline" />
+      </template>
+      {{ ft("close-tabs") }}
+    </n-button>
   </bottom-action>
 </template>
 
@@ -41,7 +39,7 @@ const { ft, gt } = useHelpi18n()
 const { removeTabs, getTabs } = useChromeTabs()
 
 const clear = () => {
-  batchTabsStore.clearSelectedTabs
+  batchTabsStore.clearSelectedTabs()
 }
 
 const closeDrawer = () => {

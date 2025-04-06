@@ -18,65 +18,6 @@
         </span>
       </template>
     </div>
-    <div
-      v-if="duplicateCardStore.isFindDuplicate"
-      class="flex-center h-full gap-x-4 rounded-lg px-6 shadow-base-lg"
-    >
-      <n-button
-        secondary
-        size="small"
-        :disabled="duplicateCardStore.currentIndex === 0"
-        type="primary"
-        @click="showPrevious"
-      >
-        <template #icon>
-          <n-icon :size="16" :component="PreviousOutline" />
-        </template>
-        {{ ft("previous") }}
-      </n-button>
-      <n-button
-        secondary
-        size="small"
-        :disabled="
-          duplicateCardStore.currentIndex >=
-          duplicateCardStore.duplicateCards.size - 1
-        "
-        type="primary"
-        @click="showNext"
-      >
-        <template #icon>
-          <n-icon :size="16" :component="NextOutline" />
-        </template>
-        {{ ft("next") }}
-      </n-button>
-      <div
-        class="flex-center select-none gap-x-3 font-medium text-text-secondary"
-      >
-        <span
-          v-html="
-            gt(
-              'current-duplicate-count',
-              duplicateCardStore.currentDuplicateCount,
-            )
-          "
-        ></span>
-        <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
-        <span class="font-medium">
-          {{
-            duplicateCardStore.duplicateCards.size > 0
-              ? duplicateCardStore.currentIndex + 1
-              : 0
-          }}
-          /
-          {{ duplicateCardStore.duplicateCards.size }}
-        </span>
-      </div>
-      <n-button secondary circle size="small" type="primary" @click="onCancel">
-        <template #icon>
-          <n-icon :size="20" :component="Close" />
-        </template>
-      </n-button>
-    </div>
     <div class="flex-center flex-shrink-0 gap-3">
       <n-icon
         size="20"
@@ -99,6 +40,7 @@
     </div>
   </div>
   <nav-action />
+  <TopDuplicateAction />
 </template>
 
 <script setup lang="tsx">
@@ -117,15 +59,10 @@ import { ICON_LIST } from "@/utils/constants.ts"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useDuplicateCardStore } from "@/store/duplicate-card"
-import { useDuplicateCard } from "@/hooks/useDuplicateCard"
-import { PreviousOutline, NextOutline, Close } from "@vicons/carbon"
-
+import TopDuplicateAction from "@/views/navs/components/top-duplicate-action.vue"
 const { themeColor, theme, setTheme } = useThemeStore()
 
 const currentTheme = ref(theme)
-const duplicateCardStore = useDuplicateCardStore()
-const { showPrevious, showNext } = useDuplicateCard()
 
 const themeOptions = Object.keys(themeColor).map((key) => ({
   label: key,
@@ -222,9 +159,5 @@ function onDeleteSpace() {
       dialog.destroyAll()
     },
   })
-}
-
-function onCancel() {
-  duplicateCardStore.setIsFindDuplicate(false)
 }
 </script>
