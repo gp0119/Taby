@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-[50px] min-w-[1000px] justify-between border-0 border-b border-solid px-4"
+    class="flex h-[50px] justify-between border-0 border-b border-solid px-4"
   >
     <div class="flex-center">
       <!--   排序   -->

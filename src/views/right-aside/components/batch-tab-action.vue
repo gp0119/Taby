@@ -5,18 +5,20 @@
       v-html="gt('select-tabs', batchTabsStore.selectedTabIds.length)"
     />
 
-    <n-button secondary type="primary" @click="onHandleSave">
-      <template #icon>
-        <n-icon :size="16" :component="FolderMoveTo" />
-      </template>
-      {{ ft("save-tabs") }}
-    </n-button>
-    <n-button ghost type="primary" @click="onHandleClose">
-      <template #icon>
-        <n-icon :size="16" :component="CloseOutline" />
-      </template>
-      {{ ft("close-tabs") }}
-    </n-button>
+    <div class="flex items-center justify-between gap-x-4">
+      <n-button secondary type="primary" @click="onHandleSave">
+        <template #icon>
+          <n-icon :size="16" :component="FolderMoveTo" />
+        </template>
+        {{ ft("save-tabs") }}
+      </n-button>
+      <n-button ghost type="primary" @click="onHandleClose">
+        <template #icon>
+          <n-icon :size="16" :component="CloseOutline" />
+        </template>
+        {{ ft("close-tabs") }}
+      </n-button>
+    </div>
   </bottom-action>
 </template>
 

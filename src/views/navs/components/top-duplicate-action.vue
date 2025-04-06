@@ -1,5 +1,27 @@
 <template>
   <TopAction v-model:show="show" @close="onCancel">
+    <div
+      class="flex-center select-none gap-x-3 font-medium text-text-secondary"
+    >
+      <span
+        v-html="
+          gt(
+            'current-duplicate-count',
+            duplicateCardStore.currentDuplicateCount,
+          )
+        "
+      ></span>
+      <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
+      <span class="font-medium">
+        {{
+          duplicateCardStore.duplicateCards.size > 0
+            ? duplicateCardStore.currentIndex + 1
+            : 0
+        }}
+        /
+        {{ duplicateCardStore.duplicateCards.size }}
+      </span>
+    </div>
     <div class="flex items-center justify-between gap-x-4">
       <n-button
         secondary
@@ -28,28 +50,6 @@
         </template>
         {{ ft("next") }}
       </n-button>
-    </div>
-    <div
-      class="flex-center select-none gap-x-3 font-medium text-text-secondary"
-    >
-      <span
-        v-html="
-          gt(
-            'current-duplicate-count',
-            duplicateCardStore.currentDuplicateCount,
-          )
-        "
-      ></span>
-      <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
-      <span class="font-medium">
-        {{
-          duplicateCardStore.duplicateCards.size > 0
-            ? duplicateCardStore.currentIndex + 1
-            : 0
-        }}
-        /
-        {{ duplicateCardStore.duplicateCards.size }}
-      </span>
     </div>
   </TopAction>
 </template>

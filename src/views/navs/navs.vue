@@ -1,8 +1,8 @@
 <template>
   <div
-    class="flex h-[50px] min-w-[1000px] items-center justify-between border-0 border-b border-solid px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
-    <div class="flex items-center gap-4">
+    <div class="flex shrink-0 flex-nowrap items-center gap-4">
       <template v-if="title">
         <div class="flex-center">
           <n-icon size="20" class="mr-1">
@@ -13,7 +13,7 @@
           </span>
         </div>
         <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
-        <span class="font-thin text-text-secondary">
+        <span class="whitespace-nowrap font-thin text-text-secondary">
           {{ spacesStore.collections.length }} Collections
         </span>
       </template>

@@ -20,6 +20,11 @@ export const useDuplicateCardStore = defineStore("duplicateCard", {
     },
     currentDuplicateCount: (state) => {
       if (!state.isFindDuplicate) return 0
+      if (
+        Array.from(state.duplicateCards.values())[state.currentIndex] ===
+        undefined
+      )
+        return 0
       return Array.from(state.duplicateCards.values())[state.currentIndex]
         ?.length
     },

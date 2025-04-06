@@ -15,7 +15,7 @@
         @mousedown="onMouseDown"
         :style="{ left: clientX }"
       >
-        <div class="flex items-center justify-between gap-x-6 px-6 py-4">
+        <div class="flex items-center justify-between gap-x-8 px-6 py-4">
           <slot name="default" />
           <n-button
             secondary

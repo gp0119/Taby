@@ -4,18 +4,20 @@
       class="flex-center select-none font-medium text-text-secondary"
       v-html="gt('select-cards', batchCardStore.selectedCardIds.length)"
     />
-    <n-button secondary type="primary" @click="onHandleMove">
-      <template #icon>
-        <n-icon :size="16" :component="FolderMoveTo" />
-      </template>
-      {{ ft("move") }}
-    </n-button>
-    <n-button ghost type="primary" @click="onHandleDelete">
-      <template #icon>
-        <n-icon :size="16" :component="Delete" />
-      </template>
-      {{ ft("delete") }}
-    </n-button>
+    <div class="flex items-center justify-between gap-x-4">
+      <n-button secondary type="primary" @click="onHandleMove">
+        <template #icon>
+          <n-icon :size="16" :component="FolderMoveTo" />
+        </template>
+        {{ ft("move") }}
+      </n-button>
+      <n-button ghost type="primary" @click="onHandleDelete">
+        <template #icon>
+          <n-icon :size="16" :component="Delete" />
+        </template>
+        {{ ft("delete") }}
+      </n-button>
+    </div>
   </bottom-action>
 </template>
 
