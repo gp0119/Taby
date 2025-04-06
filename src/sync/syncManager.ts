@@ -36,23 +36,31 @@ class SyncManager {
     if (!data) return
     const result = await GistManager.uploadData(data)
     await db.clearModifiedTable()
+    localStorage.removeItem("lastModifiedTime")
     return result
   }
 
-  triggerUpload = debounce(
-    async () => {
-      const modifiedData: Partial<SyncData> = await db.getModifiedTables()
-      console.log("modifiedData: ", modifiedData)
-      if (isEmpty(modifiedData)) return
-      await GistManager.uploadData(modifiedData)
-      await db.clearModifiedTable()
-    },
+  uploadModifiedTablesImmediate = async () => {
+    const modifiedData: Partial<SyncData> = await db.getModifiedTables()
+    if (isEmpty(modifiedData)) return
+    await GistManager.uploadData(modifiedData)
+    await db.clearModifiedTable()
+    localStorage.removeItem("lastModifiedTime")
+  }
+
+  uploadModifiedTablesDebounce = debounce(
+    this.uploadModifiedTablesImmediate,
     this.SYNC_INTERVAL,
     {
       leading: false,
       trailing: true,
     },
   )
+
+  triggerUpload = async () => {
+    localStorage.setItem("lastModifiedTime", Date.now() + "")
+    await this.uploadModifiedTablesDebounce()
+  }
 
   triggerDownload = async () => {
     const data = await GistManager.downloadAll()
@@ -63,13 +71,18 @@ class SyncManager {
 
   autoSync = async () => {
     const { accessToken, gistId } = await this.getToken()
+    // console.log("accessToken: ", accessToken, "gistId: ", gistId)
     if (!accessToken || !gistId) return
     const modifiedTables = localStorage.getItem("modifiedTables")
     const lastSyncTime = localStorage.getItem("lastSyncTime")
     if (modifiedTables) {
+      const lastModifiedTime = localStorage.getItem("lastModifiedTime")
       const tables = JSON.parse(modifiedTables)
-      if (tables.length > 0) {
-        await this.triggerUpload()
+      if (
+        tables.length > 0 &&
+        Date.now() - Number(lastModifiedTime) > this.SYNC_INTERVAL
+      ) {
+        this.uploadModifiedTablesImmediate()
       }
     } else {
       if (!lastSyncTime) {
