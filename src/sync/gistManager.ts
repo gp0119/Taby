@@ -125,37 +125,26 @@ class GistManager {
         labels: { content: string }
         cards: { content: string }
         favicons: { content: string }
-        "taby-backup.json": { content: string }
       }
     }>({
       endpoint: `/gists/${this.GIST_ID}`,
       method: "GET",
     })
     // 兼容老数据
-    if (res.files.spaces || res.files.collections) {
-      const { spaces, collections, labels, cards, favicons } = res.files
-      const remoteData: SyncData = {
-        spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
-        collections: collections
-          ? JSON.parse(decompressFromUTF16(collections.content))
-          : [],
-        labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
-        cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
-        favicons: favicons
-          ? JSON.parse(decompressFromUTF16(favicons.content))
-          : [],
-      }
-      console.log("new remoteData: ", remoteData)
-      return remoteData
-    } else {
-      const compressedContent = res.files["taby-backup.json"].content
-      if (!compressedContent) throw new Error("远程数据为空")
-      const remoteData: SyncData = JSON.parse(
-        decompressFromUTF16(compressedContent),
-      )
-      console.log("old remoteData: ", remoteData)
-      return remoteData
+    const { spaces, collections, labels, cards, favicons } = res.files
+    const remoteData: SyncData = {
+      spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
+      collections: collections
+        ? JSON.parse(decompressFromUTF16(collections.content))
+        : [],
+      labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
+      cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
+      favicons: favicons
+        ? JSON.parse(decompressFromUTF16(favicons.content))
+        : [],
     }
+    console.log("new remoteData: ", remoteData)
+    return remoteData
   }
 
   async uploadData(data: Partial<SyncData>) {

@@ -1,4 +1,4 @@
-import Dexie, { EntityTable, Transaction } from "dexie"
+import Dexie, { EntityTable } from "dexie"
 import { Card, Collection, Favicon, Label, Space, SyncData } from "@/type.ts"
 import syncManager from "@/sync/syncManager.ts"
 
@@ -14,36 +14,21 @@ class DataBase extends Dexie {
 
   constructor() {
     super("TabyDatabase")
-    this.version(2)
-      .stores({
-        spaces: "++id, title, order, createdAt, icon",
-        collections:
-          "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
-        labels: "++id, title, color",
-        cards:
-          "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
-        favicons: "++id, url",
-      })
-      .upgrade((tx: Transaction) => {
-        this.handleCards(tx)
-      })
+    this.version(2).stores({
+      spaces: "++id, title, order, createdAt, icon",
+      collections:
+        "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
+      labels: "++id, title, color",
+      cards:
+        "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
+      favicons: "++id, url",
+    })
     this.initializeDefaultData()
     this.addHooks()
 
     // 添加页面卸载时的清理
     this.unloadHandler = this.cleanup.bind(this)
     window.addEventListener("beforeunload", this.unloadHandler)
-  }
-
-  async handleCards(tx: Transaction) {
-    tx.table("cards")
-      .toCollection()
-      .modify(async (card: any) => {
-        card.description = ""
-        card.title = card.customTitle || card.title
-        delete card.customDescription
-        delete card.customTitle
-      })
   }
 
   public static getInstance(): DataBase {
@@ -297,9 +282,12 @@ class DataBase extends Dexie {
             color: label.color,
           })),
         )
-        await this.favicons.bulkPut(data.favicons || [])
-        await this.cards.bulkPut(
-          data.cards.map((card) => ({
+        const usedFaviconIds = new Set<number>()
+        const cards = data.cards.map((card) => {
+          if (card.faviconId) {
+            usedFaviconIds.add(card.faviconId)
+          }
+          return {
             id: card.id,
             title: card.customTitle || card.title,
             url: card.url,
@@ -308,8 +296,13 @@ class DataBase extends Dexie {
             collectionId: card.collectionId || 0,
             faviconId: card.faviconId || 0,
             createdAt: card.createdAt || Date.now(),
-          })),
+          }
+        })
+        const usedFavicons = data.favicons.filter((favicon) =>
+          usedFaviconIds.has(favicon.id),
         )
+        await this.favicons.bulkPut(usedFavicons)
+        await this.cards.bulkPut(cards)
         await this.clearModifiedTable()
       },
     )
