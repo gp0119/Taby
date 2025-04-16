@@ -4,7 +4,7 @@
   "version": "1.0.9",
   "description": "A simple new tab extension",
   "chrome_url_overrides": {
-    "newtab": "index.html"
+    "newtab": "newtab.html"
   },
   "author": {
     "email": "ganpeng0119@gmail.com"
@@ -29,5 +29,10 @@
     "72": "icons/72.png",
     "128": "icons/128.png",
     "512": "icons/512.png"
+  },
+  "action": {
+    "default_title": "Taby",
+    "default_icon": "icons/32.png",
+    "default_popup": "popup.html"
   }
 }

@@ -44,14 +44,16 @@ export default defineConfig({
     ],
   },
   build: {
+    outDir: path.resolve(__dirname, "dist"),
     rollupOptions: {
       input: {
-        index: path.resolve(__dirname, "index.html"),
+        newtab: path.resolve(__dirname, "newtab.html"),
         content: path.resolve(__dirname, "src/content/content.ts"),
+        popup: path.resolve(__dirname, "popup.html"),
       },
       output: {
         assetFileNames: "assets/[name]-[hash].[ext]", // 静态资源
-        chunkFileNames: "js/[name]-[hash].js", // 代码分割中产生的 chunk
+        chunkFileNames: "common/[name]-[hash].js", // 代码分割中产生的 chunk
         name: "[name].js",
         manualChunks: {
           "naive-vendor": ["naive-ui"],
@@ -66,7 +68,8 @@ export default defineConfig({
             chunkInfo.facadeModuleId!,
             path.extname(chunkInfo.facadeModuleId!),
           )
-          const saveArr = ["content", "service-worker"]
+          console.log("baseName: ", baseName)
+          const saveArr = ["content", "service-worker", "popup", "newtab"]
           return `[name]/${saveArr.includes(baseName) ? baseName : chunkInfo.name}.js`
         },
       },
