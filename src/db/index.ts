@@ -549,7 +549,8 @@ class DataManager {
     return db.cards.bulkAdd(cards)
   }
 
-  async addFavicon(url: string) {
+  async addFavicon(url: string | undefined) {
+    if (!url) return
     let _url = url.trim()
     const isExist = await db.favicons.where("url").equals(_url).first()
     if (isExist) return isExist.id
