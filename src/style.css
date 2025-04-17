@@ -22,6 +22,9 @@
     scrollbar-width: thin;
     scrollbar-color: #d1d5db transparent;
   }
+  .scrollbar-gutter-stable {
+    scrollbar-gutter: stable;
+  }
 }
 
 body {

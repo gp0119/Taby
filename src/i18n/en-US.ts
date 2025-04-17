@@ -91,4 +91,5 @@ export default {
   "save-to": "Save to",
   "save-tabs": "Save Tabs",
   "close-tabs": "Close Tabs",
+  "save-confirm": "Are you sure you want to save {type} to {collection}?",
 }

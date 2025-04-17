@@ -48,6 +48,10 @@ export interface CollectionWithCards extends Collection {
   labels: Label[]
 }
 
+export interface SpaceWithCollections extends Space {
+  collections: Collection[]
+}
+
 export interface Favicon {
   id: number
   url: string

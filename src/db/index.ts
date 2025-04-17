@@ -7,6 +7,7 @@ import {
   movePosition,
   Space,
   Label,
+  SpaceWithCollections,
 } from "@/type.ts"
 import { db } from "./database.ts"
 
@@ -557,6 +558,17 @@ class DataManager {
 
   async getFaviconById(id: number) {
     return db.favicons.get(id)
+  }
+
+  async getAllSpaceWithCollections(): Promise<SpaceWithCollections[]> {
+    const spaces = await db.spaces.toArray()
+    const collections = await db.collections.toArray()
+    return spaces.map((space) => ({
+      ...space,
+      collections: collections.filter(
+        (collection) => collection.spaceId === space.id,
+      ),
+    }))
   }
 }
 

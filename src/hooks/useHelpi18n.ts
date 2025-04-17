@@ -11,8 +11,13 @@ export const useHelpi18n = () => {
     return t(key, { type: value })
   }
 
+  const ft2 = (key: string, obj: Record<string, string>) => {
+    return t(key, obj)
+  }
+
   return {
     ft,
     gt,
+    ft2,
   }
 }

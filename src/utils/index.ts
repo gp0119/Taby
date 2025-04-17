@@ -11,5 +11,6 @@ export function getGoogleFavicon(u: string) {
 }
 
 export function isNewTabPage(url: string) {
+  console.log("url: ", url)
   return url === "chrome://newtab/"
 }

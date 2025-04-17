@@ -89,4 +89,5 @@ export default {
   "save-to": "保存到",
   "save-tabs": "保存标签",
   "close-tabs": "关闭标签",
+  "save-confirm": "确定保存 {type} 到 {collection} 吗?",
 }

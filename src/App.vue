@@ -63,6 +63,21 @@ import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 
+const handleVisibilityChange = () => {
+  if (localStorage.getItem("refreshCollections")) {
+    refreshCollections()
+    localStorage.removeItem("refreshCollections")
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("visibilitychange", handleVisibilityChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener("visibilitychange", handleVisibilityChange)
+})
+
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
     primaryColor: themeStore.themeColor[themeStore.theme].primary,
