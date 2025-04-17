@@ -74,13 +74,13 @@
 <script setup lang="ts">
 import { Close, CopyOutline } from "@vicons/ionicons5"
 import { Pen } from "@vicons/carbon"
-import { CardWithFavicon } from "@/type.ts"
+import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
 
 const props = withDefaults(
   defineProps<{
-    child: CardWithFavicon
+    child: Card
     type: string
     selectIds?: number[]
     duplicateUrl?: string | null

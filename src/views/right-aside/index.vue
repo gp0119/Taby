@@ -87,28 +87,23 @@ const onDragEnd = async (evt: SortableEvent) => {
   const { id, windowid } = itemEl.dataset
   if (to.classList.contains("card-wrapper")) {
     const toClollectionId = to.getAttribute("data-collectionid")
-    chrome.tabs.sendMessage(
-      Number(id),
-      { action: "getFavicons" },
-      async function (favicon) {
-        const title = itemEl.getAttribute("data-title") as string
-        const url = itemEl.getAttribute("data-url") as string
-        let faviconId = null
-        if (favicon) {
-          faviconId = await dataManager.addFavicon(favicon)
-        }
-        await dataManager.addCard(
-          {
-            title,
-            url,
-            collectionId: Number(toClollectionId),
-            ...(faviconId && { faviconId }),
-          },
-          newIndex!,
-        )
-        await refreshCollections()
+    const title = itemEl.getAttribute("data-title") as string
+    const url = itemEl.getAttribute("data-url") as string
+    const favicon = itemEl.getAttribute("data-favicon") as string
+    let faviconId = null
+    if (favicon) {
+      faviconId = await dataManager.addFavicon(favicon)
+    }
+    await dataManager.addCard(
+      {
+        title,
+        url,
+        collectionId: Number(toClollectionId),
+        ...(faviconId && { faviconId }),
       },
+      newIndex!,
     )
+    await refreshCollections()
   } else if (to.classList.contains("aside-card-wrapper")) {
     const toWindowId = to.getAttribute("data-windowid")
     await moveTab(Number(id), Number(newIndex), Number(toWindowId))

@@ -61,11 +61,12 @@ const onHandleSave = async () => {
   const { collectionId, position } = await openDialog(ft("save-to"))
   const cardIds: number[] = []
   for (const tab of batchTabsStore.selectedTab) {
+    const faviconId = await dataManager.addFavicon(tab.favicon)
     const cardId = await dataManager.addCard({
       title: tab.title,
       url: tab.url,
       collectionId: Number(collectionId),
-      faviconId: undefined,
+      faviconId: faviconId,
     })
     cardIds.push(cardId)
   }

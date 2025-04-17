@@ -9,13 +9,6 @@
   "author": {
     "email": "ganpeng0119@gmail.com"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["/content/content.js"],
-      "run_at": "document_end"
-    }
-  ],
   "permissions": ["favicon", "storage", "tabs", "activeTab"],
   "web_accessible_resources": [
     {

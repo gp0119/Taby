@@ -2,7 +2,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useModal, NInput, NScrollbar, NIcon } from "naive-ui"
 import dataManager from "@/db"
 import { debounce } from "lodash-es"
-import { CardWithFavicon } from "@/type"
+import { Card } from "@/type"
 import Favicon from "@/components/favicon.vue"
 import { SearchOutline } from "@vicons/ionicons5"
 import { useEventListener } from "@vueuse/core"
@@ -12,13 +12,13 @@ export const useSearchModal = () => {
   const modal = useModal()
   const { refreshCollections } = useRefresh()
 
-  const cards = ref<CardWithFavicon[]>([])
+  const cards = ref<Card[]>([])
   const currentIndex = ref(0)
   const searchCardsFromDb = debounce(async () => {
     currentIndex.value = 0
     cards.value = (await dataManager.getCardsByTitleOrUrl(
       searchValue.value,
-    )) as unknown as CardWithFavicon[]
+    )) as unknown as Card[]
   }, 300)
   const { ft } = useHelpi18n()
 

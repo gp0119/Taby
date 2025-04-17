@@ -43,7 +43,7 @@
 <script setup lang="tsx">
 import dataManager from "@/db"
 import Card from "@components/card.vue"
-import { Card as iCard, CardWithFavicon } from "@/type.ts"
+import { Card as iCard } from "@/type.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
 import { useBatchCardStore } from "@/store/batch-card"
@@ -56,7 +56,7 @@ import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 
 defineProps<{
-  cards: CardWithFavicon[]
+  cards: iCard[]
   collectionId: number
 }>()
 
@@ -73,22 +73,20 @@ async function onHandleClick(child: any) {
   const tab = await chrome.tabs.create({ url: child.url })
   if (child.favicon) return
   const tabId = tab.id!
+  onHandleNoFavicon(tabId, child.id)
+}
+
+function onHandleNoFavicon(tabId: number, cardId: number) {
   chrome.tabs.onUpdated.addListener(
-    function listener(updatedTabId, changeInfo, _tab) {
+    async function listener(updatedTabId, changeInfo, _tab) {
       if (updatedTabId === tabId && changeInfo.status == "complete") {
-        chrome.tabs.sendMessage(
-          tabId,
-          { action: "getFavicons" },
-          async function (favicon) {
-            console.log("favicon: ", favicon)
-            if (!favicon) return
-            await dataManager.updateCardFavicon(child.id, favicon)
-            await refreshCollections()
-          },
-        )
+        const openedTab = await chrome.tabs.get(tabId)
+        const favicon = openedTab.favIconUrl
+        if (!favicon) return
+        await dataManager.updateCardFavicon(cardId, favicon)
+        await refreshCollections()
         chrome.tabs.onUpdated.removeListener(listener)
       }
-      return true
     },
   )
 }
@@ -109,7 +107,7 @@ async function onDeleteCard(card: iCard) {
   })
 }
 
-function onEdit(child: CardWithFavicon) {
+function onEdit(child: iCard) {
   const formModel = ref({
     title: child.title,
     description: child.description,

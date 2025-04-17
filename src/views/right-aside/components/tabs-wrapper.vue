@@ -19,6 +19,7 @@
       :data-windowid="windowId"
       :data-url="tab.url"
       :data-title="tab.title"
+      :data-favicon="tab.favicon"
       :data-index="index"
       :select-ids="selectedTabIds"
       class="group/aside right-aside-item"

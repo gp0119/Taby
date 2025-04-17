@@ -26,22 +26,19 @@
 </template>
 
 <script setup lang="tsx">
-import { CardWithFavicon } from "@/type.ts"
+import { Card } from "@/type.ts"
 import { getFaviconFromCache, getGoogleFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{
   type: string
-  child: CardWithFavicon
+  child: Card
 }>()
 
 const firstLetter = props.child.title?.charAt(0).toUpperCase()
 
 const innerFavicon = computed(() => {
   const { favicon, url } = props.child
-  if (props.type === "right-aside") {
-    return getFaviconFromCache(url) || getGoogleFavicon(url)
-  }
   return favicon ? favicon : getGoogleFavicon(url)
 })
 </script>

@@ -7,6 +7,7 @@ export function useChromeTabs() {
 
   async function getTabs() {
     const res = await chrome.tabs.query({})
+    console.log("res: ", res)
     tabs.value = res.reduce((acc: { [key: string]: Card[] }, cur) => {
       if (acc[cur.windowId]) {
         acc[cur.windowId].push({
@@ -17,6 +18,7 @@ export function useChromeTabs() {
           id: cur.id as number,
           collectionId: 0,
           order: 0,
+          favicon: cur.favIconUrl || "",
         })
       } else {
         acc[cur.windowId] = [
@@ -28,12 +30,13 @@ export function useChromeTabs() {
             id: cur.id as number,
             collectionId: 0,
             order: 0,
+            favicon: cur.favIconUrl || "",
           },
         ]
       }
       return acc
     }, {})
-    // console.log("tabs.value: ", tabs.value)
+    console.log("tabs.value: ", tabs.value)
   }
 
   function removeTab(tabId: number | undefined) {

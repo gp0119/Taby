@@ -41,10 +41,11 @@ export interface Card extends BaseEntity {
   order: number
   windowId?: number
   faviconId?: number
+  favicon?: string
 }
 
 export interface CollectionWithCards extends Collection {
-  cards: CardWithFavicon[]
+  cards: Card[]
   labels: Label[]
 }
 
@@ -55,10 +56,6 @@ export interface SpaceWithCollections extends Space {
 export interface Favicon {
   id: number
   url: string
-}
-
-export interface CardWithFavicon extends Card {
-  favicon: string | null
 }
 
 export interface SyncData {
