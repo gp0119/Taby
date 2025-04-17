@@ -93,7 +93,7 @@ import {
   Upload,
 } from "@vicons/carbon"
 import { useSpacesStore } from "@/store/spaces.ts"
-import logo from "@/assets/72.png"
+import logo from "@/assets/icon.svg"
 import { Space } from "@/type.ts"
 import { useEventListener } from "@vueuse/core"
 import { UploadFileInfo } from "naive-ui"

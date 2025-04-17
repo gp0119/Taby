@@ -1,16 +1,20 @@
 <template>
   <div
-    class="scrollbar-gutter-stable scrollbar-thin h-[500px] w-80 overflow-y-auto rounded-lg bg-[#fafafa] py-4"
+    class="w-80 rounded-lg bg-[#fafafa] pb-4"
     v-if="activeTab && !isNewTabPage(activeTab.url || '')"
   >
-    <div class="flex select-none items-center justify-between px-4 pb-6">
-      <h1 class="text-2xl font-bold">Taby</h1>
-      <span class="text-blue-500">OPEN TABY</span>
+    <div
+      class="flex select-none items-center justify-between border-b border-gray-200 p-4 text-[#F65077]"
+    >
+      <h1 class="text-xl font-medium">Taby</h1>
+      <span class="cursor-pointer" @click="openTaby">OPEN TABY</span>
     </div>
     <n-collapse
       accordion
       :expanded-names="expandedNames"
       @item-header-click="onHandleItemHeaderClick"
+      arrow-placement="right"
+      class="scrollbar-gutter-stable scrollbar-thin h-[500px] overflow-y-auto pt-4"
     >
       <n-collapse-item
         v-for="space in spaces"
@@ -29,9 +33,9 @@
         </template>
         <template #header-extra>
           <n-icon
-            size="18"
+            size="20"
             @click.stop="onClickHeaderExtra(space.id)"
-            class="hidden group-hover/collection:block"
+            class="hidden text-[#F65077] group-hover/collection:block"
             title="Add Collection"
           >
             <component :is="AddOutline" />
@@ -52,30 +56,38 @@
               size="small"
               class="rounded-l-none"
             >
-              Cancel
+              <template #icon>
+                <n-icon size="18">
+                  <component :is="CloseOutline" />
+                </n-icon>
+              </template>
             </n-button>
             <n-button
               size="small"
               class="rounded-l-none"
               @click="onAddCollection(space.id)"
             >
-              Save
+              <template #icon>
+                <n-icon size="16">
+                  <component :is="SaveOutline" />
+                </n-icon>
+              </template>
             </n-button>
           </n-input-group>
         </div>
-        <div class="flex flex-col divide-y divide-gray-200 pl-5">
+        <div class="flex flex-col divide-y divide-gray-200">
           <template v-if="space.collections.length > 0">
             <div
               v-for="collection in space.collections"
               :key="collection.id"
               class="group flex items-center justify-between px-2.5 py-3"
             >
-              <span class="select-none">
+              <span class="select-none group-hover:text-[#F65077]">
                 {{ collection.title }}
               </span>
               <n-icon
-                size="18"
-                class="hidden cursor-pointer group-hover:block"
+                size="16"
+                class="hidden cursor-pointer text-[#F65077] group-hover:block"
                 title="Save Tab to this collection"
                 @click="onSave(collection)"
               >
@@ -104,7 +116,12 @@
 import dataManager from "@/db"
 import { SpaceWithCollections, Collection } from "@/type.ts"
 import { ICON_LIST } from "@/utils/constants.ts"
-import { StorefrontOutline, SaveOutline, AddOutline } from "@vicons/ionicons5"
+import {
+  StorefrontOutline,
+  SaveOutline,
+  AddOutline,
+  CloseOutline,
+} from "@vicons/ionicons5"
 import { useDialog, useMessage } from "naive-ui"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useI18n } from "vue-i18n"
@@ -125,6 +142,17 @@ const activeTab = ref<chrome.tabs.Tab | null>(null)
 watchEffect(() => {
   locale.value = currentLanguage.value
 })
+
+const openTaby = async () => {
+  const tabs = await chrome.tabs.query({
+    url: "chrome://newtab/",
+  })
+  if (tabs.length > 0) {
+    chrome.tabs.update(tabs[0].id, { active: true })
+  } else {
+    chrome.tabs.create({ url: "chrome://newtab/" })
+  }
+}
 
 const getSpaces = async () => {
   spaces.value = await dataManager.getAllSpaceWithCollections()

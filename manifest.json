@@ -25,14 +25,13 @@
     }
   ],
   "icons": {
-    "32": "icons/32.png",
-    "72": "icons/72.png",
-    "128": "icons/128.png",
-    "512": "icons/512.png"
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "action": {
     "default_title": "Taby",
-    "default_icon": "icons/32.png",
+    "default_icon": "icons/icon32.png",
     "default_popup": "popup.html"
   }
 }
