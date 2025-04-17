@@ -23,7 +23,6 @@
       :data-index="index"
       :select-ids="selectedTabIds"
       class="group/aside right-aside-item"
-      type="right-aside"
       :class="{ hidden: isNewTabPage(tab.url) }"
       :child="tab"
       @delete="removeTab(tab.id)"

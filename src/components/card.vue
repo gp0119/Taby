@@ -23,7 +23,6 @@
         />
       </div>
       <favicon
-        :type="type"
         :child="child"
         class="favicon group-hover/card:hidden"
         :class="{
@@ -81,7 +80,6 @@ import favicon from "./favicon.vue"
 const props = withDefaults(
   defineProps<{
     child: Card
-    type: string
     selectIds?: number[]
     duplicateUrl?: string | null
     showCheckbox?: boolean

@@ -31,7 +31,6 @@ import { getFaviconFromCache, getGoogleFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{
-  type: string
   child: Card
 }>()
 

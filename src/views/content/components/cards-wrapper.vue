@@ -21,7 +21,6 @@
       :key="card.id"
       :data-id="card.id"
       class="card-item group/content"
-      type="content"
       :child="card"
       :select-ids="batchCardStore.selectedCardIds"
       :duplicateUrl="duplicateCardStore.currentDuplicateUrl"
@@ -117,11 +116,7 @@ function onEdit(child: iCard) {
     title: () => {
       return (
         <div class="flex items-center">
-          <Favicon
-            class="block h-[20px] w-[20px]"
-            type="content"
-            child={child}
-          />
+          <Favicon class="block h-[20px] w-[20px]" child={child} />
           <span>{ft("edit", "card")}</span>
         </div>
       )
