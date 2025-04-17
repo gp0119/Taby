@@ -7,36 +7,26 @@ export function useChromeTabs() {
 
   async function getTabs() {
     const res = await chrome.tabs.query({})
-    console.log("res: ", res)
+    // console.log("res: ", res)
     tabs.value = res.reduce((acc: { [key: string]: Card[] }, cur) => {
+      const tab = {
+        title: cur.title || "",
+        url: cur.url || "",
+        description: "",
+        windowId: cur.windowId,
+        id: cur.id as number,
+        collectionId: 0,
+        order: 0,
+        favicon: cur.favIconUrl || "",
+      }
       if (acc[cur.windowId]) {
-        acc[cur.windowId].push({
-          title: cur.title || "",
-          url: cur.url || "",
-          description: "",
-          windowId: cur.windowId,
-          id: cur.id as number,
-          collectionId: 0,
-          order: 0,
-          favicon: cur.favIconUrl || "",
-        })
+        acc[cur.windowId].push(tab)
       } else {
-        acc[cur.windowId] = [
-          {
-            title: cur.title || "",
-            url: cur.url || "",
-            description: "",
-            windowId: cur.windowId,
-            id: cur.id as number,
-            collectionId: 0,
-            order: 0,
-            favicon: cur.favIconUrl || "",
-          },
-        ]
+        acc[cur.windowId] = [tab]
       }
       return acc
     }, {})
-    console.log("tabs.value: ", tabs.value)
+    // console.log("tabs.value: ", tabs.value)
   }
 
   function removeTab(tabId: number | undefined) {

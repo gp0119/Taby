@@ -48,7 +48,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         newtab: path.resolve(__dirname, "newtab.html"),
-        content: path.resolve(__dirname, "src/content/content.ts"),
         popup: path.resolve(__dirname, "popup.html"),
       },
       output: {
