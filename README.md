@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/assets/128.png" alt="Taby Logo" width="128" height="128">
+  <img src="src/assets/icon.svg" alt="Taby Logo" width="128" height="128">
   <h1>Taby</h1>
   <p><strong>简洁而强大的新标签页扩展</strong></p>
   <p><strong>A simple yet powerful new tab extension</strong></p>
@@ -49,7 +49,7 @@ Taby 是一款简约而功能丰富的浏览器新标签页扩展，旨在提升
 1. 下载最新版本的 [release](https://github.com/gp0119/Taby/releases)
 2. 解压下载的文件
 3. 在浏览器中转到扩展页面:
-    - Chrome: `chrome://extensions/`
+   - Chrome: `chrome://extensions/`
 4. 启用开发者模式
 5. 点击 "加载已解压的扩展" 并选择解压后的文件夹
 
