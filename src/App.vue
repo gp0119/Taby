@@ -62,21 +62,42 @@ import { GlobalThemeOverrides } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
+import { debounce } from "lodash-es"
 
-const handleVisibilityChange = () => {
-  if (localStorage.getItem("refreshCollections")) {
-    refreshCollections()
-    localStorage.removeItem("refreshCollections")
-  }
-}
+const { refreshSpaces, refreshCollections } = useRefresh()
+
+const loading = ref(true)
+
+provide("loading", {
+  loading,
+})
+
+const handleVisibilityChange = debounce(
+  async () => {
+    // console.log("handleVisibilityChange")
+    if (localStorage.getItem("refreshCollections")) {
+      await refreshCollections()
+      localStorage.removeItem("refreshCollections")
+    }
+    await syncManager.autoUpload()
+  },
+  3000,
+  {
+    leading: true,
+    trailing: false,
+  },
+)
 
 onMounted(() => {
+  // console.log("onMounted")
   document.addEventListener("visibilitychange", handleVisibilityChange)
+  window.addEventListener("beforeunload", removeListener)
 })
 
-onUnmounted(() => {
+const removeListener = () => {
   document.removeEventListener("visibilitychange", handleVisibilityChange)
-})
+  window.removeEventListener("beforeunload", removeListener)
+}
 
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   common: {
@@ -114,14 +135,6 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   },
 }))
 
-const { refreshSpaces, refreshCollections } = useRefresh()
-
-const loading = ref(true)
-
-provide("loading", {
-  loading,
-})
-
 onMounted(async () => {
   themeStore.setThemeProperty()
   const result = await chrome.storage.sync.get([
@@ -149,7 +162,7 @@ onMounted(async () => {
   if (result.gistId) {
     localStorage.setItem("gistId", result.gistId)
   }
-  await syncManager.autoSync()
+  await syncManager.autoDownload()
   await refreshSpaces()
   await refreshCollections()
   loading.value = false

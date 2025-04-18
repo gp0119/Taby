@@ -69,12 +69,24 @@ class SyncManager {
     return data
   }
 
-  autoSync = async () => {
+  autoDownload = async () => {
     const { accessToken, gistId } = await this.getToken()
-    // console.log("accessToken: ", accessToken, "gistId: ", gistId)
+    if (!accessToken || !gistId) return
+    const lastSyncTime = localStorage.getItem("lastSyncTime")
+    if (!lastSyncTime) {
+      await this.triggerDownload()
+      return
+    } else {
+      if (Date.now() - Number(lastSyncTime) > this.AUTO_DOWNLOAD_INTERVAL) {
+        await this.triggerDownload()
+      }
+    }
+  }
+
+  autoUpload = async () => {
+    const { accessToken, gistId } = await this.getToken()
     if (!accessToken || !gistId) return
     const modifiedTables = localStorage.getItem("modifiedTables")
-    const lastSyncTime = localStorage.getItem("lastSyncTime")
     if (modifiedTables) {
       const lastModifiedTime = localStorage.getItem("lastModifiedTime")
       const tables = JSON.parse(modifiedTables)
@@ -83,15 +95,6 @@ class SyncManager {
         Date.now() - Number(lastModifiedTime) > this.SYNC_INTERVAL
       ) {
         this.uploadModifiedTablesImmediate()
-      }
-    } else {
-      if (!lastSyncTime) {
-        await this.triggerDownload()
-        return
-      } else {
-        if (Date.now() - Number(lastSyncTime) > this.AUTO_DOWNLOAD_INTERVAL) {
-          await this.triggerDownload()
-        }
       }
     }
   }
