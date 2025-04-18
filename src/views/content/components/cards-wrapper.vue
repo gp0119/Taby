@@ -80,6 +80,7 @@ function onHandleNoFavicon(tabId: number, cardId: number) {
     async function listener(updatedTabId, changeInfo, _tab) {
       if (updatedTabId === tabId && changeInfo.status == "complete") {
         const openedTab = await chrome.tabs.get(tabId)
+        console.log("openedTab: ", openedTab)
         const favicon = openedTab.favIconUrl
         if (!favicon) return
         await dataManager.updateCardFavicon(cardId, favicon)

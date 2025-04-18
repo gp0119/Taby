@@ -69,19 +69,16 @@ export const useSearchModal = () => {
     if (child.favicon) return
     const tabId = tab.id!
     chrome.tabs.onUpdated.addListener(
-      function listener(updatedTabId, changeInfo, _tab) {
+      async function listener(updatedTabId, changeInfo, _tab) {
         if (updatedTabId === tabId && changeInfo.status == "complete") {
-          chrome.tabs.sendMessage(
-            tabId,
-            { action: "getFavicons" },
-            async function (favicon) {
-              await dataManager.updateCardFavicon(child.id, favicon)
-              await refreshCollections()
-            },
-          )
+          const openedTab = await chrome.tabs.get(tabId)
+          console.log("openedTab: ", openedTab)
+          const favicon = openedTab.favIconUrl
+          if (!favicon) return
+          await dataManager.updateCardFavicon(child.id, favicon)
+          await refreshCollections()
           chrome.tabs.onUpdated.removeListener(listener)
         }
-        return true
       },
     )
   }

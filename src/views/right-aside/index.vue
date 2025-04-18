@@ -116,7 +116,16 @@ const onDragEnd = async (evt: SortableEvent) => {
 
 onMounted(async () => {
   await debounceRefreshTabs()
+  window.addEventListener("beforeunload", removeListener)
 })
+
+const removeListener = () => {
+  chrome.tabs.onUpdated.removeListener(debounceRefreshTabs)
+  chrome.tabs.onMoved.removeListener(debounceRefreshTabs)
+  chrome.tabs.onRemoved.removeListener(debounceRefreshTabs)
+  chrome.tabs.onAttached.removeListener(debounceRefreshTabs)
+  window.removeEventListener("beforeunload", removeListener)
+}
 
 const onCloseAllTabs = async (windowId: number | string) => {
   await closeAllTabsExceptCurrent(Number(windowId))
