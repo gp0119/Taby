@@ -7,7 +7,9 @@
     "dev": "vite",
     "watch-build": "vite --watch build",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev-website": "vite --config vite.website.config.ts",
+    "build-website": "vite build --config vite.website.config.ts"
   },
   "dependencies": {
     "@vicons/carbon": "^0.13.0",
