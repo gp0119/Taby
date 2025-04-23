@@ -96,6 +96,8 @@ class SyncManager {
       ) {
         this.uploadModifiedTablesImmediate()
       }
+    } else {
+      localStorage.removeItem("lastModifiedTime")
     }
   }
 }

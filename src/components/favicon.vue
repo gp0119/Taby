@@ -27,7 +27,7 @@
 
 <script setup lang="tsx">
 import { Card } from "@/type.ts"
-import { getFaviconFromCache, getGoogleFavicon } from "@/utils"
+import { getGoogleFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{

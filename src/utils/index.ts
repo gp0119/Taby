@@ -5,9 +5,13 @@ export function getFaviconFromCache(u: string) {
   return url.toString()
 }
 
-export function getGoogleFavicon(u: string) {
-  const domain = new URL(u).hostname
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+export function getGoogleFavicon(url: string) {
+  try {
+    const domain = new URL(url).hostname
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
+  } catch (error) {
+    return ""
+  }
 }
 
 export function isNewTabPage(url: string) {

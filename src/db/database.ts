@@ -255,7 +255,6 @@ class DataBase extends Dexie {
       "rw",
       [this.spaces, this.collections, this.labels, this.cards, this.favicons],
       async () => {
-        await this.clearData()
         await this.spaces.bulkPut(
           data.spaces.map((space) => ({
             id: space.id,
