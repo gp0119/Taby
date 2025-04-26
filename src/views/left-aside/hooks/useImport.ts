@@ -4,7 +4,7 @@ import { useMessage } from "naive-ui"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 
 async function batchAddLable(labels: Label[]) {
-  const labelIds: number[] = []
+  const labelIds: string[] = []
   for (const label of labels) {
     const labelId = await dataManager.getOrCreateLabelWithTitle(label.title)
     if (labelId) {
@@ -14,7 +14,7 @@ async function batchAddLable(labels: Label[]) {
   return labelIds
 }
 
-async function batchAddCard(cards: Card[], collectionId: number) {
+async function batchAddCard(cards: Card[], collectionId: string) {
   await dataManager.batchAddCards(
     cards.map((card, index) => {
       return {
@@ -32,8 +32,8 @@ async function batchAddCard(cards: Card[], collectionId: number) {
 
 async function addCollection(
   collection: CollectionWithCards,
-  spaceId: number,
-  labelIds: number[],
+  spaceId: string,
+  labelIds: string[],
 ) {
   return dataManager.addCollection({
     title: collection.title,
@@ -62,12 +62,12 @@ export function useImport() {
             icon: "StorefrontOutline",
           })
           for (const list of lists.lists) {
-            const labelIds: number[] = await batchAddLable(list.labels)
+            const labelIds: string[] = await batchAddLable(list.labels)
             const collectionId = (await addCollection(
               list,
               spaceId,
               labelIds,
-            )) as number
+            )) as string
             await batchAddCard(list.cards, collectionId)
           }
           resolve(true)
@@ -95,12 +95,12 @@ export function useImport() {
               icon: space.icon,
             })
             for (const collection of space.collections) {
-              const labelIds: number[] = await batchAddLable(collection.labels)
+              const labelIds: string[] = await batchAddLable(collection.labels)
               const collectionId = (await addCollection(
                 collection,
                 spaceId,
                 labelIds,
-              )) as number
+              )) as string
               for (const card of collection.cards) {
                 if (card.favicon) {
                   card.faviconId = await dataManager.addFavicon(card.favicon)

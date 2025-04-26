@@ -45,11 +45,11 @@
 import { isNewTabPage } from "@/utils"
 import { ChevronForward } from "@vicons/ionicons5"
 import { Close } from "@vicons/carbon"
-import type { Card as iCard } from "@/type.ts"
+import type { ChromeTabInfo } from "@/type.ts"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 defineProps<{
   index: number
-  tabs: iCard[]
+  tabs: ChromeTabInfo[]
 }>()
 
 const { ft } = useHelpi18n()

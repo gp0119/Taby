@@ -136,7 +136,7 @@ const { ft, ft2 } = useHelpi18n()
 const spaces = ref<SpaceWithCollections[]>([])
 const newCollectionName = ref("")
 const isAddingCollection = ref(false)
-const expandedNames = ref<number | null>(null)
+const expandedNames = ref<string | null>(null)
 const activeTab = ref<chrome.tabs.Tab | null>(null)
 
 watchEffect(() => {
@@ -148,7 +148,7 @@ const openTaby = async () => {
     url: "chrome://newtab/",
   })
   if (tabs.length > 0) {
-    chrome.tabs.update(tabs[0].id, { active: true })
+    chrome.tabs.update(tabs[0].id!, { active: true })
   } else {
     chrome.tabs.create({ url: "chrome://newtab/" })
   }
@@ -173,7 +173,7 @@ const onHandleItemHeaderClick = ({
   name,
   expanded,
 }: {
-  name: number
+  name: string
   expanded: boolean
 }) => {
   isAddingCollection.value = false
@@ -184,7 +184,7 @@ const onHandleItemHeaderClick = ({
   }
 }
 
-const onClickHeaderExtra = (spaceId: number) => {
+const onClickHeaderExtra = (spaceId: string) => {
   isAddingCollection.value = true
   expandedNames.value = spaceId
 }
@@ -210,7 +210,7 @@ const onSave = async (collection: Collection) => {
       await dataManager.addCard({
         title: title || "",
         url: url || "",
-        collectionId: Number(collection.id),
+        collectionId: collection.id,
         ...(faviconId && { faviconId }),
       })
       message.success(ft("success", "save"))
@@ -220,10 +220,10 @@ const onSave = async (collection: Collection) => {
   })
 }
 
-const onAddCollection = async (spaceId: number) => {
+const onAddCollection = async (spaceId: string) => {
   await dataManager.addCollection({
     title: newCollectionName.value,
-    spaceId: Number(spaceId),
+    spaceId: spaceId,
     labelIds: [],
   })
   newCollectionName.value = ""

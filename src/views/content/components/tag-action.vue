@@ -108,7 +108,7 @@ const addTag = () => {
   })
   newTag.value.title = ""
 }
-const addTagforCollection = async (id: number) => {
+const addTagforCollection = async (id: string) => {
   await dataManager.addTagforCollection(props.item.id, id)
   await refreshCollections()
 }
@@ -117,7 +117,7 @@ const { open: openEditDialog } = useEditDialog()
 const { open: openDeleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const onDeleteTag = async (tag: {
-  id: number
+  id: string
   title: string
   color: string
 }) => {
@@ -137,7 +137,7 @@ const onDeleteTag = async (tag: {
     },
   })
 }
-const onEditTag = (tag: { id: number; title: string; color: string }) => {
+const onEditTag = (tag: { id: string; title: string; color: string }) => {
   const formModel = ref({ title: tag.title, color: tag.color })
   openEditDialog({
     title: ft("edit", "tags"),

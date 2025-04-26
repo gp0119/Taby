@@ -1,6 +1,7 @@
 import Dexie, { EntityTable } from "dexie"
 import { Card, Collection, Favicon, Label, Space, SyncData } from "@/type.ts"
 import syncManager from "@/sync/syncManager.ts"
+import { v4 as uuidv4, validate as uuidValidate } from "uuid"
 
 class DataBase extends Dexie {
   private static instance: DataBase
@@ -14,15 +15,194 @@ class DataBase extends Dexie {
 
   constructor() {
     super("TabyDatabase")
-    this.version(2).stores({
-      spaces: "++id, title, order, createdAt, icon",
-      collections:
-        "++id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
-      labels: "++id, title, color",
-      cards:
-        "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
-      favicons: "++id, url",
-    })
+    this.version(3)
+      .stores({
+        spaces: "id, title, order, createdAt, icon",
+        collections:
+          "id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
+        labels: "id, title, color",
+        cards:
+          "id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
+        favicons: "id, url",
+      })
+      .upgrade(async (tx) => {
+        console.log("Upgrading database to version 3...")
+
+        // 1. 为所有表添加临时的 uuid 字段
+        await Promise.all([
+          tx
+            .table("spaces")
+            .toCollection()
+            .modify((space) => {
+              if (typeof space.id === "number") {
+                space.temp_uuid = uuidv4()
+              }
+            }),
+          tx
+            .table("collections")
+            .toCollection()
+            .modify((collection) => {
+              if (typeof collection.id === "number") {
+                collection.temp_uuid = uuidv4()
+              }
+            }),
+          tx
+            .table("labels")
+            .toCollection()
+            .modify((label) => {
+              if (typeof label.id === "number") {
+                label.temp_uuid = uuidv4()
+              }
+            }),
+          tx
+            .table("cards")
+            .toCollection()
+            .modify((card) => {
+              if (typeof card.id === "number") {
+                card.temp_uuid = uuidv4()
+              }
+            }),
+          tx
+            .table("favicons")
+            .toCollection()
+            .modify((favicon) => {
+              if (typeof favicon.id === "number") {
+                favicon.temp_uuid = uuidv4()
+              }
+            }),
+        ])
+
+        // 2. 创建旧 ID 到新 UUID 的映射
+        const spaceIdMap = new Map<number, string>()
+        await tx.table("spaces").each((space) => {
+          if (typeof space.id === "number" && space.temp_uuid) {
+            spaceIdMap.set(space.id, space.temp_uuid)
+          }
+        })
+
+        const collectionIdMap = new Map<number, string>()
+        await tx.table("collections").each((collection) => {
+          if (typeof collection.id === "number" && collection.temp_uuid) {
+            collectionIdMap.set(collection.id, collection.temp_uuid)
+          }
+        })
+
+        const labelIdMap = new Map<number, string>()
+        await tx.table("labels").each((label) => {
+          if (typeof label.id === "number" && label.temp_uuid) {
+            labelIdMap.set(label.id, label.temp_uuid)
+          }
+        })
+
+        const faviconIdMap = new Map<number, string>()
+        await tx.table("favicons").each((favicon) => {
+          if (typeof favicon.id === "number" && favicon.temp_uuid) {
+            faviconIdMap.set(favicon.id, favicon.temp_uuid)
+          }
+        })
+
+        console.log("ID maps created.")
+
+        // 3. 更新主键和外键
+        await Promise.all([
+          // 更新 Spaces 主键
+          tx
+            .table("spaces")
+            .toCollection()
+            .modify((space) => {
+              if (space.temp_uuid) {
+                space.id = space.temp_uuid
+                delete space.temp_uuid
+              }
+            }),
+
+          // 更新 Collections 主键、spaceId、labelIds
+          tx
+            .table("collections")
+            .toCollection()
+            .modify((collection) => {
+              // 更新主键
+              if (collection.temp_uuid) {
+                collection.id = collection.temp_uuid
+                delete collection.temp_uuid
+              }
+              // 更新 spaceId
+              if (
+                typeof collection.spaceId === "number" &&
+                spaceIdMap.has(collection.spaceId)
+              ) {
+                collection.spaceId = spaceIdMap.get(collection.spaceId)!
+              }
+              // 更新 labelIds
+              if (Array.isArray(collection.labelIds)) {
+                collection.labelIds = collection.labelIds
+                  .map((oldLabelId: number | string) => {
+                    if (
+                      typeof oldLabelId === "number" &&
+                      labelIdMap.has(oldLabelId)
+                    ) {
+                      return labelIdMap.get(oldLabelId)!
+                    }
+                    return String(oldLabelId)
+                  })
+                  .filter(
+                    (id: string | null | undefined): id is string =>
+                      id !== null && id !== undefined,
+                  )
+              }
+            }),
+
+          // 更新 Labels 主键
+          tx
+            .table("labels")
+            .toCollection()
+            .modify((label) => {
+              if (label.temp_uuid) {
+                label.id = label.temp_uuid
+                delete label.temp_uuid
+              }
+            }),
+
+          // 更新 Cards 主键、collectionId、faviconId
+          tx
+            .table("cards")
+            .toCollection()
+            .modify((card) => {
+              // 更新主键
+              if (card.temp_uuid) {
+                card.id = card.temp_uuid
+                delete card.temp_uuid
+              }
+              // 更新 collectionId
+              if (
+                typeof card.collectionId === "number" &&
+                collectionIdMap.has(card.collectionId)
+              ) {
+                card.collectionId = collectionIdMap.get(card.collectionId)!
+              }
+              // 更新 faviconId
+              if (
+                card.faviconId &&
+                typeof card.faviconId === "number" &&
+                faviconIdMap.has(card.faviconId)
+              ) {
+                card.faviconId = faviconIdMap.get(card.faviconId)!
+              }
+            }),
+
+          // 更新 Favicons 主键
+          tx
+            .table("favicons")
+            .toCollection()
+            .modify((favicon) => {
+              if (favicon.temp_uuid) {
+                favicon.id = favicon.temp_uuid
+                delete favicon.temp_uuid
+              }
+            }),
+        ])
+        console.log("Database upgrade to v3 complete.")
+      })
     this.initializeDefaultData()
     this.addHooks()
 
@@ -40,6 +220,7 @@ class DataBase extends Dexie {
 
   private async createDefaultSpace() {
     await this.spaces.add({
+      id: uuidv4(),
       title: "My Collections",
       order: 1000,
       createdAt: Date.now(),
@@ -165,7 +346,7 @@ class DataBase extends Dexie {
   }
 
   private stripMetadata<
-    T extends { createdAt?: number; modifiedAt?: number; id?: number },
+    T extends { createdAt?: number; modifiedAt?: number; id?: number | string },
   >(obj: T, additionalFields: (keyof T)[] = []): Partial<T> {
     const { createdAt, modifiedAt, id, ...rest } = obj
     const result = { ...rest } as Partial<T>
@@ -177,7 +358,7 @@ class DataBase extends Dexie {
     return result
   }
 
-  async exportBySpaceId(spaceIds: number[]) {
+  async exportBySpaceId(spaceIds: string[]) {
     const spaces = await this.spaces.where("id").anyOf(spaceIds).sortBy("order")
     const labels = await this.labels.toArray()
     const labelsMap = new Map(labels.map((label) => [label.id, label]))
@@ -204,7 +385,7 @@ class DataBase extends Dexie {
                 "labelIds",
                 "spaceId",
               ]),
-              labels: collection.labelIds.map((labelId) => {
+              labels: (collection.labelIds || []).map((labelId) => {
                 const label = labelsMap.get(labelId)
                 return label ? this.stripMetadata(label) : null
               }),
@@ -245,66 +426,167 @@ class DataBase extends Dexie {
   }
 
   async importData(data: {
-    spaces: Space[]
-    collections: Collection[]
-    labels: Label[]
-    cards: Card[]
-    favicons: Favicon[]
+    // 允许 Partial 并且 id 可以是 number 或 string
+    spaces: Partial<Space & { id?: number | string }>[]
+    collections: Partial<
+      Collection & {
+        id?: number | string
+        spaceId?: number | string
+        labelIds?: (number | string)[]
+      }
+    >[]
+    labels: Partial<Label & { id?: number | string }>[]
+    cards: Partial<
+      Card & {
+        id?: number | string
+        collectionId?: number | string
+        faviconId?: number | string
+      }
+    >[]
+    favicons: Partial<Favicon & { id?: number | string }>[]
   }) {
-    this.transaction(
-      "rw",
-      [this.spaces, this.collections, this.labels, this.cards, this.favicons],
-      async () => {
-        await this.spaces.bulkPut(
-          data.spaces.map((space) => ({
-            id: space.id,
-            title: space.title,
-            icon: space.icon,
-            order: space.order || 0,
-            createdAt: space.createdAt || Date.now(),
-          })),
-        )
-        await this.collections.bulkPut(
-          data.collections.map((collection) => ({
-            id: collection.id,
-            title: collection.title,
-            spaceId: collection.spaceId,
-            order: collection.order || 0,
-            labelIds: collection.labelIds || [],
-            createdAt: collection.createdAt || Date.now(),
-          })),
-        )
-        await this.labels.bulkPut(
-          data.labels.map((label) => ({
-            id: label.id,
-            title: label.title,
-            color: label.color,
-          })),
-        )
-        const usedFaviconIds = new Set<number>()
-        const cards = data.cards.map((card) => {
-          if (card.faviconId) {
-            usedFaviconIds.add(card.faviconId)
-          }
-          return {
-            id: card.id,
-            title: card.customTitle || card.title,
-            url: card.url,
-            order: card.order || 0,
-            description: card.customDescription || card.description || "",
-            collectionId: card.collectionId || 0,
-            faviconId: card.faviconId || 0,
-            createdAt: card.createdAt || Date.now(),
-          }
-        })
-        const usedFavicons = data.favicons.filter((favicon) =>
-          usedFaviconIds.has(favicon.id),
-        )
-        await this.favicons.bulkPut(usedFavicons)
-        await this.cards.bulkPut(cards)
-        await this.clearModifiedTable()
-      },
-    )
+    try {
+      // 1. 处理并生成/验证 ID，同时创建旧 ID 到新 ID 的映射
+      const oldSpaceIdMap = new Map<string | number, string>()
+      const spaces = data.spaces.map((space) => {
+        const oldId = space.id
+        // 检查旧 ID 是否是有效的 UUID string
+        const newId =
+          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+        if (oldId !== undefined) {
+          oldSpaceIdMap.set(oldId, newId)
+        }
+        return { ...space, id: newId } as Space
+      })
+
+      const oldCollectionIdMap = new Map<string | number, string>()
+      const collections = data.collections.map((collection) => {
+        const oldId = collection.id
+        const newId =
+          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+        if (oldId !== undefined) {
+          oldCollectionIdMap.set(oldId, newId)
+        }
+        // 同时转换 spaceId
+        const oldSpaceId = collection.spaceId
+        const newSpaceId =
+          oldSpaceId !== undefined && oldSpaceIdMap.has(oldSpaceId)
+            ? oldSpaceIdMap.get(oldSpaceId)!
+            : String(oldSpaceId || "")
+        // 暂存旧 labelIds，后面处理
+        const oldLabelIds = collection.labelIds || []
+        return {
+          ...collection,
+          id: newId,
+          spaceId: newSpaceId,
+          labelIds: oldLabelIds,
+        } as Collection // labelIds 暂时用旧的
+      })
+
+      const oldLabelIdMap = new Map<string | number, string>()
+      const labels = data.labels.map((label) => {
+        const oldId = label.id
+        const newId =
+          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+        if (oldId !== undefined) {
+          oldLabelIdMap.set(oldId, newId)
+        }
+        return { ...label, id: newId } as Label
+      })
+
+      // 再次处理 collections，用 label map 更新 labelIds
+      collections.forEach((collection) => {
+        if (Array.isArray(collection.labelIds)) {
+          collection.labelIds = (collection.labelIds as (string | number)[]) // 类型断言
+            .map((oldLabelId) => {
+              // 使用映射转换 label ID
+              if (oldLabelId !== undefined && oldLabelIdMap.has(oldLabelId)) {
+                return oldLabelIdMap.get(oldLabelId)!
+              }
+              // 如果已经是 string 或无法映射，则保留 string
+              return typeof oldLabelId === "string" ? oldLabelId : null
+            })
+            .filter((id): id is string => id !== null) // 过滤掉 null 或无法转换的
+        }
+      })
+
+      const oldFaviconIdMap = new Map<string | number, string>()
+      const faviconsMapByUrl = new Map<string, string>()
+      const faviconsToAdd: Favicon[] = []
+      data.favicons.forEach((favicon) => {
+        const url = favicon.url?.trim()
+        if (!url) return
+
+        let newId: string
+        let existingFavicon = faviconsMapByUrl.get(url)
+
+        if (existingFavicon) {
+          newId = existingFavicon // 复用基于 URL 找到的 ID
+        } else {
+          // URL 不存在，检查传入的 ID 是否是有效 UUID
+          const oldId = favicon.id
+          newId =
+            typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+          faviconsMapByUrl.set(url, newId)
+          faviconsToAdd.push({ ...favicon, id: newId, url } as Favicon)
+        }
+
+        // 记录旧 ID 到新 ID（或复用的 ID）的映射
+        if (favicon.id !== undefined) {
+          oldFaviconIdMap.set(favicon.id, newId)
+        }
+      })
+
+      // 2. 处理 cards：始终生成新 ID，但使用映射查找正确的 *外键* ID
+      const cards = data.cards.map((card) => {
+        const cardId = uuidv4() // **始终为导入的 card 生成新 ID**
+
+        // 查找新的 collectionId (使用 collection 的映射)
+        const oldCollectionId = card.collectionId
+        const newCollectionId =
+          oldCollectionId !== undefined &&
+          oldCollectionIdMap.has(oldCollectionId)
+            ? oldCollectionIdMap.get(oldCollectionId)!
+            : ""
+
+        // 查找新的 faviconId (使用 favicon 的映射)
+        let newFaviconId: string | undefined = undefined
+        const oldFaviconId = card.faviconId
+        if (oldFaviconId !== undefined && oldFaviconIdMap.has(oldFaviconId)) {
+          newFaviconId = oldFaviconIdMap.get(oldFaviconId)!
+        } else if (card.url) {
+          newFaviconId = faviconsMapByUrl.get(card.url.trim())
+        }
+
+        return {
+          ...card,
+          id: cardId, // 使用新生成的 Card ID
+          collectionId: newCollectionId,
+          faviconId: newFaviconId,
+          title: card.title || "",
+          url: card.url || "",
+          description: card.description || "",
+          order: card.order || 0,
+          createdAt: card.createdAt || Date.now(),
+        } as Card
+      })
+
+      // 3. 使用 bulkPut 一次性导入所有处理过的数据
+      await this.transaction(
+        "rw",
+        [this.spaces, this.collections, this.labels, this.cards, this.favicons],
+        async () => {
+          await this.spaces.bulkPut(spaces)
+          await this.collections.bulkPut(collections)
+          await this.labels.bulkPut(labels)
+          await this.cards.bulkPut(cards)
+          await this.favicons.bulkPut(faviconsToAdd)
+        },
+      )
+    } catch (error) {
+      console.error("导入数据失败:", error)
+      throw error
+    }
   }
 
   async cleanup() {

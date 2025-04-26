@@ -32,7 +32,7 @@ import IconSelect from "@components/icon-select.vue"
 import dataManager from "@/db"
 import { ICON_LIST } from "@/utils/constants.ts"
 const { ft } = useHelpi18n()
-const id = defineModel<number | null | number[]>("modelValue", {
+const id = defineModel<string | null | string[]>("modelValue", {
   default: null,
 })
 

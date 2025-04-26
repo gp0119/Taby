@@ -80,7 +80,7 @@ import favicon from "./favicon.vue"
 const props = withDefaults(
   defineProps<{
     child: Card
-    selectIds?: number[]
+    selectIds?: string[]
     duplicateUrl?: string | null
     showCheckbox?: boolean
   }>(),

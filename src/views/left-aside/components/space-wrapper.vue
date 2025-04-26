@@ -30,7 +30,7 @@ import { StorefrontOutline } from "@vicons/ionicons5"
 
 defineProps<{
   spaces: Space[]
-  activeSpaceId: number
+  activeSpaceId: string
 }>()
 
 const emit = defineEmits<{

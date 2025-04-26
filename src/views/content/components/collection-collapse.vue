@@ -97,7 +97,7 @@ const isOpen = computed({
   },
 })
 
-const onHandleCheckbox = (checked: boolean, collectionId: number) => {
+const onHandleCheckbox = (checked: boolean, collectionId: string) => {
   if (checked) {
     batchCollectionStore.addSelectedCollectionId(collectionId)
   } else {

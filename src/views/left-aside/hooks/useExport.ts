@@ -12,7 +12,7 @@ export function useExport() {
     URL.revokeObjectURL(url)
   }
 
-  const exportFromTaby = async (spaceIds: number[]) => {
+  const exportFromTaby = async (spaceIds: string[]) => {
     const data = await db.exportBySpaceId(spaceIds)
     download(data)
   }

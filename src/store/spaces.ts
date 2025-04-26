@@ -6,7 +6,7 @@ import dataManager from "@/db"
 export const useSpacesStore = defineStore("spaces", () => {
   const spaces = ref<Space[]>([])
   const collections = ref<CollectionWithCards[]>([])
-  const activeId = useLocalStorage<number>("activeSpaceId", 1)
+  const activeId = useLocalStorage<string>("activeSpaceId", "")
 
   const currentSpace = computed(() =>
     spaces.value.find((space) => space.id === activeId.value),
@@ -16,6 +16,7 @@ export const useSpacesStore = defineStore("spaces", () => {
     try {
       const allSpaces = await dataManager.getAllSpaces()
       spaces.value = allSpaces
+      console.log("allSpaces: ", allSpaces)
       return allSpaces
     } catch (error) {
       console.error("Failed to fetch spaces:", error)
@@ -23,16 +24,18 @@ export const useSpacesStore = defineStore("spaces", () => {
     }
   }
 
-  async function fetchCollections(spaceId: number) {
+  async function fetchCollections(spaceId: string) {
     try {
-      return dataManager.getCollectionWithCards(spaceId)
+      const collections = await dataManager.getCollectionWithCards(spaceId)
+      console.log("collections: ", collections)
+      return collections
     } catch (error) {
       console.error(`Failed to fetch collections for space ${spaceId}:`, error)
       return []
     }
   }
 
-  async function setActiveSpace(id: number) {
+  async function setActiveSpace(id: string) {
     activeId.value = id
   }
 

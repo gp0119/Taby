@@ -30,9 +30,9 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const { ft } = useHelpi18n()
 const props = defineProps<{
-  spaceId: number
+  spaceId: string
 }>()
-const id = defineModel<number | null>("modelValue", {
+const id = defineModel<string | null>("modelValue", {
   default: null,
 })
 const spacesStore = useSpacesStore()
@@ -41,7 +41,7 @@ const formModel = ref({
   title: "",
 })
 
-async function getOptions(spaceId: number): Promise<iOptions> {
+async function getOptions(spaceId: string): Promise<iOptions> {
   const result = await spacesStore.fetchCollections(spaceId)
   return result.map((collection) => ({
     label: collection.title,

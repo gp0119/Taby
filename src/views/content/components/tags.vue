@@ -18,11 +18,11 @@ import { Label } from "@/type.ts"
 import Tag from "@/components/tag.vue"
 const props = defineProps<{
   labels: Label[]
-  collectionId: number
+  collectionId: string
 }>()
 
 const { refreshCollections } = useRefresh()
-const onDeleteTagFromCollection = async (tagId: number) => {
+const onDeleteTagFromCollection = async (tagId: string) => {
   await dataManager.removeTagforCollection(props.collectionId, tagId)
   await refreshCollections()
 }

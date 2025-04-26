@@ -21,7 +21,7 @@ defineProps<{
   placeholder?: string
 }>()
 
-const id = defineModel<number | null | number[]>("modelValue", {
+const id = defineModel<string | null | string[]>("modelValue", {
   default: null,
 })
 </script>

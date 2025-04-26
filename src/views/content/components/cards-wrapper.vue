@@ -56,7 +56,7 @@ import { useBatchTabsStore } from "@/store/batch-tabs"
 
 defineProps<{
   cards: iCard[]
-  collectionId: number
+  collectionId: string
 }>()
 
 const { refreshCollections } = useRefresh()
@@ -75,7 +75,7 @@ async function onHandleClick(child: any) {
   onHandleNoFavicon(tabId, child.id)
 }
 
-function onHandleNoFavicon(tabId: number, cardId: number) {
+function onHandleNoFavicon(tabId: number, cardId: string) {
   chrome.tabs.onUpdated.addListener(
     async function listener(updatedTabId, changeInfo, _tab) {
       if (updatedTabId === tabId && changeInfo.status == "complete") {
@@ -169,11 +169,11 @@ const onDragEnd = async (evt: any) => {
   const { collectionid: toCollectionId } = to.dataset
   const fromCardId = item.getAttribute("data-id")
   if (fromCollectionId === toCollectionId) {
-    await dataManager.moveCard(Number(fromCardId), oldIndex!, newIndex!)
+    await dataManager.moveCard(fromCardId!, oldIndex!, newIndex!)
   } else {
     await dataManager.moveCardToCollection(
-      Number(fromCardId),
-      Number(toCollectionId)!,
+      fromCardId!,
+      toCollectionId!,
       newIndex,
     )
     item.remove()

@@ -9,7 +9,7 @@ export const useBatchMoveCollectionDialog = () => {
   const { ft } = useHelpi18n()
   const { open } = useEditDialog()
   const formModel = ref<{
-    spaceId: number | null
+    spaceId: string | null
     position: movePosition
   }>({
     spaceId: null,
@@ -18,7 +18,7 @@ export const useBatchMoveCollectionDialog = () => {
 
   const openDialog = (title?: string) =>
     new Promise<{
-      spaceId: number | null
+      spaceId: string | null
       position: movePosition
     }>((resolve, reject) => {
       open({

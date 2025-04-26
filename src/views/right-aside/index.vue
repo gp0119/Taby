@@ -47,7 +47,7 @@ import TabsWrapper from "./components/tabs-wrapper.vue"
 import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import type { Card as iCard } from "@/type"
+import type { ChromeTabInfo } from "@/type"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
@@ -98,7 +98,7 @@ const onDragEnd = async (evt: SortableEvent) => {
       {
         title,
         url,
-        collectionId: Number(toClollectionId),
+        collectionId: String(toClollectionId),
         ...(faviconId && { faviconId }),
       },
       newIndex!,
@@ -132,11 +132,11 @@ const onCloseAllTabs = async (windowId: number | string) => {
   await refreshTabs()
 }
 
-const onHandleCheckbox = (e: boolean, tab: iCard) => {
+const onHandleCheckbox = (e: boolean, tab: ChromeTabInfo) => {
   if (e) {
     batchTabsStore.addSelectedTab(tab)
   } else {
-    batchTabsStore.removeSelectedTab(tab.id)
+    batchTabsStore.removeSelectedTab(tab.id!)
   }
 }
 </script>

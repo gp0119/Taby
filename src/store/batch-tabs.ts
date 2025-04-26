@@ -1,10 +1,10 @@
 import { defineStore } from "pinia"
-import type { Card } from "@/type"
+import type { ChromeTabInfo } from "@/type"
 
 export const useBatchTabsStore = defineStore("batch-tabs", () => {
-  const selectedTab = ref<Card[]>([])
+  const selectedTab = ref<ChromeTabInfo[]>([])
 
-  const addSelectedTab = (tab: Card) => {
+  const addSelectedTab = (tab: ChromeTabInfo) => {
     selectedTab.value.push(tab)
   }
 
@@ -17,7 +17,7 @@ export const useBatchTabsStore = defineStore("batch-tabs", () => {
   }
 
   const selectedTabIds = computed(() => {
-    return selectedTab.value.map((item) => item.id)
+    return selectedTab.value.map((item) => item.id) as number[]
   })
 
   return {

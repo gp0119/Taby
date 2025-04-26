@@ -1,5 +1,5 @@
 interface BaseEntity {
-  id: number
+  id: string
   createdAt?: number
   modifiedAt?: number
 }
@@ -8,7 +8,7 @@ export interface iCard extends BaseEntity {
   title: string
   url: string
   description: string
-  faviconId?: number
+  faviconId?: string
   windowId?: number
   oldIndex?: number
 }
@@ -21,9 +21,9 @@ export interface Space extends BaseEntity {
 
 export interface Collection extends BaseEntity {
   title: string
-  spaceId: number
+  spaceId: string
   order: number
-  labelIds: number[]
+  labelIds: string[]
 }
 
 export interface Label extends BaseEntity {
@@ -37,10 +37,10 @@ export interface Card extends BaseEntity {
   customDescription?: string
   url: string
   description: string
-  collectionId: number
+  collectionId: string
   order: number
   windowId?: number
-  faviconId?: number
+  faviconId?: string
   favicon?: string
 }
 
@@ -54,7 +54,7 @@ export interface SpaceWithCollections extends Space {
 }
 
 export interface Favicon {
-  id: number
+  id: string
   url: string
 }
 
@@ -68,7 +68,7 @@ export interface SyncData {
 
 export interface iOption {
   label: string
-  value: number
+  value: string
 }
 export interface SyncTokenData {
   accessToken: string | undefined
@@ -76,3 +76,14 @@ export interface SyncTokenData {
 }
 export type iOptions = iOption[]
 export type movePosition = "HEAD" | "END"
+
+export interface ChromeTabInfo {
+  title: string
+  url: string
+  description: string
+  windowId: number
+  id: number | undefined // 使用 number | undefined
+  collectionId: string // 这个字段可能不需要，或者保持为空
+  order: number
+  favicon: string
+}

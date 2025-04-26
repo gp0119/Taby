@@ -113,7 +113,7 @@ function onDeleteCollection(item: CollectionWithCards) {
 }
 
 function onMoveCollection(item: CollectionWithCards) {
-  const spaceId = ref<number | null>(null)
+  const spaceId = ref<string | null>(null)
   openEditDialog({
     title: gt("move-type-to", item.title),
     renderContent: () => (

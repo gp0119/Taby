@@ -12,8 +12,8 @@ export const useBatchMoveCardDialog = () => {
   const { ft } = useHelpi18n()
   const { open } = useEditDialog()
   const formModel = ref<{
-    spaceId: number | null
-    collectionId: number | null
+    spaceId: string | null
+    collectionId: string | null
     position: movePosition
   }>({
     spaceId: spacesStore.activeId,
@@ -23,8 +23,8 @@ export const useBatchMoveCardDialog = () => {
 
   const openDialog = (title?: string) =>
     new Promise<{
-      spaceId: number | null
-      collectionId: number | null
+      spaceId: string | null
+      collectionId: string | null
       position: movePosition
     }>((resolve, reject) => {
       open({

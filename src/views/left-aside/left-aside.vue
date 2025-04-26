@@ -143,7 +143,7 @@ const onDragEnd = async (evt: SortableEvent) => {
   const { item: itemEl, oldIndex, newIndex } = evt
   if (newIndex === oldIndex) return
   const currentSpaceId = itemEl.getAttribute("data-id")
-  await dataManager.moveSpace(Number(currentSpaceId), oldIndex!, newIndex!)
+  await dataManager.moveSpace(String(currentSpaceId), oldIndex!, newIndex!)
   await refreshSpaces()
 }
 
@@ -189,7 +189,7 @@ function onHandleSpaceClick(space: Space) {
 function onImport() {
   const type = ref("toby")
   const formModel = ref<{
-    spaceId: number
+    spaceId: string
     fileList: UploadFileInfo[]
   }>({
     spaceId: spacesStore.activeId,

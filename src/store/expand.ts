@@ -6,10 +6,10 @@ import { useSpacesStore } from "./spaces"
 export const useExpandStore = defineStore("expand", () => {
   const spacesStore = useSpacesStore()
   const expandedCollections = useLocalStorage<{
-    [key: number]: boolean
+    [key: string]: boolean
   }>("expanded-collections", {})
 
-  const toggleCollection = (collectionId: number) => {
+  const toggleCollection = (collectionId: string) => {
     if (isUndef(expandedCollections.value[collectionId])) {
       expandedCollections.value[collectionId] = false
     } else {
@@ -18,7 +18,7 @@ export const useExpandStore = defineStore("expand", () => {
     }
   }
 
-  const isCollectionExpanded = (collectionId: number) => {
+  const isCollectionExpanded = (collectionId: string) => {
     return isUndef(expandedCollections.value[collectionId])
       ? true
       : expandedCollections.value[collectionId]
@@ -34,7 +34,7 @@ export const useExpandStore = defineStore("expand", () => {
 
   const collapseAll = async () => {
     expandedCollections.value = spacesStore.collections.reduce(
-      (acc: { [key: number]: boolean }, item) => {
+      (acc: { [key: string]: boolean }, item) => {
         acc[item.id] = false
         return acc
       },
