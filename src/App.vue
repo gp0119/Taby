@@ -137,6 +137,8 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
 
 onMounted(async () => {
   themeStore.setThemeProperty()
+  await refreshSpaces()
+  await refreshCollections()
   const result = await chrome.storage.sync.get([
     SYNC_GIST_TOKEN,
     SYNC_GIST_ID,
@@ -162,9 +164,11 @@ onMounted(async () => {
   if (result.gistId) {
     localStorage.setItem("gistId", result.gistId)
   }
-  await syncManager.autoDownload()
-  await refreshSpaces()
-  await refreshCollections()
+  const isAutoDownload = await syncManager.autoDownload()
+  if (isAutoDownload) {
+    await refreshSpaces()
+    await refreshCollections()
+  }
   loading.value = false
 })
 </script>

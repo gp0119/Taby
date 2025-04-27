@@ -1,7 +1,7 @@
 import Dexie, { EntityTable } from "dexie"
 import { Card, Collection, Favicon, Label, Space, SyncData } from "@/type.ts"
 import syncManager from "@/sync/syncManager.ts"
-import { v4 as uuidv4, validate as uuidValidate } from "uuid"
+import { uuid, uuidValidate } from "@/utils/index.ts"
 
 class DataBase extends Dexie {
   private static instance: DataBase
@@ -16,13 +16,13 @@ class DataBase extends Dexie {
   constructor() {
     super("TabyDatabase")
     this.version(2).stores({
-      spaces: "id, title, order, createdAt, icon",
+      spaces: "&id, title, order, createdAt, icon",
       collections:
-        "id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
-      labels: "id, title, color",
+        "&id, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
+      labels: "&id, title, color",
       cards:
-        "id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
-      favicons: "id, url",
+        "&id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
+      favicons: "&id, url",
     })
     this.initializeDefaultData()
     this.addHooks()
@@ -41,7 +41,7 @@ class DataBase extends Dexie {
 
   private async createDefaultSpace() {
     await this.spaces.add({
-      id: uuidv4(),
+      id: uuid(),
       title: "My Collections",
       order: 1000,
       createdAt: Date.now(),
@@ -280,7 +280,7 @@ class DataBase extends Dexie {
         const oldId = space.id
         // 检查旧 ID 是否是有效的 UUID string
         const newId =
-          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuid()
         if (oldId !== undefined) {
           oldSpaceIdMap.set(oldId, newId)
         }
@@ -291,7 +291,7 @@ class DataBase extends Dexie {
       const collections = data.collections.map((collection) => {
         const oldId = collection.id
         const newId =
-          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuid()
         if (oldId !== undefined) {
           oldCollectionIdMap.set(oldId, newId)
         }
@@ -315,7 +315,7 @@ class DataBase extends Dexie {
       const labels = data.labels.map((label) => {
         const oldId = label.id
         const newId =
-          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+          typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuid()
         if (oldId !== undefined) {
           oldLabelIdMap.set(oldId, newId)
         }
@@ -354,7 +354,7 @@ class DataBase extends Dexie {
           // URL 不存在，检查传入的 ID 是否是有效 UUID
           const oldId = favicon.id
           newId =
-            typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuidv4()
+            typeof oldId === "string" && uuidValidate(oldId) ? oldId : uuid()
           faviconsMapByUrl.set(url, newId)
           faviconsToAdd.push({ ...favicon, id: newId, url } as Favicon)
         }
@@ -367,7 +367,7 @@ class DataBase extends Dexie {
 
       // 2. 处理 cards：始终生成新 ID，但使用映射查找正确的 *外键* ID
       const cards = data.cards.map((card) => {
-        const cardId = uuidv4() // **始终为导入的 card 生成新 ID**
+        const cardId = uuid() // **始终为导入的 card 生成新 ID**
 
         // 查找新的 collectionId (使用 collection 的映射)
         const oldCollectionId = card.collectionId

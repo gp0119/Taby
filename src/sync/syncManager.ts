@@ -69,18 +69,26 @@ class SyncManager {
     return data
   }
 
-  autoDownload = async () => {
-    const { accessToken, gistId } = await this.getToken()
-    if (!accessToken || !gistId) return
-    const lastSyncTime = localStorage.getItem("lastSyncTime")
-    if (!lastSyncTime) {
-      await this.triggerDownload()
-      return
-    } else {
-      if (Date.now() - Number(lastSyncTime) > this.AUTO_DOWNLOAD_INTERVAL) {
-        await this.triggerDownload()
+  autoDownload = () => {
+    return new Promise(async (resolve) => {
+      const { accessToken, gistId } = await this.getToken()
+      if (!accessToken || !gistId) {
+        resolve(false)
+        return
       }
-    }
+      const lastSyncTime = localStorage.getItem("lastSyncTime")
+      if (!lastSyncTime) {
+        await this.triggerDownload()
+        resolve(true)
+      } else {
+        if (Date.now() - Number(lastSyncTime) > this.AUTO_DOWNLOAD_INTERVAL) {
+          await this.triggerDownload()
+          resolve(true)
+        } else {
+          resolve(false)
+        }
+      }
+    })
   }
 
   autoUpload = async () => {

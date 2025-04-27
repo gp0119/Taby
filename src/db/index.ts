@@ -1,5 +1,5 @@
 import { COLOR_LIST } from "@/utils/constants.ts"
-import Dexie, { InsertType } from "dexie"
+import Dexie from "dexie"
 import {
   Card,
   Collection,
@@ -10,7 +10,7 @@ import {
   SpaceWithCollections,
 } from "@/type.ts"
 import { db } from "./database.ts"
-import { v4 as uuidv4 } from "uuid"
+import { uuid } from "@/utils/index.ts"
 
 class DataManager {
   private static instance: DataManager
@@ -34,7 +34,7 @@ class DataManager {
     const lastSpace = await db.spaces.orderBy("order").last()
     const { title, icon } = space
     const newSpace: Space = {
-      id: uuidv4(),
+      id: uuid(),
       title: title || "",
       ...(icon && { icon }),
       order: lastSpace ? lastSpace.order + this.ORDER_STEP : this.ORDER_STEP,
@@ -100,7 +100,7 @@ class DataManager {
         .toArray()
 
       const newCollection: Collection = {
-        id: uuidv4(),
+        id: uuid(),
         title: collection.title || "",
         spaceId: spaceId,
         labelIds: labelIds,
@@ -128,7 +128,7 @@ class DataManager {
         .last()
 
       const newCollection: Collection = {
-        id: uuidv4(),
+        id: uuid(),
         title: collection.title || "",
         spaceId: spaceId,
         labelIds: labelIds,
@@ -223,7 +223,7 @@ class DataManager {
 
   async addLabel(title: string, color: string) {
     const newLabel: Label = {
-      id: uuidv4(),
+      id: uuid(),
       title,
       color,
     }
@@ -236,7 +236,7 @@ class DataManager {
     if (label) return label.id
     const randomIndex = Math.floor(Math.random() * COLOR_LIST.length)
     const newLabel: Label = {
-      id: uuidv4(),
+      id: uuid(),
       title,
       color: COLOR_LIST[randomIndex],
     }
@@ -311,7 +311,7 @@ class DataManager {
       const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
       const newCard: Card = {
         ...newCardBase,
-        id: uuidv4(),
+        id: uuid(),
         description: "",
         order: lastOrder + this.ORDER_STEP,
         createdAt: Date.now(),
@@ -323,7 +323,7 @@ class DataManager {
     const newOrder = (targetIndex + 1) * this.ORDER_STEP
     const newCard: Card = {
       ...newCardBase,
-      id: uuidv4(),
+      id: uuid(),
       description: "",
       order: newOrder,
       createdAt: Date.now(),
@@ -544,7 +544,6 @@ class DataManager {
   async getCollectionWithCards(
     spaceId: string,
   ): Promise<CollectionWithCards[]> {
-    console.log("spaceId: ", spaceId)
     const collections = await db.collections
       .where("[spaceId+order]")
       .between([spaceId, Dexie.minKey], [spaceId, Dexie.maxKey])
@@ -579,7 +578,7 @@ class DataManager {
   async batchAddCards(cards: Omit<Card, "id">[]) {
     const cardsToAdd = cards.map((card) => ({
       ...card,
-      id: uuidv4(),
+      id: uuid(),
       collectionId: String(card.collectionId || ""),
       faviconId: card.faviconId ? String(card.faviconId) : undefined,
       title: card.title || "",
@@ -596,7 +595,7 @@ class DataManager {
     let _url = url.trim()
     const isExist = await db.favicons.where("url").equals(_url).first()
     if (isExist) return isExist.id
-    const newFavicon = { id: uuidv4(), url: _url }
+    const newFavicon = { id: uuid(), url: _url }
     await db.favicons.add(newFavicon)
     return newFavicon.id
   }
