@@ -71,6 +71,7 @@ class GistManager {
     }
     return (await response.json()) as T
   }
+
   async createGist(data: SyncData) {
     const { spaces, collections, labels, cards, favicons } = data
     const files: { [key: string]: { content: string } } = {}
@@ -114,11 +115,14 @@ class GistManager {
     return this.request({
       endpoint: `/gists/${this.GIST_ID}`,
       method: "PATCH",
-      body: { files },
+      body: {
+        files,
+      },
     })
   }
   async fetchGist() {
     const res = await this.request<{
+      description: string
       files: {
         spaces: { content: string }
         collections: { content: string }
@@ -143,7 +147,12 @@ class GistManager {
         ? JSON.parse(decompressFromUTF16(favicons.content))
         : [],
     }
-    console.log("new remoteData: ", remoteData)
+    console.log(
+      "new remoteData: ",
+      remoteData,
+      "description: ",
+      res.description,
+    )
     return remoteData
   }
 
