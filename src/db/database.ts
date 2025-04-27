@@ -43,7 +43,6 @@ class DataBase extends Dexie {
       title: "My Collections",
       order: 1000,
       createdAt: Date.now(),
-      modifiedAt: Date.now(),
       icon: "StorefrontOutline",
     })
     await this.clearModifiedTable()
@@ -164,10 +163,11 @@ class DataBase extends Dexie {
     }
   }
 
-  private stripMetadata<
-    T extends { createdAt?: number; modifiedAt?: number; id?: number },
-  >(obj: T, additionalFields: (keyof T)[] = []): Partial<T> {
-    const { createdAt, modifiedAt, id, ...rest } = obj
+  private stripMetadata<T extends { createdAt?: number; id?: number }>(
+    obj: T,
+    additionalFields: (keyof T)[] = [],
+  ): Partial<T> {
+    const { createdAt, id, ...rest } = obj
     const result = { ...rest } as Partial<T>
     additionalFields.forEach((field) => {
       if (field in result) {

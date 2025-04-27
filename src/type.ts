@@ -1,7 +1,6 @@
 interface BaseEntity {
   id: number
   createdAt?: number
-  modifiedAt?: number
 }
 
 export interface iCard extends BaseEntity {

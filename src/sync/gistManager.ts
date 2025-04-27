@@ -147,12 +147,7 @@ class GistManager {
         ? JSON.parse(decompressFromUTF16(favicons.content))
         : [],
     }
-    console.log(
-      "new remoteData: ",
-      remoteData,
-      "description: ",
-      res.description,
-    )
+    console.log("new remoteData: ", remoteData)
     return remoteData
   }
 
