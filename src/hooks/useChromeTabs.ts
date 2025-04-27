@@ -9,12 +9,12 @@ export function useChromeTabs() {
     const res = await chrome.tabs.query({})
     // console.log("res: ", res)
     tabs.value = res.reduce((acc: { [key: string]: Card[] }, cur) => {
-      const tab = {
+      const tab: Card = {
         title: cur.title || "",
         url: cur.url || "",
         description: "",
         windowId: cur.windowId,
-        id: cur.id as number,
+        id: cur.id!,
         collectionId: 0,
         order: 0,
         favicon: cur.favIconUrl || "",
