@@ -1,5 +1,6 @@
 interface BaseEntity {
   id: number
+  uid: string
   createdAt?: number
 }
 
@@ -20,9 +21,10 @@ export interface Space extends BaseEntity {
 
 export interface Collection extends BaseEntity {
   title: string
-  spaceId: number
+  spaceId: string
   order: number
-  labelIds: number[]
+  labelIds: string[]
+  icon?: string
 }
 
 export interface Label extends BaseEntity {
@@ -36,10 +38,10 @@ export interface Card extends BaseEntity {
   customDescription?: string
   url: string
   description: string
-  collectionId: number
+  collectionId: string
   order: number
   windowId?: number
-  faviconId?: number
+  faviconId?: string
   favicon?: string
 }
 
@@ -54,6 +56,7 @@ export interface SpaceWithCollections extends Space {
 
 export interface Favicon {
   id: number
+  uid: string
   url: string
 }
 

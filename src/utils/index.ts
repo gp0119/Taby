@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid"
+
 export function getFaviconFromCache(u: string) {
   const url = new URL(chrome.runtime.getURL("/_favicon/"))
   url.searchParams.set("pageUrl", u)
@@ -16,4 +18,8 @@ export function getGoogleFavicon(url: string) {
 
 export function isNewTabPage(url: string) {
   return url === "chrome://newtab/"
+}
+
+export function uuid() {
+  return nanoid(6)
 }
