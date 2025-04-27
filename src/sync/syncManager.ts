@@ -11,7 +11,6 @@ const LOCAL_LAST_DOWNLOAD_TIME = "localLastDownloadTime" // Stored in localStora
 class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
-  AUTO_DOWNLOAD_INTERVAL = 1000 * 60 * 60 * 3 // 3 hours
 
   constructor() {}
 
