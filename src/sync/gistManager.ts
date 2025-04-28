@@ -152,8 +152,7 @@ class GistManager {
       let decompressedString: string | null = null
       try {
         const uint8Array = decompressWithPako(file.content)
-        decompressedString = new TextDecoder().decode(uint8Array)
-        return JSON.parse(decompressedString)
+        return JSON.parse(uint8Array)
       } catch (e) {
         try {
           decompressedString = decompressFromUTF16(file.content)
