@@ -53,6 +53,7 @@
           type="primary"
           size="small"
           :disabled="!formModel.accessToken"
+          :loading="uploadLoading"
           @click="handleUpload"
         >
           <template #icon>
@@ -64,6 +65,7 @@
           ghost
           size="small"
           type="primary"
+          :loading="downloadLoading"
           @click="handleDownload"
           :disabled="!(formModel.accessToken && formModel.gistId)"
         >
@@ -107,6 +109,8 @@ const formRef = ref<FormInst | null>(null)
 const message = useMessage()
 const { open } = useDeleteDialog()
 
+const uploadLoading = ref(false)
+const downloadLoading = ref(false)
 const renderLabel = (option: any) => {
   return (
     <div class="flex items-center">
@@ -157,6 +161,7 @@ const handleGistIdChange = debounce((value: string) => {
 const handleUpload = () => {
   formRef.value?.validate().then(async () => {
     try {
+      uploadLoading.value = true
       const gistId = await syncManager.uploadAll()
       formModel.value.gistId = gistId as string
       localStorage.setItem(SYNC_GIST_ID, gistId as string)
@@ -165,9 +170,11 @@ const handleUpload = () => {
         [SYNC_GIST_ID]: gistId as string,
       })
       message.success(ft("success", "upload"))
+      uploadLoading.value = false
       show.value = false
     } catch (error) {
       message.error(ft("fail", "upload"))
+      uploadLoading.value = false
     }
   })
 }
@@ -179,6 +186,7 @@ const handleDownload = () => {
     onPositiveClick: () => {
       formRef.value?.validate().then(async () => {
         try {
+          downloadLoading.value = true
           await syncManager.triggerDownload()
           await chrome.storage.sync.set({
             [SYNC_GIST_TOKEN]: formModel.value.accessToken,
@@ -187,9 +195,11 @@ const handleDownload = () => {
           await refreshSpaces()
           await refreshCollections()
           message.success(ft("success", "download"))
+          downloadLoading.value = false
           show.value = false
         } catch (error) {
           message.error(ft("fail", "download"))
+          downloadLoading.value = false
         }
       })
     },
