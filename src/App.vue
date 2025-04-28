@@ -84,10 +84,7 @@ const handleVisibilityChange = debounce(
     await syncManager.autoUpload()
   },
   3000,
-  {
-    leading: true,
-    trailing: false,
-  },
+  { leading: true, trailing: false },
 )
 
 onMounted(() => {
@@ -154,7 +151,7 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
-  themeStore.setThemeProperty()
+  themeStore.applyThemeAttribute()
   await refreshSpaces()
   await refreshCollections()
   const isDownloaded = await syncManager.autoDownload()

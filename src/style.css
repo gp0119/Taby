@@ -2,6 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 为每个主题定义变量 */
+html[data-theme="pink"] {
+  --primary: #f65077;
+  --darkenPrimary: #e0496c;
+  --bodyBackground: #fafafa;
+  --cardBackground: #ffffff;
+  --textPrimary: #333333;
+  --textSecondary: #666666;
+  --borderColor: #e9e9e9;
+  --hoverColor: #fae8ea;
+  --shadowColor: rgba(143, 57, 80, 0.2);
+  --sepia: 0;
+}
+
+html[data-theme="purple"] {
+  --primary: #8b5fbf;
+  --darkenPrimary: #61398f;
+  --bodyBackground: #f5f3f7;
+  --cardBackground: #f1edf5;
+  --textPrimary: #4a4a4a;
+  --textSecondary: #878787;
+  --borderColor: #e9e4ed;
+  --hoverColor: #e9e4ed;
+  --shadowColor: rgba(97, 57, 143, 0.2);
+  --sepia: 0.3;
+}
+
+html[data-theme="green"] {
+  --primary: #4caf50;
+  --darkenPrimary: #2a9235;
+  --bodyBackground: #eafbe5;
+  --cardBackground: #e0f1db;
+  --textPrimary: #18361a;
+  --textSecondary: #304933;
+  --borderColor: #c8e0c5;
+  --hoverColor: #b4c8b1;
+  --shadowColor: rgba(33, 84, 61, 0.2);
+  --sepia: 0.6;
+}
+
+html[data-theme="dark"] {
+  --primary: #7d81da;
+  --darkenPrimary: #6568b2;
+  --bodyBackground: #1a1f2b;
+  --cardBackground: #292e3b;
+  --textPrimary: #cbd5e1;
+  --textSecondary: #94a3b8;
+  --borderColor: #353f51;
+  --hoverColor: #6e78b2;
+  --shadowColor: rgba(14, 17, 24, 0.8);
+  --sepia: 0.5;
+}
+
+html[data-theme="orange"] {
+  --primary: #ff7f50;
+  --darkenPrimary: #dd6236;
+  --bodyBackground: #f6efdf;
+  --cardBackground: #ece5d5;
+  --textPrimary: #442e1a;
+  --textSecondary: #6b635c;
+  --borderColor: #dad4c0;
+  --hoverColor: #ffd299;
+  --shadowColor: rgba(122, 90, 48, 0.2);
+  --sepia: 0.5;
+}
+
 @layer utilities {
   .flex-center {
     display: flex;

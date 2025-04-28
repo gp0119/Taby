@@ -68,22 +68,13 @@ export const useThemeStore = defineStore("theme", () => {
 
   const setTheme = (value: string) => {
     theme.value = value
-    setThemeProperty()
+    applyThemeAttribute()
   }
 
-  const setThemeProperty = () => {
-    let root = document.documentElement
-    const color = themeColor[theme.value]
-
-    const cleanupFunction = () => {
-      root.style.display = "none"
-      window.removeEventListener("beforeunload", cleanupFunction)
-    }
-
-    window.addEventListener("beforeunload", cleanupFunction)
-
-    for (const key in color) {
-      root.style.setProperty(`--${key}`, color[key])
+  const applyThemeAttribute = () => {
+    const root = document.documentElement
+    if (root) {
+      root.dataset.theme = theme.value
     }
   }
 
@@ -91,6 +82,6 @@ export const useThemeStore = defineStore("theme", () => {
     theme,
     themeColor,
     setTheme,
-    setThemeProperty,
+    applyThemeAttribute,
   }
 })
