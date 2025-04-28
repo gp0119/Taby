@@ -2,11 +2,12 @@ import { db } from "@/db/database.ts"
 import GistManager from "@/sync/gistManager.ts"
 import { SyncData, SyncTokenData } from "@/type.ts"
 import { debounce, isEmpty } from "lodash-es"
-import { SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
-
-// Define storage keys
-const REMOTE_LAST_UPDATE_TIME = "remoteLastUpdateTime" // Stored in chrome.storage.sync
-const LOCAL_LAST_DOWNLOAD_TIME = "localLastDownloadTime" // Stored in localStorage
+import {
+  SYNC_GIST_TOKEN,
+  SYNC_GIST_ID,
+  LOCAL_LAST_DOWNLOAD_TIME,
+  REMOTE_LAST_UPDATE_TIME,
+} from "@/utils/constants.ts"
 
 class SyncManager {
   private static instance: SyncManager
@@ -38,10 +39,8 @@ class SyncManager {
     const data: Partial<SyncData> = await db.exportData()
     if (!data) return
     const result = await GistManager.uploadData(data)
-    // Set remote update time after successful upload
     const now = Date.now()
     await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
-    // Also update local download time, as this client is now up-to-date
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
     await db.clearModifiedTable()
     localStorage.removeItem("lastModifiedTime")
@@ -52,10 +51,8 @@ class SyncManager {
     const modifiedData: Partial<SyncData> = await db.getModifiedTables()
     if (isEmpty(modifiedData)) return
     await GistManager.uploadData(modifiedData)
-    // Set remote update time after successful upload
     const now = Date.now()
     await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
-    // Also update local download time, as this client is now up-to-date
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
     await db.clearModifiedTable()
     localStorage.removeItem("lastModifiedTime")
@@ -64,10 +61,7 @@ class SyncManager {
   uploadModifiedTablesDebounce = debounce(
     this.uploadModifiedTablesImmediate,
     this.SYNC_INTERVAL,
-    {
-      leading: false,
-      trailing: true,
-    },
+    { leading: false, trailing: true },
   )
 
   triggerUpload = async () => {
@@ -76,10 +70,8 @@ class SyncManager {
   }
 
   triggerDownload = async () => {
-    // downloadAll now returns only remoteData
     const data = await GistManager.downloadAll()
     await db.importData(data)
-    // Set local download time after successful download/import
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, Date.now() + "")
     return data
   }
@@ -88,22 +80,17 @@ class SyncManager {
     const { accessToken, gistId } = await this.getToken()
     if (!accessToken || !gistId) return
     try {
-      // 1. Get remote update time from chrome.storage.sync
       const syncStorage = await chrome.storage.sync.get([
         REMOTE_LAST_UPDATE_TIME,
       ])
-      const remoteUpdateTime = syncStorage[REMOTE_LAST_UPDATE_TIME] // This will be a number or undefined
-
-      // 2. Get local download time from localStorage
+      const remoteUpdateTime = syncStorage[REMOTE_LAST_UPDATE_TIME]
       const localDownloadTimeStr = localStorage.getItem(
         LOCAL_LAST_DOWNLOAD_TIME,
       )
       const localDownloadTime = localDownloadTimeStr
         ? Number(localDownloadTimeStr)
-        : 0 // Default to 0 if not set
+        : 0
 
-      // 3. Compare times
-      // Download if local time is missing (first sync) or remote is newer than local
       if (
         !localDownloadTime ||
         (remoteUpdateTime && remoteUpdateTime > localDownloadTime)

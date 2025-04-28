@@ -221,3 +221,5 @@ export const GITEE_API = "https://gitee.com/api/v5"
 export const SYNC_GIST_ID = "gistId"
 export const SYNC_GIST_TOKEN = "accessToken"
 export const SYNC_TYPE = "syncType"
+export const REMOTE_LAST_UPDATE_TIME = "remoteLastUpdateTime" // Stored in chrome.storage.sync
+export const LOCAL_LAST_DOWNLOAD_TIME = "localLastDownloadTime" // Stored in localStorage
