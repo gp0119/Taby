@@ -70,11 +70,13 @@ const loading = ref(true)
 
 provide("loading", {
   loading,
+  setLoading: (value: boolean) => {
+    loading.value = value
+  },
 })
 
 const handleVisibilityChange = debounce(
   async () => {
-    // console.log("handleVisibilityChange")
     if (localStorage.getItem("refreshCollections")) {
       await refreshCollections()
       localStorage.removeItem("refreshCollections")
@@ -89,7 +91,6 @@ const handleVisibilityChange = debounce(
 )
 
 onMounted(() => {
-  // console.log("onMounted")
   document.addEventListener("visibilitychange", handleVisibilityChange)
   window.addEventListener("beforeunload", removeListener)
 })

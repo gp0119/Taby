@@ -171,10 +171,15 @@ function onAddSpace() {
   })
 }
 
+const { setLoading } = inject("loading") as {
+  setLoading: (value: boolean) => void
+}
 function onHandleSpaceClick(space: Space) {
+  setLoading(true)
   spacesStore.setActiveSpace(space.id!)
   refreshCollections()
   duplicateCardStore.clearDuplicateCards()
+  setLoading(false)
 }
 
 function onImport() {
