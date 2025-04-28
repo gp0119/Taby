@@ -106,6 +106,9 @@ class GistManager {
     return res.id
   }
   async updateGist(data: Partial<SyncData>) {
+    if (!this.GIST_ID) {
+      throw new Error("未设置 Gist ID")
+    }
     const files: { [key: string]: { content: string } } = {}
     Object.entries(data).forEach(([key, value]) => {
       if (value)
@@ -121,6 +124,9 @@ class GistManager {
     })
   }
   async fetchGist() {
+    if (!this.GIST_ID) {
+      throw new Error("未设置 Gist ID")
+    }
     const res = await this.request<{
       description: string
       files: {
@@ -134,7 +140,6 @@ class GistManager {
       endpoint: `/gists/${this.GIST_ID}`,
       method: "GET",
     })
-    // 兼容老数据
     const { spaces, collections, labels, cards, favicons } = res.files
     const remoteData: SyncData = {
       spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
