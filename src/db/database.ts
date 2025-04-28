@@ -251,10 +251,15 @@ class DataBase extends Dexie {
     cards: Card[]
     favicons: Favicon[]
   }) {
-    this.transaction(
-      "rw",
-      [this.spaces, this.collections, this.labels, this.cards, this.favicons],
-      async () => {
+    const tablesToLock: Dexie.Table[] = [
+      this.spaces,
+      this.collections,
+      this.labels,
+      this.cards,
+      this.favicons,
+    ]
+    try {
+      await this.transaction("rw", tablesToLock, async () => {
         await Promise.all([
           this.spaces.clear(),
           this.collections.clear(),
@@ -262,56 +267,61 @@ class DataBase extends Dexie {
           this.cards.clear(),
           this.favicons.clear(),
         ])
-        await this.spaces.bulkPut(
-          data.spaces.map((space) => ({
-            id: space.id,
-            title: space.title,
-            icon: space.icon,
-            order: space.order || 0,
-            createdAt: space.createdAt,
-          })),
-        )
-        await this.collections.bulkPut(
-          data.collections.map((collection) => ({
-            id: collection.id,
-            title: collection.title,
-            spaceId: collection.spaceId,
-            order: collection.order || 0,
-            labelIds: collection.labelIds || [],
-            createdAt: collection.createdAt,
-          })),
-        )
-        await this.labels.bulkPut(
-          data.labels.map((label) => ({
-            id: label.id,
-            title: label.title,
-            color: label.color,
-          })),
-        )
-        const usedFaviconIds = new Set<number>()
-        const cards = data.cards.map((card) => {
-          if (card.faviconId) {
-            usedFaviconIds.add(card.faviconId)
+        const chunkSize = 100
+        if (data.spaces && data.spaces.length > 0) {
+          await this.spaces.bulkPut(data.spaces)
+        }
+        if (data.collections && data.collections.length > 0) {
+          await this.collections.bulkPut(data.collections)
+        }
+        if (data.labels && data.labels.length > 0) {
+          await this.labels.bulkPut(data.labels)
+        }
+        let faviconsToImport: Favicon[] = []
+        if (
+          data.cards &&
+          data.cards.length > 0 &&
+          data.favicons &&
+          data.favicons.length > 0
+        ) {
+          const usedFaviconIds = new Set<number>()
+          data.cards.forEach((card) => {
+            if (card.faviconId && card.faviconId > 0) {
+              usedFaviconIds.add(card.faviconId)
+            }
+          })
+          faviconsToImport = data.favicons.filter((favicon) =>
+            usedFaviconIds.has(favicon.id),
+          )
+        } else {
+          faviconsToImport =
+            data.favicons && data.cards?.length === 0 ? data.favicons : []
+        }
+        if (faviconsToImport.length > 0) {
+          const numChunks = Math.ceil(faviconsToImport.length / chunkSize)
+          for (let i = 0; i < numChunks; i++) {
+            const start = i * chunkSize
+            const end = start + chunkSize
+            const chunk = faviconsToImport.slice(start, end)
+            await this.favicons.bulkPut(chunk)
           }
-          return {
-            id: card.id,
-            title: card.customTitle || card.title,
-            url: card.url,
-            order: card.order || 0,
-            description: card.customDescription || card.description || "",
-            collectionId: card.collectionId || 0,
-            faviconId: card.faviconId || 0,
-            createdAt: card.createdAt,
+        }
+
+        if (data.cards && data.cards.length > 0) {
+          const numChunks = Math.ceil(data.cards.length / chunkSize)
+          for (let i = 0; i < numChunks; i++) {
+            const start = i * chunkSize
+            const end = start + chunkSize
+            const chunk = data.cards.slice(start, end)
+            await this.cards.bulkPut(chunk)
           }
-        })
-        const usedFavicons = data.favicons.filter((favicon) =>
-          usedFaviconIds.has(favicon.id),
-        )
-        await this.favicons.bulkPut(usedFavicons)
-        await this.cards.bulkPut(cards)
+        }
         await this.clearModifiedTable()
-      },
-    )
+        localStorage.removeItem("lastModifiedTime")
+      })
+    } catch (error) {
+      console.error("Data import failed:", error)
+    }
   }
 
   async cleanup() {
