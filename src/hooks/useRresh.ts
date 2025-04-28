@@ -10,8 +10,7 @@ export const useRefresh = () => {
   }
 
   const refreshCollections = async () => {
-    const collections = await spacesStore.fetchCollections(spacesStore.activeId)
-    spacesStore.setCollections(collections)
+    await spacesStore.fetchCollections(spacesStore.activeId)
     await tagsStore.fetchCollectionsTags()
   }
 

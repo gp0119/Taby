@@ -84,14 +84,12 @@ import syncManager from "@/sync/syncManager.ts"
 import { LogoGithub } from "@vicons/ionicons5"
 import { CloudDownload, CloudUpload } from "@vicons/carbon"
 import { debounce } from "lodash-es"
-import { useSpacesStore } from "@/store/spaces.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 
 const { ft } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
-const spacesStore = useSpacesStore()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const syncTypeOptions = ref([
   { label: "GitHub", value: "github" },
@@ -187,7 +185,6 @@ const handleDownload = () => {
             [SYNC_GIST_ID]: formModel.value.gistId,
           })
           await refreshSpaces()
-          await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
           await refreshCollections()
           message.success(ft("success", "download"))
           show.value = false

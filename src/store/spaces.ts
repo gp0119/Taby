@@ -5,8 +5,13 @@ import dataManager from "@/db"
 
 export const useSpacesStore = defineStore("spaces", () => {
   const spaces = ref<Space[]>([])
-  const collections = ref<CollectionWithCards[]>([])
   const activeId = useLocalStorage<number>("activeSpaceId", 1)
+
+  const cacheCollections = ref<{ [key: number]: CollectionWithCards[] }>({})
+
+  const collections = computed(() => {
+    return cacheCollections.value[activeId.value] || []
+  })
 
   const currentSpace = computed(() =>
     spaces.value.find((space) => space.id === activeId.value),
@@ -32,7 +37,10 @@ export const useSpacesStore = defineStore("spaces", () => {
 
   async function fetchCollections(spaceId: number) {
     try {
-      return dataManager.getCollectionWithCards(spaceId)
+      const collections = await dataManager.getCollectionWithCards(spaceId)
+      console.log("collections: ", collections)
+      cacheCollections.value[spaceId] = collections
+      return collections
     } catch (error) {
       console.error(`Failed to fetch collections for space ${spaceId}:`, error)
       return []
@@ -41,11 +49,9 @@ export const useSpacesStore = defineStore("spaces", () => {
 
   async function setActiveSpace(id: number) {
     activeId.value = id
-  }
-
-  function setCollections(_collections: CollectionWithCards[]) {
-    // console.log("_collections: ", _collections)
-    collections.value = _collections
+    if (!cacheCollections.value[id]) {
+      await fetchCollections(id)
+    }
   }
 
   return {
@@ -57,6 +63,5 @@ export const useSpacesStore = defineStore("spaces", () => {
     fetchSpaces,
     fetchCollections,
     setActiveSpace,
-    setCollections,
   }
 })

@@ -84,7 +84,7 @@ const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
-const { refreshSpaces, refreshCollections } = useRefresh()
+const { refreshSpaces } = useRefresh()
 
 watch(
   () => spacesStore.activeId,
@@ -154,8 +154,6 @@ function onDeleteSpace() {
     onPositiveClick: async () => {
       await dataManager.removeSpace(spacesStore.activeId)
       await refreshSpaces()
-      await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
-      await refreshCollections()
       dialog.destroyAll()
     },
   })

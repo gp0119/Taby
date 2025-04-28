@@ -177,7 +177,6 @@ const { setLoading } = inject("loading") as {
 function onHandleSpaceClick(space: Space) {
   setLoading(true)
   spacesStore.setActiveSpace(space.id!)
-  refreshCollections()
   duplicateCardStore.clearDuplicateCards()
   setLoading(false)
 }
