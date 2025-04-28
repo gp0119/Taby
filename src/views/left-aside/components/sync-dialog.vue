@@ -126,7 +126,6 @@ const renderLabel = (option: any) => {
 
 const handleSyncTypeChange = (value: string) => {
   if (value === formModel.value.syncType) return
-  console.log("value: ", value, formModel.value.syncType)
   // type
   chrome.storage.sync.set({ [SYNC_TYPE]: value })
   formModel.value.syncType = value
