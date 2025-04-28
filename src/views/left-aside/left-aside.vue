@@ -112,9 +112,6 @@ const { openModal } = useSearchModal()
 const loadingBar = useLoadingBar()
 const { ft } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
-const init = async () => {
-  await spacesStore.initialize()
-}
 
 const showSyncDialog = ref(false)
 
@@ -124,12 +121,6 @@ const cleanup = useEventListener(window, "keydown", (e) => {
     e.stopPropagation()
     openModal()
   }
-})
-
-onMounted(async () => {
-  setTimeout(async () => {
-    await init()
-  }, 100)
 })
 
 onUnmounted(() => {
@@ -175,7 +166,7 @@ function onAddSpace() {
         title: formModel.value.title,
         icon: formModel.value.icon,
       })
-      await spacesStore.initialize()
+      await refreshSpaces()
     },
   })
 }

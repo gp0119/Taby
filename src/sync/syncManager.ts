@@ -77,38 +77,46 @@ class SyncManager {
   }
 
   autoDownload = async () => {
-    const { accessToken, gistId } = await this.getToken()
-    if (!accessToken || !gistId) return
-    try {
-      const syncStorage = await chrome.storage.sync.get([
-        REMOTE_LAST_UPDATE_TIME,
-      ])
-      const remoteUpdateTime = syncStorage[REMOTE_LAST_UPDATE_TIME]
-      const localDownloadTimeStr = localStorage.getItem(
-        LOCAL_LAST_DOWNLOAD_TIME,
-      )
-      const localDownloadTime = localDownloadTimeStr
-        ? Number(localDownloadTimeStr)
-        : 0
-
-      if (
-        !localDownloadTime ||
-        (remoteUpdateTime && remoteUpdateTime > localDownloadTime)
-      ) {
-        console.log("Remote Gist potentially newer, downloading...", {
-          remoteUpdateTime,
-          localDownloadTime,
-        })
-        await this.triggerDownload()
-      } else {
-        console.log("Local data is up-to-date, skipping download.", {
-          remoteUpdateTime,
-          localDownloadTime,
-        })
+    return new Promise(async (resolve) => {
+      const { accessToken, gistId } = await this.getToken()
+      if (!accessToken || !gistId) {
+        resolve(false)
+        return
       }
-    } catch (error) {
-      console.error("Error during autoDownload check:", error)
-    }
+      try {
+        const syncStorage = await chrome.storage.sync.get([
+          REMOTE_LAST_UPDATE_TIME,
+        ])
+        const remoteUpdateTime = syncStorage[REMOTE_LAST_UPDATE_TIME]
+        const localDownloadTimeStr = localStorage.getItem(
+          LOCAL_LAST_DOWNLOAD_TIME,
+        )
+        const localDownloadTime = localDownloadTimeStr
+          ? Number(localDownloadTimeStr)
+          : 0
+
+        if (
+          !localDownloadTime ||
+          (remoteUpdateTime && remoteUpdateTime > localDownloadTime)
+        ) {
+          console.log("Remote Gist potentially newer, downloading...", {
+            remoteUpdateTime,
+            localDownloadTime,
+          })
+          await this.triggerDownload()
+          resolve(true)
+        } else {
+          console.log("Local data is up-to-date, skipping download.", {
+            remoteUpdateTime,
+            localDownloadTime,
+          })
+          resolve(false)
+        }
+      } catch (error) {
+        console.error("Error during autoDownload check:", error)
+        resolve(false)
+      }
+    })
   }
 
   autoUpload = async () => {

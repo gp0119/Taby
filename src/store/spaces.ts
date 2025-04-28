@@ -16,6 +16,13 @@ export const useSpacesStore = defineStore("spaces", () => {
     try {
       const allSpaces = await dataManager.getAllSpaces()
       spaces.value = allSpaces
+      if (
+        allSpaces.length > 0 &&
+        (!activeId.value ||
+          allSpaces.findIndex((space) => space.id === activeId.value) === -1)
+      ) {
+        await setActiveSpace(allSpaces[0].id!)
+      }
       return allSpaces
     } catch (error) {
       console.error("Failed to fetch spaces:", error)
@@ -41,14 +48,6 @@ export const useSpacesStore = defineStore("spaces", () => {
     collections.value = _collections
   }
 
-  // 初始化方法
-  async function initialize() {
-    const spaces = await fetchSpaces()
-    if (spaces.length > 0 && !activeId.value) {
-      await setActiveSpace(spaces[0].id!)
-    }
-  }
-
   return {
     spaces,
     collections,
@@ -58,7 +57,6 @@ export const useSpacesStore = defineStore("spaces", () => {
     fetchSpaces,
     fetchCollections,
     setActiveSpace,
-    initialize,
     setCollections,
   }
 })
