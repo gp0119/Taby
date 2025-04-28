@@ -11,11 +11,16 @@ export const useRefresh = () => {
 
   const refreshCollections = async () => {
     await spacesStore.fetchCollections(spacesStore.activeId)
+    await refreshTags()
+  }
+
+  const refreshTags = async () => {
     await tagsStore.fetchCollectionsTags()
   }
 
   return {
     refreshSpaces,
     refreshCollections,
+    refreshTags,
   }
 }

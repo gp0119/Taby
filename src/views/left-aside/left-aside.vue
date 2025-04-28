@@ -107,7 +107,7 @@ import SyncDialog from "./components/sync-dialog.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 
 const spacesStore = useSpacesStore()
-const { refreshSpaces, refreshCollections } = useRefresh()
+const { refreshSpaces, refreshCollections, refreshTags } = useRefresh()
 const { openModal } = useSearchModal()
 const loadingBar = useLoadingBar()
 const { ft } = useHelpi18n()
@@ -174,9 +174,10 @@ function onAddSpace() {
 const { setLoading } = inject("loading") as {
   setLoading: (value: boolean) => void
 }
-function onHandleSpaceClick(space: Space) {
+async function onHandleSpaceClick(space: Space) {
   setLoading(true)
-  spacesStore.setActiveSpace(space.id!)
+  await spacesStore.setActiveSpace(space.id!)
+  await refreshTags()
   duplicateCardStore.clearDuplicateCards()
   setLoading(false)
 }

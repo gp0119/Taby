@@ -31,16 +31,13 @@ export const useTagsStore = defineStore("tags", () => {
   }
 
   async function fetchCollectionsTags() {
-    const allTags = await dataManager.getLabels()
-    const collectionsTagIds = new Set()
+    const collectionsTagIds = new Map<number, Label>()
     spacesStore.collections.forEach((collection) => {
-      collection.labelIds.forEach((labelId) => {
-        collectionsTagIds.add(labelId)
+      collection.labels.forEach((label) => {
+        collectionsTagIds.set(label.id, label)
       })
     })
-    collectionsTags.value = allTags.filter((tag) =>
-      collectionsTagIds.has(tag.id),
-    )
+    collectionsTags.value = Array.from(collectionsTagIds.values())
   }
 
   function setSelectedTag(tag: Label | null) {

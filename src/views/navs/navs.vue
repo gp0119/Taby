@@ -46,7 +46,6 @@
 <script setup lang="tsx">
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
-import { useTagsStore } from "@/store/tags.ts"
 import { useThemeStore } from "@/store/theme.ts"
 import LangSwitch from "./components/lang-switch.vue"
 import NavAction from "@/views/navs/components/nav-action.vue"
@@ -78,21 +77,12 @@ const renderLabel = (option: SelectOption | SelectGroupOption) => {
   return <div class="h-4 w-4" style={`background: ${option.color}`}></div>
 }
 
-const tagsStore = useTagsStore()
 const spacesStore = useSpacesStore()
 const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
 const { refreshSpaces } = useRefresh()
-
-watch(
-  () => spacesStore.activeId,
-  async () => {
-    await tagsStore.fetchCollectionsTags()
-  },
-  { immediate: true },
-)
 
 const title = computed(
   () =>
