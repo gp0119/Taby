@@ -255,20 +255,20 @@ class DataBase extends Dexie {
       "rw",
       [this.spaces, this.collections, this.labels, this.cards, this.favicons],
       async () => {
-        // await Promise.all([
-        //   this.spaces.clear(),
-        //   this.collections.clear(),
-        //   this.labels.clear(),
-        //   this.cards.clear(),
-        //   this.favicons.clear(),
-        // ])
+        await Promise.all([
+          this.spaces.clear(),
+          this.collections.clear(),
+          this.labels.clear(),
+          this.cards.clear(),
+          this.favicons.clear(),
+        ])
         await this.spaces.bulkPut(
           data.spaces.map((space) => ({
             id: space.id,
             title: space.title,
             icon: space.icon,
             order: space.order || 0,
-            createdAt: space.createdAt || Date.now(),
+            createdAt: space.createdAt,
           })),
         )
         await this.collections.bulkPut(
@@ -278,7 +278,7 @@ class DataBase extends Dexie {
             spaceId: collection.spaceId,
             order: collection.order || 0,
             labelIds: collection.labelIds || [],
-            createdAt: collection.createdAt || Date.now(),
+            createdAt: collection.createdAt,
           })),
         )
         await this.labels.bulkPut(
@@ -301,7 +301,7 @@ class DataBase extends Dexie {
             description: card.customDescription || card.description || "",
             collectionId: card.collectionId || 0,
             faviconId: card.faviconId || 0,
-            createdAt: card.createdAt || Date.now(),
+            createdAt: card.createdAt,
           }
         })
         const usedFavicons = data.favicons.filter((favicon) =>
