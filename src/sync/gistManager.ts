@@ -6,7 +6,8 @@ import {
   SYNC_GIST_TOKEN,
   SYNC_GIST_ID,
 } from "@/utils/constants.ts"
-import { compressToUTF16, decompressFromUTF16 } from "lz-string"
+import { decompressFromUTF16 } from "lz-string"
+import { compressWithPako, decompressWithPako } from "@/utils/index.ts"
 
 class GistManager {
   private API = GITHUB_API
@@ -76,21 +77,21 @@ class GistManager {
     const { spaces, collections, labels, cards, favicons } = data
     const files: { [key: string]: { content: string } } = {}
     if (spaces && spaces.length > 0) {
-      files.spaces = { content: compressToUTF16(JSON.stringify(spaces)) }
+      files.spaces = { content: compressWithPako(JSON.stringify(spaces)) }
     }
     if (collections && collections.length > 0) {
       files.collections = {
-        content: compressToUTF16(JSON.stringify(collections)),
+        content: compressWithPako(JSON.stringify(collections)),
       }
     }
     if (cards && cards.length > 0) {
-      files.cards = { content: compressToUTF16(JSON.stringify(cards)) }
+      files.cards = { content: compressWithPako(JSON.stringify(cards)) }
     }
     if (labels && labels.length > 0) {
-      files.labels = { content: compressToUTF16(JSON.stringify(labels)) }
+      files.labels = { content: compressWithPako(JSON.stringify(labels)) }
     }
     if (favicons && favicons.length > 0) {
-      files.favicons = { content: compressToUTF16(JSON.stringify(favicons)) }
+      files.favicons = { content: compressWithPako(JSON.stringify(favicons)) }
     }
     const res = await this.request<{
       id: string
@@ -112,7 +113,7 @@ class GistManager {
     const files: { [key: string]: { content: string } } = {}
     Object.entries(data).forEach(([key, value]) => {
       if (value)
-        files[key] = { content: compressToUTF16(JSON.stringify(value)) }
+        files[key] = { content: compressWithPako(JSON.stringify(value)) }
     })
 
     return this.request({
@@ -130,29 +131,58 @@ class GistManager {
     const res = await this.request<{
       description: string
       files: {
-        spaces: { content: string }
-        collections: { content: string }
-        labels: { content: string }
-        cards: { content: string }
-        favicons: { content: string }
+        spaces?: { content: string }
+        collections?: { content: string }
+        labels?: { content: string }
+        cards?: { content: string }
+        favicons?: { content: string }
       }
     }>({
       endpoint: `/gists/${this.GIST_ID}`,
       method: "GET",
     })
-    const { spaces, collections, labels, cards, favicons } = res.files
-    const remoteData: SyncData = {
-      spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
-      collections: collections
-        ? JSON.parse(decompressFromUTF16(collections.content))
-        : [],
-      labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
-      cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
-      favicons: favicons
-        ? JSON.parse(decompressFromUTF16(favicons.content))
-        : [],
+
+    const tryDecompress = (
+      file: { content: string } | undefined,
+      fileName: string,
+    ): any[] => {
+      if (!file || !file.content) {
+        return []
+      }
+      let decompressedString: string | null = null
+      try {
+        const uint8Array = decompressWithPako(file.content)
+        decompressedString = new TextDecoder().decode(uint8Array)
+        return JSON.parse(decompressedString)
+      } catch (e) {
+        try {
+          decompressedString = decompressFromUTF16(file.content)
+          if (decompressedString) {
+            return JSON.parse(decompressedString)
+          } else {
+            console.warn(
+              `Decompressing ${fileName} with lz-string resulted in null or empty string.`,
+            )
+            return []
+          }
+        } catch (e2) {
+          console.error(
+            `Failed to decompress ${fileName} with both pako and lz-string:`,
+            e2,
+            `Original pako error: ${e}`,
+          )
+          return []
+        }
+      }
     }
-    console.log("new remoteData: ", remoteData)
+
+    const remoteData: SyncData = {
+      spaces: tryDecompress(res.files.spaces, "spaces"),
+      collections: tryDecompress(res.files.collections, "collections"),
+      labels: tryDecompress(res.files.labels, "labels"),
+      cards: tryDecompress(res.files.cards, "cards"),
+      favicons: tryDecompress(res.files.favicons, "favicons"),
+    }
     return remoteData
   }
 
