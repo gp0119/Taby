@@ -14,7 +14,7 @@
     >
       <n-form-item :label="`${ft('sync-type')}:`" path="syncType">
         <n-select
-          v-model:value="formModel.syncType"
+          :value="formModel.syncType"
           :options="syncTypeOptions"
           :render-label="renderLabel"
           @update:value="handleSyncTypeChange"
@@ -122,26 +122,38 @@ const renderLabel = (option: any) => {
   )
 }
 
-const handleSyncTypeChange = debounce((value: string) => {
+const handleSyncTypeChange = (value: string) => {
+  if (value === formModel.value.syncType) return
+  console.log("value: ", value, formModel.value.syncType)
+  // type
   chrome.storage.sync.set({ [SYNC_TYPE]: value })
+  formModel.value.syncType = value
   localStorage.setItem(SYNC_TYPE, value)
-  formModel.value.accessToken = ""
-  formModel.value.gistId = ""
-  localStorage.setItem(SYNC_GIST_TOKEN, "")
-  localStorage.setItem(SYNC_GIST_ID, "")
   syncManager.setEnv(SYNC_TYPE, value)
+
+  // 清空accessToken
+  formModel.value.accessToken = ""
+  localStorage.setItem(SYNC_GIST_TOKEN, "")
   syncManager.setEnv(SYNC_GIST_TOKEN, "")
+  chrome.storage.sync.set({ [SYNC_GIST_TOKEN]: "" })
+
+  // 清空gistId
+  formModel.value.gistId = ""
+  localStorage.setItem(SYNC_GIST_ID, "")
   syncManager.setEnv(SYNC_GIST_ID, "")
-}, 1000)
+  chrome.storage.sync.set({ [SYNC_GIST_ID]: "" })
+}
 
 const handleAccessTokenChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_TOKEN, value)
   syncManager.setEnv(SYNC_GIST_TOKEN, value)
+  chrome.storage.sync.set({ [SYNC_GIST_TOKEN]: value })
 }, 1000)
 
 const handleGistIdChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_ID, value)
   syncManager.setEnv(SYNC_GIST_ID, value)
+  chrome.storage.sync.set({ [SYNC_GIST_ID]: value })
 }, 1000)
 
 const handleUpload = () => {
@@ -169,18 +181,16 @@ const handleDownload = () => {
     onPositiveClick: () => {
       formRef.value?.validate().then(async () => {
         try {
-          formRef.value?.validate().then(async () => {
-            await syncManager.triggerDownload()
-            await chrome.storage.sync.set({
-              [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-              [SYNC_GIST_ID]: formModel.value.gistId,
-            })
-            await refreshSpaces()
-            await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
-            await refreshCollections()
-            message.success(ft("success", "download"))
-            show.value = false
+          await syncManager.triggerDownload()
+          await chrome.storage.sync.set({
+            [SYNC_GIST_TOKEN]: formModel.value.accessToken,
+            [SYNC_GIST_ID]: formModel.value.gistId,
           })
+          await refreshSpaces()
+          await spacesStore.setActiveSpace(spacesStore.spaces[0].id)
+          await refreshCollections()
+          message.success(ft("success", "download"))
+          show.value = false
         } catch (error) {
           message.error(ft("fail", "download"))
         }

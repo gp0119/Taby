@@ -136,10 +136,7 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   },
 }))
 
-onMounted(async () => {
-  themeStore.setThemeProperty()
-  await refreshSpaces()
-  await refreshCollections()
+onBeforeMount(async () => {
   const result = await chrome.storage.sync.get([
     SYNC_GIST_TOKEN,
     SYNC_GIST_ID,
@@ -150,21 +147,16 @@ onMounted(async () => {
   }
   if (result.accessToken) {
     localStorage.setItem("accessToken", result.accessToken)
-    if (/^ghp_/.test(result.accessToken)) {
-      chrome.storage.sync.set({
-        [SYNC_TYPE]: "github",
-      })
-      localStorage.setItem("syncType", "github")
-    } else {
-      chrome.storage.sync.set({
-        [SYNC_TYPE]: "gitee",
-      })
-      localStorage.setItem("syncType", "gitee")
-    }
   }
   if (result.gistId) {
     localStorage.setItem("gistId", result.gistId)
   }
+})
+
+onMounted(async () => {
+  themeStore.setThemeProperty()
+  await refreshSpaces()
+  await refreshCollections()
   const isDownloaded = await syncManager.autoDownload()
   if (isDownloaded) {
     await refreshSpaces()
