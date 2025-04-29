@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 *.zip
 *.tsbuildinfo
+
+components.d.ts
+auto-imports.d.ts
