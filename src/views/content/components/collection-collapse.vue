@@ -30,13 +30,13 @@
           />
           <div
             class="flex-center cursor-pointer text-text-primary"
-            @click="isOpen = !isOpen"
             :class="{
               '!text-primary':
                 batchCollectionStore.selectedCollectionIds.includes(
                   collection.id,
                 ),
             }"
+            @click="isOpen = !isOpen"
           >
             <n-icon
               size="20"

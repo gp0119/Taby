@@ -7,30 +7,30 @@
       <n-dropdown
         trigger="hover"
         :options="sortStore.sortOptions"
-        @select="handleSortSelect"
         :render-label="renderSortLabel"
         :show="sortStore.isSortOpen"
+        @select="handleSortSelect"
         @update:show="sortStore.toggleSortOpen"
       >
         <n-button quaternary :focusable="false" type="primary" class="!px-2">
           <template #icon>
             <n-icon
-              size="18"
               v-if="
                 sortStore.sortOrder === 'title-desc' ||
                 sortStore.sortOrder === 'created-at-desc'
               "
+              size="18"
               :component="ArrowUp"
             />
             <n-icon
-              size="18"
               v-else-if="
                 sortStore.sortOrder === 'title-asc' ||
                 sortStore.sortOrder === 'created-at-asc'
               "
+              size="18"
               :component="ArrowDown"
             />
-            <n-icon size="20" v-else :component="Draggable" />
+            <n-icon v-else size="20" :component="Draggable" />
           </template>
           <span class="w-[60px] text-ellipsis leading-6">
             {{ ft(sortStore.sortOrder ?? "draggable") }}
@@ -51,8 +51,8 @@
         :render-label="renderTagLabel"
         key-field="id"
         label-field="title"
-        @select="handleTagSelect"
         :show="tagsStore.isTagOpen"
+        @select="handleTagSelect"
         @update:show="tagsStore.toggleTagOpen"
       >
         <n-button quaternary :focusable="false" type="primary" class="!px-2">
@@ -63,7 +63,7 @@
           </template>
           <template v-if="tagsStore.selectedTag">
             <Tag
-              titleClass="w-[60px] text-ellipsis"
+              title-class="w-[60px] text-ellipsis"
               :tag="tagsStore.selectedTag"
               :closeable="false"
             />
@@ -86,8 +86,8 @@
         quaternary
         :focusable="false"
         type="primary"
-        @click="onToggleExpandAll"
         class="!px-2"
+        @click="onToggleExpandAll"
       >
         <template #icon>
           <n-icon
@@ -127,8 +127,8 @@
         <template #default>
           <div class="flex flex-col items-start gap-y-2 py-1.5">
             <n-switch
-              :round="false"
               v-model:value="draggableStore.draggable"
+              :round="false"
               @update-value="draggableStore.setDraggable"
             >
               <template #checked-icon>
@@ -145,8 +145,8 @@
               </template>
             </n-switch>
             <n-switch
-              :round="false"
               v-model:value="duplicateCardStore.isFindDuplicate"
+              :round="false"
               @update-value="duplicateCardStore.setIsFindDuplicate"
             >
               <template #checked-icon>

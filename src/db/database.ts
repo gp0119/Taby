@@ -167,7 +167,7 @@ class DataBase extends Dexie {
     obj: T,
     additionalFields: (keyof T)[] = [],
   ): Partial<T> {
-    const { createdAt, id, ...rest } = obj
+    const { createdAt: _, id: _id, ...rest } = obj
     const result = { ...rest } as Partial<T>
     additionalFields.forEach((field) => {
       if (field in result) {

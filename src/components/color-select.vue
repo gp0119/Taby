@@ -1,5 +1,5 @@
 <template>
-  <n-popover trigger="hover" content-class="!p-0" v-model:show="show">
+  <n-popover v-model:show="show" trigger="hover" content-class="!p-0">
     <template #trigger>
       <n-button
         :size="size"
@@ -18,8 +18,8 @@
           v-for="color in COLOR_LIST"
           :key="color"
           class="flex-center h-[20px] w-[20px] cursor-pointer select-none overflow-hidden"
-          @click="pickColor(color)"
           :style="`background-color: ${color}33; color: ${color};border-color: ${color}4A; border-width: 1px; border-style: solid;`"
+          @click="pickColor(color)"
         >
           <n-icon
             v-if="color === selectedColor"

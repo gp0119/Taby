@@ -1,9 +1,9 @@
 <template>
   <n-popover
+    v-model:show="show"
     trigger="hover"
     content-class="!p-0"
     :to="false"
-    v-model:show="show"
   >
     <template #trigger>
       <n-button>

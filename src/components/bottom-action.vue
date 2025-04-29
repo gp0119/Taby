@@ -6,14 +6,14 @@
       enter-from-class="translate-y-full opacity-0"
       enter-to-class="translate-y-0 opacity-100"
       leave-from-class="translate-y-0 opacity-100"
-      leave-to-class="translate-y-full opacity-0"
+      leave-to-class="translate-y-full opacity-0" 
     >
       <div
         v-if="show"
         ref="bottomActionRef"
         class="pointer-events-auto fixed bottom-3 left-1/2 z-10 -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
-        @mousedown="onMouseDown"
         :style="{ left: clientX }"
+        @mousedown="onMouseDown"
       >
         <div class="flex items-center justify-between gap-x-8 px-6 py-4">
           <slot name="default" />

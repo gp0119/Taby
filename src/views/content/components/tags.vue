@@ -1,10 +1,10 @@
 <template>
   <n-space v-if="labels.length" class="ml-3">
     <Tag
-      class="group/tag"
-      :tag="tag"
       v-for="tag in labels"
       :key="tag.id"
+      class="group/tag"
+      :tag="tag"
       closeable
       @delete="onDeleteTagFromCollection(tag.id)"
     />

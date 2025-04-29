@@ -34,8 +34,8 @@
     </DynamicScroller>
     <div
       v-else
-      class="bg-body-color py-16 text-center text-2xl text-gray-400"
       v-memo="['no-collections']"
+      class="bg-body-color py-16 text-center text-2xl text-gray-400"
     >
       {{ ft("no-collections") }}
     </div>

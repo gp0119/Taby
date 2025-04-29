@@ -28,8 +28,8 @@
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
       <div class="-mt-3 overflow-hidden">
-        <div class="bg-body-color px-4 py-4" v-if="!isEmpty(tabs)">
-          <slot name="cards" :tabs="tabs"></slot>
+        <div v-if="!isEmpty(tabs)" class="bg-body-color px-4 py-4">
+          <slot name="cards" :tabs="tabs" />
         </div>
         <template v-else>
           <div class="py-3 text-center font-thin text-text-secondary">

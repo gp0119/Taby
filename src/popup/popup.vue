@@ -1,7 +1,7 @@
 <template>
   <div
-    class="w-80 rounded-lg bg-[#fafafa] pb-4"
     v-if="activeTab && !isNewTabPage(activeTab.url || '')"
+    class="w-80 rounded-lg bg-[#fafafa] pb-4"
   >
     <div
       class="flex select-none items-center justify-between border-b border-gray-200 p-4 text-[#F65077]"
@@ -12,9 +12,9 @@
     <n-collapse
       accordion
       :expanded-names="expandedNames"
-      @item-header-click="onHandleItemHeaderClick"
       arrow-placement="right"
       class="scrollbar-gutter-stable scrollbar-thin h-[500px] overflow-y-auto pt-4"
+      @item-header-click="onHandleItemHeaderClick"
     >
       <n-collapse-item
         v-for="space in spaces"
@@ -34,16 +34,16 @@
         <template #header-extra>
           <n-icon
             size="20"
-            @click.stop="onClickHeaderExtra(space.id)"
             class="hidden text-[#F65077] group-hover/collection:block"
             title="Add Collection"
+            @click.stop="onClickHeaderExtra(space.id)"
           >
             <component :is="AddOutline" />
           </n-icon>
         </template>
         <div
-          class="flex items-center justify-between"
           v-if="isAddingCollection"
+          class="flex items-center justify-between"
         >
           <n-input-group>
             <n-input
@@ -52,9 +52,9 @@
               placeholder="Collection Name"
             />
             <n-button
-              @click="isAddingCollection = false"
               size="small"
               class="rounded-l-none"
+              @click="isAddingCollection = false"
             >
               <template #icon>
                 <n-icon size="18">

@@ -12,7 +12,7 @@
             {{ title }}
           </span>
         </div>
-        <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
+        <span class="h-[16px] w-[0.5px] bg-text-primary" />
         <span class="whitespace-nowrap font-thin text-text-secondary">
           {{ spacesStore.collections.length }} Collections
         </span>
@@ -28,15 +28,15 @@
       </n-icon>
       <LangSwitch />
       <n-select
+        v-model:value="currentTheme"
         size="tiny"
         :show-checkmark="false"
         :show-arrow="false"
         :consistent-menu-width="false"
-        v-model:value="currentTheme"
         :options="themeOptions"
-        @update:value="onUpdateValue"
         :render-label="renderLabel"
-      ></n-select>
+        @update:value="onUpdateValue"
+      />
     </div>
   </div>
   <nav-action />

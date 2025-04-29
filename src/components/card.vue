@@ -51,8 +51,8 @@
           v-if="isSupported"
           :size="24"
           :border-radius="24"
-          @click.stop="onHandleCopy"
           class="copy-button"
+          @click.stop="onHandleCopy"
         >
           <n-icon color="#fff" :size="12" :component="CopyOutline" />
         </n-icon-wrapper>
@@ -66,7 +66,7 @@
           <n-icon color="#fff" :size="12" :component="Pen" />
         </n-icon-wrapper>
       </div>
-    </div>
+    </div> 
   </div>
 </template>
 

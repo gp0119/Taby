@@ -9,11 +9,11 @@
     item-key="id"
     :data-collectionid="collectionId"
     handle=".card-item"
-    dragClass="*:!opacity-20"
+    drag-class="*:!opacity-20"
     ghost-class="sortable-ghost-dashed-border"
     :animation="150"
     :delay="100"
-    :delayOnTouchOnly="true"
+    :delay-on-touch-only="true"
     @end="onDragEnd"
   >
     <Card
@@ -23,15 +23,15 @@
       class="card-item group/content"
       :child="card"
       :select-ids="batchCardStore.selectedCardIds"
-      :duplicateUrl="duplicateCardStore.currentDuplicateUrl"
-      @click="onHandleClick(card)"
-      @delete="onDeleteCard(card)"
-      @edit="onEdit(card)"
-      @check="onHandleCheckbox($event, card)"
+      :duplicate-url="duplicateCardStore.currentDuplicateUrl"
       :show-checkbox="
         batchCollectionStore.selectedCollectionIds.length <= 0 &&
         batchTabsStore.selectedTabIds.length <= 0
       "
+      @click="onHandleClick(card)"
+      @delete="onDeleteCard(card)"
+      @edit="onEdit(card)"
+      @check="onHandleCheckbox($event, card)"
     />
     <div class="empty-text">
       {{ ft("no-cards") }}
@@ -77,7 +77,7 @@ async function onHandleClick(child: any) {
 
 function onHandleNoFavicon(tabId: number, cardId: number) {
   chrome.tabs.onUpdated.addListener(
-    async function listener(updatedTabId, changeInfo, _tab) {
+    async function listener(updatedTabId, changeInfo) {
       if (updatedTabId === tabId && changeInfo.status == "complete") {
         const openedTab = await chrome.tabs.get(tabId)
         console.log("openedTab: ", openedTab)

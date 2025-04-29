@@ -7,11 +7,11 @@
     @end="onDragEnd"
   >
     <div
-      class="space-item flex cursor-pointer items-center px-2 py-1.5 font-medium text-text-primary"
       v-for="item in spaces"
+      :key="item.title"
+      class="space-item flex cursor-pointer items-center px-2 py-1.5 font-medium text-text-primary"
       :data-id="item.id"
       :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
-      :key="item.title"
       @click="onHandleSpaceClick(item)"
     >
       <n-icon size="18">

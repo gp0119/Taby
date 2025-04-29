@@ -10,8 +10,8 @@
             duplicateCardStore.currentDuplicateCount,
           )
         "
-      ></span>
-      <span class="h-[16px] w-[0.5px] bg-text-primary"></span>
+      />
+      <span class="h-[16px] w-[0.5px] bg-text-primary" />
       <span class="font-medium">
         {{
           duplicateCardStore.duplicateCards.size > 0

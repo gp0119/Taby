@@ -27,3 +27,4 @@ dist-ssr
 
 components.d.ts
 auto-imports.d.ts
+.eslintrc-auto-import.json

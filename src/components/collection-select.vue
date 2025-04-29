@@ -39,7 +39,7 @@ const spacesStore = useSpacesStore()
 const options = ref<iOptions>([])
 const formModel = ref({
   title: "",
-})
+}) 
 
 async function getOptions(spaceId: number): Promise<iOptions> {
   const result = await spacesStore.fetchCollections(spaceId)

@@ -1,8 +1,8 @@
 <template>
   <select-wrapper
+    v-model="id"
     :options="allSpaces"
     :multiple="multiple"
-    v-model="id"
     :placeholder="ft('select', 'space')"
     :render-label="renderLabel"
   >

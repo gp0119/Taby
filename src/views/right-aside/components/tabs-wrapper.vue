@@ -25,10 +25,10 @@
       class="group/aside right-aside-item"
       :class="{ hidden: isNewTabPage(tab.url) }"
       :child="tab"
+      :show-checkbox="showCheckbox"
       @delete="removeTab(tab.id)"
       @click="activeTab(tab)"
       @check="onHandleCheckbox($event, tab)"
-      :show-checkbox="showCheckbox"
     />
   </VueDraggable>
 </template>

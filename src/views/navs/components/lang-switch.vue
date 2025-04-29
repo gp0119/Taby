@@ -2,8 +2,8 @@
   <n-dropdown
     trigger="hover"
     :options="options"
-    @select="changeLanguage"
     :render-label="renderLabel"
+    @select="changeLanguage"
   >
     <n-button quaternary circle>
       <template #icon>

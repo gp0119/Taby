@@ -9,27 +9,27 @@
       class="right-aside-area scrollbar-thin h-[calc(100vh-50px)] overflow-y-auto px-3 py-4"
     >
       <TabsCollapse
-        class="mb-4"
         v-for="(item, windowId, index) in tabs"
         :key="index"
+        class="mb-4"
         :index="index"
         :tabs="item"
         @close-all-tabs="onCloseAllTabs(windowId)"
       >
-        <template #cards="{ tabs }">
+        <template #cards="{ tabs: _tabs }">
           <TabsWrapper
             v-if="isExpanded"
-            :tabs="tabs"
+            :tabs="_tabs"
             :window-id="windowId"
             :selected-tab-ids="batchTabsStore.selectedTabIds"
-            @remove-tab="removeTab"
-            @active-tab="activeTab"
-            @drag-end="onDragEnd"
-            @check="onHandleCheckbox"
             :show-checkbox="
               batchCollectionStore.selectedCollectionIds.length <= 0 &&
               batchCardStore.selectedCardIds.length <= 0
             "
+            @remove-tab="removeTab"
+            @active-tab="activeTab"
+            @drag-end="onDragEnd"
+            @check="onHandleCheckbox"
           />
         </template>
       </TabsCollapse>

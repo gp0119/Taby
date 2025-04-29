@@ -3,7 +3,7 @@
     v-model:show="show"
     preset="dialog"
     :title="ft('sync-with-gist')"
-    titleClass="[&_.n-base-icon]:hidden !text-text-primary"
+    title-class="[&_.n-base-icon]:hidden !text-text-primary"
     class="bg-body-color"
   >
     <n-form
@@ -66,8 +66,8 @@
           size="small"
           type="primary"
           :loading="downloadLoading"
-          @click="handleDownload"
           :disabled="!(formModel.accessToken && formModel.gistId)"
+          @click="handleDownload"
         >
           <template #icon>
             <n-icon size="14" :component="CloudDownload" />
@@ -171,7 +171,7 @@ const handleUpload = () => {
       message.success(ft("success", "upload"))
       uploadLoading.value = false
       show.value = false
-    } catch (error) {
+    } catch {
       message.error(ft("fail", "upload"))
       uploadLoading.value = false
     }
@@ -196,7 +196,7 @@ const handleDownload = () => {
           message.success(ft("success", "download"))
           downloadLoading.value = false
           show.value = false
-        } catch (error) {
+        } catch {
           message.error(ft("fail", "download"))
           downloadLoading.value = false
         }

@@ -12,8 +12,8 @@
         size="20"
         title="Tag"
         :component="TagGroup"
-        @click.stop="() => {}"
         class="mx-1.5 cursor-pointer text-primary"
+        @click.stop="() => {}"
       />
     </template>
     <template #header>
@@ -22,11 +22,11 @@
       </n-text>
     </template>
     <n-scrollbar class="max-h-[300px]">
-      <n-space vertical v-if="tagsStore.tags.length > 0">
+      <n-space v-if="tagsStore.tags.length > 0" vertical>
         <div
-          class="group/tag flex items-center justify-between"
           v-for="tag in tagsStore.tags"
           :key="tag.id"
+          class="group/tag flex items-center justify-between"
         >
           <Tag
             :tag="tag"
@@ -48,17 +48,17 @@
     </n-scrollbar>
     <template #footer>
       <n-input-group>
-        <color-select size="tiny" v-model:value="selectedColor" />
+        <color-select v-model:value="selectedColor" size="tiny" />
         <n-input
-          class="!w-[100px]"
           v-model:value="newTag.title"
+          class="!w-[100px]"
           :placeholder="ft('placeholder', 'tags')"
           size="tiny"
           maxlength="10"
         />
         <n-button size="tiny" @click="addTag">
           <template #icon>
-            <n-icon :component="Checkmark"></n-icon>
+            <n-icon :component="Checkmark" />
           </template>
         </n-button>
       </n-input-group>

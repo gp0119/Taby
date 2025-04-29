@@ -1,7 +1,7 @@
 <template>
   <n-tag
-    class="!rounded px-2"
     :key="tag.id"
+    class="!rounded px-2"
     size="small"
     :color="{
       color: `${tag.color}33`,

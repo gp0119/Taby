@@ -41,8 +41,8 @@
           type="primary"
           ghost
           class="w-full"
-          @click="onImport"
           :focusable="false"
+          @click="onImport"
         >
           <span class="w-8">{{ ft("import") }}</span>
           <template #icon>
@@ -53,8 +53,8 @@
           type="primary"
           ghost
           class="w-full"
-          @click="onExport"
           :focusable="false"
+          @click="onExport"
         >
           <span class="w-8">{{ ft("export") }}</span>
           <template #icon>
@@ -65,8 +65,8 @@
           secondary
           type="primary"
           class="w-full"
-          @click="showSyncDialog = true"
           :focusable="false"
+          @click="showSyncDialog = true"
         >
           <span class="w-8">{{ ft("sync") }}</span>
           <template #icon>
