@@ -152,6 +152,7 @@ onBeforeMount(async () => {
 
 onMounted(async () => {
   themeStore.applyThemeAttribute()
+  await new Promise((resolve) => setTimeout(resolve, 100))
   await refreshSpaces()
   await refreshCollections()
   const isDownloaded = await syncManager.autoDownload()
