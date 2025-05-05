@@ -8,11 +8,6 @@
     lazy
     class="card-avatar favicon-size"
   >
-    <template #fallback>
-      <div class="favicon-size flex-center h-full bg-hover-color">
-        <span class="text-text-primary">{{ firstLetter }}</span>
-      </div>
-    </template>
     <template #placeholder>
       <div class="favicon-size flex-center h-full">
         <n-icon
@@ -27,14 +22,12 @@
 
 <script setup lang="tsx">
 import { Card } from "@/type.ts"
-import { getGoogleFavicon } from "@/utils"
+import { getGoogleFavicon, getFaviconFromCache } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{
   child: Card
 }>()
-
-const firstLetter = props.child.title?.charAt(0).toUpperCase()
 
 const innerFavicon = computed(() => {
   const { favicon, url } = props.child
@@ -42,7 +35,9 @@ const innerFavicon = computed(() => {
     ? favicon.startsWith("http")
       ? `https://wsrv.nl/?url=${favicon}&page=-1&default=1`
       : favicon
-    : getGoogleFavicon(url)
+    : url.startsWith("chrome://")
+      ? getFaviconFromCache(url)
+      : getGoogleFavicon(url)
 })
 </script>
 
