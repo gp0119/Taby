@@ -38,7 +38,11 @@ const firstLetter = props.child.title?.charAt(0).toUpperCase()
 
 const innerFavicon = computed(() => {
   const { favicon, url } = props.child
-  return favicon ? favicon : getGoogleFavicon(url)
+  return favicon
+    ? favicon.startsWith("http")
+      ? `https://wsrv.nl/?url=${favicon}&page=-1&default=1`
+      : favicon
+    : getGoogleFavicon(url)
 })
 </script>
 
