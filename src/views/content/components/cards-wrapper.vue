@@ -80,7 +80,6 @@ async function onHandleClick(child: any) {
 
 const debounceUpdateCardFavicon = debounce(
   async (cardId: number, favicon: string, activeId: number) => {
-    console.log("cardId: ", cardId, favicon)
     await dataManager.updateCardFavicon(cardId, favicon)
     await refreshCollections(activeId)
   },
