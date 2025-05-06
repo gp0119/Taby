@@ -76,7 +76,7 @@ const onHandleSave = async () => {
     position,
   )
   await refreshCollections()
-  await batchTabsStore.clearSelectedTabs()
+  batchTabsStore.clearSelectedTabs()
   closeDrawer()
 }
 
@@ -88,7 +88,7 @@ const onHandleClose = async () => {
     onPositiveClick: async () => {
       await removeTabs(batchTabsStore.selectedTabIds)
       await getTabs()
-      await batchTabsStore.clearSelectedTabs()
+      batchTabsStore.clearSelectedTabs()
       closeDrawer()
     },
   })

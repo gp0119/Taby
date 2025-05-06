@@ -10,7 +10,7 @@ class DataBase extends Dexie {
   labels!: EntityTable<Label, "id">
   cards!: EntityTable<Card, "id">
   favicons!: EntityTable<Favicon, "id">
-  private unloadHandler: () => void
+  private readonly unloadHandler: () => void
 
   constructor() {
     super("TabyDatabase")
@@ -32,7 +32,7 @@ class DataBase extends Dexie {
   }
 
   public static getInstance(): DataBase {
-    if (!DataBase.instance || DataBase.instance.isOpen() === false) {
+    if (!DataBase.instance || !DataBase.instance.isOpen()) {
       DataBase.instance = new DataBase()
     }
     return DataBase.instance
@@ -328,7 +328,7 @@ class DataBase extends Dexie {
     try {
       // 清理事件监听器
       window.removeEventListener("beforeunload", this.unloadHandler)
-      await this.close()
+      this.close()
       // 清理单例实例
       if (DataBase.instance) {
         DataBase.instance = undefined as any
