@@ -14,6 +14,10 @@ export function getGoogleFavicon(url: string) {
   }
 }
 
+export function getWsrvFavicon(url: string) {
+  return `https://wsrv.nl/?url=${url}&page=-1&default=1`
+}
+
 export function isNewTabPage(url: string) {
   return url === "chrome://newtab/"
 }

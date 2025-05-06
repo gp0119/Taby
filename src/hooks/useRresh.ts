@@ -9,8 +9,8 @@ export const useRefresh = () => {
     await spacesStore.fetchSpaces()
   }
 
-  const refreshCollections = async () => {
-    await spacesStore.fetchCollections(spacesStore.activeId)
+  const refreshCollections = async (activeId?: number) => {
+    await spacesStore.fetchCollections(activeId || spacesStore.activeId)
     await refreshTags()
   }
 

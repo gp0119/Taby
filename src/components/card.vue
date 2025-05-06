@@ -66,7 +66,7 @@
           <n-icon color="#fff" :size="12" :component="Pen" />
         </n-icon-wrapper>
       </div>
-    </div> 
+    </div>
   </div>
 </template>
 

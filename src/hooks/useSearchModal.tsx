@@ -7,11 +7,13 @@ import Favicon from "@/components/favicon.vue"
 import { SearchOutline } from "@vicons/ionicons5"
 import { useEventListener } from "@vueuse/core"
 import { useRefresh } from "@/hooks/useRresh"
+import { useSpacesStore } from "@/store/spaces"
+
 export const useSearchModal = () => {
   const searchValue = ref("")
   const modal = useModal()
   const { refreshCollections } = useRefresh()
-
+  const spacesStore = useSpacesStore()
   const cards = ref<Card[]>([])
   const currentIndex = ref(0)
   const searchCardsFromDb = debounce(async () => {
@@ -62,21 +64,32 @@ export const useSearchModal = () => {
     modal.destroyAll()
   })
 
+  const debounceUpdateCardFavicon = debounce(
+    async (cardId: number, favicon: string, activeId: number) => {
+      await dataManager.updateCardFavicon(cardId, favicon)
+      await refreshCollections(activeId)
+    },
+    1000,
+    {
+      leading: true,
+      trailing: false,
+    },
+  )
+
   async function onHandleClick(child: any) {
     modal.destroyAll()
     await new Promise((resolve) => setTimeout(resolve, 300))
     const tab = await chrome.tabs.create({ url: child.url })
+    const activeId = spacesStore.activeId
     if (child.favicon) return
     const tabId = tab.id!
     chrome.tabs.onUpdated.addListener(
-      async function listener(updatedTabId, changeInfo, _tab) {
-        if (updatedTabId === tabId && changeInfo.status == "complete") {
-          const openedTab = await chrome.tabs.get(tabId)
-          console.log("openedTab: ", openedTab)
-          const favicon = openedTab.favIconUrl
+      async function listener(updatedTabId, changeInfo) {
+        console.log("changeInfo: ", changeInfo)
+        if (updatedTabId === tabId && changeInfo.favIconUrl) {
+          const favicon = changeInfo.favIconUrl
           if (!favicon) return
-          await dataManager.updateCardFavicon(child.id, favicon)
-          await refreshCollections()
+          debounceUpdateCardFavicon(child.id, favicon, activeId)
           chrome.tabs.onUpdated.removeListener(listener)
         }
       },

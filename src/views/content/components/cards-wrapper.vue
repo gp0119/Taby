@@ -53,7 +53,8 @@ import Favicon from "@/components/favicon.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
-
+import { debounce } from "lodash-es"
+import { useSpacesStore } from "@/store/spaces"
 defineProps<{
   cards: iCard[]
   collectionId: number
@@ -65,26 +66,39 @@ const { ft, gt } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
+const spacesStore = useSpacesStore()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(child: any) {
+  const activeId = spacesStore.activeId
   const tab = await chrome.tabs.create({ url: child.url })
   if (child.favicon) return
   const tabId = tab.id!
-  onHandleNoFavicon(tabId, child.id)
+  onHandleNoFavicon(tabId, child.id, activeId)
 }
 
-function onHandleNoFavicon(tabId: number, cardId: number) {
+const debounceUpdateCardFavicon = debounce(
+  async (cardId: number, favicon: string, activeId: number) => {
+    console.log("cardId: ", cardId, favicon)
+    await dataManager.updateCardFavicon(cardId, favicon)
+    await refreshCollections(activeId)
+  },
+  1000,
+  {
+    leading: true,
+    trailing: false,
+  },
+)
+
+function onHandleNoFavicon(tabId: number, cardId: number, activeId: number) {
   chrome.tabs.onUpdated.addListener(
     async function listener(updatedTabId, changeInfo) {
-      if (updatedTabId === tabId && changeInfo.status == "complete") {
-        const openedTab = await chrome.tabs.get(tabId)
-        console.log("openedTab: ", openedTab)
-        const favicon = openedTab.favIconUrl
+      console.log("changeInfo: ", changeInfo)
+      if (updatedTabId === tabId && changeInfo.favIconUrl) {
+        const favicon = changeInfo.favIconUrl
         if (!favicon) return
-        await dataManager.updateCardFavicon(cardId, favicon)
-        await refreshCollections()
+        debounceUpdateCardFavicon(cardId, favicon, activeId)
         chrome.tabs.onUpdated.removeListener(listener)
       }
     },

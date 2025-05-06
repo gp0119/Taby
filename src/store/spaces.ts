@@ -38,7 +38,6 @@ export const useSpacesStore = defineStore("spaces", () => {
   async function fetchCollections(spaceId: number) {
     try {
       const collections = await dataManager.getCollectionWithCards(spaceId)
-      console.log("collections: ", collections)
       cacheCollections.value[spaceId] = collections
       return collections
     } catch (error) {

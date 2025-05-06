@@ -22,7 +22,7 @@
 
 <script setup lang="tsx">
 import { Card } from "@/type.ts"
-import { getGoogleFavicon, getFaviconFromCache } from "@/utils"
+import { getGoogleFavicon, getFaviconFromCache, getWsrvFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = defineProps<{
@@ -33,7 +33,7 @@ const innerFavicon = computed(() => {
   const { favicon, url } = props.child
   return favicon
     ? favicon.startsWith("http")
-      ? `https://wsrv.nl/?url=${favicon}&page=-1&default=1`
+      ? getWsrvFavicon(favicon)
       : favicon
     : url.startsWith("chrome://")
       ? getFaviconFromCache(url)

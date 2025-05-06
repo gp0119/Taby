@@ -6,7 +6,7 @@
       enter-from-class="translate-y-full opacity-0"
       enter-to-class="translate-y-0 opacity-100"
       leave-from-class="translate-y-0 opacity-100"
-      leave-to-class="translate-y-full opacity-0" 
+      leave-to-class="translate-y-full opacity-0"
     >
       <div
         v-if="show"
