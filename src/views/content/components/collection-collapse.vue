@@ -20,7 +20,8 @@
               ),
               '!hidden':
                 batchCardStore.selectedCardIds.length > 0 ||
-                batchTabsStore.selectedTabIds.length > 0,
+                batchTabsStore.selectedTabIds.length > 0 ||
+                duplicateCardStore.isFindDuplicate,
             }"
             size="large"
             :checked="
@@ -77,7 +78,9 @@ import { useExpandStore } from "@/store/expand"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
 import { useBatchTabsStore } from "@/store/batch-tabs"
+import { useDuplicateCardStore } from "@/store/duplicate-card"
 
+const duplicateCardStore = useDuplicateCardStore()
 const props = defineProps<{
   collection: CollectionWithCards
 }>()

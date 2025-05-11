@@ -24,7 +24,9 @@
             :selected-tab-ids="batchTabsStore.selectedTabIds"
             :show-checkbox="
               batchCollectionStore.selectedCollectionIds.length <= 0 &&
-              batchCardStore.selectedCardIds.length <= 0
+              batchCardStore.selectedCardIds.length <= 0 &&
+              !duplicateCardStore.isFindDuplicate &&
+              !draggableStore.draggable
             "
             @remove-tab="removeTab"
             @active-tab="activeTab"
@@ -52,7 +54,11 @@ import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
 import BatchTabAction from "./components/batch-tab-action.vue"
+import { useDraggableStore } from "@/store/draggable"
+import { useDuplicateCardStore } from "@/store/duplicate-card"
 
+const draggableStore = useDraggableStore()
+const duplicateCardStore = useDuplicateCardStore()
 const {
   tabs,
   getTabs,
