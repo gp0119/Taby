@@ -210,9 +210,11 @@ import Tag from "@/components/tag.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useBatchCardStore } from "@/store/batch-card"
 import { useBatchCollectionStore } from "@/store/batch-collection"
+import { useBatchTabsStore } from "@/store/batch-tabs"
 
 const batchCardStore = useBatchCardStore()
 const batchCollectionStore = useBatchCollectionStore()
+const batchTabsStore = useBatchTabsStore()
 
 const draggableStore = useDraggableStore()
 const duplicateCardStore = useDuplicateCardStore()
@@ -331,6 +333,7 @@ const onToggleDraggable = (value: boolean) => {
   if (value) {
     batchCardStore.clearSelectedCardIds()
     batchCollectionStore.clearSelectedCollectionIds()
+    batchTabsStore.clearSelectedTabs()
   }
 }
 
@@ -339,6 +342,7 @@ const onToggleFindDuplicate = (value: boolean) => {
   if (value) {
     batchCardStore.clearSelectedCardIds()
     batchCollectionStore.clearSelectedCollectionIds()
+    batchTabsStore.clearSelectedTabs()
   }
 }
 </script>
