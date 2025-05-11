@@ -232,7 +232,7 @@ class DataManager {
       return text?.toLowerCase().includes(searchText) ?? false
     }
 
-    return db.cards
+    const cards = await db.cards
       .filter(
         (card) =>
           searchInText(card.title) ||
@@ -240,6 +240,19 @@ class DataManager {
           searchInText(card.description),
       )
       .toArray()
+
+    const faviconIds: number[] = cards
+      .map((card) => card.faviconId)
+      .filter((id): id is number => id !== undefined)
+    if (faviconIds.length === 0) return cards
+    const favicons = await db.favicons.where("id").anyOf(faviconIds).toArray()
+    const faviconMap = new Map(
+      favicons.map((favicon) => [favicon.id, favicon.url]),
+    )
+    return cards.map((card) => ({
+      ...card,
+      favicon: card.faviconId ? faviconMap.get(card.faviconId) || "" : "",
+    }))
   }
 
   async removeLabel(id: number) {

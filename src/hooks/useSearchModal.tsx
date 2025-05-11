@@ -105,7 +105,6 @@ export const useSearchModal = () => {
       title: () => <span class="text-text-primary">{ft("search")}</span>,
       style:
         "position: fixed; top: 200px; left: 50%; transform: translateX(-50%);",
-      // maskClosable: false,
       content: () => (
         <div>
           <div class="pr-4">
@@ -141,15 +140,28 @@ export const useSearchModal = () => {
                         <span
                           v-html={card.title.replace(
                             new RegExp(searchValue.value, "gi"),
-                            `<span class="font-semibold">${searchValue.value}</span>`,
+                            `<span class="font-semibold text-text-primary">${searchValue.value}</span>`,
                           )}
-                        ></span>
-                        <span class="mx-2 inline-block h-[16px] w-[1px] bg-text-secondary"></span>
-                        <span>{card.description}</span>
+                        />
+                        {card.description && (
+                          <>
+                            <span class="mx-2 inline-block h-[16px] w-[1px] bg-text-secondary"></span>
+                            <span
+                              v-html={card.description.replace(
+                                new RegExp(searchValue.value, "gi"),
+                                `<span class="font-semibold text-text-primary">${searchValue.value}</span>`,
+                              )}
+                            />
+                          </>
+                        )}
                       </span>
-                      <div class="text-ellipsis text-xs font-light text-text-secondary">
-                        {card.url}
-                      </div>
+                      <div
+                        class="text-ellipsis text-xs font-light text-text-secondary"
+                        v-html={card.url.replace(
+                          new RegExp(searchValue.value, "gi"),
+                          `<span class="font-semibold text-text-primary">${searchValue.value}</span>`,
+                        )}
+                      />
                     </div>
                   </div>
                 </div>
