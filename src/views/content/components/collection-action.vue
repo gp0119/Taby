@@ -39,8 +39,9 @@ import TagAction from "./tag-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-const { ft, gt } = useHelpi18n()
+import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
 
+const { ft, gt } = useHelpi18n()
 defineProps<{
   item: CollectionWithCards
 }>()
@@ -112,23 +113,16 @@ function onDeleteCollection(item: CollectionWithCards) {
   })
 }
 
-function onMoveCollection(item: CollectionWithCards) {
-  const spaceId = ref<number | null>(null)
-  openEditDialog({
-    title: gt("move-type-to", item.title),
-    renderContent: () => (
-      <n-form>
-        <n-form-item label={`${ft("space")}:`}>
-          <space-select v-model={spaceId.value} />
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      if (!spaceId.value) return
-      await dataManager.moveCollectionToSpace(item.id, spaceId.value)
-      await refreshCollections()
-    },
-  })
+const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()
+async function onMoveCollection(item: CollectionWithCards) {
+  const { spaceId, position } = await openMoveDialog()
+  await dataManager.batchUpdateCollections(
+    [item.id],
+    { spaceId: spaceId! },
+    position,
+  )
+  await refreshCollections()
+  refreshCollections(spaceId as number)
 }
 
 function onOpenCollection(item: CollectionWithCards) {

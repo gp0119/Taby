@@ -40,7 +40,6 @@
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { useDraggableStore } from "@/store/draggable.ts"
 import { ref } from "vue"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
 import { FolderMoveTo, Delete, DirectionMerge } from "@vicons/carbon"
@@ -52,7 +51,6 @@ import bottomAction from "@/components/bottom-action.vue"
 
 const show = ref(false)
 const batchCollectionStore = useBatchCollectionStore()
-const draggableStore = useDraggableStore()
 
 const { refreshCollections } = useRefresh()
 const { ft, gt } = useHelpi18n()
@@ -85,7 +83,7 @@ const onHandleMove = async () => {
     position,
   )
   await refreshCollections()
-  draggableStore.setDraggable(false)
+  refreshCollections(spaceId as number)
   closeDrawer()
 }
 

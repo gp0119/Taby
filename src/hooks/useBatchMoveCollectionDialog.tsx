@@ -8,19 +8,19 @@ import { NForm, NFormItem, NRadioGroup, NRadioButton } from "naive-ui"
 export const useBatchMoveCollectionDialog = () => {
   const { ft } = useHelpi18n()
   const { open } = useEditDialog()
-  const formModel = ref<{
-    spaceId: number | null
-    position: movePosition
-  }>({
-    spaceId: null,
-    position: "END",
-  })
 
   const openDialog = (title?: string) =>
     new Promise<{
       spaceId: number | null
       position: movePosition
     }>((resolve, reject) => {
+      const formModel = ref<{
+        spaceId: number | null
+        position: movePosition
+      }>({
+        spaceId: null,
+        position: "END",
+      })
       open({
         title: title || ft("move-to"),
         renderContent: () => {

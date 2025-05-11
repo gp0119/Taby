@@ -11,15 +11,6 @@ export const useBatchMoveCardDialog = () => {
   const spacesStore = useSpacesStore()
   const { ft } = useHelpi18n()
   const { open } = useEditDialog()
-  const formModel = ref<{
-    spaceId: number | null
-    collectionId: number | null
-    position: movePosition
-  }>({
-    spaceId: spacesStore.activeId,
-    collectionId: null,
-    position: "END",
-  })
 
   const openDialog = (title?: string) =>
     new Promise<{
@@ -27,17 +18,34 @@ export const useBatchMoveCardDialog = () => {
       collectionId: number | null
       position: movePosition
     }>((resolve, reject) => {
+      const formModel = ref<{
+        spaceId: number | null
+        collectionId: number | null
+        position: movePosition
+      }>({
+        spaceId: spacesStore.activeId,
+        collectionId: null,
+        position: "END",
+      })
       open({
         title: title || ft("move-to"),
         renderContent: () => {
           return (
             <NForm model={formModel.value}>
               <NFormItem label={`${ft("space")}:`}>
-                <SpaceSelect v-model:value={formModel.value.spaceId} />
+                <SpaceSelect
+                  modelValue={formModel.value.spaceId}
+                  onUpdate:value={(value) => {
+                    if (value !== formModel.value.spaceId) {
+                      formModel.value.collectionId = null
+                      formModel.value.spaceId = value as number
+                    }
+                  }}
+                />
               </NFormItem>
               <NFormItem label={`${ft("collection")}:`}>
                 <CollectionSelect
-                  v-model:value={formModel.value.collectionId}
+                  v-model={formModel.value.collectionId}
                   spaceId={formModel.value.spaceId!}
                 />
               </NFormItem>

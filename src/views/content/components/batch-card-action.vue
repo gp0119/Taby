@@ -55,13 +55,14 @@ watch(
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleMove = async () => {
-  const { collectionId, position } = await openDialog()
+  const { collectionId, position, spaceId } = await openDialog()
   await dataManager.batchUpdateCards(
     batchCardStore.selectedCardIds,
     { collectionId: collectionId! },
     position,
   )
   await refreshCollections()
+  refreshCollections(spaceId as number)
   closeDrawer()
 }
 

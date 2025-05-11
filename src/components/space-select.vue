@@ -5,6 +5,7 @@
     :multiple="multiple"
     :placeholder="ft('select', 'space')"
     :render-label="renderLabel"
+    @update:value="onUpdateValue"
   >
     <template #action>
       <n-input-group>
@@ -77,5 +78,13 @@ const onAddSpace = async () => {
   await dataManager.addSpace(formModel.value)
   formModel.value.title = ""
   await spacesStore.fetchSpaces()
+}
+
+const emit = defineEmits<{
+  (e: "update:value", value: number | null | number[]): void
+}>()
+
+const onUpdateValue = (value: number | null | number[]) => {
+  emit("update:value", value)
 }
 </script>
