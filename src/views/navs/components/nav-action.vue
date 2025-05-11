@@ -101,7 +101,7 @@
           }}
         </div>
       </n-button>
-
+      <!--   更多   -->
       <n-popover
         trigger="hover"
         :show-arrow="false"
@@ -126,10 +126,11 @@
         </template>
         <template #default>
           <div class="flex flex-col items-start gap-y-2 py-1.5">
+            <!--   拖拽   -->
             <n-switch
               v-model:value="draggableStore.draggable"
               :round="false"
-              @update-value="draggableStore.setDraggable"
+              @update-value="onToggleDraggable"
             >
               <template #checked-icon>
                 <n-icon size="12" :component="BanOutline" />
@@ -144,10 +145,11 @@
                 {{ ft("enable-drag") }}
               </template>
             </n-switch>
+            <!--   查找重复   -->
             <n-switch
               v-model:value="duplicateCardStore.isFindDuplicate"
               :round="false"
-              @update-value="duplicateCardStore.setIsFindDuplicate"
+              @update-value="onToggleFindDuplicate"
             >
               <template #checked-icon>
                 <n-icon size="12" :component="ViewOff" />
@@ -206,6 +208,11 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import Tag from "@/components/tag.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
+import { useBatchCardStore } from "@/store/batch-card"
+import { useBatchCollectionStore } from "@/store/batch-collection"
+
+const batchCardStore = useBatchCardStore()
+const batchCollectionStore = useBatchCollectionStore()
 
 const draggableStore = useDraggableStore()
 const duplicateCardStore = useDuplicateCardStore()
@@ -317,5 +324,21 @@ function onAddCollection() {
       await refreshCollections()
     },
   })
+}
+
+const onToggleDraggable = (value: boolean) => {
+  draggableStore.setDraggable(value)
+  if (value) {
+    batchCardStore.clearSelectedCardIds()
+    batchCollectionStore.clearSelectedCollectionIds()
+  }
+}
+
+const onToggleFindDuplicate = (value: boolean) => {
+  duplicateCardStore.setIsFindDuplicate(value)
+  if (value) {
+    batchCardStore.clearSelectedCardIds()
+    batchCollectionStore.clearSelectedCollectionIds()
+  }
 }
 </script>
