@@ -1,6 +1,7 @@
 <template>
   <TopAction v-model:show="show" @close="onCancel">
     <div
+      v-if="duplicateCardStore.duplicateCards.size > 0"
       class="flex-center select-none gap-x-3 font-medium text-text-secondary"
     >
       <span
@@ -13,16 +14,15 @@
       />
       <span class="h-[16px] w-[0.5px] bg-text-primary" />
       <span class="font-medium">
-        {{
-          duplicateCardStore.duplicateCards.size > 0
-            ? duplicateCardStore.currentIndex + 1
-            : 0
-        }}
+        {{ duplicateCardStore.currentIndex + 1 }}
         /
         {{ duplicateCardStore.duplicateCards.size }}
       </span>
     </div>
-    <div class="flex items-center justify-between gap-x-4">
+    <div
+      v-if="duplicateCardStore.duplicateCards.size > 0"
+      class="flex items-center justify-between gap-x-4"
+    >
       <n-button
         secondary
         size="small"
@@ -50,6 +50,12 @@
         </template>
         {{ ft("next") }}
       </n-button>
+    </div>
+    <div
+      v-if="duplicateCardStore.duplicateCards.size === 0"
+      class="flex-center select-none gap-x-3 font-medium text-text-secondary"
+    >
+      {{ ft("no-duplicate-cards") }}
     </div>
   </TopAction>
 </template>
