@@ -1,9 +1,10 @@
-import { useDialog } from "naive-ui"
+import { useDialog, NButton } from "naive-ui"
 import { VNodeChild } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 export const useDeleteDialog = () => {
   const dialog = useDialog()
   const { ft } = useHelpi18n()
+
   const open = ({
     title,
     content,
@@ -17,14 +18,34 @@ export const useDeleteDialog = () => {
     negativeText?: string
     positiveText?: string
   }) => {
-    dialog.error({
+    const dialogRef = dialog.error({
       title,
       content,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
       class: "bg-body-color",
+      autoFocus: false,
       negativeText: negativeText || ft("cancel"),
       positiveText: positiveText || ft("confirm"),
       onPositiveClick,
+      action: () => {
+        return (
+          <div class="flex items-center gap-2">
+            <NButton onClick={() => dialogRef.destroy()} size="small">
+              {ft("cancel")}
+            </NButton>
+            <NButton
+              type="primary"
+              onClick={() => {
+                onPositiveClick()
+                dialogRef.destroy()
+              }}
+              size="small"
+            >
+              {ft("confirm")}
+            </NButton>
+          </div>
+        )
+      },
     })
   }
 

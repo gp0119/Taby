@@ -28,6 +28,7 @@ export function useEditDialog() {
       title,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
       class: "bg-body-color",
+      autoFocus: false,
       negativeText: negativeText || ft("cancel"),
       positiveText: positiveText || ft("confirm"),
       content: renderContent,

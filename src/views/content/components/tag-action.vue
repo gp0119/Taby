@@ -152,7 +152,7 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
             />
             <n-button
               secondary
-              type="error"
+              type="primary"
               onClick={() => onDeleteTag(tag)}
               v-slots={{
                 icon: () => <n-icon size="16" component={Delete} />,

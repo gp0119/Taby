@@ -42,7 +42,6 @@ withDefaults(
     wrapper?: boolean
   }>(),
   {
-    to: false,
     wrapper: false,
   },
 )
