@@ -7,7 +7,7 @@
     :render-label="renderLabel"
     @update:value="onUpdateValue"
   >
-    <template #action>
+    <template v-if="addable" #action>
       <n-input-group>
         <IconSelect v-model:value="formModel.icon" />
         <n-input
@@ -40,9 +40,11 @@ const id = defineModel<number | null | number[]>("modelValue", {
 withDefaults(
   defineProps<{
     multiple?: boolean
+    addable?: boolean
   }>(),
   {
     multiple: false,
+    addable: true,
   },
 )
 

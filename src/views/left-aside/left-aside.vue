@@ -251,7 +251,11 @@ function onExport() {
       return (
         <n-form model={formModel.value}>
           <n-form-item label={`${ft("space")}:`}>
-            <SpaceSelect multiple v-model:value={formModel.value.spaceIds} />
+            <SpaceSelect
+              multiple
+              addable={false}
+              v-model:value={formModel.value.spaceIds}
+            />
           </n-form-item>
         </n-form>
       )
