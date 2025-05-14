@@ -47,24 +47,24 @@
       </div>
       <div class="bottom-button-wrapper">
         <!--   复制按钮   -->
-        <n-icon-wrapper
-          v-if="isSupported"
-          :size="24"
-          :border-radius="24"
-          class="copy-button"
-          @click.stop="onHandleCopy"
-        >
-          <n-icon color="#fff" :size="12" :component="CopyOutline" />
-        </n-icon-wrapper>
+        <PopoverIcon
+          wrapper
+          message="Copy Card"
+          size="24"
+          :to="true"
+          :icon="CopyOutline"
+          wrapper-class="copy-button"
+          @click="onHandleCopy"
+        />
         <!--   编辑按钮   -->
-        <n-icon-wrapper
-          :size="24"
-          :border-radius="24"
-          class="edit-button"
-          @click.stop="onHandleEdit"
-        >
-          <n-icon color="#fff" :size="12" :component="Pen" />
-        </n-icon-wrapper>
+        <PopoverIcon
+          wrapper
+          message="Edit Card"
+          size="24"
+          :icon="Pen"
+          wrapper-class="edit-button"
+          @click="onHandleEdit"
+        />
       </div>
     </div>
   </div>
@@ -76,6 +76,7 @@ import { Pen } from "@vicons/carbon"
 import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
+import PopoverIcon from "@/components/popover-icon.vue"
 
 const props = withDefaults(
   defineProps<{
@@ -87,7 +88,7 @@ const props = withDefaults(
   { showCheckbox: true },
 )
 
-const { copy, isSupported } = useClipboard()
+const { copy } = useClipboard()
 const emit = defineEmits(["delete", "click", "copy", "edit", "check"])
 
 function onHandleClick() {
@@ -110,7 +111,7 @@ function onHandleCheckbox(checked: boolean) {
   emit("check", checked)
 }
 </script>
-<style scoped>
+<style>
 .card {
   @apply w-full cursor-pointer rounded-md bg-card-color shadow-base;
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;

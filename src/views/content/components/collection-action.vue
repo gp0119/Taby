@@ -3,26 +3,26 @@
     class="hidden items-center group-hover/item:flex"
     :class="{ '!flex': isShowTagAction }"
   >
-    <n-icon
+    <PopoverIcon
+      message="Open Collection"
       size="20"
-      class="mx-1.5 cursor-pointer text-primary"
-      title="Open Collection"
-      :component="Launch"
-      @click.stop="onOpenCollection(item)"
+      icon-class="text-primary mx-1.5"
+      :icon="Launch"
+      @click="onOpenCollection(item)"
     />
-    <n-icon
+    <PopoverIcon
       size="20"
-      class="mx-1.5 cursor-pointer text-primary"
-      title="Edit Collection"
-      :component="Edit"
-      @click.stop="onEditCollection(item)"
+      icon-class="text-primary mx-1.5"
+      message="Edit Collection"
+      :icon="Edit"
+      @click="onEditCollection(item)"
     />
-    <n-icon
+    <PopoverIcon
+      message="Move Collection"
       size="20"
-      class="mx-1.5 cursor-pointer text-primary"
-      title="Move Collection"
-      :component="FolderMoveTo"
-      @click.stop="onMoveCollection(item)"
+      icon-class="text-primary mx-1.5"
+      :icon="FolderMoveTo"
+      @click="onMoveCollection(item)"
     />
     <TagAction :item="item" />
   </div>
@@ -40,6 +40,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
+import PopoverIcon from "@/components/popover-icon.vue"
 
 const { ft, gt } = useHelpi18n()
 defineProps<{
