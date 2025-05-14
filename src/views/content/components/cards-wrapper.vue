@@ -130,8 +130,8 @@ function onEdit(child: iCard) {
     title: () => {
       return (
         <div class="flex items-center">
-          <Favicon class="block h-[20px] w-[20px]" child={child} />
-          <span>{ft("edit", "card")}</span>
+          <Favicon child={child} />
+          <span class="ml-2">{ft("edit", "card")}</span>
         </div>
       )
     },
