@@ -42,9 +42,22 @@ export default {
             opacity: "1",
           },
         },
+        fadeOut: {
+          "0%": {
+            opacity: "1",
+          },
+          "99%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "0",
+            display: "none",
+          },
+        },
       },
       animation: {
         "scale-in": "scaleIn 0.2s ease-out",
+        "fade-out": "fadeOut 0.5s ease-out forwards",
       },
       screens: {
         400: "400px",

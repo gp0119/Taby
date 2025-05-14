@@ -6,19 +6,21 @@
           <n-modal-provider>
             <n-layout
               has-sider
-              class="h-full [&_.n-layout-toggle-button]:!top-[25px] [&_.n-layout-toggle-button]:shadow-base"
+              class="h-full [&_.n-layout-toggle-button]:!top-[25px] [&_.n-layout-toggle-button]:!bg-body-color [&_.n-layout-toggle-button]:shadow-base"
               content-class="bg-body-color"
             >
               <n-layout-sider
                 :width="200"
                 :collapsed-width="30"
-                content-class="bg-body-color"
+                :collapsed="leftAsideCollapsed"
                 :show-collapsed-content="false"
                 show-trigger="arrow-circle"
-                trigger-class="!bg-body-color"
-                class="border-r"
+                class="border-r !bg-body-color"
+                @update:collapsed="onUpdateLeftAsideCollapsed"
               >
-                <left-aside />
+                <left-aside
+                  :class="{ 'animate-fade-out': leftAsideCollapsed }"
+                />
               </n-layout-sider>
               <n-layout
                 content-class="bg-body-color"
@@ -32,15 +34,17 @@
                   <content />
                 </n-layout-content>
                 <n-layout-sider
-                  content-class="bg-body-color"
-                  class="border-l"
+                  class="border-l !bg-body-color"
                   :width="250"
                   :collapsed-width="30"
+                  :collapsed="rightAsideCollapsed"
                   :show-collapsed-content="false"
                   show-trigger="arrow-circle"
-                  trigger-class="!bg-body-color"
+                  @update:collapsed="onUpdateRightAsideCollapsed"
                 >
-                  <right-aside />
+                  <right-aside
+                    :class="{ 'animate-fade-out': rightAsideCollapsed }"
+                  />
                 </n-layout-sider>
               </n-layout>
             </n-layout>
@@ -75,6 +79,14 @@ provide("loading", {
   },
 })
 
+const leftAsideCollapsed = ref(false)
+const rightAsideCollapsed = ref(false)
+const onUpdateLeftAsideCollapsed = (collapsed: boolean) => {
+  leftAsideCollapsed.value = collapsed
+}
+const onUpdateRightAsideCollapsed = (collapsed: boolean) => {
+  rightAsideCollapsed.value = collapsed
+}
 const handleVisibilityChange = debounce(
   async () => {
     if (localStorage.getItem("refreshCollections")) {

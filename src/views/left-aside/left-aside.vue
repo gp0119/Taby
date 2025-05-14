@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full flex-col">
+  <div class="flex h-full flex-col" v-bind="$attrs">
     <div>
       <div
         class="flex h-[50px] items-center border-0 border-b border-solid px-4 leading-[50px]"
