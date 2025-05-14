@@ -12,7 +12,7 @@
       <div class="favicon-size flex-center h-full">
         <n-icon
           class="text-text-secondary"
-          size="24"
+          size="20"
           :component="DocumentUnknown"
         />
       </div>
@@ -43,6 +43,9 @@ const innerFavicon = computed(() => {
 
 <style scoped>
 .card-avatar {
-  @apply mr-2.5 inline-block flex-shrink-0 select-none bg-transparent sepia-base;
+  @apply inline-block flex-shrink-0 select-none bg-transparent sepia-base;
+}
+.favicon-size {
+  @apply h-5 w-5;
 }
 </style>

@@ -9,7 +9,7 @@
   >
     <div class="card-header">
       <div
-        class="favicon-size mr-2.5 hidden h-[24px] w-[24px] animate-scale-in items-center justify-center group-hover/card:flex"
+        class="favicon-size hidden h-5 w-5 animate-scale-in items-center justify-center group-hover/card:flex"
         :class="{
           '!flex': showCheckbox && selectIds?.includes(child.id),
           '!hidden': !showCheckbox,
@@ -41,7 +41,7 @@
         <n-icon color="#fff" :size="14" :component="Close" />
       </n-icon-wrapper>
     </div>
-    <div class="card-title-wrapper relative p-2.5">
+    <div class="card-title-wrapper relative px-4 py-2.5">
       <div class="card-description">
         {{ child.description || child.title }}
       </div>
@@ -117,14 +117,14 @@ function onHandleCheckbox(checked: boolean) {
 }
 .card-header {
   @apply relative flex items-center border-0 border-b border-solid px-4 py-3;
-  @apply group-hover/aside:bg-hover-color;
+  @apply group-hover/aside:rounded-md group-hover/aside:bg-hover-color;
 }
 
 .card-title {
-  @apply flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
+  @apply ml-2 flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
 }
 .card-description {
-  @apply select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-light text-text-secondary;
+  @apply select-none overflow-hidden overflow-ellipsis whitespace-nowrap text-xs font-light text-text-secondary;
 }
 .delete-button {
   @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;

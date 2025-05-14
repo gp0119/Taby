@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded shadow-base">
+  <div class="overflow-hidden rounded-md shadow-base">
     <div class="group/title flex items-center justify-between px-4 py-3">
       <div class="flex items-center" @click="isOpen = !isOpen">
         <n-icon
