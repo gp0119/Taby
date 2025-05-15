@@ -33,11 +33,11 @@
             :closeable="false"
             @click="addTagforCollection(tag.id)"
           />
-          <n-icon
+          <PopoverIcon
+            message="Edit Tag"
             size="16"
-            class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
-            title="Edit Collection"
-            :component="Edit"
+            icon-class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
+            :icon="Edit"
             @click="onEditTag(tag)"
           />
         </div>
@@ -79,6 +79,7 @@ import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
 import { useDialog } from "naive-ui"
+import PopoverIcon from "@/components/popover-icon.vue"
 
 const props = defineProps<{
   item: CollectionWithCards
@@ -174,5 +175,3 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
   })
 }
 </script>
-
-<style scoped></style>

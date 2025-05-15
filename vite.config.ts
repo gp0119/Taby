@@ -7,6 +7,7 @@ import vueJsx from "@vitejs/plugin-vue-jsx"
 import copy from "rollup-plugin-copy"
 import path from "path"
 
+const isWatch = process.argv.includes("--watch")
 export default defineConfig({
   plugins: [
     vue(),
@@ -50,6 +51,7 @@ export default defineConfig({
   },
   build: {
     outDir: path.resolve(__dirname, "dist"),
+    emptyOutDir: !isWatch,
     rollupOptions: {
       input: {
         newtab: path.resolve(__dirname, "newtab.html"),

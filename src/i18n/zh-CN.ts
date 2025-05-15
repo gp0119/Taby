@@ -67,7 +67,7 @@ export default {
   tab: "标签页",
   "no-tabs": "这里没有标签",
   "open-tabs": "打开的标签",
-  window: "窗口",
+  window: "window",
   search: "搜索",
   "search-placeholder": "请输入标题或链接",
   "no-search-result": "没有搜索结果",

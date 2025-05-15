@@ -4,6 +4,7 @@
     placement="bottom"
     :keep-alive-on-hover="false"
     class="!rounded-md !bg-primary !px-2 !py-1 text-white"
+    content-class="!p-0"
     arrow-class="!bg-primary"
   >
     <template #trigger>

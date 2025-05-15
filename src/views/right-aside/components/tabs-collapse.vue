@@ -13,14 +13,13 @@
           {{ ft("window") }} {{ index + 1 }}
         </span>
       </div>
-      <n-icon
+      <PopoverIcon
+        message="Close All Tabs"
         size="20"
-        class="hidden cursor-pointer text-primary group-hover/title:block"
-        title="Close All Tabs"
+        icon-class="hidden cursor-pointer text-primary group-hover/title:block"
+        :icon="Close"
         @click="onCloseAllTabs"
-      >
-        <Close />
-      </n-icon>
+      />
     </div>
 
     <div
@@ -47,6 +46,8 @@ import { ChevronForward } from "@vicons/ionicons5"
 import { Close } from "@vicons/carbon"
 import type { Card as iCard } from "@/type.ts"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
+import PopoverIcon from "@/components/popover-icon.vue"
+
 defineProps<{
   index: number
   tabs: iCard[]
