@@ -6,7 +6,7 @@
     <div
       class="flex select-none items-center justify-between border-b border-gray-200 p-4 text-[#F65077]"
     >
-      <Logo class="text-6xl" />
+      <Logo class="h-5" />
       <span class="cursor-pointer" @click="openTaby">OPEN TABY</span>
     </div>
     <n-collapse
@@ -37,7 +37,7 @@
             size="20"
             icon-class="hidden text-[#F65077] group-hover/collection:block"
             content-class="!p-0"
-            class="!rounded-md !bg-[#F65077] text-white"
+            class="!rounded-md !bg-[#F65077] !px-2 !py-1 text-white"
             arrow-class="!bg-[#F65077]"
             :icon="AddOutline"
             @click="onClickHeaderExtra(space.id)"
@@ -92,7 +92,7 @@
                 size="16"
                 icon-class="hidden text-[#F65077] group-hover:block"
                 content-class="!p-0"
-                class="!rounded-md !bg-[#F65077] text-white"
+                class="!rounded-md !bg-[#F65077] !px-2 !py-1 text-white"
                 arrow-class="!bg-[#F65077]"
                 :icon="SaveOutline"
                 @click="onSave(collection)"

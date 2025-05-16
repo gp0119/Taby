@@ -5,7 +5,7 @@
         <div
           class="flex h-[50px] items-center border-0 border-b border-solid px-4 text-primary"
         >
-          <Logo class="text-8xl" />
+          <Logo class="h-7 w-auto" />
         </div>
       </a>
       <div class="border-b border-border-color px-2 py-3">
