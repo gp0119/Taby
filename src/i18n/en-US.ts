@@ -100,4 +100,5 @@ export default {
   "sync-note-3":
     "Every time you open the application, if there is an update, it will be automatically downloaded.",
   "sync-note-4": "Automatic update does not support cross-browser.",
+  "favicon-tip": "Favicon supports base64 format",
 }

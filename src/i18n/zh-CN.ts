@@ -95,4 +95,5 @@ export default {
   "sync-note-2": "编辑后5分钟自动上传。5分钟内再次编辑将重置计时。",
   "sync-note-3": "每次打开应用时，若有更新将自动下载。",
   "sync-note-4": "自动更新不支持跨浏览器。",
+  "favicon-tip": "图标支持 base64 格式",
 }

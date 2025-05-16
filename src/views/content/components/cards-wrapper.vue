@@ -55,6 +55,8 @@ import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
 import { useSpacesStore } from "@/store/spaces"
+import { InformationSquare } from "@vicons/carbon"
+
 defineProps<{
   cards: iCard[]
   collectionId: number
@@ -152,7 +154,34 @@ function onEdit(child: iCard) {
         <n-form-item label={`${ft("url")}:`}>
           <n-input v-model:value={child.url} disabled />
         </n-form-item>
-        <n-form-item label={`${ft("favicon")}:`}>
+        <n-form-item
+          v-slots={{
+            label: () => (
+              <div class="flex items-center">
+                <n-popover
+                  trigger="hover"
+                  content-class="!p-0"
+                  class="!rounded-md !bg-card-color !px-2 !py-1 text-text-primary"
+                  arrow-class="!bg-card-color"
+                  placement="top-start"
+                  v-slots={{
+                    trigger: () => (
+                      <n-icon
+                        size="16"
+                        class="mr-1 cursor-pointer text-primary"
+                        component={InformationSquare}
+                      />
+                    ),
+                    default: () => (
+                      <span class="text-xs">{ft("favicon-tip")}</span>
+                    ),
+                  }}
+                />
+                <span>{ft("favicon")}:</span>
+              </div>
+            ),
+          }}
+        >
           <n-input
             v-model:value={formModel.value.favicon}
             placeholder={ft("placeholder", "favicon")}
