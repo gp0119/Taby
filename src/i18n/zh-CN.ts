@@ -91,4 +91,8 @@ export default {
   "close-tabs": "关闭标签",
   "save-confirm": "确定保存 {type} 到 {collection} 吗?",
   "no-duplicate-cards": "没有重复的标签",
+  "sync-note-1": "第一次上传无需填写gistId，上传时将自动创建。",
+  "sync-note-2": "编辑后5分钟自动上传。5分钟内再次编辑将重置计时。",
+  "sync-note-3": "每次打开应用时，若有更新将自动下载。",
+  "sync-note-4": "自动更新不支持跨浏览器。",
 }

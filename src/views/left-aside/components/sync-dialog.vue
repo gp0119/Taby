@@ -2,10 +2,35 @@
   <n-modal
     v-model:show="show"
     preset="dialog"
-    :title="ft('sync-with-gist')"
     title-class="[&_.n-base-icon]:hidden !text-text-primary"
     class="bg-body-color"
+    :auto-focus="false"
   >
+    <template #header>
+      <span class="mr-1 text-text-primary">{{ ft("sync-with-gist") }}</span>
+      <n-popover
+        trigger="hover"
+        content-class="!p-0"
+        class="!rounded-md !bg-card-color text-text-primary"
+        arrow-class="!bg-card-color"
+        placement="top"
+        style="max-width: 600px"
+      >
+        <template #trigger>
+          <n-icon
+            size="18"
+            class="cursor-pointer text-primary"
+            :component="InformationSquare"
+          />
+        </template>
+        <ul class="list-inside list-disc text-justify text-xs">
+          <li>{{ ft("sync-note-1") }}</li>
+          <li>{{ ft("sync-note-2") }}</li>
+          <li>{{ ft("sync-note-3") }}</li>
+          <li>{{ ft("sync-note-4") }}</li>
+        </ul>
+      </n-popover>
+    </template>
     <n-form
       ref="formRef"
       :model="formModel"
@@ -39,7 +64,11 @@
           @update:value="handleAccessTokenChange"
         />
       </n-form-item>
-      <n-form-item path="gistId" :label="`${ft('gist-id')}:`">
+      <n-form-item
+        path="gistId"
+        :label="`${ft('gist-id')}:`"
+        :show-feedback="false"
+      >
         <n-input
           v-model:value="formModel.gistId"
           :placeholder="ft('placeholder', 'gist-id')"
@@ -84,7 +113,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { FormInst, useMessage } from "naive-ui"
 import syncManager from "@/sync/syncManager.ts"
 import { LogoGithub } from "@vicons/ionicons5"
-import { CloudDownload, CloudUpload } from "@vicons/carbon"
+import { CloudDownload, CloudUpload, InformationSquare } from "@vicons/carbon"
 import { debounce } from "lodash-es"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"

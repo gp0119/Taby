@@ -93,4 +93,11 @@ export default {
   "close-tabs": "Close Tabs",
   "save-confirm": "Are you sure you want to save {type} to {collection}?",
   "no-duplicate-cards": "No duplicate cards",
+  "sync-note-1":
+    "First upload does not require gistId, it will be automatically created when uploading.",
+  "sync-note-2":
+    "Edit after 5 minutes and upload automatically. Editing again within 5 minutes will reset the timer.",
+  "sync-note-3":
+    "Every time you open the application, if there is an update, it will be automatically downloaded.",
+  "sync-note-4": "Automatic update does not support cross-browser.",
 }
