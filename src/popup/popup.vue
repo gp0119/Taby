@@ -6,7 +6,7 @@
     <div
       class="flex select-none items-center justify-between border-b border-gray-200 p-4 text-[#F65077]"
     >
-      <h1 class="text-xl font-medium">Taby</h1>
+      <Logo class="text-6xl" />
       <span class="cursor-pointer" @click="openTaby">OPEN TABY</span>
     </div>
     <n-collapse
@@ -132,6 +132,7 @@ import { useI18n } from "vue-i18n"
 import { useLocalStorage } from "@vueuse/core"
 import { isNewTabPage } from "@/utils"
 import PopoverIcon from "@/components/popover-icon.vue"
+import Logo from "@/components/logo.vue"
 
 const currentLanguage = useLocalStorage("LANG", "en-US")
 const { locale } = useI18n()
