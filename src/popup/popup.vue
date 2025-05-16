@@ -32,14 +32,16 @@
           <span class="select-none pl-2">{{ space.title }}</span>
         </template>
         <template #header-extra>
-          <n-icon
+          <PopoverIcon
+            message="Add Collection"
             size="20"
-            class="hidden text-[#F65077] group-hover/collection:block"
-            title="Add Collection"
-            @click.stop="onClickHeaderExtra(space.id)"
-          >
-            <component :is="AddOutline" />
-          </n-icon>
+            icon-class="hidden text-[#F65077] group-hover/collection:block"
+            content-class="!p-0"
+            class="!rounded-md !bg-[#F65077] text-white"
+            arrow-class="!bg-[#F65077]"
+            :icon="AddOutline"
+            @click="onClickHeaderExtra(space.id)"
+          />
         </template>
         <div
           v-if="isAddingCollection"
@@ -85,14 +87,16 @@
               <span class="select-none group-hover:text-[#F65077]">
                 {{ collection.title }}
               </span>
-              <n-icon
+              <PopoverIcon
+                message="Save Tab to this collection"
                 size="16"
-                class="hidden cursor-pointer text-[#F65077] group-hover:block"
-                title="Save Tab to this collection"
+                icon-class="hidden text-[#F65077] group-hover:block"
+                content-class="!p-0"
+                class="!rounded-md !bg-[#F65077] text-white"
+                arrow-class="!bg-[#F65077]"
+                :icon="SaveOutline"
                 @click="onSave(collection)"
-              >
-                <component :is="SaveOutline" />
-              </n-icon>
+              />
             </div>
           </template>
           <template v-if="space.collections.length <= 0 && !isAddingCollection">
@@ -127,6 +131,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useI18n } from "vue-i18n"
 import { useLocalStorage } from "@vueuse/core"
 import { isNewTabPage } from "@/utils"
+import PopoverIcon from "@/components/popover-icon.vue"
 
 const currentLanguage = useLocalStorage("LANG", "en-US")
 const { locale } = useI18n()
