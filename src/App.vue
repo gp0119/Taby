@@ -89,8 +89,9 @@ const onUpdateRightAsideCollapsed = (collapsed: boolean) => {
 }
 const handleVisibilityChange = debounce(
   async () => {
-    if (localStorage.getItem("refreshCollections")) {
-      await refreshCollections()
+    const spaceId = localStorage.getItem("refreshCollections")
+    if (spaceId) {
+      await refreshCollections(Number(spaceId))
       localStorage.removeItem("refreshCollections")
     }
     await syncManager.autoUpload()

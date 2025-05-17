@@ -220,7 +220,7 @@ const onSave = async (collection: Collection) => {
       })
       message.success(ft("success", "save"))
       await getSpaces()
-      await sendMessageToTaby()
+      await sendMessageToTaby(collection.spaceId)
     },
   })
 }
@@ -234,10 +234,10 @@ const onAddCollection = async (spaceId: number) => {
   newCollectionName.value = ""
   isAddingCollection.value = false
   await getSpaces()
-  await sendMessageToTaby()
+  await sendMessageToTaby(spaceId)
 }
 
-const sendMessageToTaby = async () => {
-  localStorage.setItem("refreshCollections", "true")
+const sendMessageToTaby = async (spaceId: number) => {
+  localStorage.setItem("refreshCollections", spaceId.toString())
 }
 </script>
