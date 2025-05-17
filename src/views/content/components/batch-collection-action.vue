@@ -89,8 +89,8 @@ const onHandleMove = async () => {
 
 const onHandleDelete = async () => {
   onDeleteComfirm({
-    title: ft("delete", "tags"),
-    content: ft("delete-cards-confirm"),
+    title: ft("delete", "collections"),
+    content: ft("delete-collections-confirm"),
     onPositiveClick: async () => {
       await dataManager.batchDeleteCollections(
         batchCollectionStore.selectedCollectionIds,

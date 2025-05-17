@@ -18,6 +18,7 @@ export default {
   "sync-with": "Sync with {type}",
   "drag-to-sort": "Drag to Sort",
   tags: "Tags",
+  tag: "Tag",
   "no-tags": "No tags",
   title: "Title",
   url: "Url",
@@ -61,7 +62,7 @@ export default {
   "placeholder-search": "Press Ctrl/Cmd + F to search",
   "delete-confirm":
     "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
-  "delete-cards-confirm": "Are you sure you want to delete these tags?",
+  "delete-cards-confirm": "Are you sure you want to delete these Cards?",
   "download-remote-confirm":
     "Are you sure you want to download remote data? This will overwrite local data, please be careful.",
   "select-cards":
@@ -106,4 +107,9 @@ export default {
   "open-all-tabs": "Open All Tabs",
   "close-all-tabs": "Close All Tabs",
   "move-collection": "Move Collection",
+  "close-tabs-confirm": "Are you sure you want to close these tabs?",
+  collections: "Collections",
+  "delete-collections-confirm":
+    "Are you sure you want to delete these collections?",
+  cards: "Cards",
 }

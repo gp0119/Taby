@@ -34,7 +34,7 @@
             @click="addTagforCollection(tag.id)"
           />
           <PopoverIcon
-            :message="ft('edit', 'tags')"
+            :message="ft('edit', 'tag')"
             size="16"
             icon-class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
             :icon="Edit"
@@ -52,7 +52,7 @@
         <n-input
           v-model:value="newTag.title"
           class="!w-[100px]"
-          :placeholder="ft('placeholder', 'tags')"
+          :placeholder="ft('placeholder', 'tag')"
           size="tiny"
           maxlength="10"
         />
@@ -123,7 +123,7 @@ const onDeleteTag = async (tag: {
   color: string
 }) => {
   openDeleteDialog({
-    title: ft("delete", "tags"),
+    title: ft("delete", "tag"),
     content: () => (
       <span
         class="text-text-primary"
@@ -141,7 +141,7 @@ const onDeleteTag = async (tag: {
 const onEditTag = (tag: { id: number; title: string; color: string }) => {
   const formModel = ref({ title: tag.title, color: tag.color })
   openEditDialog({
-    title: ft("edit", "tags"),
+    title: ft("edit", "tag"),
     renderContent: () => (
       <n-form model={formModel.value}>
         <n-form-item label={`${ft("title")}:`} class="!mb-1">
@@ -149,7 +149,7 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
           <n-input-group>
             <n-input
               v-model:value={formModel.value.title}
-              placeholder={ft("placeholder", "tags")}
+              placeholder={ft("placeholder", "tag")}
             />
             <n-button
               secondary

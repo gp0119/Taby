@@ -69,7 +69,7 @@ const onHandleMove = async () => {
 const { open: onDeleteComfirm } = useDeleteDialog()
 const onHandleDelete = async () => {
   onDeleteComfirm({
-    title: ft("delete", "tags"),
+    title: ft("delete", "cards"),
     content: ft("delete-cards-confirm"),
     onPositiveClick: async () => {
       await dataManager.batchDeleteCards(batchCardStore.selectedCardIds)

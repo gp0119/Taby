@@ -18,6 +18,7 @@ export default {
   "sync-with": "使用 {type} 同步",
   "drag-to-sort": "拖动排序",
   tags: "标签",
+  tag: "标签",
   "no-tags": "这里没有标签",
   title: "标题",
   url: "链接",
@@ -58,7 +59,7 @@ export default {
   "no-cards": "这里是空的,请拖动标签页到这里",
   "placeholder-search": "按住 Ctrl/Cmd + F 搜索",
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
-  "delete-cards-confirm": "确定删除这些标签吗?",
+  "delete-cards-confirm": "确定删除这些 Cards 吗?",
   "download-remote-confirm": "确定下载远程数据吗?这会覆盖本地数据,请谨慎操作",
   "select-cards":
     "已选择 <span class='text-primary mx-2'>{type}</span> 个 Card",
@@ -101,4 +102,8 @@ export default {
   "open-all-tabs": "打开所有标签",
   "close-all-tabs": "关闭所有标签",
   "move-collection": "移动 Collection",
+  "close-tabs-confirm": "确定关闭这些标签吗?",
+  collections: "Collections",
+  "delete-collections-confirm": "确定删除这些 Collection 吗?",
+  cards: "Cards",
 }

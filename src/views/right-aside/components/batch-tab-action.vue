@@ -83,8 +83,8 @@ const onHandleSave = async () => {
 const { open: onDeleteComfirm } = useDeleteDialog()
 const onHandleClose = async () => {
   onDeleteComfirm({
-    title: ft("delete", "tags"),
-    content: ft("delete-cards-confirm"),
+    title: ft("close-tabs"),
+    content: ft("close-tabs-confirm"),
     onPositiveClick: async () => {
       await removeTabs(batchTabsStore.selectedTabIds)
       await getTabs()
