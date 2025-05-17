@@ -51,9 +51,6 @@ withDefaults(
   },
 )
 
-const $attrs = useAttrs()
-console.log($attrs)
-
 const emit = defineEmits<{
   (e: "click"): void
 }>()
