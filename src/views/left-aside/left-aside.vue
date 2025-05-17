@@ -21,7 +21,7 @@
           {{ ft("space") }}
         </span>
         <PopoverIcon
-          message="Add Space"
+          :message="ft('add', 'space')"
           size="18"
           :icon="FolderAdd"
           icon-class="text-primary"

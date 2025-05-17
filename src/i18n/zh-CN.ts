@@ -45,6 +45,7 @@ export default {
   "disable-drag": "关闭拖拽",
   edit: "编辑{type}",
   add: "添加{type}",
+  copy: "复制{type}",
   delete: "删除{type}",
   create: "创建一个新的{type}",
   placeholder: "请输入{type}",
@@ -96,4 +97,8 @@ export default {
   "sync-note-3": "每次打开应用时，若有更新将自动下载。",
   "sync-note-4": "自动更新不支持跨浏览器。",
   "favicon-tip": "图标支持 base64 格式",
+  "save-tabs-to": "保存标签到{type}",
+  "open-all-tabs": "打开所有标签",
+  "close-all-tabs": "关闭所有标签",
+  "move-collection": "移动 Collection",
 }

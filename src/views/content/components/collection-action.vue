@@ -4,7 +4,7 @@
     :class="{ '!flex': isShowTagAction }"
   >
     <PopoverIcon
-      message="Open Collection"
+      :message="ft('open-all-tabs')"
       size="20"
       icon-class="text-primary mx-1.5"
       :icon="Launch"
@@ -13,12 +13,12 @@
     <PopoverIcon
       size="20"
       icon-class="text-primary mx-1.5"
-      message="Edit Collection"
+      :message="ft('edit', 'collection')"
       :icon="Edit"
       @click="onEditCollection(item)"
     />
     <PopoverIcon
-      message="Move Collection"
+      :message="ft('move-collection')"
       size="20"
       icon-class="text-primary mx-1.5"
       :icon="FolderMoveTo"

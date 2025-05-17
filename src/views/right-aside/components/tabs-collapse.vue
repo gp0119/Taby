@@ -14,7 +14,7 @@
         </span>
       </div>
       <PopoverIcon
-        message="Close All Tabs"
+        :message="ft('close-all-tabs')"
         size="20"
         icon-class="hidden cursor-pointer text-primary group-hover/title:block"
         :icon="Close"

@@ -49,7 +49,7 @@
         <!--   复制按钮   -->
         <PopoverIcon
           wrapper
-          message="Copy Card"
+          :message="ft('copy', 'url')"
           size="24"
           :to="true"
           :icon="CopyOutline"
@@ -59,7 +59,7 @@
         <!--   编辑按钮   -->
         <PopoverIcon
           wrapper
-          message="Edit Card"
+          :message="ft('edit', 'card')"
           size="24"
           :icon="Pen"
           wrapper-class="edit-button"
@@ -77,6 +77,7 @@ import { Card } from "@/type.ts"
 import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
 import PopoverIcon from "@/components/popover-icon.vue"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const props = withDefaults(
   defineProps<{
@@ -88,6 +89,7 @@ const props = withDefaults(
   { showCheckbox: true },
 )
 
+const { ft } = useHelpi18n()
 const { copy } = useClipboard()
 const emit = defineEmits(["delete", "click", "copy", "edit", "check"])
 

@@ -33,7 +33,7 @@
         </template>
         <template #header-extra>
           <PopoverIcon
-            message="Add Collection"
+            :message="ft('add', 'collection')"
             size="20"
             icon-class="hidden text-[#F65077] group-hover/collection:block"
             content-class="!p-0"
@@ -88,7 +88,7 @@
                 {{ collection.title }}
               </span>
               <PopoverIcon
-                message="Save Tab to this collection"
+                :message="gt('save-tabs-to', collection.title)"
                 size="16"
                 icon-class="hidden text-[#F65077] group-hover:block"
                 content-class="!p-0"
@@ -138,7 +138,7 @@ const currentLanguage = useLocalStorage("LANG", "en-US")
 const { locale } = useI18n()
 const dialog = useDialog()
 const message = useMessage()
-const { ft, ft2 } = useHelpi18n()
+const { ft, ft2, gt } = useHelpi18n()
 const spaces = ref<SpaceWithCollections[]>([])
 const newCollectionName = ref("")
 const isAddingCollection = ref(false)
@@ -171,7 +171,6 @@ onMounted(async () => {
       currentWindow: true,
     })
   )?.[0]
-  console.log("activeTab.value: ", activeTab.value)
   await getSpaces()
 })
 

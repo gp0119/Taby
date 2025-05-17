@@ -34,7 +34,7 @@
             @click="addTagforCollection(tag.id)"
           />
           <PopoverIcon
-            message="Edit Tag"
+            :message="ft('edit', 'tags')"
             size="16"
             icon-class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
             :icon="Edit"
