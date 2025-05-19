@@ -9,50 +9,7 @@
       <n-dialog-provider>
         <n-message-provider>
           <n-modal-provider>
-            <n-layout
-              has-sider
-              class="h-full [&_.n-layout-toggle-button]:!top-[25px] [&_.n-layout-toggle-button]:!bg-body-color [&_.n-layout-toggle-button]:shadow-base"
-              content-class="bg-body-color"
-            >
-              <n-layout-sider
-                :width="200"
-                :collapsed-width="30"
-                :collapsed="leftAsideCollapsed"
-                :show-collapsed-content="false"
-                show-trigger="arrow-circle"
-                class="border-r !bg-body-color"
-                @update:collapsed="onUpdateLeftAsideCollapsed"
-              >
-                <left-aside
-                  :class="{ 'animate-fade-out': leftAsideCollapsed }"
-                />
-              </n-layout-sider>
-              <n-layout
-                content-class="bg-body-color"
-                has-sider
-                sider-placement="right"
-              >
-                <n-layout-content
-                  content-class="bg-body-color  overflow-hidden"
-                >
-                  <navs />
-                  <content />
-                </n-layout-content>
-                <n-layout-sider
-                  class="border-l !bg-body-color"
-                  :width="250"
-                  :collapsed-width="30"
-                  :collapsed="rightAsideCollapsed"
-                  :show-collapsed-content="false"
-                  show-trigger="arrow-circle"
-                  @update:collapsed="onUpdateRightAsideCollapsed"
-                >
-                  <right-aside
-                    :class="{ 'animate-fade-out': rightAsideCollapsed }"
-                  />
-                </n-layout-sider>
-              </n-layout>
-            </n-layout>
+            <layout />
           </n-modal-provider>
         </n-message-provider>
       </n-dialog-provider>
@@ -63,15 +20,12 @@
 <script setup lang="ts">
 import { useThemeStore } from "@/store/theme.ts"
 import syncManager from "@/sync/syncManager.ts"
-import navs from "@/views/navs/navs.vue"
-import leftAside from "@/views/left-aside/left-aside.vue"
-import rightAside from "@/views/right-aside/index.vue"
-import content from "@/views/content/index.vue"
 import { GlobalThemeOverrides, darkTheme, lightTheme } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { debounce } from "lodash-es"
+import layout from "@/layout/index.vue"
 
 const { refreshSpaces, refreshCollections } = useRefresh()
 
