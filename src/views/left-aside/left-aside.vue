@@ -40,9 +40,8 @@
     <div class="px-2.5 py-4">
       <n-space vertical>
         <n-button
-          type="primary"
-          ghost
-          class="w-full"
+          tertiary
+          class="w-full !shadow"
           :focusable="false"
           @click="onImport"
         >
@@ -52,9 +51,8 @@
           </template>
         </n-button>
         <n-button
-          type="primary"
-          ghost
-          class="w-full"
+          tertiary
+          class="w-full !shadow"
           :focusable="false"
           @click="onExport"
         >
@@ -64,9 +62,8 @@
           </template>
         </n-button>
         <n-button
-          secondary
-          type="primary"
-          class="w-full"
+          tertiary
+          class="w-full !shadow"
           :focusable="false"
           @click="showSyncDialog = true"
         >

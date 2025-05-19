@@ -1,5 +1,10 @@
 <template>
-  <n-config-provider :theme-overrides="themeOverrides" class="h-full" abstract>
+  <n-config-provider
+    :theme-overrides="themeOverrides"
+    :theme="themeStore.theme === 'dark' ? darkTheme : lightTheme"
+    class="h-full"
+    abstract
+  >
     <n-loading-bar-provider>
       <n-dialog-provider>
         <n-message-provider>
@@ -62,7 +67,7 @@ import navs from "@/views/navs/navs.vue"
 import leftAside from "@/views/left-aside/left-aside.vue"
 import rightAside from "@/views/right-aside/index.vue"
 import content from "@/views/content/index.vue"
-import { GlobalThemeOverrides } from "naive-ui"
+import { GlobalThemeOverrides, darkTheme, lightTheme } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
 const themeStore = useThemeStore()
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
@@ -122,10 +127,18 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   Button: {
     textColor: themeStore.themeColor[themeStore.theme].textPrimary,
     colorPressedPrimary: themeStore.themeColor[themeStore.theme].darkenPrimary,
+    waveOpacity: 0,
+    borderRadiusSmall: "6px",
+    borderRadiusMedium: "6px",
+  },
+  Dialog: {
+    borderRadius: "12px",
   },
   Input: {
     color: themeStore.themeColor[themeStore.theme].cardBackground,
     textColor: themeStore.themeColor[themeStore.theme].textPrimary,
+    boxShadowFocus: "none",
+    borderRadius: "6px",
   },
   Form: {
     labelTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
@@ -136,6 +149,7 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
     buttonColorActive: themeStore.themeColor[themeStore.theme].primary,
     buttonBorderColorActive: themeStore.themeColor[themeStore.theme].primary,
     buttonTextColorActive: "#fff",
+    buttonBorderRadius: "6px",
   },
   Tag: {
     colorBordered: themeStore.themeColor[themeStore.theme].cardBackground,

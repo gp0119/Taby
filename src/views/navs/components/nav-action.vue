@@ -169,7 +169,7 @@
       </n-popover>
     </div>
     <div class="flex-center gap-2">
-      <n-button size="small" secondary type="primary" @click="onAddCollection">
+      <n-button size="small" tertiary class="!shadow" @click="onAddCollection">
         <span>{{ ft("add", "collection") }}</span>
         <template #icon>
           <n-icon size="20" :component="Add" />
