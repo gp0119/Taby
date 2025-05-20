@@ -6,14 +6,17 @@
         side === 'left'
           ? layoutStore.leftAsideWidth + 'px'
           : layoutStore.rightAsideWidth + 'px',
-      transition: 'width 0.2s ease-in-out',
+      transition: 'width 3s ease-in-out',
     }"
     :class="{
       'px-2.5': !collapsed,
     }"
-    @mouseleave="onHandleMouse('leave')"
+    @mouseleave="handleMouseLeave"
   >
-    <aside class="flex h-full flex-col gap-y-3 py-2.5">
+    <aside
+      class="pin-side-aside flex h-full flex-col gap-y-3 py-2.5"
+      @mouseenter="handleMouseEnter"
+    >
       <div
         v-if="$slots.header"
         class="rounded-lg"
@@ -42,14 +45,14 @@
       v-if="side === 'left'"
       class="absolute right-0 top-0 z-10 h-full w-2 cursor-ew-resize"
       style="background: transparent"
-      @mouseenter="onHandleMouse('enter')"
+      @mouseenter="handleMouseEnter"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useLayoutStore } from "@/store/layout"
-import { debounce } from "lodash-es"
+import { onUnmounted } from "vue"
 
 const layoutStore = useLayoutStore()
 
@@ -66,11 +69,40 @@ withDefaults(
   },
 )
 
-const onHandleMouse = debounce((type: "enter" | "leave") => {
+let mouseMoveHandler: ((e: MouseEvent) => void) | null = null
+const safeDistance = 40 // px
+
+function handleMouseLeave() {
   if (layoutStore.leftAsidePinned) return
-  const shouldCollapse = type !== "enter"
-  if (layoutStore.leftAsideCollapsed !== shouldCollapse) {
-    layoutStore.onUpdateLeftAsideCollapsed(shouldCollapse)
+  if (!layoutStore.leftAsideCollapsed) {
+    mouseMoveHandler = (e: MouseEvent) => {
+      const aside = document.querySelector(".pin-side-aside") as HTMLElement
+      if (!aside) return
+      const rect = aside.getBoundingClientRect()
+      if (e.clientX - rect.right > safeDistance) {
+        layoutStore.onUpdateLeftAsideCollapsed(true)
+        document.removeEventListener("mousemove", mouseMoveHandler!)
+        mouseMoveHandler = null
+      }
+    }
+    document.addEventListener("mousemove", mouseMoveHandler)
   }
-}, 100)
+}
+
+function handleMouseEnter() {
+  if (layoutStore.leftAsidePinned) return
+  if (layoutStore.leftAsideCollapsed) {
+    layoutStore.onUpdateLeftAsideCollapsed(false)
+  }
+  if (mouseMoveHandler) {
+    document.removeEventListener("mousemove", mouseMoveHandler)
+    mouseMoveHandler = null
+  }
+}
+
+onUnmounted(() => {
+  if (mouseMoveHandler) {
+    document.removeEventListener("mousemove", mouseMoveHandler)
+  }
+})
 </script>
