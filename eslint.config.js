@@ -5,6 +5,7 @@ import fs from "node:fs"
 import js from "@eslint/js"
 import configPrettier from "eslint-config-prettier"
 import pluginPrettier from "eslint-plugin-prettier"
+import pluginTailwindcss from "eslint-plugin-tailwindcss"
 
 const readJsonFile = (filePath) => {
   try {
@@ -24,10 +25,12 @@ export default [
     ignores: ["dist/**", "node_modules/**", ".eslintrc-auto-import.json"],
     plugins: {
       prettier: pluginPrettier,
+      tailwindcss: pluginTailwindcss,
     },
     rules: {
       ...configPrettier.rules,
       ...pluginPrettier.configs.recommended.rules,
+      "tailwindcss/classnames-order": "off",
     },
   },
   {

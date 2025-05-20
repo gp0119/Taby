@@ -1,8 +1,8 @@
 <template>
   <div
-    class="group/item w-full border-b border-border-color"
+    class="group/item flex h-full w-full flex-col rounded-lg border border-dashed border-transparent bg-white"
     :class="{
-      'shadow-bottom': batchCollectionStore.selectedCollectionIds.includes(
+      '!border-primary': batchCollectionStore.selectedCollectionIds.includes(
         collection.id,
       ),
     }"
@@ -50,20 +50,30 @@
               {{ collection.title }}
             </span>
           </div>
+          <div
+            class="ml-2 flex cursor-pointer items-center rounded-md bg-content-bg px-1.5 py-0.5 text-sm text-text-secondary"
+          >
+            {{ collection.cards.length }} sites
+            <n-icon size="16" class="ml-1">
+              <ChevronForward />
+            </n-icon>
+          </div>
         </div>
+        <span
+          v-if="collection.labels.length > 0"
+          class="mx-4 h-[16px] w-[0.5px] bg-text-primary"
+        />
         <Tags :labels="collection.labels" :collection-id="collection.id" />
       </div>
       <CollectionAction :item="collection" />
     </div>
 
     <div
-      class="grid transition-[grid-template-rows] duration-300 ease-in-out"
+      class="grid flex-1 transition-[grid-template-rows] duration-300 ease-in-out"
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
-      <div class="-mt-1.5 overflow-hidden">
-        <div class="px-5 pb-5">
-          <slot name="cards" :collection="collection" />
-        </div>
+      <div class="overflow-hidden">
+        <slot name="cards" :collection="collection" />
       </div>
     </div>
   </div>

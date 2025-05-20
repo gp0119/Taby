@@ -115,7 +115,7 @@ function onHandleCheckbox(checked: boolean) {
 </script>
 <style>
 .card {
-  @apply w-full cursor-pointer rounded-md bg-card-color shadow-base;
+  @apply w-full cursor-pointer rounded-md bg-card-color shadow-card-shadow;
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {

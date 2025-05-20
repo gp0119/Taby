@@ -1,5 +1,5 @@
 <template>
-  <n-space v-if="labels.length" class="ml-3">
+  <n-space v-if="labels.length">
     <Tag
       v-for="tag in labels"
       :key="tag.id"

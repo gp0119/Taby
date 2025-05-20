@@ -18,17 +18,16 @@
           :data-index="index"
           :data-active="active"
           :size-dependencies="[item.cards]"
+          class="px-4 py-2"
         >
-          <div v-memo="[item, item.cards.length]">
-            <CollectionCollapse :collection="item">
-              <template #cards="{ collection }">
-                <CardsWrapper
-                  :cards="collection.cards"
-                  :collection-id="collection.id"
-                />
-              </template>
-            </CollectionCollapse>
-          </div>
+          <CollectionCollapse :collection="item">
+            <template #cards="{ collection }">
+              <CardsWrapper
+                :cards="collection.cards"
+                :collection-id="collection.id"
+              />
+            </template>
+          </CollectionCollapse>
         </DynamicScrollerItem>
       </template>
     </DynamicScroller>
