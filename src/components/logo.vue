@@ -1,5 +1,5 @@
 <template>
-  <div class="n flex h-[50px] items-center px-2.5">
+  <div class="n flex h-[50px] items-center overflow-hidden px-2.5">
     <a
       href="https://github.com/gp0119/Taby"
       target="_blank"
@@ -37,8 +37,7 @@
         class="text-primary"
       >
         <svg
-          v-show="!layoutStore.leftAsideCollapsed"
-          class="ml-2 mt-1.5 h-6"
+          class="ml-3 mt-1.5 h-6"
           viewBox="0 0 94 38"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +50,6 @@
       <div class="flex flex-nowrap items-center gap-x-2">
         <LeftCollapseIcon />
         <PopoverIcon
-          v-if="!layoutStore.leftAsideCollapsed"
           :message="ft('add', 'space')"
           size="18"
           radius="8"

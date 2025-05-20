@@ -9,7 +9,7 @@
     <div
       v-for="item in spaces"
       :key="item.title"
-      class="space-item hover:shadow-hover-shadow flex w-full cursor-pointer flex-nowrap items-center gap-x-2.5 whitespace-nowrap rounded-lg p-2 font-medium text-text-primary"
+      class="space-item flex w-full cursor-pointer flex-nowrap items-center gap-x-2.5 whitespace-nowrap rounded-lg p-2 font-medium text-text-primary hover:shadow-hover-shadow"
       :data-id="item.id"
       :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
       @click="onHandleSpaceClick(item)"
@@ -18,7 +18,7 @@
         tertiary
         size="small"
         :type="activeSpaceId === item.id ? 'primary' : 'default'"
-        class="!shadow-btn-shadow w-[28px] flex-shrink-0"
+        class="w-[28px] flex-shrink-0 !shadow-btn-shadow"
       >
         <template #icon>
           <n-icon

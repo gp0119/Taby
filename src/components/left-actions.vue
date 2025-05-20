@@ -2,42 +2,63 @@
   <n-space vertical>
     <n-button
       tertiary
-      class="!shadow-btn-shadow w-full"
+      class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
       :focusable="false"
       @click="onImport"
     >
-      <span v-if="!layoutStore.leftAsideCollapsed" class="w-8">
+      <n-icon
+        size="18"
+        class="flex w-[34px] flex-shrink-0 items-center justify-center"
+        :component="DocumentImport"
+      />
+      <span
+        :class="{
+          'animate-hide': layoutStore.leftAsideCollapsed,
+          'animate-show': !layoutStore.leftAsideCollapsed,
+        }"
+      >
         {{ ft("import") }}
       </span>
-      <template #icon>
-        <n-icon size="18" :component="DocumentImport" />
-      </template>
     </n-button>
     <n-button
       tertiary
-      class="!shadow-btn-shadow w-full"
+      class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
       :focusable="false"
       @click="onExport"
     >
-      <span v-if="!layoutStore.leftAsideCollapsed" class="w-8">
+      <n-icon
+        size="18"
+        class="flex w-[34px] flex-shrink-0 items-center justify-center"
+        :component="DocumentExport"
+      />
+      <span
+        :class="{
+          'animate-hide': layoutStore.leftAsideCollapsed,
+          'animate-show': !layoutStore.leftAsideCollapsed,
+        }"
+      >
         {{ ft("export") }}
       </span>
-      <template #icon>
-        <n-icon size="18" :component="DocumentExport" />
-      </template>
     </n-button>
     <n-button
       tertiary
-      class="!shadow-btn-shadow w-full"
+      class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
       :focusable="false"
       @click="showSyncDialog = true"
     >
-      <span v-if="!layoutStore.leftAsideCollapsed" class="w-8">
+      <n-icon
+        size="18"
+        class="flex w-[34px] flex-shrink-0 items-center justify-center"
+        :component="CloudDataOps"
+      />
+      <span
+        :class="{
+          'animate-hide': layoutStore.leftAsideCollapsed,
+          'animate-show': !layoutStore.leftAsideCollapsed,
+        }"
+      >
         {{ ft("sync") }}
       </span>
-      <template #icon>
-        <n-icon size="18" :component="CloudDataOps" />
-      </template>
     </n-button>
   </n-space>
   <SyncDialog v-model:show="showSyncDialog" />

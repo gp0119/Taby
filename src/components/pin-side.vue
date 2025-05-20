@@ -17,38 +17,29 @@
       <div
         v-if="$slots.header"
         class="rounded-lg"
-        :style="{
-          transition: 'background-color 0.2s ease-in-out',
-        }"
-        :class="{
-          'bg-transparent': layoutStore.leftAsideCollapsed,
-          'bg-white': !layoutStore.leftAsideCollapsed,
-        }"
+        :class="[
+          !layoutStore.leftAsideCollapsed ? 'bg-white' : 'bg-transparent',
+          'transition-colors duration-300 ease-in-out',
+        ]"
       >
         <slot name="header" />
       </div>
       <div
         class="flex-1 rounded-lg"
-        :style="{
-          transition: 'background-color 0.2s ease-in-out',
-        }"
-        :class="{
-          'bg-white': !layoutStore.leftAsideCollapsed,
-          'bg-transparent': layoutStore.leftAsideCollapsed,
-        }"
+        :class="[
+          !layoutStore.leftAsideCollapsed ? 'bg-white' : 'bg-transparent',
+          'transition-colors duration-300 ease-in-out',
+        ]"
       >
         <slot />
       </div>
       <div
         v-if="$slots.footer"
         class="rounded-lg px-2.5 py-4"
-        :style="{
-          transition: 'background-color 0.2s ease-in-out',
-        }"
-        :class="{
-          'bg-transparent': layoutStore.leftAsideCollapsed,
-          'bg-white': !layoutStore.leftAsideCollapsed,
-        }"
+        :class="[
+          !layoutStore.leftAsideCollapsed ? 'bg-white' : 'bg-transparent',
+          'transition-colors duration-300 ease-in-out',
+        ]"
       >
         <slot name="footer" />
       </div>

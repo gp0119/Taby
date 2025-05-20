@@ -55,21 +55,17 @@ export default {
         show: {
           "0%": {
             opacity: "0",
-            transform: "translateX(50px)",
           },
           "100%": {
             opacity: "1",
-            transform: "translateX(0)",
           },
         },
         hide: {
           "0%": {
             opacity: "1",
-            transform: "translateX(0)",
           },
           "100%": {
             opacity: "0",
-            transform: "translateX(50px)",
           },
         },
       },

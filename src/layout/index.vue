@@ -6,7 +6,7 @@
         <LeftActions />
       </template>
     </pinSide>
-    <main class="bg-content-bg flex-1 rounded-xl">
+    <main class="flex-1 rounded-xl bg-content-bg">
       <navs />
       <content />
     </main>
