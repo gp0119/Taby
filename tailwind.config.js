@@ -13,6 +13,8 @@ export default {
       },
       colors: {
         primary: "var(--primary)",
+        "body-bg": "var(--bodyBg)",
+        "content-bg": "var(--contentBg)",
         "darken-primary": "var(--darkenPrimary)",
         "body-color": "var(--bodyBackground)",
         "card-color": "var(--cardBackground)",

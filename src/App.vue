@@ -38,14 +38,6 @@ provide("loading", {
   },
 })
 
-const leftAsideCollapsed = ref(false)
-const rightAsideCollapsed = ref(false)
-const onUpdateLeftAsideCollapsed = (collapsed: boolean) => {
-  leftAsideCollapsed.value = collapsed
-}
-const onUpdateRightAsideCollapsed = (collapsed: boolean) => {
-  rightAsideCollapsed.value = collapsed
-}
 const handleVisibilityChange = debounce(
   async () => {
     const spaceId = localStorage.getItem("refreshCollections")

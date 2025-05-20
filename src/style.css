@@ -5,6 +5,8 @@
 /* 为每个主题定义变量 */
 html[data-theme="pink"] {
   --primary: #f65077;
+  --bodyBg: #e0e4e8;
+  --contentBg: #f4f5f7;
   --darkenPrimary: #e0496c;
   --bodyBackground: #fafafa;
   --cardBackground: #ffffff;

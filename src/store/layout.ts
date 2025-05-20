@@ -2,13 +2,20 @@ import { defineStore } from "pinia"
 
 export const useLayoutStore = defineStore("Layout", () => {
   const layout = ref<"leftMenu" | "topMenu">("leftMenu")
-  const leftAsideCollapsed = ref(true)
-  const rightAsideCollapsed = ref(true)
-  const leftAsideWidth = ref(200)
-  const rightAsideWidth = ref(200)
-  const MIN_WIDTH = 150
-  const MAX_WIDTH = 300
 
+  const leftAsideCollapsed = ref(true)
+  const rightAsideCollapsed = ref(false)
+
+  const leftAsideWidth = computed(() => {
+    return leftAsideCollapsed.value ? 66 : 220
+  })
+
+  const rightAsideWidth = computed(() => {
+    return rightAsideCollapsed.value ? 66 : 220
+  })
+
+  const leftAsidePinned = ref(false)
+  const rightAsidePinned = ref(false)
   const onUpdateLayout = (_layout: "leftMenu" | "topMenu") => {
     layout.value = _layout
   }
@@ -18,11 +25,11 @@ export const useLayoutStore = defineStore("Layout", () => {
   const onUpdateRightAsideCollapsed = (collapsed: boolean) => {
     rightAsideCollapsed.value = collapsed
   }
-  const onUpdateLeftAsideWidth = (width: number) => {
-    leftAsideWidth.value = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width))
+  const onUpdateLeftAsidePinned = (pinned: boolean) => {
+    leftAsidePinned.value = pinned
   }
-  const onUpdateRightAsideWidth = (width: number) => {
-    rightAsideWidth.value = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width))
+  const onUpdateRightAsidePinned = (pinned: boolean) => {
+    rightAsidePinned.value = pinned
   }
 
   return {
@@ -31,10 +38,11 @@ export const useLayoutStore = defineStore("Layout", () => {
     rightAsideCollapsed,
     leftAsideWidth,
     rightAsideWidth,
+    leftAsidePinned,
     onUpdateLayout,
     onUpdateLeftAsideCollapsed,
     onUpdateRightAsideCollapsed,
-    onUpdateLeftAsideWidth,
-    onUpdateRightAsideWidth,
+    onUpdateLeftAsidePinned,
+    onUpdateRightAsidePinned,
   }
 })

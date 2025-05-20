@@ -15,7 +15,7 @@
       <n-icon-wrapper
         v-if="wrapper"
         :size="size"
-        :border-radius="size"
+        :border-radius="radius || size"
         :class="wrapperClass"
         @click.stop="onClick"
       >
@@ -42,6 +42,7 @@ withDefaults(
     message: string
     icon: Component
     size?: number | string
+    radius?: number | string
     iconClass?: string
     wrapperClass?: string
     wrapper?: boolean
