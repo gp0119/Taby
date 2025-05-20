@@ -2,8 +2,7 @@
   <n-space vertical>
     <n-button
       tertiary
-      class="!shadow"
-      :class="{ 'w-full': !layoutStore.leftAsideCollapsed }"
+      class="!shadow-btn-shadow w-full"
       :focusable="false"
       @click="onImport"
     >
@@ -16,8 +15,7 @@
     </n-button>
     <n-button
       tertiary
-      class="!shadow"
-      :class="{ 'w-full': !layoutStore.leftAsideCollapsed }"
+      class="!shadow-btn-shadow w-full"
       :focusable="false"
       @click="onExport"
     >
@@ -30,8 +28,7 @@
     </n-button>
     <n-button
       tertiary
-      class="!shadow"
-      :class="{ 'w-full': !layoutStore.leftAsideCollapsed }"
+      class="!shadow-btn-shadow w-full"
       :focusable="false"
       @click="showSyncDialog = true"
     >

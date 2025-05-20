@@ -2,37 +2,36 @@
   <VueDraggable
     :model-value="spaces"
     item-key="id"
-    class="flex flex-col gap-y-2.5"
+    class="flex flex-col gap-y-1.5"
     ghost-class="sortable-ghost-dashed-border"
     @end="onDragEnd"
   >
     <div
       v-for="item in spaces"
       :key="item.title"
-      class="space-item flex w-full cursor-pointer flex-nowrap items-center gap-x-2.5 whitespace-nowrap font-medium text-text-primary"
+      class="space-item hover:shadow-hover-shadow flex w-full cursor-pointer flex-nowrap items-center gap-x-2.5 whitespace-nowrap rounded-lg p-2 font-medium text-text-primary"
       :data-id="item.id"
       :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
       @click="onHandleSpaceClick(item)"
     >
       <n-button
         tertiary
+        size="small"
         :type="activeSpaceId === item.id ? 'primary' : 'default'"
-        class="flex-shrink-0 !shadow"
+        class="!shadow-btn-shadow w-[28px] flex-shrink-0"
       >
         <template #icon>
           <n-icon
-            size="20"
+            size="18"
             :component="item.icon ? ICON_LIST[item.icon] : StorefrontOutline"
           />
         </template>
       </n-button>
       <div
-        class="select-none overflow-hidden transition-all duration-200 ease-in-out"
+        class="select-none overflow-hidden"
         :class="{
-          'translate-x-[-10px] scale-95 opacity-0':
-            layoutStore.leftAsideCollapsed,
-          'translate-x-0 scale-100 opacity-100':
-            !layoutStore.leftAsideCollapsed,
+          'animate-hide': layoutStore.leftAsideCollapsed,
+          'animate-show': !layoutStore.leftAsideCollapsed,
         }"
       >
         {{ item.title }}

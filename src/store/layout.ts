@@ -7,11 +7,11 @@ export const useLayoutStore = defineStore("Layout", () => {
   const rightAsideCollapsed = ref(false)
 
   const leftAsideWidth = computed(() => {
-    return leftAsideCollapsed.value ? 66 : 220
+    return leftAsideCollapsed.value ? 70 : 220
   })
 
   const rightAsideWidth = computed(() => {
-    return rightAsideCollapsed.value ? 66 : 220
+    return rightAsideCollapsed.value ? 70 : 220
   })
 
   const leftAsidePinned = ref(false)

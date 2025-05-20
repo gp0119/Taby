@@ -1,14 +1,7 @@
 <template>
-  <div
-    class="flex h-full flex-col rounded-lg"
-    :class="{
-      'bg-white': !layoutStore.leftAsideCollapsed,
-      'bg-transparent': layoutStore.leftAsideCollapsed,
-    }"
-    v-bind="$attrs"
-  >
+  <div class="flex h-full flex-col" v-bind="$attrs">
     <Logo />
-    <div class="mt-2 w-full flex-1 p-2">
+    <div class="mt-2 w-full flex-1 px-1">
       <SpaceWrapper
         :spaces="allSpaces"
         :active-space-id="activeSpaceId"
@@ -27,13 +20,11 @@ import SpaceWrapper from "./components/space-wrapper.vue"
 import { SortableEvent } from "vue-draggable-plus"
 import dataManager from "@/db"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
-import { useLayoutStore } from "@/store/layout"
 import Logo from "@/components/logo.vue"
 
 const spacesStore = useSpacesStore()
 const { refreshSpaces, refreshTags } = useRefresh()
 const duplicateCardStore = useDuplicateCardStore()
-const layoutStore = useLayoutStore()
 
 const allSpaces = computed(() => spacesStore.spaces)
 const activeSpaceId = computed(() => spacesStore.activeId)

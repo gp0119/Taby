@@ -1,12 +1,12 @@
 <template>
-  <div class="n flex h-[50px] items-center px-4">
+  <div class="n flex h-[50px] items-center px-2.5">
     <a
       href="https://github.com/gp0119/Taby"
       target="_blank"
       class="flex items-center justify-center text-primary"
     >
       <svg
-        class="h-7"
+        class="h-8"
         viewBox="0 0 48 48"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
@@ -25,11 +25,10 @@
       </svg>
     </a>
     <div
-      class="flex flex-1 items-center justify-between transition-all duration-200 ease-in-out"
+      class="flex flex-1 items-center justify-between"
       :class="{
-        'translate-x-[-10px] scale-95 opacity-0':
-          layoutStore.leftAsideCollapsed,
-        'translate-x-0 scale-100 opacity-100': !layoutStore.leftAsideCollapsed,
+        'animate-hide': layoutStore.leftAsideCollapsed,
+        'animate-show': !layoutStore.leftAsideCollapsed,
       }"
     >
       <a

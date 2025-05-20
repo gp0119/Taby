@@ -7,6 +7,10 @@ export default {
         base: "1px 1px 5px 0px var(--shadowColor)",
         "base-lg": "2px 2px 5px 5px var(--shadowColor)",
         bottom: "0 6px 12px -4px var(--shadowColor)",
+        "hover-shadow":
+          "rgba(135, 145, 155, 0.3) 0px 3px 8px 0px, rgba(135, 145, 155, 0.0.08) 0px 0px 0px 1px",
+        "btn-shadow":
+          "0 1px 2px 0 rgba(142,149,173,0.64),0 0px 1px 1px rgba(142,149,173,0.1),inset 1px 1px 1px 0 rgba(255,255,255,0.81),inset -1px -1px 1px 0 #E2E4E9",
       },
       dropShadow: {
         base: "1px 2px 4px rgba(112, 112, 140, 0.15)",
@@ -44,22 +48,31 @@ export default {
             opacity: "1",
           },
         },
-        fadeOut: {
+        show: {
+          "0%": {
+            opacity: "0",
+            transform: "translateX(50px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
+        hide: {
           "0%": {
             opacity: "1",
-          },
-          "99%": {
-            opacity: "0",
+            transform: "translateX(0)",
           },
           "100%": {
             opacity: "0",
-            display: "none",
+            transform: "translateX(50px)",
           },
         },
       },
       animation: {
         "scale-in": "scaleIn 0.2s ease-out",
-        "fade-out": "fadeOut 0.5s ease-out forwards",
+        show: "show 0.2s ease-out",
+        hide: "hide 0.2s ease-out",
       },
       screens: {
         400: "400px",

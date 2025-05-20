@@ -1,25 +1,25 @@
 <template>
   <div
-    class="relative h-full translate-x-0"
+    class="relative h-full translate-x-0 px-2"
     :style="{
       width:
         side === 'left'
           ? layoutStore.leftAsideWidth + 'px'
           : layoutStore.rightAsideWidth + 'px',
-      transition: 'width 3s ease-in-out',
-    }"
-    :class="{
-      'px-2.5': !collapsed,
+      transition: 'all 0.2s ease-in-out',
     }"
     @mouseleave="handleMouseLeave"
   >
     <aside
-      class="pin-side-aside flex h-full flex-col gap-y-3 py-2.5"
+      class="pin-side-aside flex h-full flex-col gap-y-2 py-2"
       @mouseenter="handleMouseEnter"
     >
       <div
         v-if="$slots.header"
         class="rounded-lg"
+        :style="{
+          transition: 'background-color 0.2s ease-in-out',
+        }"
         :class="{
           'bg-transparent': layoutStore.leftAsideCollapsed,
           'bg-white': !layoutStore.leftAsideCollapsed,
@@ -27,12 +27,24 @@
       >
         <slot name="header" />
       </div>
-      <div class="flex-1">
+      <div
+        class="flex-1 rounded-lg"
+        :style="{
+          transition: 'background-color 0.2s ease-in-out',
+        }"
+        :class="{
+          'bg-white': !layoutStore.leftAsideCollapsed,
+          'bg-transparent': layoutStore.leftAsideCollapsed,
+        }"
+      >
         <slot />
       </div>
       <div
         v-if="$slots.footer"
         class="rounded-lg px-2.5 py-4"
+        :style="{
+          transition: 'background-color 0.2s ease-in-out',
+        }"
         :class="{
           'bg-transparent': layoutStore.leftAsideCollapsed,
           'bg-white': !layoutStore.leftAsideCollapsed,
@@ -56,7 +68,7 @@ import { onUnmounted } from "vue"
 
 const layoutStore = useLayoutStore()
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     side: "left" | "right"
     collapsed: boolean
@@ -80,7 +92,11 @@ function handleMouseLeave() {
       if (!aside) return
       const rect = aside.getBoundingClientRect()
       if (e.clientX - rect.right > safeDistance) {
-        layoutStore.onUpdateLeftAsideCollapsed(true)
+        if (props.side === "left") {
+          layoutStore.onUpdateLeftAsideCollapsed(true)
+        } else {
+          layoutStore.onUpdateRightAsideCollapsed(true)
+        }
         document.removeEventListener("mousemove", mouseMoveHandler!)
         mouseMoveHandler = null
       }
@@ -91,8 +107,10 @@ function handleMouseLeave() {
 
 function handleMouseEnter() {
   if (layoutStore.leftAsidePinned) return
-  if (layoutStore.leftAsideCollapsed) {
+  if (props.side === "left" && layoutStore.leftAsideCollapsed) {
     layoutStore.onUpdateLeftAsideCollapsed(false)
+  } else if (props.side === "right" && layoutStore.rightAsideCollapsed) {
+    layoutStore.onUpdateRightAsideCollapsed(false)
   }
   if (mouseMoveHandler) {
     document.removeEventListener("mousemove", mouseMoveHandler)
