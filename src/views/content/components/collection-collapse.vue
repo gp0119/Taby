@@ -51,12 +51,10 @@
             </span>
           </div>
           <div
-            class="ml-2 flex cursor-pointer items-center rounded-md bg-content-bg px-1.5 py-0.5 text-sm text-text-secondary"
+            class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
           >
-            {{ collection.cards.length }} sites
-            <n-icon size="16" class="ml-1">
-              <ChevronForward />
-            </n-icon>
+            {{ collection.cards.length }} cards
+            <n-icon size="14" :component="ChevronForward" />
           </div>
         </div>
         <span

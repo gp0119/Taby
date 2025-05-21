@@ -1,0 +1,100 @@
+<template>
+  <n-popover
+    trigger="click"
+    placement="bottom-end"
+    style="padding: 0; min-width: 280px"
+  >
+    <template #trigger>
+      <n-button
+        quaternary
+        :focusable="false"
+        size="small"
+        type="primary"
+        class="w-[28px]"
+      >
+        <template #icon>
+          <n-icon size="18" :component="EllipsisVerticalSharp" />
+        </template>
+      </n-button>
+    </template>
+    <template #default>
+      <div class="flex flex-col overflow-hidden rounded-lg">
+        <!--   拖拽   -->
+        <div class="flex flex-col gap-y-4 p-4">
+          <!--   拖拽   -->
+          <div class="flex w-full items-center justify-between">
+            <div class="flex items-center gap-x-1">
+              <n-icon-wrapper>
+                <n-icon size="18" :component="Move" />
+              </n-icon-wrapper>
+              <span>{{ ft("enable-drag") }}</span>
+            </div>
+            <n-switch
+              v-model:value="draggableStore.draggable"
+              @update-value="onToggleDraggable"
+            />
+          </div>
+
+          <!--   查找重复   -->
+          <div class="flex w-full items-center justify-between">
+            <div class="flex items-center gap-x-1">
+              <n-icon-wrapper>
+                <n-icon size="18" :component="View" />
+              </n-icon-wrapper>
+              <span>{{ ft("enable-duplicate") }}</span>
+            </div>
+            <n-switch
+              v-model:value="duplicateCardStore.isFindDuplicate"
+              @update-value="onToggleFindDuplicate"
+            />
+          </div>
+        </div>
+
+        <div
+          class="flex flex-col gap-y-2 border-t border-gray-200 bg-content-bg px-4 py-2"
+        >
+          <LangSwitch />
+          <ThemeSwitch />
+        </div>
+      </div>
+    </template>
+  </n-popover>
+</template>
+
+<script setup lang="ts">
+import { useHelpi18n } from "@/hooks/useHelpi18n.js"
+import { useBatchCardStore } from "@/store/batch-card.ts"
+import { useBatchCollectionStore } from "@/store/batch-collection.ts"
+import { useBatchTabsStore } from "@/store/batch-tabs.ts"
+import { useDraggableStore } from "@/store/draggable.js"
+import { useDuplicateCardStore } from "@/store/duplicate-card.js"
+import { Move, View } from "@vicons/carbon"
+import { EllipsisVerticalSharp } from "@vicons/ionicons5"
+import LangSwitch from "./lang-switch.vue"
+import ThemeSwitch from "./theme-switch.vue"
+
+const { ft } = useHelpi18n()
+const duplicateCardStore = useDuplicateCardStore()
+const draggableStore = useDraggableStore()
+const batchCardStore = useBatchCardStore()
+const batchCollectionStore = useBatchCollectionStore()
+const batchTabsStore = useBatchTabsStore()
+
+const onToggleDraggable = (value: boolean) => {
+  draggableStore.setDraggable(value)
+  if (value) {
+    batchCardStore.clearSelectedCardIds()
+    batchCollectionStore.clearSelectedCollectionIds()
+    batchTabsStore.clearSelectedTabs()
+  }
+}
+
+const onToggleFindDuplicate = (value: boolean) => {
+  duplicateCardStore.setIsFindDuplicate(value)
+  if (value) {
+    batchCardStore.clearSelectedCardIds()
+    batchCollectionStore.clearSelectedCollectionIds()
+    batchTabsStore.clearSelectedTabs()
+  }
+}
+</script>

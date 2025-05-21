@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-[50px] items-center justify-between border-0 border-b border-solid px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="flex h-[50px] items-center justify-between px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex shrink-0 flex-nowrap items-center gap-4">
       <template v-if="title">
@@ -16,73 +16,55 @@
         <span class="whitespace-nowrap font-thin text-text-secondary">
           {{ spacesStore.collections.length }} Collections
         </span>
+        <n-icon
+          size="20"
+          class="cursor-pointer text-primary"
+          @click="onEditSpace"
+        >
+          <Settings />
+        </n-icon>
+        <n-button
+          size="small"
+          tertiary
+          class="!shadow"
+          @click="onAddCollection"
+        >
+          <template #icon>
+            <n-icon size="20" :component="Add" />
+          </template>
+        </n-button>
       </template>
     </div>
     <div class="flex-center flex-shrink-0 gap-3">
-      <n-icon
-        size="20"
-        class="cursor-pointer text-primary"
-        @click="onEditSpace"
-      >
-        <Settings />
-      </n-icon>
-      <LangSwitch />
-      <n-select
-        v-model:value="currentTheme"
-        size="tiny"
-        :show-checkmark="false"
-        :show-arrow="false"
-        :consistent-menu-width="false"
-        :options="themeOptions"
-        :render-label="renderLabel"
-        @update:value="onUpdateValue"
-      />
+      <nav-action />
+      <MorePopover />
     </div>
   </div>
-  <nav-action />
   <TopDuplicateAction />
 </template>
 
 <script setup lang="tsx">
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
-import { useThemeStore } from "@/store/theme.ts"
-import LangSwitch from "./components/lang-switch.vue"
+import MorePopover from "@/views/navs/components/morePopover.vue"
 import NavAction from "@/views/navs/components/nav-action.vue"
 import { Settings } from "@vicons/ionicons5"
-import { Delete } from "@vicons/carbon"
+import { Delete, Add } from "@vicons/carbon"
 import dataManager from "@/db"
-import { SelectOption, SelectGroupOption } from "naive-ui"
 import IconSelect from "@components/icon-select.vue"
 import { ICON_LIST } from "@/utils/constants.ts"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import TopDuplicateAction from "@/views/navs/components/top-duplicate-action.vue"
-const { themeColor, theme, setTheme } = useThemeStore()
-
-const currentTheme = ref(theme)
-
-const themeOptions = Object.keys(themeColor).map((key) => ({
-  label: key,
-  value: key,
-  color: themeColor[key].primary,
-}))
-
-const onUpdateValue = (value: string) => {
-  setTheme(value)
-}
-
-const renderLabel = (option: SelectOption | SelectGroupOption) => {
-  return <div class="h-4 w-4" style={`background: ${option.color}`}></div>
-}
+import { movePosition } from "@/type"
 
 const spacesStore = useSpacesStore()
 const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
-const { refreshSpaces } = useRefresh()
+const { refreshSpaces, refreshCollections } = useRefresh()
 
 const title = computed(
   () =>
@@ -141,6 +123,51 @@ function onDeleteSpace() {
       await dataManager.removeSpace(spacesStore.activeId)
       await refreshSpaces()
       dialog.destroyAll()
+    },
+  })
+}
+
+function onAddCollection() {
+  const formModel = ref<{
+    title: string
+    position: movePosition
+  }>({ title: "", position: "END" })
+  open({
+    title: ft("add", "collection"),
+    renderContent: () => (
+      <n-form model={formModel.value}>
+        <n-form-item label={`${ft("title")}:`}>
+          <n-input
+            v-model:value={formModel.value.title}
+            placeholder={ft("placeholder", "title")}
+          />
+        </n-form-item>
+        <n-form-item label={`${ft("position")}:`}>
+          <n-radio-group
+            class="w-full"
+            v-model:value={formModel.value.position}
+          >
+            <n-radio-button class="w-1/2 text-center" value="HEAD">
+              {ft("move-to-head")}
+            </n-radio-button>
+            <n-radio-button class="w-1/2 text-center" value="END">
+              {ft("move-to-end")}
+            </n-radio-button>
+          </n-radio-group>
+        </n-form-item>
+      </n-form>
+    ),
+    onPositiveClick: async () => {
+      if (!formModel.value.title) return
+      await dataManager.addCollection(
+        {
+          title: formModel.value.title,
+          spaceId: spacesStore.activeId,
+          labelIds: [],
+        },
+        formModel.value.position,
+      )
+      await refreshCollections()
     },
   })
 }
