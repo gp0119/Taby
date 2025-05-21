@@ -1,5 +1,5 @@
 <template>
-  <div class="scrollbar-thin h-[calc(100vh-100px)] overflow-y-auto">
+  <div class="scrollbar-thin h-[calc(100vh-60px)] overflow-y-auto">
     <VueDraggable
       :model-value="collections"
       item-key="id"

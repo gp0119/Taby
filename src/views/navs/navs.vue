@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex h-[50px] items-center justify-between px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="group/nav flex h-[50px] items-center justify-between px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex shrink-0 flex-nowrap items-center gap-4">
       <template v-if="title">
@@ -16,28 +16,26 @@
         <span class="whitespace-nowrap font-thin text-text-secondary">
           {{ spacesStore.collections.length }} Collections
         </span>
-        <n-icon
-          size="20"
-          class="cursor-pointer text-primary"
-          @click="onEditSpace"
-        >
-          <Settings />
-        </n-icon>
-        <n-button
-          size="small"
-          tertiary
-          class="!shadow"
-          @click="onAddCollection"
-        >
-          <template #icon>
-            <n-icon size="20" :component="Add" />
-          </template>
-        </n-button>
+        <PopoverWrapper :message="ft('edit', 'space')">
+          <n-button
+            quaternary
+            :focusable="false"
+            size="small"
+            class="hidden w-[28px] group-hover/nav:inline-flex"
+            @click="onEditSpace"
+          >
+            <template #icon>
+              <n-icon size="18" :component="Edit" />
+            </template>
+          </n-button>
+        </PopoverWrapper>
       </template>
     </div>
-    <div class="flex-center flex-shrink-0 gap-3">
-      <nav-action />
+    <div class="flex-center gap-x-3">
       <MorePopover />
+      <AddCollection />
+      <TagFilter />
+      <CollapseBtn />
     </div>
   </div>
   <TopDuplicateAction />
@@ -47,9 +45,8 @@
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import MorePopover from "@/views/navs/components/morePopover.vue"
-import NavAction from "@/views/navs/components/nav-action.vue"
-import { Settings } from "@vicons/ionicons5"
-import { Delete, Add } from "@vicons/carbon"
+import TagFilter from "@/views/navs/components/tag-filter.vue"
+import { Edit, Delete } from "@vicons/carbon"
 import dataManager from "@/db"
 import IconSelect from "@components/icon-select.vue"
 import { ICON_LIST } from "@/utils/constants.ts"
@@ -57,14 +54,16 @@ import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import TopDuplicateAction from "@/views/navs/components/top-duplicate-action.vue"
-import { movePosition } from "@/type"
+import CollapseBtn from "@/views/navs/components/collapse-btn.vue"
+import AddCollection from "@/views/navs/components/add-collection.vue"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const spacesStore = useSpacesStore()
 const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
 const { ft, gt } = useHelpi18n()
-const { refreshSpaces, refreshCollections } = useRefresh()
+const { refreshSpaces } = useRefresh()
 
 const title = computed(
   () =>
@@ -123,51 +122,6 @@ function onDeleteSpace() {
       await dataManager.removeSpace(spacesStore.activeId)
       await refreshSpaces()
       dialog.destroyAll()
-    },
-  })
-}
-
-function onAddCollection() {
-  const formModel = ref<{
-    title: string
-    position: movePosition
-  }>({ title: "", position: "END" })
-  open({
-    title: ft("add", "collection"),
-    renderContent: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label={`${ft("title")}:`}>
-          <n-input
-            v-model:value={formModel.value.title}
-            placeholder={ft("placeholder", "title")}
-          />
-        </n-form-item>
-        <n-form-item label={`${ft("position")}:`}>
-          <n-radio-group
-            class="w-full"
-            v-model:value={formModel.value.position}
-          >
-            <n-radio-button class="w-1/2 text-center" value="HEAD">
-              {ft("move-to-head")}
-            </n-radio-button>
-            <n-radio-button class="w-1/2 text-center" value="END">
-              {ft("move-to-end")}
-            </n-radio-button>
-          </n-radio-group>
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      if (!formModel.value.title) return
-      await dataManager.addCollection(
-        {
-          title: formModel.value.title,
-          spaceId: spacesStore.activeId,
-          labelIds: [],
-        },
-        formModel.value.position,
-      )
-      await refreshCollections()
     },
   })
 }

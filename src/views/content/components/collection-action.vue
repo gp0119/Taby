@@ -4,13 +4,6 @@
     :class="{ '!flex': isShowTagAction }"
   >
     <PopoverIcon
-      :message="ft('open-all-tabs')"
-      size="20"
-      icon-class="text-primary mx-1.5"
-      :icon="Launch"
-      @click="onOpenCollection(item)"
-    />
-    <PopoverIcon
       size="20"
       icon-class="text-primary mx-1.5"
       :message="ft('edit', 'collection')"
@@ -30,11 +23,10 @@
 
 <script setup lang="tsx">
 import { CollectionWithCards } from "@/type.ts"
-import { FolderMoveTo, Delete, Edit, Launch } from "@vicons/carbon"
+import { FolderMoveTo, Delete, Edit } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import TagAction from "./tag-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
@@ -48,7 +40,6 @@ defineProps<{
 }>()
 
 const { refreshCollections } = useRefresh()
-const { openTabs } = useChromeTabs()
 const isShowTagAction = ref(false)
 
 provide("isShowTagAction", {
@@ -122,9 +113,5 @@ async function onMoveCollection(item: CollectionWithCards) {
   )
   await refreshCollections()
   refreshCollections(spaceId as number)
-}
-
-function onOpenCollection(item: CollectionWithCards) {
-  openTabs(item.cards.map((card) => card.url))
 }
 </script>

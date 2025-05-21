@@ -104,6 +104,12 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   LoadingBar: {
     colorLoading: "#18A058",
   },
+  Popover: {
+    borderRadius: "12px",
+  },
+  Dropdown: {
+    borderRadius: "12px",
+  },
 }))
 
 onBeforeMount(async () => {

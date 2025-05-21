@@ -5,13 +5,7 @@
     style="padding: 0; min-width: 280px"
   >
     <template #trigger>
-      <n-button
-        quaternary
-        :focusable="false"
-        size="small"
-        type="primary"
-        class="w-[28px]"
-      >
+      <n-button quaternary :focusable="false" size="small" class="w-[28px]">
         <template #icon>
           <n-icon size="18" :component="EllipsisVerticalSharp" />
         </template>
@@ -19,11 +13,12 @@
     </template>
     <template #default>
       <div class="flex flex-col overflow-hidden rounded-lg">
-        <!--   拖拽   -->
         <div class="flex flex-col gap-y-4 p-4">
+          <!--   排序   -->
+          <SortSwitch />
           <!--   拖拽   -->
           <div class="flex w-full items-center justify-between">
-            <div class="flex items-center gap-x-1">
+            <div class="flex items-center gap-x-2">
               <n-icon-wrapper>
                 <n-icon size="18" :component="Move" />
               </n-icon-wrapper>
@@ -37,7 +32,7 @@
 
           <!--   查找重复   -->
           <div class="flex w-full items-center justify-between">
-            <div class="flex items-center gap-x-1">
+            <div class="flex items-center gap-x-2">
               <n-icon-wrapper>
                 <n-icon size="18" :component="View" />
               </n-icon-wrapper>
@@ -61,13 +56,14 @@
   </n-popover>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import { useHelpi18n } from "@/hooks/useHelpi18n.js"
 import { useBatchCardStore } from "@/store/batch-card.ts"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
 import { useBatchTabsStore } from "@/store/batch-tabs.ts"
 import { useDraggableStore } from "@/store/draggable.js"
 import { useDuplicateCardStore } from "@/store/duplicate-card.js"
+import SortSwitch from "@/views/navs/components/sort-switch.vue"
 import { Move, View } from "@vicons/carbon"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import LangSwitch from "./lang-switch.vue"

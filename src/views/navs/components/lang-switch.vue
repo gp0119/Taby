@@ -1,6 +1,6 @@
 <template>
   <div class="flex w-full items-center justify-between">
-    <div class="flex items-center gap-x-1">
+    <div class="flex items-center gap-x-2">
       <n-icon-wrapper>
         <n-icon size="18" :component="LanguageOutline" />
       </n-icon-wrapper>
@@ -10,11 +10,12 @@
       <div
         v-for="option in options"
         :key="option.key"
-        class="flex-center h-[30px] w-[30px] rounded-md border-2 bg-white"
+        class="flex-center h-[26px] w-[26px] rounded-md border-2 bg-white text-xs font-medium"
         :class="{
           'border-primary': currentLanguage === option.key,
           'border-transparent': currentLanguage !== option.key,
         }"
+        @click="changeLanguage(option.key)"
       >
         {{ option.label }}
       </div>
@@ -42,12 +43,4 @@ const changeLanguage = async (value: string) => {
 watchEffect(() => {
   locale.value = currentLanguage.value
 })
-
-const renderLabel = (option: any) => {
-  return (
-    <div class={{ "text-primary": currentLanguage.value === option.key }}>
-      {option.label}
-    </div>
-  )
-}
 </script>

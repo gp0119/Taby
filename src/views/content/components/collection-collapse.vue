@@ -50,12 +50,15 @@
               {{ collection.title }}
             </span>
           </div>
-          <div
-            class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
-          >
-            {{ collection.cards.length }} cards
-            <n-icon size="14" :component="ChevronForward" />
-          </div>
+          <PopoverWrapper :message="ft('open-all-tabs')">
+            <div
+              class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+              @click="onOpenCollection(collection)"
+            >
+              {{ collection.cards.length }} cards
+              <n-icon size="14" :component="ChevronForward" />
+            </div>
+          </PopoverWrapper>
         </div>
         <span
           v-if="collection.labels.length > 0"
@@ -87,8 +90,13 @@ import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { useChromeTabs } from "@/hooks/useChromeTabs"
 
+const { ft } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
+const { openTabs } = useChromeTabs()
 const props = defineProps<{
   collection: CollectionWithCards
 }>()
@@ -114,5 +122,9 @@ const onHandleCheckbox = (checked: boolean, collectionId: number) => {
   } else {
     batchCollectionStore.removeSelectedCollectionId(collectionId)
   }
+}
+
+function onOpenCollection(item: CollectionWithCards) {
+  openTabs(item.cards.map((card) => card.url))
 }
 </script>

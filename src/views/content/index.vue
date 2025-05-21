@@ -5,7 +5,7 @@
       v-else-if="collections?.length"
       :items="collections"
       :min-item-size="160"
-      class="dynamic-scroller-optimize scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-100px)] overflow-y-auto"
+      class="dynamic-scroller-optimize scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-60px)] overflow-y-auto"
       :prerender="5"
       :buffer="500"
       key-field="id"

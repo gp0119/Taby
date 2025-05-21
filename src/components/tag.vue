@@ -10,7 +10,9 @@
     }"
   >
     <div class="flex items-center">
-      <span :class="titleClass">{{ tag.title }}</span>
+      <span :class="titleClass" class="text-center">
+        {{ tag.title }}
+      </span>
       <n-icon-wrapper
         v-if="closeable"
         border-radius="10"

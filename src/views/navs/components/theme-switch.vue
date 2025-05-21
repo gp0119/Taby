@@ -1,8 +1,8 @@
 <template>
   <div class="flex w-full items-center justify-between">
-    <div class="flex items-center gap-x-1">
+    <div class="flex items-center gap-x-2">
       <n-icon-wrapper>
-        <n-icon size="18" :component="PaintBrush" />
+        <n-icon size="18" :component="ColorPalette" />
       </n-icon-wrapper>
       <span>Theme</span>
     </div>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="tsx">
-import { PaintBrush } from "@vicons/carbon"
+import { ColorPalette } from "@vicons/carbon"
 import { useThemeStore } from "@/store/theme.ts"
 
 const { themeColor, theme, setTheme } = useThemeStore()

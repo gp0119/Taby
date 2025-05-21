@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-100px)] overflow-y-auto">
+  <div class="h-[calc(100vh-60px)] overflow-y-auto">
     <div
       v-for="i in 5"
       :key="i"

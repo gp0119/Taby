@@ -37,7 +37,7 @@
             :message="ft('edit', 'tag')"
             size="16"
             icon-class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
-            :icon="Edit"
+            :icon="TagEdit"
             @click="onEditTag(tag)"
           />
         </div>
@@ -69,7 +69,7 @@
 <script setup lang="tsx">
 import { COLOR_LIST } from "@/utils/constants.ts"
 import ColorSelect from "@components/color-select.vue"
-import { TagGroup, Edit, Checkmark, Delete } from "@vicons/carbon"
+import { TagGroup, TagEdit, Checkmark, Delete } from "@vicons/carbon"
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
 import dataManager from "@/db"
