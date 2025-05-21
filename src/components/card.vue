@@ -9,7 +9,7 @@
   >
     <div class="card-header">
       <div
-        class="favicon-size hidden h-5 w-5 animate-scale-in items-center justify-center group-hover/card:flex"
+        class="favicon-size hidden h-7 w-7 animate-scale-in items-center justify-center group-hover/card:flex"
         :class="{
           '!flex': showCheckbox && selectIds?.includes(child.id),
           '!hidden': !showCheckbox,
@@ -22,64 +22,65 @@
           @update:checked="onHandleCheckbox"
         />
       </div>
-      <favicon
-        :child="child"
-        class="favicon group-hover/card:hidden"
+      <n-button
+        :focusable="false"
+        size="small"
+        class="favicon-size w-[28px] group-hover/card:hidden"
         :class="{
           '!hidden': selectIds?.includes(child.id),
           '!flex': !showCheckbox,
         }"
-      />
-      <span class="card-title">{{ child.title }}</span>
-      <!--   删除按钮   -->
-      <n-icon-wrapper
-        :size="16"
-        :border-radius="16"
-        class="delete-button"
+      >
+        <template #icon>
+          <favicon :child="child" />
+        </template>
+      </n-button>
+
+      <span class="card-title text-ellipsis">{{ child.title }}</span>
+
+      <n-button
+        quaternary
+        :focusable="false"
+        size="tiny"
+        class="more-button hidden w-[22px] animate-scale-in group-hover/card:inline-flex"
+        @click.stop="onHandleEdit"
+      >
+        <template #icon>
+          <n-icon
+            size="17"
+            class="text-text-primary"
+            :component="EllipsisVerticalSharp"
+          />
+        </template>
+      </n-button>
+      <n-button
+        quaternary
+        :focusable="false"
+        circle
+        size="tiny"
+        class="close-button hidden w-[22px] animate-scale-in group-hover/card:inline-flex"
         @click.stop="onHandleDelete"
       >
-        <n-icon color="#fff" :size="14" :component="Close" />
-      </n-icon-wrapper>
+        <template #icon>
+          <n-icon size="17" class="text-text-primary" :component="Close" />
+        </template>
+      </n-button>
     </div>
-    <div class="card-title-wrapper relative px-4 py-2.5">
-      <div class="card-description">
+    <div class="card-title-wrapper relative px-2 py-1.5">
+      <div class="card-description text-ellipsis">
         {{ child.description || child.title }}
-      </div>
-      <div class="bottom-button-wrapper">
-        <!--   复制按钮   -->
-        <PopoverIcon
-          wrapper
-          :message="ft('copy', 'url')"
-          size="24"
-          :to="true"
-          :icon="CopyOutline"
-          wrapper-class="copy-button"
-          @click="onHandleCopy"
-        />
-        <!--   编辑按钮   -->
-        <PopoverIcon
-          wrapper
-          :message="ft('edit', 'card')"
-          size="24"
-          :icon="Pen"
-          wrapper-class="edit-button"
-          @click="onHandleEdit"
-        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Close, CopyOutline } from "@vicons/ionicons5"
-import { Pen } from "@vicons/carbon"
 import { Card } from "@/type.ts"
-import { useClipboard } from "@vueuse/core"
 import favicon from "./favicon.vue"
-import PopoverIcon from "@/components/popover-icon.vue"
-import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { EllipsisVerticalSharp } from "@vicons/ionicons5"
+import { Close } from "@vicons/carbon"
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     child: Card
     selectIds?: number[]
@@ -89,24 +90,18 @@ const props = withDefaults(
   { showCheckbox: true },
 )
 
-const { ft } = useHelpi18n()
-const { copy } = useClipboard()
-const emit = defineEmits(["delete", "click", "copy", "edit", "check"])
+const emit = defineEmits(["click", "edit", "check", "delete"])
 
 function onHandleClick() {
   emit("click")
 }
 
-function onHandleDelete() {
-  emit("delete")
-}
-
-function onHandleCopy() {
-  copy(props.child.url)
-}
-
 function onHandleEdit() {
   emit("edit")
+}
+
+function onHandleDelete() {
+  emit("delete")
 }
 
 function onHandleCheckbox(checked: boolean) {
@@ -119,15 +114,15 @@ function onHandleCheckbox(checked: boolean) {
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
-  @apply relative flex items-center border-0 border-b border-solid px-4 py-3;
+  @apply relative flex items-center border-0 border-b border-solid px-2 py-3;
   @apply group-hover/aside:rounded-md group-hover/aside:bg-hover-color;
 }
 
 .card-title {
-  @apply ml-2 flex-1 select-none overflow-hidden overflow-ellipsis whitespace-nowrap font-normal text-text-primary;
+  @apply ml-2 flex-1 select-none font-normal text-text-primary;
 }
 .card-description {
-  @apply select-none overflow-hidden overflow-ellipsis whitespace-nowrap text-xs font-light text-text-secondary;
+  @apply select-none text-xs font-light text-text-secondary;
 }
 .delete-button {
   @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;
@@ -137,10 +132,6 @@ function onHandleCheckbox(checked: boolean) {
 }
 .edit-button {
   @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
-}
-.bottom-button-wrapper {
-  @apply absolute -bottom-2.5 -right-2.5 hidden items-center justify-center gap-x-3;
-  @apply group-hover/content:flex;
 }
 .duplicate-card {
   @apply bg-gradient-to-b from-primary to-card-color;

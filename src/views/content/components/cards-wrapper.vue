@@ -241,15 +241,7 @@ function onHandleCheckbox(checked: boolean, card: iCard) {
   @apply group-has-[.card-item]/wrapper:hidden group-has-[.right-aside-item]/wrapper:hidden;
 }
 
-.card-wrapper :deep(.delete-button) {
-  top: -8px;
-}
-
-.card-wrapper :deep(.copy-button) {
-  bottom: -10px;
-}
-
-.card-wrapper :deep(.edit-button) {
-  bottom: -10px;
+.card-wrapper :deep(.close-button) {
+  display: none !important;
 }
 </style>

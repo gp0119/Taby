@@ -41,6 +41,7 @@ const { setLoading } = inject("loading") as {
   setLoading: (value: boolean) => void
 }
 async function onHandleSpaceClick(space: Space) {
+  if (space.id === spacesStore.activeId) return
   setLoading(true)
   await spacesStore.setActiveSpace(space.id!)
   await refreshTags()

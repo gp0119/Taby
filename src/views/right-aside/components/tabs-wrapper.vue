@@ -74,12 +74,20 @@ const onHandleCheckbox = (value: boolean, tab: iCard) => {
 .aside-card-wrapper :deep(.card-header) {
   padding: 8px;
 }
+.aside-card-wrapper :deep(.favicon-size) {
+  width: 24px;
+  height: 24px;
+}
+.aside-card-wrapper :deep(.favicon) {
+  width: 16px;
+  height: 16px;
+}
 .aside-card-wrapper :deep(.card-title) {
   font-weight: 400;
   font-size: 12px;
 }
-.aside-card-wrapper :deep(.delete-button) {
-  top: 10px;
+.aside-card-wrapper :deep(.more-button) {
+  display: none !important;
 }
 .aside-card-wrapper :deep(.card-title-wrapper) {
   display: none;

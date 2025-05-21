@@ -6,13 +6,13 @@
     }"
     :src="innerFavicon"
     lazy
-    class="card-avatar favicon-size"
+    class="card-avatar favicon h-5 w-5"
   >
     <template #placeholder>
-      <div class="favicon-size flex-center h-full">
+      <div class="flex-center favicon h-5 w-5">
         <n-icon
           class="text-text-secondary"
-          size="20"
+          size="18"
           :component="DocumentUnknown"
         />
       </div>
@@ -44,8 +44,5 @@ const innerFavicon = computed(() => {
 <style scoped>
 .card-avatar {
   @apply inline-block flex-shrink-0 select-none bg-transparent sepia-base;
-}
-.favicon-size {
-  @apply h-5 w-5;
 }
 </style>
