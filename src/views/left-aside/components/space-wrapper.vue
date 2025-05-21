@@ -15,7 +15,8 @@
       @click="onHandleSpaceClick(item)"
     >
       <n-button
-        tertiary
+        :tertiary="activeSpaceId !== item.id"
+        :secondary="activeSpaceId === item.id"
         size="small"
         :type="activeSpaceId === item.id ? 'primary' : 'default'"
         class="w-[28px] flex-shrink-0 !shadow-btn-shadow"

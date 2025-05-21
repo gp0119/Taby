@@ -16,7 +16,7 @@
         <span class="whitespace-nowrap font-thin text-text-secondary">
           {{ spacesStore.collections.length }} Collections
         </span>
-        <PopoverWrapper :message="ft('edit', 'space')">
+        <PopoverWrapper :message="ft('edit', 'space')" placement="bottom-start">
           <n-button
             quaternary
             :focusable="false"

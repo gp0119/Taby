@@ -1,5 +1,5 @@
 <template>
-  <PopoverWrapper :message="ft('add', 'collection')">
+  <PopoverWrapper :message="ft('add', 'collection')" placement="bottom-end">
     <n-button
       tertiary
       :focusable="false"

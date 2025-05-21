@@ -17,14 +17,14 @@ export function useEditDialog() {
   }: {
     title: string | (() => VNode)
     renderContent: () => VNode
-    renderAction?: () => VNode
+    renderAction?: (props: { close: () => void }) => VNode
     onPositiveClick?: () => void
     onNegativeClick?: () => void
     icon?: () => VNode
     positiveText?: string
     negativeText?: string
   }) => {
-    dialog.create({
+    const dialogRef = dialog.create({
       title,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
       class: "bg-body-color",
@@ -41,7 +41,14 @@ export function useEditDialog() {
             onMaskClick: onNegativeClick,
           }
         : {}),
-      ...(renderAction ? { action: renderAction } : {}),
+      ...(renderAction
+        ? {
+            action: () =>
+              renderAction({
+                close: () => dialogRef.destroy(),
+              }),
+          }
+        : {}),
     })
   }
 

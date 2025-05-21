@@ -1,5 +1,5 @@
 <template>
-  <PopoverWrapper :message="ft('placeholder-search')">
+  <PopoverWrapper :message="ft('placeholder-search')" placement="bottom-end">
     <n-button
       quaternary
       :focusable="false"

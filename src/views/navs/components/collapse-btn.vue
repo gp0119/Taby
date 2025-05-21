@@ -3,6 +3,7 @@
     :message="
       !expandStore.isCollapseAll ? ft('expand-all') : ft('collapse-all')
     "
+    placement="bottom-end"
   >
     <n-button
       tertiary

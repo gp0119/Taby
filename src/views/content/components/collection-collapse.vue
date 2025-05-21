@@ -50,7 +50,7 @@
               {{ collection.title }}
             </span>
           </div>
-          <PopoverWrapper :message="ft('open-all-tabs')">
+          <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
             <div
               class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
               @click="onOpenCollection(collection)"

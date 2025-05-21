@@ -29,7 +29,6 @@
         batchTabsStore.selectedTabIds.length <= 0
       "
       @click="onHandleClick(card)"
-      @delete="onDeleteCard(card)"
       @edit="onEdit(card)"
       @check="onHandleCheckbox($event, card)"
     />
@@ -55,7 +54,9 @@ import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
 import { useSpacesStore } from "@/store/spaces"
-import { InformationSquare } from "@vicons/carbon"
+import { InformationSquare, FolderMoveTo, Delete, Save } from "@vicons/carbon"
+import { useDialog } from "naive-ui"
+import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 
 defineProps<{
   cards: iCard[]
@@ -69,6 +70,7 @@ const duplicateCardStore = useDuplicateCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
 const spacesStore = useSpacesStore()
+const dialog = useDialog()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
@@ -118,8 +120,22 @@ async function onDeleteCard(card: iCard) {
     onPositiveClick: async () => {
       await dataManager.removeCard(card.id)
       await refreshCollections()
+      dialog.destroyAll()
     },
   })
+}
+
+const { openDialog } = useBatchMoveCardDialog()
+const onHandleMove = async (card: iCard) => {
+  const { collectionId, position, spaceId } = await openDialog()
+  await dataManager.batchUpdateCards(
+    [card.id],
+    { collectionId: collectionId! },
+    position,
+  )
+  await refreshCollections()
+  refreshCollections(spaceId as number)
+  dialog.destroyAll()
 }
 
 function onEdit(child: iCard) {
@@ -132,7 +148,14 @@ function onEdit(child: iCard) {
     title: () => {
       return (
         <div class="flex items-center">
-          <Favicon child={child} />
+          <n-button
+            focusable={false}
+            size="small"
+            class="w-[28px]"
+            v-slots={{
+              icon: () => <Favicon child={child} />,
+            }}
+          />
           <span class="ml-2">{ft("edit", "card")}</span>
         </div>
       )
@@ -189,17 +212,58 @@ function onEdit(child: iCard) {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: async () => {
-      let faviconId
-      if (formModel.value.favicon) {
-        faviconId = await dataManager.addFavicon(formModel.value.favicon)
-      }
-      await dataManager.updateCard(child.id, {
-        title: formModel.value.title,
-        description: formModel.value.description,
-        faviconId,
-      })
-      await refreshCollections()
+    renderAction: ({ close }) => {
+      return (
+        <div class="flex w-full items-center gap-x-2">
+          <n-button
+            ghost
+            type="primary"
+            size="small"
+            class="mr-auto"
+            v-slots={{
+              icon: () => <n-icon size="16" component={Delete} />,
+            }}
+            onClick={() => onDeleteCard(child)}
+          >
+            {ft("delete")}
+          </n-button>
+          <n-button
+            secondary
+            type="primary"
+            size="small"
+            v-slots={{
+              icon: () => <n-icon size="16" component={FolderMoveTo} />,
+            }}
+            onClick={() => onHandleMove(child)}
+          >
+            {ft("move")}
+          </n-button>
+          <n-button
+            type="primary"
+            size="small"
+            v-slots={{
+              icon: () => <n-icon size="16" component={Save} />,
+            }}
+            onClick={async () => {
+              let faviconId
+              if (formModel.value.favicon) {
+                faviconId = await dataManager.addFavicon(
+                  formModel.value.favicon,
+                )
+              }
+              await dataManager.updateCard(child.id, {
+                title: formModel.value.title,
+                description: formModel.value.description,
+                faviconId,
+              })
+              await refreshCollections()
+              close()
+            }}
+          >
+            {ft("confirm")}
+          </n-button>
+        </div>
+      )
     },
   })
 }
