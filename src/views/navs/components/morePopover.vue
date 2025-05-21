@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="click"
+    trigger="hover"
     placement="bottom-end"
     style="padding: 0; min-width: 280px"
   >

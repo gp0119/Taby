@@ -32,6 +32,7 @@
       </template>
     </div>
     <div class="flex-center gap-x-3">
+      <SearchBtn />
       <MorePopover />
       <AddCollection />
       <TagFilter />
@@ -57,6 +58,7 @@ import TopDuplicateAction from "@/views/navs/components/top-duplicate-action.vue
 import CollapseBtn from "@/views/navs/components/collapse-btn.vue"
 import AddCollection from "@/views/navs/components/add-collection.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import SearchBtn from "@/views/navs/components/search-btn.vue"
 
 const spacesStore = useSpacesStore()
 const { open } = useEditDialog()
