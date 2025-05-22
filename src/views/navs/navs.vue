@@ -1,24 +1,29 @@
 <template>
   <div
-    class="group/nav flex h-[50px] items-center justify-between px-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="group/nav flex h-[50px] items-center justify-between pl-4 pr-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
-    <div class="flex shrink-0 flex-nowrap items-center gap-4">
+    <div class="flex shrink-0 flex-nowrap items-center gap-3">
+      <PinIcon side="left" :pinned="layoutStore.leftAsidePinned" />
       <template v-if="title">
-        <div class="flex-center">
-          <n-icon size="20" class="mr-1">
-            <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
-          </n-icon>
-          <span class="shrink-0 select-none text-xl text-text-primary">
-            {{ title }}
+        <div
+          class="flex shrink-0 flex-nowrap items-center gap-4 rounded bg-gray-200 px-2.5"
+        >
+          <div class="flex-center">
+            <n-icon size="18" class="mr-2">
+              <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
+            </n-icon>
+            <span class="shrink-0 select-none text-lg text-text-primary">
+              {{ title }}
+            </span>
+          </div>
+          <span class="h-[16px] w-[0.5px] bg-text-primary" />
+          <span class="whitespace-nowrap font-thin text-text-secondary">
+            {{ spacesStore.collections.length }} Collections
           </span>
         </div>
-        <span class="h-[16px] w-[0.5px] bg-text-primary" />
-        <span class="whitespace-nowrap font-thin text-text-secondary">
-          {{ spacesStore.collections.length }} Collections
-        </span>
         <PopoverWrapper :message="ft('edit', 'space')" placement="bottom-start">
           <n-button
-            quaternary
+            tertiary
             :focusable="false"
             size="small"
             class="hidden w-[28px] group-hover/nav:inline-flex"
@@ -37,6 +42,7 @@
       <AddCollection />
       <TagFilter />
       <CollapseBtn />
+      <PinIcon side="right" :pinned="layoutStore.rightAsidePinned" />
     </div>
   </div>
   <TopDuplicateAction />
@@ -59,7 +65,10 @@ import CollapseBtn from "@/views/navs/components/collapse-btn.vue"
 import AddCollection from "@/views/navs/components/add-collection.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import SearchBtn from "@/views/navs/components/search-btn.vue"
+import PinIcon from "@/components/pin-icon.vue"
+import { useLayoutStore } from "@/store/layout"
 
+const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()
 const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()

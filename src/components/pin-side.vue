@@ -4,12 +4,16 @@
     :style="{
       width: `${collapsed ? collapsedWidth : width}px`,
       transition: 'all 0.2s ease-in-out',
+      padding: collapsed ? '0 0' : '0 8px',
     }"
     @mouseleave="handleMouseAction('leave')"
   >
     <aside
-      ref="pinSideRef"
-      class="pin-side-aside flex h-full flex-col gap-y-2 py-2"
+      class="flex h-full flex-col gap-y-2 py-2"
+      :class="{
+        collapsed: collapsed,
+        pinned: pinned,
+      }"
       @mouseenter="handleMouseAction('enter')"
     >
       <div
@@ -33,7 +37,7 @@
       </div>
       <div
         v-if="$slots.footer"
-        class="rounded-lg px-2.5 py-4"
+        class="rounded-lg p-[13px]"
         :class="[
           !collapsed ? 'bg-white' : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
@@ -71,7 +75,7 @@ const props = withDefaults(
     pinned?: boolean
   }>(),
   {
-    collapsedWidth: 66,
+    collapsedWidth: 60,
     width: 220,
     pinned: false,
   },

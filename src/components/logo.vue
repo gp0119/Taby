@@ -6,7 +6,7 @@
       class="flex items-center justify-center text-primary"
     >
       <svg
-        class="h-8"
+        class="h-10"
         viewBox="0 0 48 48"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
@@ -34,10 +34,10 @@
       <a
         href="https://github.com/gp0119/Taby"
         target="_blank"
-        class="text-primary"
+        class="ml-4 text-primary"
       >
         <svg
-          class="ml-3 mt-1.5 h-6"
+          class="mt-1.5 h-6"
           viewBox="0 0 94 38"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +48,6 @@
         </svg>
       </a>
       <div class="flex flex-nowrap items-center gap-x-2">
-        <LeftCollapseIcon />
         <PopoverWrapper :message="ft('add', 'space')" @click="onAddSpace">
           <n-icon
             :component="Add"
@@ -63,7 +62,6 @@
 
 <script setup lang="tsx">
 import { useLayoutStore } from "@/store/layout"
-import LeftCollapseIcon from "./left-collapse-icon.vue"
 import { Add } from "@vicons/carbon"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"

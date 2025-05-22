@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full flex-col" v-bind="$attrs">
     <Logo />
-    <div class="mt-2 w-full flex-1 px-1">
+    <div class="mt-2 w-full flex-1 px-2">
       <SpaceWrapper
         :spaces="allSpaces"
         :active-space-id="activeSpaceId"

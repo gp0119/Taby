@@ -8,6 +8,7 @@ export const useLayoutStore = defineStore("Layout", () => {
 
   const leftAsidePinned = ref(false)
   const rightAsidePinned = ref(false)
+
   const onUpdateLayout = (_layout: "leftMenu" | "topMenu") => {
     layout.value = _layout
   }

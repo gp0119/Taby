@@ -1,6 +1,5 @@
 <template>
   <n-popover
-    v-if="!layoutStore.leftAsideCollapsed"
     trigger="hover"
     placement="bottom"
     :keep-alive-on-hover="false"
@@ -9,8 +8,11 @@
     <template #trigger>
       <n-icon :size="18" class="cursor-pointer" @click.stop="onClick">
         <svg
-          v-if="!layoutStore.leftAsidePinned"
+          v-if="!pinned"
           class="h-5 w-5 cursor-pointer"
+          :class="{
+            'rotate-180': side === 'right',
+          }"
           viewBox="0 0 32 32"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -26,6 +28,9 @@
         <svg
           v-else
           class="h-5 w-5 cursor-pointer"
+          :class="{
+            'rotate-180': side === 'right',
+          }"
           viewBox="0 0 32 32"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -44,13 +49,21 @@
   </n-popover>
 </template>
 
-<script setup>
+<script setup lang="tsx">
 import { useLayoutStore } from "@/store/layout"
+
+const props = defineProps<{
+  pinned: boolean
+  side: "left" | "right"
+}>()
 
 const layoutStore = useLayoutStore()
 
 const onClick = () => {
-  console.log(111)
-  layoutStore.onUpdateLeftAsidePinned(!layoutStore.leftAsidePinned)
+  if (props.side === "left") {
+    layoutStore.onUpdateLeftAsidePinned(!layoutStore.leftAsidePinned)
+  } else {
+    layoutStore.onUpdateRightAsidePinned(!layoutStore.rightAsidePinned)
+  }
 }
 </script>

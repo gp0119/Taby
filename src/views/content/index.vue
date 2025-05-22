@@ -18,7 +18,7 @@
           :data-index="index"
           :data-active="active"
           :size-dependencies="[item.cards]"
-          class="px-4 py-2"
+          class="py-2 pl-4 pr-2"
         >
           <CollectionCollapse :collection="item">
             <template #cards="{ collection }">

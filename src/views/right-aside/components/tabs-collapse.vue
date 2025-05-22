@@ -1,5 +1,7 @@
 <template>
-  <div class="group/title mb-1 flex items-center justify-between p-4">
+  <div
+    class="group/title mb-1 flex items-center justify-between px-2.5 py-2 pb-4"
+  >
     <WindowIcon>{{ index + 1 }}</WindowIcon>
     <PopoverIcon
       :message="ft('close-all-tabs')"
@@ -10,7 +12,7 @@
     />
   </div>
 
-  <div v-if="!isEmpty(tabs)" class="px-2">
+  <div v-if="!isEmpty(tabs)" class="px-3">
     <slot name="cards" :tabs="tabs" />
   </div>
   <div v-else class="py-3 text-center font-thin text-text-secondary">

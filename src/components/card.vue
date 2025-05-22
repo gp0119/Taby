@@ -9,9 +9,9 @@
   >
     <div class="card-header">
       <div
-        class="favicon-size hidden h-7 w-7 animate-scale-in items-center justify-center group-hover/card:flex"
+        class="favicon-size hidden h-7 w-7 flex-shrink-0 animate-scale-in items-center justify-center group-hover/card:flex"
         :class="{
-          '!flex': showCheckbox && selectIds?.includes(child.id),
+          '!inline-flex': showCheckbox && selectIds?.includes(child.id),
           '!hidden': !showCheckbox,
         }"
         @click.stop="() => {}"
@@ -66,7 +66,9 @@
         </template>
       </n-button>
     </div>
-    <div class="card-title-wrapper relative px-2 py-1.5">
+    <div
+      class="card-description-wrapper relative border-t border-solid px-2 py-1.5"
+    >
       <div class="card-description text-ellipsis">
         {{ child.description || child.title }}
       </div>
@@ -114,7 +116,7 @@ function onHandleCheckbox(checked: boolean) {
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
-  @apply relative flex items-center border-0 border-b border-solid px-2 py-3;
+  @apply relative flex items-center px-2 py-3;
   @apply group-hover/aside:rounded-md group-hover/aside:bg-hover-color;
 }
 

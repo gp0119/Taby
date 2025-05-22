@@ -6,7 +6,12 @@
     style="padding: 0; min-width: 280px"
   >
     <template #trigger>
-      <n-button quaternary :focusable="false" size="small" class="w-[28px]">
+      <n-button
+        tertiary
+        :focusable="false"
+        size="small"
+        class="w-[28px] !shadow-btn-shadow"
+      >
         <template #icon>
           <n-icon size="18" :component="EllipsisVerticalSharp" />
         </template>

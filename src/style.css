@@ -88,6 +88,11 @@ html[data-theme="orange"] {
   }
   .scrollbar-thin {
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scrollbar-thin:hover,
+  .scrollbar-thin:active,
+  .scrollbar-thin:focus {
     scrollbar-color: #d1d5db transparent;
   }
   .scrollbar-gutter-stable {

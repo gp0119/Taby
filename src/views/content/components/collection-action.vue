@@ -3,21 +3,25 @@
     class="hidden items-center gap-x-2 group-hover/item:flex"
     :class="{ '!flex': isShowTagAction }"
   >
-    <PopoverWrapper
-      :message="ft('edit', 'collection')"
-      @click="onEditCollection(item)"
-    >
-      <n-button quaternary size="small" class="w-[28px]">
+    <PopoverWrapper :message="ft('edit', 'collection')">
+      <n-button
+        quaternary
+        size="small"
+        class="w-[28px]"
+        @click="onEditCollection(item)"
+      >
         <template #icon>
           <n-icon :component="Edit" size="18" />
         </template>
       </n-button>
     </PopoverWrapper>
-    <PopoverWrapper
-      :message="ft('move-collection')"
-      @click="onMoveCollection(item)"
-    >
-      <n-button quaternary size="small" class="w-[28px]">
+    <PopoverWrapper :message="ft('move-collection')">
+      <n-button
+        quaternary
+        size="small"
+        class="w-[28px]"
+        @click="onMoveCollection(item)"
+      >
         <template #icon>
           <n-icon :component="FolderMoveTo" size="18" />
         </template>

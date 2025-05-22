@@ -71,9 +71,6 @@ const onHandleCheckbox = (value: boolean, tab: iCard) => {
 }
 </script>
 <style scoped>
-.aside-card-wrapper :deep(.card) {
-  background: transparent;
-}
 .aside-card-wrapper :deep(.card-header) {
   padding: 6px;
 }
@@ -92,7 +89,10 @@ const onHandleCheckbox = (value: boolean, tab: iCard) => {
 .aside-card-wrapper :deep(.more-button) {
   display: none !important;
 }
-.aside-card-wrapper :deep(.card-title-wrapper) {
+.aside-card-wrapper :deep(.card-description-wrapper) {
   display: none;
+}
+.collapsed .aside-card-wrapper :deep(.close-button) {
+  display: none !important;
 }
 </style>

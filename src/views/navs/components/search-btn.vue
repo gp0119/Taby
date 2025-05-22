@@ -1,10 +1,10 @@
 <template>
   <PopoverWrapper :message="ft('placeholder-search')" placement="bottom-end">
     <n-button
-      quaternary
+      tertiary
       :focusable="false"
       size="small"
-      class="w-[28px]"
+      class="w-[28px] !shadow-btn-shadow"
       @click="openModal"
     >
       <template #icon>
