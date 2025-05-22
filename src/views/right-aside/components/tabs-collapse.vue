@@ -10,7 +10,7 @@
     />
   </div>
 
-  <div v-if="!isEmpty(tabs)" class="px-4">
+  <div v-if="!isEmpty(tabs)" class="px-2">
     <slot name="cards" :tabs="tabs" />
   </div>
   <div v-else class="py-3 text-center font-thin text-text-secondary">

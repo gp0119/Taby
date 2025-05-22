@@ -1,24 +1,22 @@
 <template>
   <div
-    class="relative h-full translate-x-0 px-2"
+    class="relative z-10 h-full translate-x-0 px-2"
     :style="{
-      width:
-        side === 'left'
-          ? layoutStore.leftAsideWidth + 'px'
-          : layoutStore.rightAsideWidth + 'px',
+      width: `${collapsed ? collapsedWidth : width}px`,
       transition: 'all 0.2s ease-in-out',
     }"
-    @mouseleave="handleMouseLeave"
+    @mouseleave="handleMouseAction('leave')"
   >
     <aside
+      ref="pinSideRef"
       class="pin-side-aside flex h-full flex-col gap-y-2 py-2"
-      @mouseenter="handleMouseEnter"
+      @mouseenter="handleMouseAction('enter')"
     >
       <div
         v-if="$slots.header"
         class="rounded-lg"
         :class="[
-          !layoutStore.leftAsideCollapsed ? 'bg-white' : 'bg-transparent',
+          !collapsed ? 'bg-white' : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
       >
@@ -27,7 +25,7 @@
       <div
         class="flex-1 rounded-lg"
         :class="[
-          !layoutStore.leftAsideCollapsed ? 'bg-white' : 'bg-transparent',
+          !collapsed ? 'bg-white' : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
       >
@@ -37,27 +35,32 @@
         v-if="$slots.footer"
         class="rounded-lg px-2.5 py-4"
         :class="[
-          !layoutStore.leftAsideCollapsed ? 'bg-white' : 'bg-transparent',
+          !collapsed ? 'bg-white' : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
       >
         <slot name="footer" />
       </div>
     </aside>
-    <div
+    <!-- <div
       v-if="side === 'left'"
       class="absolute right-0 top-0 z-10 h-full w-2 cursor-ew-resize"
       style="background: transparent"
-      @mouseenter="handleMouseEnter"
+    /> -->
+    <div
+      v-if="!collapsed && !pinned"
+      class="absolute top-0 z-[99999] h-full w-4"
+      :class="{
+        '-right-4': side === 'left',
+        '-left-4': side === 'right',
+      }"
+      style="background: transparent"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useLayoutStore } from "@/store/layout"
-import { onUnmounted } from "vue"
-
-const layoutStore = useLayoutStore()
+import { debounce } from "lodash-es"
 
 const props = withDefaults(
   defineProps<{
@@ -65,53 +68,25 @@ const props = withDefaults(
     collapsed: boolean
     collapsedWidth?: number
     width?: number
+    pinned?: boolean
   }>(),
   {
     collapsedWidth: 66,
     width: 220,
+    pinned: false,
   },
 )
 
-let mouseMoveHandler: ((e: MouseEvent) => void) | null = null
-const safeDistance = 40 // px
+const emit = defineEmits<{
+  (e: "update:collapsed", collapsed: boolean): void
+}>()
 
-function handleMouseLeave() {
-  if (layoutStore.leftAsidePinned) return
-  if (!layoutStore.leftAsideCollapsed) {
-    mouseMoveHandler = (e: MouseEvent) => {
-      const aside = document.querySelector(".pin-side-aside") as HTMLElement
-      if (!aside) return
-      const rect = aside.getBoundingClientRect()
-      if (e.clientX - rect.right > safeDistance) {
-        if (props.side === "left") {
-          layoutStore.onUpdateLeftAsideCollapsed(true)
-        } else {
-          layoutStore.onUpdateRightAsideCollapsed(true)
-        }
-        document.removeEventListener("mousemove", mouseMoveHandler!)
-        mouseMoveHandler = null
-      }
-    }
-    document.addEventListener("mousemove", mouseMoveHandler)
+const handleMouseAction = debounce((type: "enter" | "leave") => {
+  if (props.pinned) return
+  if (type === "enter") {
+    emit("update:collapsed", false)
+  } else {
+    emit("update:collapsed", true)
   }
-}
-
-function handleMouseEnter() {
-  if (layoutStore.leftAsidePinned) return
-  if (props.side === "left" && layoutStore.leftAsideCollapsed) {
-    layoutStore.onUpdateLeftAsideCollapsed(false)
-  } else if (props.side === "right" && layoutStore.rightAsideCollapsed) {
-    layoutStore.onUpdateRightAsideCollapsed(false)
-  }
-  if (mouseMoveHandler) {
-    document.removeEventListener("mousemove", mouseMoveHandler)
-    mouseMoveHandler = null
-  }
-}
-
-onUnmounted(() => {
-  if (mouseMoveHandler) {
-    document.removeEventListener("mousemove", mouseMoveHandler)
-  }
-})
+}, 60)
 </script>

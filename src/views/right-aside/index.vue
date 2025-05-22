@@ -1,6 +1,10 @@
 <template>
   <div
-    class="right-aside-area scrollbar-thin h-full overflow-y-auto rounded-lg bg-white"
+    class="right-aside-area scrollbar-thin h-full overflow-y-auto rounded-lg"
+    :class="{
+      'bg-white': !layoutStore.rightAsideCollapsed,
+      'bg-transparent': layoutStore.rightAsideCollapsed,
+    }"
   >
     <TabsCollapse
       v-for="(item, windowId, index) in tabs"
@@ -48,7 +52,9 @@ import { useBatchCardStore } from "@/store/batch-card"
 import BatchTabAction from "./components/batch-tab-action.vue"
 import { useDraggableStore } from "@/store/draggable"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
+import { useLayoutStore } from "@/store/layout"
 
+const layoutStore = useLayoutStore()
 const draggableStore = useDraggableStore()
 const duplicateCardStore = useDuplicateCardStore()
 const {

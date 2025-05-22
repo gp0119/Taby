@@ -1,6 +1,11 @@
 <template>
   <div class="flex h-full bg-[#E0E4E8]">
-    <pinSide :collapsed="layoutStore.leftAsideCollapsed" side="left">
+    <pinSide
+      :collapsed="layoutStore.leftAsideCollapsed"
+      :pinned="layoutStore.leftAsidePinned"
+      side="left"
+      @update:collapsed="layoutStore.onUpdateLeftAsideCollapsed"
+    >
       <left-aside />
       <template #footer>
         <LeftActions />
@@ -10,7 +15,12 @@
       <navs />
       <content />
     </main>
-    <pinSide :collapsed="layoutStore.rightAsideCollapsed" side="right">
+    <pinSide
+      :collapsed="layoutStore.rightAsideCollapsed"
+      :pinned="layoutStore.rightAsidePinned"
+      side="right"
+      @update:collapsed="layoutStore.onUpdateRightAsideCollapsed"
+    >
       <right-aside />
     </pinSide>
   </div>

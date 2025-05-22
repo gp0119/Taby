@@ -4,15 +4,7 @@ export const useLayoutStore = defineStore("Layout", () => {
   const layout = ref<"leftMenu" | "topMenu">("leftMenu")
 
   const leftAsideCollapsed = ref(true)
-  const rightAsideCollapsed = ref(false)
-
-  const leftAsideWidth = computed(() => {
-    return leftAsideCollapsed.value ? 70 : 220
-  })
-
-  const rightAsideWidth = computed(() => {
-    return rightAsideCollapsed.value ? 70 : 220
-  })
+  const rightAsideCollapsed = ref(true)
 
   const leftAsidePinned = ref(false)
   const rightAsidePinned = ref(false)
@@ -36,9 +28,8 @@ export const useLayoutStore = defineStore("Layout", () => {
     layout,
     leftAsideCollapsed,
     rightAsideCollapsed,
-    leftAsideWidth,
-    rightAsideWidth,
     leftAsidePinned,
+    rightAsidePinned,
     onUpdateLayout,
     onUpdateLeftAsideCollapsed,
     onUpdateRightAsideCollapsed,

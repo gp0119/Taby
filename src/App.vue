@@ -110,6 +110,9 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
   Dropdown: {
     borderRadius: "12px",
   },
+  Card: {
+    borderRadius: "12px",
+  },
 }))
 
 onBeforeMount(async () => {
