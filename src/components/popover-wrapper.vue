@@ -1,24 +1,25 @@
 <template>
-  <n-popover
+  <n-tooltip
     v-bind="$attrs"
     :keep-alive-on-hover="false"
     :trigger="trigger"
+    :show-arrow="false"
     :placement="placement"
   >
     <template #trigger>
       <slot />
     </template>
     <div class="text-xs">{{ message }}</div>
-  </n-popover>
+  </n-tooltip>
 </template>
 
 <script setup lang="ts">
-import { PopoverProps } from "naive-ui"
+import { TooltipProps } from "naive-ui"
 
 withDefaults(
   defineProps<{
-    trigger?: PopoverProps["trigger"]
-    placement?: PopoverProps["placement"]
+    trigger?: TooltipProps["trigger"]
+    placement?: TooltipProps["placement"]
     message: string
   }>(),
   {

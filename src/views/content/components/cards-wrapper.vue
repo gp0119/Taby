@@ -54,7 +54,7 @@ import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
 import { useSpacesStore } from "@/store/spaces"
-import { InformationSquare, FolderMoveTo, Delete, Save } from "@vicons/carbon"
+import { InformationSquare, FolderMoveTo, Delete } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 
@@ -214,22 +214,20 @@ function onEdit(child: iCard) {
     ),
     renderAction: ({ close }) => {
       return (
-        <div class="flex w-full items-center gap-x-2">
+        <div class="flex w-full items-center gap-x-3">
           <n-button
             ghost
             type="primary"
             size="small"
-            class="mr-auto"
             v-slots={{
               icon: () => <n-icon size="16" component={Delete} />,
             }}
             onClick={() => onDeleteCard(child)}
-          >
-            {ft("delete")}
-          </n-button>
+          />
           <n-button
-            secondary
+            ghost
             type="primary"
+            class="mr-auto"
             size="small"
             v-slots={{
               icon: () => <n-icon size="16" component={FolderMoveTo} />,
@@ -238,12 +236,12 @@ function onEdit(child: iCard) {
           >
             {ft("move")}
           </n-button>
+          <n-button ghost size="small" onClick={() => close()}>
+            {ft("cancel")}
+          </n-button>
           <n-button
             type="primary"
             size="small"
-            v-slots={{
-              icon: () => <n-icon size="16" component={Save} />,
-            }}
             onClick={async () => {
               let faviconId
               if (formModel.value.favicon) {

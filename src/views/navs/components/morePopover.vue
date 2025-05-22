@@ -2,6 +2,7 @@
   <n-popover
     trigger="hover"
     placement="bottom-end"
+    :show-arrow="false"
     style="padding: 0; min-width: 280px"
   >
     <template #trigger>

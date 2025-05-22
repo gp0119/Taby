@@ -8,13 +8,11 @@
     @update:show="setIsShowTagAction"
   >
     <template #trigger>
-      <n-icon
-        size="20"
-        title="Tag"
-        :component="TagGroup"
-        class="mx-1.5 cursor-pointer text-primary"
-        @click.stop="() => {}"
-      />
+      <n-button quaternary size="small" class="w-[28px]">
+        <template #icon>
+          <n-icon size="18" :component="TagGroup" />
+        </template>
+      </n-button>
     </template>
     <template #header>
       <n-text depth="1">

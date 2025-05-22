@@ -49,14 +49,13 @@
       </a>
       <div class="flex flex-nowrap items-center gap-x-2">
         <LeftCollapseIcon />
-        <PopoverIcon
-          :message="ft('add', 'space')"
-          size="18"
-          radius="8"
-          :icon="FolderAdd"
-          icon-class="text-primary"
-          @click="onAddSpace"
-        />
+        <PopoverWrapper :message="ft('add', 'space')" @click="onAddSpace">
+          <n-icon
+            :component="Add"
+            size="24"
+            class="cursor-pointer [&_svg]:stroke-current [&_svg]:stroke-[0.5px]"
+          />
+        </PopoverWrapper>
       </div>
     </div>
   </div>
@@ -65,13 +64,13 @@
 <script setup lang="tsx">
 import { useLayoutStore } from "@/store/layout"
 import LeftCollapseIcon from "./left-collapse-icon.vue"
-import PopoverIcon from "./popover-icon.vue"
-import { FolderAdd } from "@vicons/carbon"
+import { Add } from "@vicons/carbon"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import IconSelect from "@components/icon-select.vue"
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
+import PopoverWrapper from "./popover-wrapper.vue"
 
 const layoutStore = useLayoutStore()
 const { ft } = useHelpi18n()

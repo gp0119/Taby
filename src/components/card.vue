@@ -54,7 +54,7 @@
         </template>
       </n-button>
       <n-button
-        quaternary
+        tertiary
         :focusable="false"
         circle
         size="tiny"

@@ -6,7 +6,7 @@
     key-field="id"
     label-field="title"
     placement="bottom-end"
-    :show-arrow="true"
+    :show-arrow="false"
     :show="tagsStore.isTagOpen"
     @select="handleTagSelect"
     @update:show="tagsStore.toggleTagOpen"

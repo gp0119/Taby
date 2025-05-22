@@ -56,7 +56,7 @@
               @click="onOpenCollection(collection)"
             >
               {{ collection.cards.length }} cards
-              <n-icon size="14" :component="ChevronForward" />
+              <n-icon size="12" :component="ArrowUpRight" />
             </div>
           </PopoverWrapper>
         </div>
@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import { ChevronForward } from "@vicons/ionicons5"
+import { ArrowUpRight } from "@vicons/carbon"
 import { CollectionWithCards } from "@/type"
 import CollectionAction from "./collection-action.vue"
 import Tags from "./tags.vue"

@@ -5,7 +5,7 @@
     :render-label="renderSortLabel"
     :show="sortStore.isSortOpen"
     placement="right-start"
-    :show-arrow="true"
+    :show-arrow="false"
     @select="handleSortSelect"
     @update:show="sortStore.toggleSortOpen"
   >
