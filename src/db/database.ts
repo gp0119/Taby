@@ -204,10 +204,12 @@ class DataBase extends Dexie {
                 "labelIds",
                 "spaceId",
               ]),
-              labels: collection.labelIds.map((labelId) => {
-                const label = labelsMap.get(labelId)
-                return label ? this.stripMetadata(label) : null
-              }),
+              labels: collection.labelIds
+                .map((labelId) => {
+                  const label = labelsMap.get(labelId)
+                  return label ? this.stripMetadata(label) : null
+                })
+                .filter((label) => label !== null),
               cards: await Promise.all(
                 collectionCards.map(async (card) => {
                   return {
