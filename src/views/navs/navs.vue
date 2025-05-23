@@ -3,7 +3,13 @@
     class="group/nav flex h-[50px] items-center justify-between pl-4 pr-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
     <div class="flex shrink-0 flex-nowrap items-center gap-3">
-      <PinIcon side="left" :pinned="layoutStore.leftAsidePinned" />
+      <PinIcon
+        side="left"
+        :mode="layoutStore.leftLayoutMode"
+        placement="bottom-start"
+        :options="['collapse', 'expand', 'hover']"
+        @update:mode="onChangeLayoutMode($event, 'left')"
+      />
       <template v-if="title">
         <div
           class="flex shrink-0 flex-nowrap items-center gap-4 rounded bg-gray-200 px-2.5"
@@ -42,7 +48,13 @@
       <AddCollection />
       <TagFilter />
       <CollapseBtn />
-      <PinIcon side="right" :pinned="layoutStore.rightAsidePinned" />
+      <PinIcon
+        side="right"
+        :mode="layoutStore.rightLayoutMode"
+        placement="bottom-end"
+        :options="['hover', 'expand', 'collapse']"
+        @update:mode="onChangeLayoutMode($event, 'right')"
+      />
     </div>
   </div>
   <TopDuplicateAction />
@@ -67,6 +79,7 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 import SearchBtn from "@/views/navs/components/search-btn.vue"
 import PinIcon from "@/components/pin-icon.vue"
 import { useLayoutStore } from "@/store/layout"
+import type { layoutMode } from "@/type"
 
 const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()
@@ -135,5 +148,10 @@ function onDeleteSpace() {
       dialog.destroyAll()
     },
   })
+}
+
+function onChangeLayoutMode(mode: layoutMode, side: "left" | "right") {
+  console.log("onChangeLayoutMode", mode, side)
+  layoutStore.onUpdateLayoutMode(mode, side)
 }
 </script>

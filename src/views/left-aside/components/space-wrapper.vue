@@ -14,26 +14,29 @@
       :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
       @click="onHandleSpaceClick(item)"
     >
-      <n-button
-        :tertiary="activeSpaceId !== item.id"
-        :secondary="activeSpaceId === item.id"
-        size="small"
-        :type="activeSpaceId === item.id ? 'primary' : 'default'"
-        class="w-[28px] flex-shrink-0 !shadow-btn-shadow"
+      <popoverWrapper
+        :message="item.title"
+        :disabled="!layoutStore.isLeftCollapsed"
+        placement="right"
       >
-        <template #icon>
-          <n-icon
-            size="18"
-            :component="item.icon ? ICON_LIST[item.icon] : StorefrontOutline"
-          />
-        </template>
-      </n-button>
+        <n-button
+          :tertiary="activeSpaceId !== item.id"
+          :secondary="activeSpaceId === item.id"
+          size="small"
+          :type="activeSpaceId === item.id ? 'primary' : 'default'"
+          class="w-[28px] flex-shrink-0 !shadow-btn-shadow"
+        >
+          <template #icon>
+            <n-icon
+              size="18"
+              :component="item.icon ? ICON_LIST[item.icon] : StorefrontOutline"
+            />
+          </template>
+        </n-button>
+      </popoverWrapper>
       <div
         class="select-none overflow-hidden"
-        :class="{
-          'animate-hide': layoutStore.leftAsideCollapsed,
-          'animate-show': !layoutStore.leftAsideCollapsed,
-        }"
+        :class="[layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show']"
       >
         {{ item.title }}
       </div>
@@ -47,6 +50,7 @@ import { Space } from "@/type.ts"
 import { ICON_LIST } from "@/utils/constants.ts"
 import { StorefrontOutline } from "@vicons/ionicons5"
 import { useLayoutStore } from "@/store/layout"
+import popoverWrapper from "@/components/popover-wrapper.vue"
 
 const layoutStore = useLayoutStore()
 

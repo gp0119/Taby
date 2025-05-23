@@ -7,65 +7,72 @@
     }"
     @click="onHandleClick"
   >
-    <div class="card-header">
-      <div
-        class="favicon-size hidden h-7 w-7 flex-shrink-0 animate-scale-in items-center justify-center group-hover/card:flex"
-        :class="{
-          '!inline-flex': showCheckbox && selectIds?.includes(child.id),
-          '!hidden': !showCheckbox,
-        }"
-        @click.stop="() => {}"
-      >
-        <n-checkbox
-          :checked="selectIds?.includes(child.id)"
-          size="large"
-          @update:checked="onHandleCheckbox"
-        />
-      </div>
-      <n-button
-        :focusable="false"
-        size="small"
-        class="favicon-size w-[28px] group-hover/card:hidden"
-        :class="{
-          '!hidden': selectIds?.includes(child.id),
-          '!flex': !showCheckbox,
-        }"
-      >
-        <template #icon>
-          <favicon :child="child" />
-        </template>
-      </n-button>
-
-      <span class="card-title text-ellipsis">{{ child.title }}</span>
-
-      <n-button
-        quaternary
-        :focusable="false"
-        size="tiny"
-        class="more-button hidden w-[22px] animate-scale-in group-hover/card:inline-flex"
-        @click.stop="onHandleEdit"
-      >
-        <template #icon>
-          <n-icon
-            size="17"
-            class="text-text-primary"
-            :component="EllipsisVerticalSharp"
+    <PopoverWrapper
+      :message="child.title"
+      :disabled="type === 'card' || !layoutStore.isRightCollapsed"
+      placement="left"
+    >
+      <div class="card-header">
+        <div
+          class="favicon-size hidden h-7 w-7 flex-shrink-0 animate-scale-in items-center justify-center group-hover/card:flex"
+          :class="{
+            '!inline-flex': showCheckbox && selectIds?.includes(child.id),
+            '!hidden': !showCheckbox,
+          }"
+          @click.stop="() => {}"
+        >
+          <n-checkbox
+            :checked="selectIds?.includes(child.id)"
+            size="large"
+            @update:checked="onHandleCheckbox"
           />
-        </template>
-      </n-button>
-      <n-button
-        tertiary
-        :focusable="false"
-        circle
-        size="tiny"
-        class="close-button hidden w-[22px] animate-scale-in group-hover/card:inline-flex"
-        @click.stop="onHandleDelete"
-      >
-        <template #icon>
-          <n-icon size="17" class="text-text-primary" :component="Close" />
-        </template>
-      </n-button>
-    </div>
+        </div>
+        <n-button
+          :focusable="false"
+          size="small"
+          class="favicon-size w-[28px] group-hover/card:hidden"
+          :class="{
+            '!hidden': selectIds?.includes(child.id),
+            '!flex': !showCheckbox,
+          }"
+        >
+          <template #icon>
+            <favicon :child="child" />
+          </template>
+        </n-button>
+
+        <span class="card-title text-ellipsis">{{ child.title }}</span>
+
+        <n-button
+          quaternary
+          :focusable="false"
+          size="tiny"
+          class="more-button hidden w-[22px] animate-scale-in group-hover/card:inline-flex"
+          @click.stop="onHandleEdit"
+        >
+          <template #icon>
+            <n-icon
+              size="16"
+              class="text-text-primary"
+              :component="EllipsisVerticalSharp"
+            />
+          </template>
+        </n-button>
+        <n-button
+          v-if="!layoutStore.isRightCollapsed"
+          tertiary
+          :focusable="false"
+          circle
+          size="tiny"
+          class="close-button hidden h-[20px] w-[20px] animate-scale-in group-hover/card:inline-flex"
+          @click.stop="onHandleDelete"
+        >
+          <template #icon>
+            <n-icon size="14" class="text-text-primary" :component="Close" />
+          </template>
+        </n-button>
+      </div>
+    </PopoverWrapper>
     <div
       class="card-description-wrapper relative border-t border-solid px-2 py-1.5"
     >
@@ -81,9 +88,14 @@ import { Card } from "@/type.ts"
 import favicon from "./favicon.vue"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import { Close } from "@vicons/carbon"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
+import { useLayoutStore } from "@/store/layout"
+
+const layoutStore = useLayoutStore()
 
 withDefaults(
   defineProps<{
+    type: "card" | "tab"
     child: Card
     selectIds?: number[]
     duplicateUrl?: string | null

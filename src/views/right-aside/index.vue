@@ -1,19 +1,17 @@
 <template>
   <div
     class="right-aside-area h-full rounded-lg"
-    :class="{
-      'bg-white': !layoutStore.rightAsideCollapsed,
-      'bg-transparent': layoutStore.rightAsideCollapsed,
-    }"
+    :class="[layoutStore.isRightCollapsed ? 'bg-transparent' : 'bg-white']"
   >
     <WindowIconWrapper
       :tabs="tabs"
       :active="activeWindowId"
       @update:active="updateActiveWindowId"
+      @close-all-tabs="closeAllTabsExceptCurrent"
     />
-    <div class="scrollbar-none h-[calc(100vh-60px)] overflow-y-auto px-3">
+    <div class="scrollbar-none h-[calc(100vh-76px)] overflow-y-auto px-3">
       <TabsWrapper
-        v-if="tabs[activeWindowId] && tabs[activeWindowId].length > 0"
+        v-if="tabs[activeWindowId] && !isEmpty(tabs[activeWindowId])"
         :tabs="tabs[activeWindowId]"
         :window-id="activeWindowId"
         :selected-tab-ids="batchTabsStore.selectedTabIds"
@@ -53,6 +51,7 @@ import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useLayoutStore } from "@/store/layout"
 import WindowIconWrapper from "./components/window-icon-wrapper.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { isNewTabPage } from "@/utils"
 
 const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
@@ -66,6 +65,7 @@ const {
   moveTab,
   activeWindowId,
   updateActiveWindowId,
+  closeAllTabsExceptCurrent,
 } = useChromeTabs()
 const { refreshCollections } = useRefresh()
 const batchTabsStore = useBatchTabsStore()
@@ -74,6 +74,10 @@ const batchCardStore = useBatchCardStore()
 
 async function refreshTabs() {
   await getTabs()
+}
+
+const isEmpty = (tabs: any[]) => {
+  return tabs.filter((tab) => !isNewTabPage(tab.url)).length <= 0
 }
 
 const debounceRefreshTabs = debounce(refreshTabs, 300, {
@@ -87,9 +91,14 @@ chrome.tabs.onRemoved.addListener(debounceRefreshTabs)
 chrome.tabs.onAttached.addListener(debounceRefreshTabs)
 
 const onDragEnd = async (evt: SortableEvent) => {
-  const { item: itemEl, to, newIndex } = evt
+  const { item: itemEl, to, newIndex, from } = evt
   const { id, windowid } = itemEl.dataset
+  console.log("from: ", from)
+  console.log("to: ", to)
+  console.log("newIndex: ", newIndex)
+  if (from === to) return
   if (to.classList.contains("card-wrapper")) {
+    console.log(1)
     const toClollectionId = to.getAttribute("data-collectionid")
     const title = itemEl.getAttribute("data-title") as string
     const url = itemEl.getAttribute("data-url") as string
@@ -108,11 +117,8 @@ const onDragEnd = async (evt: SortableEvent) => {
       newIndex!,
     )
     await refreshCollections()
-  } else if (to.classList.contains("aside-card-wrapper")) {
-    const toWindowId = to.getAttribute("data-windowid")
-    await moveTab(Number(id), Number(newIndex), Number(toWindowId))
-    await refreshTabs()
   } else {
+    console.log(3)
     await moveTab(Number(id), Number(newIndex), Number(windowid))
     await refreshTabs()
   }

@@ -8,14 +8,15 @@
     }"
     item-key="id"
     :data-windowid="windowId"
-    class="aside-card-wrapper flex-col gap-3"
+    class="aside-card-wrapper flex h-full flex-col gap-3"
     ghost-class="sortable-ghost-dashed-border"
-    :disabled="layoutStore.rightAsideCollapsed"
+    :disabled="layoutStore.isRightCollapsed"
     @end="onDragEnd"
   >
     <card
       v-for="(tab, index) in tabs"
       :key="tab.id"
+      type="tab"
       :data-id="tab.id"
       :data-windowid="windowId"
       :data-url="tab.url"
@@ -95,8 +96,5 @@ const onHandleCheckbox = (value: boolean, tab: iCard) => {
 }
 .aside-card-wrapper :deep(.card-description-wrapper) {
   display: none;
-}
-.collapsed .aside-card-wrapper :deep(.close-button) {
-  display: none !important;
 }
 </style>

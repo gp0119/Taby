@@ -2,25 +2,26 @@
   <div
     class="relative z-10 h-full translate-x-0 px-2"
     :style="{
-      width: `${collapsed ? collapsedWidth : width}px`,
+      width: `${mode === 'collapse' || (mode === 'hover' && !hovering) ? collapsedWidth : width}px`,
       transition: 'all 0.2s ease-in-out',
-      padding: collapsed ? '0 0' : '0 8px',
+      padding:
+        mode === 'collapse' || (mode === 'hover' && !hovering)
+          ? '0 0'
+          : '0 8px',
     }"
     @mouseleave="handleMouseAction('leave')"
   >
     <aside
       class="flex h-full flex-col gap-y-2 py-2"
-      :class="{
-        collapsed: collapsed,
-        pinned: pinned,
-      }"
       @mouseenter="handleMouseAction('enter')"
     >
       <div
         v-if="$slots.header"
         class="rounded-lg"
         :class="[
-          !collapsed ? 'bg-white' : 'bg-transparent',
+          !(mode === 'collapse' || (mode === 'hover' && !hovering))
+            ? 'bg-white'
+            : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
       >
@@ -29,7 +30,9 @@
       <div
         class="flex-1 rounded-lg"
         :class="[
-          !collapsed ? 'bg-white' : 'bg-transparent',
+          !(mode === 'collapse' || (mode === 'hover' && !hovering))
+            ? 'bg-white'
+            : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
       >
@@ -39,7 +42,9 @@
         v-if="$slots.footer"
         class="rounded-lg p-[13px]"
         :class="[
-          !collapsed ? 'bg-white' : 'bg-transparent',
+          !(mode === 'collapse' || (mode === 'hover' && !hovering))
+            ? 'bg-white'
+            : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
       >
@@ -52,7 +57,7 @@
       style="background: transparent"
     /> -->
     <div
-      v-if="!collapsed && !pinned"
+      v-if="mode === 'hover' && hovering"
       class="absolute top-0 z-[99999] h-full w-4"
       :class="{
         '-right-4': side === 'left',
@@ -65,32 +70,32 @@
 
 <script setup lang="ts">
 import { debounce } from "lodash-es"
+import type { layoutMode } from "@/type"
 
 const props = withDefaults(
   defineProps<{
     side: "left" | "right"
-    collapsed: boolean
+    hovering: boolean
+    mode: layoutMode
     collapsedWidth?: number
     width?: number
-    pinned?: boolean
   }>(),
   {
     collapsedWidth: 60,
     width: 220,
-    pinned: false,
   },
 )
 
 const emit = defineEmits<{
-  (e: "update:collapsed", collapsed: boolean): void
+  (e: "update:hovering", hovering: boolean): void
 }>()
 
 const handleMouseAction = debounce((type: "enter" | "leave") => {
-  if (props.pinned) return
+  if (props.mode !== "hover") return
   if (type === "enter") {
-    emit("update:collapsed", false)
+    emit("update:hovering", true)
   } else {
-    emit("update:collapsed", true)
+    emit("update:hovering", false)
   }
 }, 60)
 </script>

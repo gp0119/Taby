@@ -10,10 +10,10 @@
       <div
         v-for="option in options"
         :key="option.key"
-        class="flex-center h-[26px] w-[26px] rounded-md border-2 bg-white text-xs font-medium"
+        class="flex-center h-[26px] w-[26px] cursor-pointer rounded-md border-2 bg-white text-xs font-medium"
         :class="{
-          'border-primary': currentLanguage === option.key,
-          'border-transparent': currentLanguage !== option.key,
+          'border-primary': languageStore.language === option.key,
+          'border-transparent': languageStore.language !== option.key,
         }"
         @click="changeLanguage(option.key)"
       >
@@ -25,22 +25,16 @@
 
 <script setup lang="tsx">
 import { LanguageOutline } from "@vicons/ionicons5"
-import { useLocalStorage } from "@vueuse/core"
-import { useI18n } from "vue-i18n"
+import { useLanguageStore } from "@/store/language"
 
 const options = [
   { label: "En", key: "en-US" },
   { label: "中", key: "zh-CN" },
 ]
 
-const currentLanguage = useLocalStorage("LANG", "en-US")
-const { locale } = useI18n()
+const languageStore = useLanguageStore()
 
 const changeLanguage = async (value: string) => {
-  currentLanguage.value = value
+  languageStore.setLanguage(value)
 }
-
-watchEffect(() => {
-  locale.value = currentLanguage.value
-})
 </script>

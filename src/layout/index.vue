@@ -1,10 +1,10 @@
 <template>
   <div class="flex h-full bg-[#E0E4E8]">
     <pinSide
-      :collapsed="layoutStore.leftAsideCollapsed"
-      :pinned="layoutStore.leftAsidePinned"
+      :mode="layoutStore.leftLayoutMode"
+      :hovering="layoutStore.leftLayoutHovering"
       side="left"
-      @update:collapsed="layoutStore.onUpdateLeftAsideCollapsed"
+      @update:hovering="layoutStore.onUpdateLayoutHovering($event, 'left')"
     >
       <left-aside />
       <template #footer>
@@ -16,10 +16,10 @@
       <content />
     </main>
     <pinSide
-      :collapsed="layoutStore.rightAsideCollapsed"
-      :pinned="layoutStore.rightAsidePinned"
+      :mode="layoutStore.rightLayoutMode"
+      :hovering="layoutStore.rightLayoutHovering"
       side="right"
-      @update:collapsed="layoutStore.onUpdateRightAsideCollapsed"
+      @update:hovering="layoutStore.onUpdateLayoutHovering($event, 'right')"
     >
       <right-aside />
     </pinSide>

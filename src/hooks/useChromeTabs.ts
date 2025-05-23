@@ -8,16 +8,14 @@ export function useChromeTabs() {
   const activeWindowId = ref<number>(0)
 
   async function getTabs() {
-    const res = await chrome.tabs.query({})
-    console.log("res: ", res)
-    const re = await chrome.tabs.query({
+    const allTabs = await chrome.tabs.query({})
+    // console.log("allTabs: ", allTabs)
+    const currentWindowTabs = await chrome.tabs.query({
       active: true,
       currentWindow: true,
     })
-    activeWindowId.value = re[0].windowId!
-    console.log("re: ", re)
-
-    tabs.value = res.reduce((acc: { [key: string]: Card[] }, cur) => {
+    activeWindowId.value = currentWindowTabs[0].windowId!
+    tabs.value = allTabs.reduce((acc: { [key: string]: Card[] }, cur) => {
       const tab: Card = {
         title: cur.title || "",
         url: cur.url || "",
@@ -35,7 +33,7 @@ export function useChromeTabs() {
       }
       return acc
     }, {})
-    console.log("tabs.value: ", tabs.value)
+    // console.log("tabs.value: ", tabs.value)
   }
 
   function removeTab(tabId: number | undefined) {

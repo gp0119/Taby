@@ -26,10 +26,7 @@
     </a>
     <div
       class="flex flex-1 items-center justify-between"
-      :class="{
-        'animate-hide': layoutStore.leftAsideCollapsed,
-        'animate-show': !layoutStore.leftAsideCollapsed,
-      }"
+      :class="[layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show']"
     >
       <a
         href="https://github.com/gp0119/Taby"

@@ -26,7 +26,10 @@ const themeStore = useThemeStore()
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
+import { useLanguageStore } from "@/store/language"
+import { useI18n } from "vue-i18n"
 
+const { locale } = useI18n()
 const { refreshSpaces, refreshCollections } = useRefresh()
 
 const loading = ref(true)
@@ -36,6 +39,10 @@ provide("loading", {
   setLoading: (value: boolean) => {
     loading.value = value
   },
+})
+const languageStore = useLanguageStore()
+watchEffect(() => {
+  locale.value = languageStore.language
 })
 
 const handleVisibilityChange = debounce(
@@ -68,10 +75,8 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
     inputColor: themeStore.themeColor[themeStore.theme].cardBackground,
     popoverColor: themeStore.themeColor[themeStore.theme].cardBackground,
     hoverColor: themeStore.themeColor[themeStore.theme].hoverColor,
-    textColor2: themeStore.themeColor[themeStore.theme].textPrimary,
   },
   Button: {
-    textColor: themeStore.themeColor[themeStore.theme].textPrimary,
     colorPressedPrimary: themeStore.themeColor[themeStore.theme].darkenPrimary,
     waveOpacity: 0,
     borderRadiusSmall: "6px",

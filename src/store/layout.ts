@@ -1,47 +1,57 @@
 import { defineStore } from "pinia"
 import { useLocalStorage } from "@vueuse/core"
+import type { layoutMode } from "@/type"
 
 export const useLayoutStore = defineStore("Layout", () => {
-  const layout = ref<"leftMenu" | "topMenu">("leftMenu")
-
-  const leftAsideCollapsed = useLocalStorage<boolean>(
-    "leftAsideCollapsed",
-    true,
-  )
-  const rightAsideCollapsed = useLocalStorage<boolean>(
-    "rightAsideCollapsed",
-    false,
+  const leftLayoutMode = useLocalStorage<layoutMode>("leftLayoutMode", "hover")
+  const rightLayoutMode = useLocalStorage<layoutMode>(
+    "rightLayoutMode",
+    "hover",
   )
 
-  const leftAsidePinned = ref(false)
-  const rightAsidePinned = ref(true)
+  const leftLayoutHovering = ref<boolean>(false)
+  const rightLayoutHovering = ref<boolean>(false)
 
-  const onUpdateLayout = (_layout: "leftMenu" | "topMenu") => {
-    layout.value = _layout
+  const onUpdateLayoutHovering = (
+    hovering: boolean,
+    side: "left" | "right",
+  ) => {
+    if (side === "left") {
+      leftLayoutHovering.value = hovering
+    } else {
+      rightLayoutHovering.value = hovering
+    }
   }
-  const onUpdateLeftAsideCollapsed = (collapsed: boolean) => {
-    leftAsideCollapsed.value = collapsed
+
+  const onUpdateLayoutMode = (mode: layoutMode, side: "left" | "right") => {
+    if (side === "left") {
+      leftLayoutMode.value = mode
+    } else {
+      rightLayoutMode.value = mode
+    }
   }
-  const onUpdateRightAsideCollapsed = (collapsed: boolean) => {
-    rightAsideCollapsed.value = collapsed
-  }
-  const onUpdateLeftAsidePinned = (pinned: boolean) => {
-    leftAsidePinned.value = pinned
-  }
-  const onUpdateRightAsidePinned = (pinned: boolean) => {
-    rightAsidePinned.value = pinned
-  }
+
+  const isLeftCollapsed = computed(() => {
+    return (
+      leftLayoutMode.value === "collapse" ||
+      (leftLayoutMode.value === "hover" && !leftLayoutHovering.value)
+    )
+  })
+  const isRightCollapsed = computed(() => {
+    return (
+      rightLayoutMode.value === "collapse" ||
+      (rightLayoutMode.value === "hover" && !rightLayoutHovering.value)
+    )
+  })
 
   return {
-    layout,
-    leftAsideCollapsed,
-    rightAsideCollapsed,
-    leftAsidePinned,
-    rightAsidePinned,
-    onUpdateLayout,
-    onUpdateLeftAsideCollapsed,
-    onUpdateRightAsideCollapsed,
-    onUpdateLeftAsidePinned,
-    onUpdateRightAsidePinned,
+    leftLayoutMode,
+    rightLayoutMode,
+    leftLayoutHovering,
+    rightLayoutHovering,
+    onUpdateLayoutHovering,
+    onUpdateLayoutMode,
+    isLeftCollapsed,
+    isRightCollapsed,
   }
 })

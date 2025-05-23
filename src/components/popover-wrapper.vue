@@ -5,6 +5,8 @@
     :trigger="trigger"
     :show-arrow="false"
     :placement="placement"
+    :disabled="disabled"
+    style="background-color: rgba(0, 0, 0, 0.8)"
   >
     <template #trigger>
       <slot />
@@ -21,10 +23,12 @@ withDefaults(
     trigger?: TooltipProps["trigger"]
     placement?: TooltipProps["placement"]
     message: string
+    disabled?: boolean
   }>(),
   {
     trigger: "hover",
     placement: "bottom",
+    disabled: false,
   },
 )
 </script>

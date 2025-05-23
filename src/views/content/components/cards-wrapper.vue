@@ -19,6 +19,7 @@
     <Card
       v-for="card in cards"
       :key="card.id"
+      type="card"
       :data-id="card.id"
       class="card-item group/content"
       :child="card"

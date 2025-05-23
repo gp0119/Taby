@@ -1,65 +1,81 @@
 <template>
   <n-space vertical>
-    <n-button
-      tertiary
-      class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
-      :focusable="false"
-      @click="onImport"
+    <popoverWrapper
+      :message="ft('import')"
+      :disabled="!layoutStore.isLeftCollapsed"
+      placement="right"
     >
-      <n-icon
-        size="18"
-        class="flex w-[34px] flex-shrink-0 items-center justify-center"
-        :component="DocumentImport"
-      />
-      <span
-        :class="{
-          'animate-hide': layoutStore.leftAsideCollapsed,
-          'animate-show': !layoutStore.leftAsideCollapsed,
-        }"
+      <n-button
+        tertiary
+        class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
+        :focusable="false"
+        @click="onImport"
       >
-        {{ ft("import") }}
-      </span>
-    </n-button>
-    <n-button
-      tertiary
-      class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
-      :focusable="false"
-      @click="onExport"
+        <n-icon
+          size="18"
+          class="flex w-[34px] flex-shrink-0 items-center justify-center"
+          :component="DocumentImport"
+        />
+        <span
+          :class="[
+            layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show',
+          ]"
+        >
+          {{ ft("import") }}
+        </span>
+      </n-button>
+    </popoverWrapper>
+    <popoverWrapper
+      :message="ft('export')"
+      :disabled="!layoutStore.isLeftCollapsed"
+      placement="right"
     >
-      <n-icon
-        size="18"
-        class="flex w-[34px] flex-shrink-0 items-center justify-center"
-        :component="DocumentExport"
-      />
-      <span
-        :class="{
-          'animate-hide': layoutStore.leftAsideCollapsed,
-          'animate-show': !layoutStore.leftAsideCollapsed,
-        }"
+      <n-button
+        tertiary
+        class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
+        :focusable="false"
+        @click="onExport"
       >
-        {{ ft("export") }}
-      </span>
-    </n-button>
-    <n-button
-      tertiary
-      class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
-      :focusable="false"
-      @click="showSyncDialog = true"
+        <n-icon
+          size="18"
+          class="flex w-[34px] flex-shrink-0 items-center justify-center"
+          :component="DocumentExport"
+        />
+        <span
+          :class="[
+            layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show',
+          ]"
+        >
+          {{ ft("export") }}
+        </span>
+      </n-button>
+    </popoverWrapper>
+
+    <popoverWrapper
+      :message="ft('sync')"
+      :disabled="!layoutStore.isLeftCollapsed"
+      placement="right"
     >
-      <n-icon
-        size="18"
-        class="flex w-[34px] flex-shrink-0 items-center justify-center"
-        :component="CloudDataOps"
-      />
-      <span
-        :class="{
-          'animate-hide': layoutStore.leftAsideCollapsed,
-          'animate-show': !layoutStore.leftAsideCollapsed,
-        }"
+      <n-button
+        tertiary
+        class="w-full overflow-hidden !px-0 !shadow-btn-shadow"
+        :focusable="false"
+        @click="showSyncDialog = true"
       >
-        {{ ft("sync") }}
-      </span>
-    </n-button>
+        <n-icon
+          size="18"
+          class="flex w-[34px] flex-shrink-0 items-center justify-center"
+          :component="CloudDataOps"
+        />
+        <span
+          :class="[
+            layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show',
+          ]"
+        >
+          {{ ft("sync") }}
+        </span>
+      </n-button>
+    </popoverWrapper>
   </n-space>
   <SyncDialog v-model:show="showSyncDialog" />
 </template>
@@ -82,6 +98,7 @@ import { useRefresh } from "@/hooks/useRresh"
 import SpaceSelect from "@/components/space-select.vue"
 import SyncDialog from "@/views/left-aside/components/sync-dialog.vue"
 import { useLayoutStore } from "@/store/layout"
+import popoverWrapper from "@/components/popover-wrapper.vue"
 
 const { ft } = useHelpi18n()
 const spacesStore = useSpacesStore()
