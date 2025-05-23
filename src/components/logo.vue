@@ -34,7 +34,7 @@
       <a
         href="https://github.com/gp0119/Taby"
         target="_blank"
-        class="ml-4 text-primary"
+        class="ml-3 text-primary"
       >
         <svg
           class="mt-1.5 h-6"

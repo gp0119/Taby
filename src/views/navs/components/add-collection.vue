@@ -8,7 +8,11 @@
       @click="onAddCollection"
     >
       <template #icon>
-        <n-icon size="20" :component="Add" />
+        <n-icon
+          size="20"
+          :component="Add"
+          class="[&_svg]:stroke-current [&_svg]:stroke-[0.5px]"
+        />
       </template>
     </n-button>
   </PopoverWrapper>

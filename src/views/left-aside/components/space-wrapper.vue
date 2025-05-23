@@ -2,14 +2,14 @@
   <VueDraggable
     :model-value="spaces"
     item-key="id"
-    class="flex flex-col gap-y-1.5"
+    class="flex flex-col gap-y-1"
     ghost-class="sortable-ghost-dashed-border"
     @end="onDragEnd"
   >
     <div
       v-for="item in spaces"
       :key="item.title"
-      class="space-item flex w-full cursor-pointer flex-nowrap items-center gap-x-2.5 whitespace-nowrap rounded-lg p-2 font-medium text-text-primary hover:shadow-hover-shadow"
+      class="space-item flex w-full cursor-pointer flex-nowrap items-center gap-x-2.5 whitespace-nowrap rounded-lg px-2 py-1.5 font-medium text-text-primary hover:shadow-hover-shadow"
       :data-id="item.id"
       :class="{ '!font-bold !text-primary': activeSpaceId === item.id }"
       @click="onHandleSpaceClick(item)"

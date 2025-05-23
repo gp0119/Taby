@@ -31,13 +31,7 @@
         </DynamicScrollerItem>
       </template>
     </DynamicScroller>
-    <div
-      v-else
-      v-memo="['no-collections']"
-      class="bg-body-color py-16 text-center text-2xl text-gray-400"
-    >
-      {{ ft("no-collections") }}
-    </div>
+    <EmptySpace v-else />
     <BatchCardAction />
     <BatchCollectionAction />
   </template>
@@ -47,7 +41,6 @@
 </template>
 
 <script setup lang="ts">
-import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
@@ -61,12 +54,12 @@ import CollectionCollapse from "./components/collection-collapse.vue"
 import BatchCollectionAction from "./components/batch-collection-action.vue"
 import SkeletonContent from "@/components/skeleton-content.vue"
 import { Collection } from "@/type"
+import EmptySpace from "@/components/empty-space.vue"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const draggableStore = useDraggableStore()
-const { ft } = useHelpi18n()
 
 const { loading } = inject("loading", {
   loading: false,
