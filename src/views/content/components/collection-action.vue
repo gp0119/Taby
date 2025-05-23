@@ -76,12 +76,12 @@ function onEditCollection(item: CollectionWithCards) {
             />
             <n-button
               secondary
-              type="primary"
+              type="error"
               onClick={() => onDeleteCollection(item)}
               v-slots={{
                 icon: () => <n-icon size="16" component={Delete} />,
               }}
-            ></n-button>
+            />
           </n-input-group>
         </n-form-item>
       </n-form>

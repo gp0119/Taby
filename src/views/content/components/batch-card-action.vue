@@ -5,13 +5,13 @@
       v-html="gt('select-cards', batchCardStore.selectedCardIds.length)"
     />
     <div class="flex items-center justify-between gap-x-4">
-      <n-button secondary type="primary" @click="onHandleMove">
+      <n-button tertiary @click="onHandleMove">
         <template #icon>
           <n-icon :size="16" :component="FolderMoveTo" />
         </template>
         {{ ft("move") }}
       </n-button>
-      <n-button ghost type="primary" @click="onHandleDelete">
+      <n-button secondary type="error" @click="onHandleDelete">
         <template #icon>
           <n-icon :size="16" :component="Delete" />
         </template>

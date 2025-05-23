@@ -1,16 +1,19 @@
 <template>
-  <div class="scrollbar-thin h-[calc(100vh-60px)] overflow-y-auto">
+  <div
+    class="scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-60px)] overflow-y-auto"
+  >
     <VueDraggable
       :model-value="collections"
       item-key="id"
       ghost-class="sortable-ghost-dashed-border"
+      class="flex flex-col pb-2 pl-4 pr-2"
       @end="onDragEnd"
     >
       <div
         v-for="collection in collections"
         :key="collection.id"
         :data-id="collection.id"
-        class="flex w-full cursor-move items-center justify-between border-b border-border-color bg-body-color px-6 py-3"
+        class="my-2 flex w-full cursor-move items-center justify-between rounded-lg border border-transparent bg-white px-6 py-3"
       >
         <div class="flex-center select-none">
           <div class="flex-center">
@@ -23,6 +26,16 @@
               {{ collection.title }}
             </span>
           </div>
+          <div
+            class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+          >
+            {{ collection.cards.length }} cards
+            <n-icon size="12" :component="ArrowUpRight" />
+          </div>
+          <span
+            v-if="collection.labels.length > 0"
+            class="mx-4 h-[16px] w-[0.5px] bg-text-primary"
+          />
           <Tags
             class="pointer-events-none"
             :labels="collection.labels"
@@ -41,6 +54,7 @@ import { CollectionWithCards } from "@/type"
 import Tags from "./tags.vue"
 import { VueDraggable } from "vue-draggable-plus"
 import { Move } from "@vicons/ionicons5"
+import { ArrowUpRight } from "@vicons/carbon"
 
 defineProps<{
   collections: CollectionWithCards[]

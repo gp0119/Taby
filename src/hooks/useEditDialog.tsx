@@ -1,5 +1,5 @@
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
-import { useDialog } from "naive-ui"
+import { useDialog, NButton } from "naive-ui"
 
 export function useEditDialog() {
   const dialog = useDialog()
@@ -48,7 +48,31 @@ export function useEditDialog() {
                 close: () => dialogRef.destroy(),
               }),
           }
-        : {}),
+        : {
+            action: () => {
+              return (
+                <div class="flex items-center gap-2">
+                  <NButton
+                    onClick={() => dialogRef.destroy()}
+                    size="small"
+                    tertiary
+                  >
+                    {ft("cancel")}
+                  </NButton>
+                  <NButton
+                    type="primary"
+                    onClick={() => {
+                      onPositiveClick?.()
+                      dialogRef.destroy()
+                    }}
+                    size="small"
+                  >
+                    {ft("confirm")}
+                  </NButton>
+                </div>
+              )
+            },
+          }),
     })
   }
 

@@ -24,10 +24,9 @@
       class="flex items-center justify-between gap-x-4"
     >
       <n-button
-        secondary
+        tertiary
         size="small"
         :disabled="duplicateCardStore.currentIndex === 0"
-        type="primary"
         @click="showPrevious"
       >
         <template #icon>
@@ -36,13 +35,12 @@
         {{ ft("previous") }}
       </n-button>
       <n-button
-        secondary
+        tertiary
         size="small"
         :disabled="
           duplicateCardStore.currentIndex >=
           duplicateCardStore.duplicateCards.size - 1
         "
-        type="primary"
         @click="showNext"
       >
         <template #icon>

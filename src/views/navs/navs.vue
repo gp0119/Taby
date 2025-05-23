@@ -111,12 +111,12 @@ function onEditSpace() {
             <n-input v-model:value={formModel.value.title} />
             <n-button
               secondary
-              type="primary"
+              type="error"
               onClick={() => onDeleteSpace()}
               v-slots={{
                 icon: () => <n-icon size="16" component={Delete} />,
               }}
-            ></n-button>
+            />
           </n-input-group>
         </n-form-item>
       </n-form>

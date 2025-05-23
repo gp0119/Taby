@@ -1,26 +1,10 @@
 <template>
-  <div class="h-[calc(100vh-60px)] overflow-y-auto">
-    <div
-      v-for="i in 5"
-      :key="i"
-      class="w-full animate-pulse border-b border-border-color p-4"
-    >
-      <div class="mb-4 h-7 w-1/3 rounded bg-card-color" />
-      <div class="h-24 w-full rounded bg-card-color" />
+  <div
+    class="scrollbar-thin scrollbar-gutter-stable flex h-[calc(100vh-60px)] flex-col gap-y-4 overflow-y-auto bg-content-bg py-4 pl-4 pr-2"
+  >
+    <div v-for="i in 6" :key="i" class="w-full rounded-lg bg-white p-4">
+      <div class="mb-4 h-6 w-1/3 rounded-lg bg-content-bg" />
+      <div class="h-20 w-full rounded-lg bg-content-bg" />
     </div>
   </div>
 </template>
-<style scoped>
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-.animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-</style>

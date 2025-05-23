@@ -30,7 +30,7 @@ export const useDeleteDialog = () => {
       action: () => {
         return (
           <div class="flex items-center gap-2">
-            <NButton onClick={() => dialogRef.destroy()} size="small">
+            <NButton onClick={() => dialogRef.destroy()} size="small" tertiary>
               {ft("cancel")}
             </NButton>
             <NButton

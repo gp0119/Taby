@@ -217,8 +217,8 @@ function onEdit(child: iCard) {
       return (
         <div class="flex w-full items-center gap-x-3">
           <n-button
-            ghost
-            type="primary"
+            secondary
+            type="error"
             size="small"
             v-slots={{
               icon: () => <n-icon size="16" component={Delete} />,
@@ -226,8 +226,7 @@ function onEdit(child: iCard) {
             onClick={() => onDeleteCard(child)}
           />
           <n-button
-            ghost
-            type="primary"
+            tertiary
             class="mr-auto"
             size="small"
             v-slots={{
@@ -237,7 +236,7 @@ function onEdit(child: iCard) {
           >
             {ft("move")}
           </n-button>
-          <n-button ghost size="small" onClick={() => close()}>
+          <n-button tertiary size="small" onClick={() => close()}>
             {ft("cancel")}
           </n-button>
           <n-button

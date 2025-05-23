@@ -18,7 +18,7 @@
             secondary
             circle
             size="small"
-            type="primary"
+            type="error"
             @click="onCancel"
           >
             <template #icon>

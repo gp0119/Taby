@@ -143,15 +143,15 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
     renderContent: () => (
       <n-form model={formModel.value}>
         <n-form-item label={`${ft("title")}:`} class="!mb-1">
-          <color-select v-model:value={formModel.value.color} />
           <n-input-group>
+            <color-select v-model:value={formModel.value.color} />
             <n-input
               v-model:value={formModel.value.title}
               placeholder={ft("placeholder", "tag")}
             />
             <n-button
               secondary
-              type="primary"
+              type="error"
               onClick={() => onDeleteTag(tag)}
               v-slots={{
                 icon: () => <n-icon size="16" component={Delete} />,

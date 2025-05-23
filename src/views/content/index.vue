@@ -107,16 +107,4 @@ function sortCollections(a: Collection, b: Collection) {
   transform: translateZ(0);
   will-change: transform;
 }
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-.animate-pulse {
-  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
 </style>
