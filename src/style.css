@@ -90,6 +90,9 @@ html[data-theme="orange"] {
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
   }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
   .scrollbar-thin:hover,
   .scrollbar-thin:active,
   .scrollbar-thin:focus {

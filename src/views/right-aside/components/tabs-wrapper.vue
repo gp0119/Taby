@@ -8,8 +8,9 @@
     }"
     item-key="id"
     :data-windowid="windowId"
-    class="aside-card-wrapper flex flex-col gap-3"
+    class="aside-card-wrapper flex-col gap-3"
     ghost-class="sortable-ghost-dashed-border"
+    :disabled="layoutStore.rightAsideCollapsed"
     @end="onDragEnd"
   >
     <card
@@ -38,6 +39,7 @@ import { isNewTabPage } from "@/utils"
 import { VueDraggable, SortableEvent } from "vue-draggable-plus"
 import type { Card as iCard } from "@/type.ts"
 import card from "@components/card.vue"
+import { useLayoutStore } from "@/store/layout"
 
 defineProps<{
   tabs: any[]
@@ -45,6 +47,8 @@ defineProps<{
   selectedTabIds: number[]
   showCheckbox: boolean
 }>()
+
+const layoutStore = useLayoutStore()
 
 const emit = defineEmits<{
   (e: "removeTab", id: number | undefined): void

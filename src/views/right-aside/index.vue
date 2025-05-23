@@ -1,38 +1,37 @@
 <template>
   <div
-    class="right-aside-area scrollbar-thin h-full overflow-y-auto rounded-lg"
+    class="right-aside-area h-full rounded-lg"
     :class="{
       'bg-white': !layoutStore.rightAsideCollapsed,
       'bg-transparent': layoutStore.rightAsideCollapsed,
     }"
   >
-    <TabsCollapse
-      v-for="(item, windowId, index) in tabs"
-      :key="index"
-      class="mb-4"
-      :index="index"
-      :tabs="item"
-      @close-all-tabs="onCloseAllTabs(windowId)"
-    >
-      <template #cards="{ tabs: _tabs }">
-        <TabsWrapper
-          v-if="isExpanded"
-          :tabs="_tabs"
-          :window-id="windowId"
-          :selected-tab-ids="batchTabsStore.selectedTabIds"
-          :show-checkbox="
-            batchCollectionStore.selectedCollectionIds.length <= 0 &&
-            batchCardStore.selectedCardIds.length <= 0 &&
-            !duplicateCardStore.isFindDuplicate &&
-            !draggableStore.draggable
-          "
-          @remove-tab="removeTab"
-          @active-tab="activeTab"
-          @drag-end="onDragEnd"
-          @check="onHandleCheckbox"
-        />
-      </template>
-    </TabsCollapse>
+    <WindowIconWrapper
+      :tabs="tabs"
+      :active="activeWindowId"
+      @update:active="updateActiveWindowId"
+    />
+    <div class="scrollbar-none h-[calc(100vh-60px)] overflow-y-auto px-3">
+      <TabsWrapper
+        v-if="tabs[activeWindowId] && tabs[activeWindowId].length > 0"
+        :tabs="tabs[activeWindowId]"
+        :window-id="activeWindowId"
+        :selected-tab-ids="batchTabsStore.selectedTabIds"
+        :show-checkbox="
+          batchCollectionStore.selectedCollectionIds.length <= 0 &&
+          batchCardStore.selectedCardIds.length <= 0 &&
+          !duplicateCardStore.isFindDuplicate &&
+          !draggableStore.draggable
+        "
+        @remove-tab="removeTab"
+        @active-tab="activeTab"
+        @drag-end="onDragEnd"
+        @check="onHandleCheckbox"
+      />
+      <div v-else class="py-3 text-center font-thin text-text-secondary">
+        {{ ft("no-tabs") }}
+      </div>
+    </div>
   </div>
   <BatchTabAction />
 </template>
@@ -43,7 +42,6 @@ import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { debounce } from "lodash-es"
 import TabsWrapper from "./components/tabs-wrapper.vue"
-import TabsCollapse from "./components/tabs-collapse.vue"
 import type { SortableEvent } from "vue-draggable-plus"
 import type { Card as iCard } from "@/type"
 import { useBatchTabsStore } from "@/store/batch-tabs"
@@ -53,7 +51,10 @@ import BatchTabAction from "./components/batch-tab-action.vue"
 import { useDraggableStore } from "@/store/draggable"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useLayoutStore } from "@/store/layout"
+import WindowIconWrapper from "./components/window-icon-wrapper.vue"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 
+const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
 const draggableStore = useDraggableStore()
 const duplicateCardStore = useDuplicateCardStore()
@@ -63,9 +64,9 @@ const {
   removeTab,
   activeTab,
   moveTab,
-  closeAllTabsExceptCurrent,
+  activeWindowId,
+  updateActiveWindowId,
 } = useChromeTabs()
-const isExpanded = ref(true)
 const { refreshCollections } = useRefresh()
 const batchTabsStore = useBatchTabsStore()
 const batchCollectionStore = useBatchCollectionStore()
@@ -128,11 +129,6 @@ const removeListener = () => {
   chrome.tabs.onRemoved.removeListener(debounceRefreshTabs)
   chrome.tabs.onAttached.removeListener(debounceRefreshTabs)
   window.removeEventListener("beforeunload", removeListener)
-}
-
-const onCloseAllTabs = async (windowId: number | string) => {
-  await closeAllTabsExceptCurrent(Number(windowId))
-  await refreshTabs()
 }
 
 const onHandleCheckbox = (e: boolean, tab: iCard) => {

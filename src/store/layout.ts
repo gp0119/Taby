@@ -1,13 +1,20 @@
 import { defineStore } from "pinia"
+import { useLocalStorage } from "@vueuse/core"
 
 export const useLayoutStore = defineStore("Layout", () => {
   const layout = ref<"leftMenu" | "topMenu">("leftMenu")
 
-  const leftAsideCollapsed = ref(true)
-  const rightAsideCollapsed = ref(true)
+  const leftAsideCollapsed = useLocalStorage<boolean>(
+    "leftAsideCollapsed",
+    true,
+  )
+  const rightAsideCollapsed = useLocalStorage<boolean>(
+    "rightAsideCollapsed",
+    false,
+  )
 
   const leftAsidePinned = ref(false)
-  const rightAsidePinned = ref(false)
+  const rightAsidePinned = ref(true)
 
   const onUpdateLayout = (_layout: "leftMenu" | "topMenu") => {
     layout.value = _layout
