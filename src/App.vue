@@ -79,7 +79,6 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
     borderRadius: "12px",
   },
   Input: {
-    boxShadowFocus: "none",
     borderRadius: "6px",
   },
   Radio: {

@@ -3,7 +3,7 @@
     v-model:show="show"
     preset="dialog"
     title-class="[&_.n-base-icon]:hidden !text-text-primary"
-    class="bg-body-color"
+    class="bg-card-color"
     :auto-focus="false"
   >
     <template #header>
@@ -11,8 +11,7 @@
       <n-popover
         trigger="hover"
         content-class="!p-0"
-        class="!rounded-md !bg-card-color text-text-primary"
-        arrow-class="!bg-card-color"
+        class="!rounded-md text-text-primary"
         placement="top"
         style="max-width: 600px"
       >
