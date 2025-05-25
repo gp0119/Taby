@@ -7,36 +7,35 @@
       <span>Theme</span>
     </div>
     <div class="flex items-center gap-x-1">
-      <div
-        v-for="option in themeOptions"
-        :key="option.value"
-        class="flex-center cursor-pointer rounded-md border-2"
-        :class="{
-          'border-primary': currentTheme === option.value,
-          'border-transparent': currentTheme !== option.value,
-        }"
-        @click="setTheme(option.value)"
+      <n-button
+        :tertiary="theme === 'light'"
+        :quaternary="theme === 'dark'"
+        size="small"
+        class="w-[28px]"
+        @click="setTheme('light')"
       >
-        <div
-          class="h-[20px] w-[20px] rounded-md border border-white"
-          :style="{ background: option.color }"
-        />
-      </div>
+        <template #icon>
+          <n-icon size="18" :component="Light" />
+        </template>
+      </n-button>
+      <n-button
+        :tertiary="theme === 'dark'"
+        :quaternary="theme === 'light'"
+        size="small"
+        class="w-[28px]"
+        @click="setTheme('dark')"
+      >
+        <template #icon>
+          <n-icon size="18" :component="Moon" />
+        </template>
+      </n-button>
     </div>
   </div>
 </template>
 
 <script setup lang="tsx">
-import { ColorPalette } from "@vicons/carbon"
+import { ColorPalette, Light, Moon } from "@vicons/carbon"
 import { useThemeStore } from "@/store/theme.ts"
 
-const { themeColor, theme, setTheme } = useThemeStore()
-
-const currentTheme = ref(theme)
-
-const themeOptions = Object.keys(themeColor).map((key) => ({
-  label: key,
-  value: key,
-  color: themeColor[key].primary,
-}))
+const { setTheme, theme } = useThemeStore()
 </script>

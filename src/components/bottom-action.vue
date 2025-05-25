@@ -11,7 +11,7 @@
       <div
         v-if="show"
         ref="bottomActionRef"
-        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
+        class="pointer-events-auto fixed bottom-3 left-1/2 z-10 -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-card-shadow"
         :style="{ left: clientX }"
         @mousedown="onMouseDown"
       >

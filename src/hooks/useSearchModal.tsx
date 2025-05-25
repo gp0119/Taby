@@ -125,7 +125,7 @@ export const useSearchModal = () => {
                 <div
                   key={card.id}
                   data-index={index}
-                  class={`mb-2.5 cursor-pointer rounded-md border shadow-base ${
+                  class={`mb-2.5 cursor-pointer rounded-md border shadow-card-shadow ${
                     currentIndex.value === index ? "bg-hover-color" : ""
                   }`}
                   onClick={() => {

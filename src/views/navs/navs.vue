@@ -12,10 +12,10 @@
       />
       <template v-if="title">
         <div
-          class="flex shrink-0 flex-nowrap items-center gap-4 rounded bg-gray-200 px-2.5"
+          class="flex shrink-0 flex-nowrap items-center gap-4 rounded px-2.5"
         >
           <div class="flex-center">
-            <n-icon size="18" class="mr-2">
+            <n-icon size="18" class="mr-2 text-text-primary">
               <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
             </n-icon>
             <span class="shrink-0 select-none text-lg text-text-primary">
@@ -32,7 +32,7 @@
             tertiary
             :focusable="false"
             size="small"
-            class="hidden w-[28px] group-hover/nav:inline-flex"
+            class="w-[28px]"
             @click="onEditSpace"
           >
             <template #icon>

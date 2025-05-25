@@ -10,7 +10,7 @@
     >
       <div
         v-if="show"
-        class="fixed left-1/2 top-2 z-10 -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-base-lg"
+        class="fixed left-1/2 top-2 z-10 -translate-x-1/2 cursor-move rounded-xl bg-card-color shadow-card-shadow"
       >
         <div class="flex items-center justify-between gap-x-8 px-6 py-4">
           <slot name="default" />

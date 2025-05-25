@@ -13,7 +13,7 @@
         v-for="collection in collections"
         :key="collection.id"
         :data-id="collection.id"
-        class="my-2 flex w-full cursor-move items-center justify-between rounded-lg border border-transparent bg-white px-6 py-3"
+        class="my-2 flex w-full cursor-move items-center justify-between rounded-lg border-2 border-transparent bg-white px-6 py-3"
       >
         <div class="flex-center select-none">
           <div class="flex-center">
@@ -27,7 +27,7 @@
             </span>
           </div>
           <div
-            class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+            class="ml-2 flex cursor-pointer items-center rounded bg-body-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
           >
             {{ collection.cards.length }} cards
             <n-icon size="12" :component="ArrowUpRight" />

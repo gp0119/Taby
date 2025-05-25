@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    trigger="click"
     placement="bottom-end"
     :show-arrow="false"
     style="padding: 0; min-width: 280px"
@@ -18,12 +18,14 @@
       </n-button>
     </template>
     <template #default>
-      <div class="flex flex-col overflow-hidden rounded-lg">
-        <div class="flex flex-col gap-y-4 p-4">
+      <div class="bg-dialog-color flex flex-col overflow-hidden rounded-lg">
+        <div class="flex flex-col">
           <!--   排序   -->
           <SortSwitch />
           <!--   拖拽   -->
-          <div class="flex w-full items-center justify-between">
+          <div
+            class="flex w-full items-center justify-between px-4 py-3 hover:bg-hover-color"
+          >
             <div class="flex items-center gap-x-2">
               <n-icon-wrapper>
                 <n-icon size="18" :component="Move" />
@@ -37,7 +39,9 @@
           </div>
 
           <!--   查找重复   -->
-          <div class="flex w-full items-center justify-between">
+          <div
+            class="flex w-full items-center justify-between px-4 py-3 hover:bg-hover-color"
+          >
             <div class="flex items-center gap-x-2">
               <n-icon-wrapper>
                 <n-icon size="18" :component="View" />
@@ -51,9 +55,7 @@
           </div>
         </div>
 
-        <div
-          class="flex flex-col gap-y-2 border-t border-gray-200 bg-content-bg px-4 py-2"
-        >
+        <div class="flex flex-col gap-y-2 border-t bg-hover-color px-4 py-2">
           <LangSwitch />
           <ThemeSwitch />
         </div>

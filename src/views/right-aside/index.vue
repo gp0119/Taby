@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="right-aside-area h-full rounded-lg"
-    :class="[layoutStore.isRightCollapsed ? 'bg-transparent' : 'bg-white']"
-  >
+  <div class="right-aside-area group/right-aside h-full rounded-lg">
     <WindowIconWrapper
       :tabs="tabs"
       :active="activeWindowId"
@@ -26,7 +23,14 @@
         @drag-end="onDragEnd"
         @check="onHandleCheckbox"
       />
-      <div v-else class="py-3 text-center font-thin text-text-secondary">
+      <div
+        v-else-if="
+          tabs[activeWindowId] &&
+          isEmpty(tabs[activeWindowId]) &&
+          !layoutStore.isRightCollapsed
+        "
+        class="flex-nowrap whitespace-nowrap py-3 text-center font-thin text-text-secondary"
+      >
         {{ ft("no-tabs") }}
       </div>
     </div>
@@ -93,12 +97,8 @@ chrome.tabs.onAttached.addListener(debounceRefreshTabs)
 const onDragEnd = async (evt: SortableEvent) => {
   const { item: itemEl, to, newIndex, from } = evt
   const { id, windowid } = itemEl.dataset
-  console.log("from: ", from)
-  console.log("to: ", to)
-  console.log("newIndex: ", newIndex)
   if (from === to) return
   if (to.classList.contains("card-wrapper")) {
-    console.log(1)
     const toClollectionId = to.getAttribute("data-collectionid")
     const title = itemEl.getAttribute("data-title") as string
     const url = itemEl.getAttribute("data-url") as string
@@ -118,7 +118,6 @@ const onDragEnd = async (evt: SortableEvent) => {
     )
     await refreshCollections()
   } else {
-    console.log(3)
     await moveTab(Number(id), Number(newIndex), Number(windowid))
     await refreshTabs()
   }

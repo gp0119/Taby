@@ -69,15 +69,8 @@ const removeListener = () => {
 }
 
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
-  common: {
-    primaryColor: themeStore.themeColor[themeStore.theme].primary,
-    primaryColorHover: themeStore.themeColor[themeStore.theme].darkenPrimary,
-    inputColor: themeStore.themeColor[themeStore.theme].cardBackground,
-    popoverColor: themeStore.themeColor[themeStore.theme].cardBackground,
-    hoverColor: themeStore.themeColor[themeStore.theme].hoverColor,
-  },
+  common: {},
   Button: {
-    colorPressedPrimary: themeStore.themeColor[themeStore.theme].darkenPrimary,
     waveOpacity: 0,
     borderRadiusSmall: "6px",
     borderRadiusMedium: "6px",
@@ -86,28 +79,11 @@ const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
     borderRadius: "12px",
   },
   Input: {
-    color: themeStore.themeColor[themeStore.theme].cardBackground,
-    textColor: themeStore.themeColor[themeStore.theme].textPrimary,
     boxShadowFocus: "none",
     borderRadius: "6px",
   },
-  Form: {
-    labelTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
-  },
   Radio: {
-    buttonColor: themeStore.themeColor[themeStore.theme].cardBackground,
-    buttonTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
-    buttonColorActive: themeStore.themeColor[themeStore.theme].primary,
-    buttonBorderColorActive: themeStore.themeColor[themeStore.theme].primary,
-    buttonTextColorActive: "#fff",
     buttonBorderRadius: "6px",
-  },
-  Tag: {
-    colorBordered: themeStore.themeColor[themeStore.theme].cardBackground,
-    closeIconColor: themeStore.themeColor[themeStore.theme].textPrimary,
-  },
-  LoadingBar: {
-    colorLoading: "#18A058",
   },
   Popover: {
     borderRadius: "12px",

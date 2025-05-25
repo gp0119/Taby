@@ -31,13 +31,14 @@
             :closeable="false"
             @click="addTagforCollection(tag.id)"
           />
-          <PopoverIcon
-            :message="ft('edit', 'tag')"
-            size="16"
-            icon-class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:block"
-            :icon="TagEdit"
-            @click="onEditTag(tag)"
-          />
+          <PopoverWrapper :message="ft('edit', 'tag')">
+            <n-icon
+              size="16"
+              :component="TagEdit"
+              class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:inline-flex"
+              @click="onEditTag(tag)"
+            />
+          </PopoverWrapper>
         </div>
       </n-space>
       <div v-else class="!bg-card-color text-center text-text-secondary">
@@ -77,7 +78,7 @@ import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
 import { useDialog } from "naive-ui"
-import PopoverIcon from "@/components/popover-icon.vue"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const props = defineProps<{
   item: CollectionWithCards

@@ -1,8 +1,8 @@
 <template>
   <div
-    class="card group/card"
+    class="card group/card border-2 border-transparent"
     :class="{
-      '!shadow-base-lg': selectIds?.includes(child.id),
+      '!border-primary': selectIds?.includes(child.id),
       'duplicate-card': duplicateUrl === child.url,
     }"
     @click="onHandleClick"
@@ -129,7 +129,6 @@ function onHandleCheckbox(checked: boolean) {
 }
 .card-header {
   @apply relative flex items-center px-2 py-3;
-  @apply group-hover/aside:rounded-md group-hover/aside:bg-hover-color;
 }
 
 .card-title {

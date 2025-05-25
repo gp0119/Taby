@@ -6,7 +6,7 @@
     :show-arrow="false"
     :placement="placement"
     :disabled="disabled"
-    style="background-color: rgba(0, 0, 0, 0.8)"
+    content-class="!p-0"
   >
     <template #trigger>
       <slot />

@@ -3,70 +3,56 @@
 @tailwind utilities;
 
 /* 为每个主题定义变量 */
-html[data-theme="pink"] {
-  --primary: #f65077;
-  --bodyBg: #e0e4e8;
+html[data-theme="light"] {
+  --primary: #18a058;
+  --primary-hover: #0c7a43;
+  --bodyBg: #e6eaef;
   --contentBg: #f4f5f7;
-  --darkenPrimary: #e0496c;
-  --bodyBackground: #fafafa;
-  --cardBackground: #ffffff;
+  --cardBg: #ffffff;
+  --dialogBg: #ffffff;
   --textPrimary: #333333;
   --textSecondary: #666666;
-  --borderColor: #e9e9e9;
-  --hoverColor: #fae8ea;
-  --shadowColor: rgba(132, 104, 113, 0.2);
+  --borderColor: #e6eaef;
+  --scrollbarColor: #e6eaef;
+  --hoverColor: #f4f5f7;
+  --hoverShadow:
+    rgba(135, 145, 155, 0.3) 0px 3px 8px 0px,
+    rgba(135, 145, 155, 0.08) 0px 0px 0px 1px;
+  --btnShadow:
+    0 1px 2px 0 rgba(142, 149, 173, 0.64),
+    0 0px 1px 1px rgba(142, 149, 173, 0.1),
+    inset 1px 1px 1px 0 rgba(255, 255, 255, 0.81), inset -1px -1px 1px 0 #e2e4e9;
+  --collectionShadow:
+    rgba(135, 145, 155, 0.5) 0px 12px 12px 0px,
+    rgba(171, 174, 181, 0.1) 0px 6px 12px 0px;
+  --cardShadow:
+    rgba(135, 145, 155, 0.2) 0px 3px 8px 0px,
+    rgba(135, 145, 155, 0.08) 0px 0px 0px 1px;
   --sepia: 0;
 }
 
-html[data-theme="purple"] {
-  --primary: #8b5fbf;
-  --darkenPrimary: #61398f;
-  --bodyBackground: #f5f3f7;
-  --cardBackground: #f1edf5;
-  --textPrimary: #4a4a4a;
-  --textSecondary: #878787;
-  --borderColor: #e9e4ed;
-  --hoverColor: #e9e4ed;
-  --shadowColor: rgba(97, 57, 143, 0.2);
-  --sepia: 0.3;
-}
-
-html[data-theme="green"] {
-  --primary: #4caf50;
-  --darkenPrimary: #2a9235;
-  --bodyBackground: #eafbe5;
-  --cardBackground: #e0f1db;
-  --textPrimary: #18361a;
-  --textSecondary: #304933;
-  --borderColor: #c8e0c5;
-  --hoverColor: #b4c8b1;
-  --shadowColor: rgba(33, 84, 61, 0.2);
-  --sepia: 0.6;
-}
-
 html[data-theme="dark"] {
-  --primary: #7d81da;
-  --darkenPrimary: #6568b2;
-  --bodyBackground: #1a1f2b;
-  --cardBackground: #292e3b;
+  --primary: #63e2b7;
+  --primary-hover: #5acea7;
+  --bodyBg: #0e1013;
+  --contentBg: #18191b;
+  --cardBg: #1f2123;
+  --dialogBg: #272a2d;
   --textPrimary: #cbd5e1;
   --textSecondary: #94a3b8;
   --borderColor: #353f51;
-  --hoverColor: #6e78b2;
-  --shadowColor: rgba(14, 17, 24, 0.8);
-  --sepia: 0.5;
-}
-
-html[data-theme="orange"] {
-  --primary: #ff7f50;
-  --darkenPrimary: #dd6236;
-  --bodyBackground: #f6efdf;
-  --cardBackground: #ece5d5;
-  --textPrimary: #442e1a;
-  --textSecondary: #6b635c;
-  --borderColor: #dad4c0;
-  --hoverColor: #ffd299;
-  --shadowColor: rgba(122, 90, 48, 0.2);
+  --hoverColor: #32363a;
+  --scrollbarColor: #32363a;
+  --hoverShadow:
+    rgba(0, 0, 0, 0.9) 0px 3px 8px 0px, rgba(0, 0, 0, 0.2) 0px 0px 0px 1px;
+  --btnShadow:
+    0 1px 2px 0 rgba(3, 4, 5, 0.64),
+    inset 1px 1px 2px 0 rgba(154, 160, 164, 0.4), inset -1px -1px 2px 0 #2a2f34;
+  --collectionShadow:
+    rgba(0, 0, 0, 0.5) 0px 24px 24px -30px,
+    rgba(0, 0, 0, 0.38) 0px 6px 12px -4px;
+  --cardShadow:
+    rgba(0, 0, 0, 0.9) 0px 3px 8px 0px, rgba(0, 0, 0, 0.2) 0px 0px 0px 1px;
   --sepia: 0.5;
 }
 
@@ -96,7 +82,7 @@ html[data-theme="orange"] {
   .scrollbar-thin:hover,
   .scrollbar-thin:active,
   .scrollbar-thin:focus {
-    scrollbar-color: #d1d5db transparent;
+    scrollbar-color: var(--scrollbarColor) transparent;
   }
   .scrollbar-gutter-stable {
     scrollbar-gutter: stable;

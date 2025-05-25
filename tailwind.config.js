@@ -6,34 +6,22 @@ export default {
       boxShadow: {
         base: "1px 1px 5px 0px var(--shadowColor)",
         "base-lg": "2px 2px 5px 5px var(--shadowColor)",
-        bottom: "0 6px 12px -4px var(--shadowColor)",
-        "hover-shadow":
-          "rgba(135, 145, 155, 0.3) 0px 3px 8px 0px, rgba(135, 145, 155, 0.08) 0px 0px 0px 1px",
-        "btn-shadow":
-          "0 1px 2px 0 rgba(142,149,173,0.64),0 0px 1px 1px rgba(142,149,173,0.1),inset 1px 1px 1px 0 rgba(255,255,255,0.81),inset -1px -1px 1px 0 #E2E4E9",
-        "collection-shadow":
-          "rgba(135, 145, 155, 0.2) 5px 10px 14px -10px, rgba(171, 174, 181, 0.08) 0px 6px 12px -4px",
-        "card-shadow":
-          "rgba(135, 145, 155, 0.2) 0px 3px 8px 0px, rgba(135, 145, 155, 0.08) 0px 0px 0px 1px",
-      },
-      dropShadow: {
-        base: "1px 2px 4px rgba(112, 112, 140, 0.15)",
+        "hover-shadow": "var(--hoverShadow)",
+        "btn-shadow": "var(--btnShadow)",
+        "collection-shadow": "var(--collectionShadow)",
+        "card-shadow": "var(--cardShadow)",
       },
       colors: {
         primary: "var(--primary)",
-        "body-bg": "var(--bodyBg)",
-        "content-bg": "var(--contentBg)",
-        "darken-primary": "var(--darkenPrimary)",
-        "body-color": "var(--bodyBackground)",
-        "card-color": "var(--cardBackground)",
+        "body-color": "var(--bodyBg)",
+        "content-color": "var(--contentBg)",
+        "card-color": "var(--cardBg)",
+        "dialog-color": "var(--dialogBg)",
         "text-primary": "var(--textPrimary)",
         "text-secondary": "var(--textSecondary)",
         "border-color": "var(--borderColor)",
         "hover-color": "var(--hoverColor)",
         "shadow-color": "var(--shadowColor)",
-        red: {
-          450: "#F65077",
-        },
       },
       sepia: {
         base: "var(--sepia)",

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full bg-[#E0E4E8]">
+  <div class="flex h-full bg-body-color">
     <pinSide
       :mode="layoutStore.leftLayoutMode"
       :hovering="layoutStore.leftLayoutHovering"
@@ -11,7 +11,7 @@
         <LeftActions />
       </template>
     </pinSide>
-    <main class="flex-1 rounded-xl bg-content-bg">
+    <main class="bg-content-color flex-1 rounded-xl">
       <navs />
       <content />
     </main>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group/item flex h-full w-full flex-col rounded-lg border border-dashed border-transparent bg-white"
+    class="group/item flex h-full w-full flex-col rounded-lg border-2 border-transparent bg-card-color"
     :class="{
       '!border-primary': batchCollectionStore.selectedCollectionIds.includes(
         collection.id,
@@ -52,7 +52,7 @@
           </div>
           <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
             <div
-              class="ml-2 flex cursor-pointer items-center rounded bg-body-bg py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+              class="ml-2 flex cursor-pointer items-center rounded bg-body-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
               @click="onOpenCollection(collection)"
             >
               {{ collection.cards.length }} cards

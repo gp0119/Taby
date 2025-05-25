@@ -27,7 +27,7 @@ export function useEditDialog() {
     const dialogRef = dialog.create({
       title,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-      class: "bg-body-color",
+      class: "bg-dialog-color",
       autoFocus: false,
       negativeText: negativeText || ft("cancel"),
       positiveText: positiveText || ft("confirm"),

@@ -3,63 +3,25 @@
     ref="wrapperRef"
     class="scrollbar-thin mb-3 flex w-full items-center gap-x-2 overflow-x-auto px-2.5 pt-1.5"
   >
-    <n-popover
+    <WindowIcon
       v-for="(_item, windowId, index) in tabs"
       :key="windowId"
-      trigger="click"
-      :show="showPopover"
-      placement="bottom-end"
-      :show-arrow="false"
-      :on-clickoutside="() => (showPopover = false)"
-      style="padding: 0; overflow: hidden"
-    >
-      <template #trigger>
-        <div
-          class="flex h-10 w-10 flex-shrink-0 cursor-pointer flex-col overflow-hidden rounded-lg border-[3px]"
-          :class="{
-            'border-primary': active == windowId,
-          }"
-          @click="handleClick(windowId)"
-          @contextmenu="onHandleContextMenu"
-        >
-          <div
-            class="flex items-center justify-center gap-0.5 bg-content-bg px-0.5 py-1"
-          >
-            <span class="h-1 w-1 rounded-full bg-gray-400" />
-            <span class="h-1 w-1 rounded-full bg-gray-400" />
-            <span class="h-1 w-1 rounded-full bg-gray-400" />
-          </div>
-          <div
-            class="flex flex-1 select-none items-center justify-center bg-white font-bold text-gray-400"
-          >
-            {{ index + 1 }}
-          </div>
-        </div>
-      </template>
-      <template #default>
-        <div
-          class="cursor-pointer px-4 py-2 hover:bg-content-bg"
-          @click="onCloseAllTabs(windowId)"
-        >
-          {{ ft("close-all-tabs") }}
-        </div>
-        <div class="cursor-pointer px-4 py-2 hover:bg-content-bg">
-          {{ ft("close-all-tabs") }}
-        </div>
-      </template>
-    </n-popover>
+      :tab="tabs[windowId]"
+      :active="active"
+      :window-id="windowId"
+      :index="index"
+      @update:active="handleClick"
+      @close-all-tabs="onCloseAllTabs"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Card } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
-import { useHelpi18n } from "@/hooks/useHelpi18n"
+import WindowIcon from "@/views/right-aside/components/window-icon.vue"
 
 const wrapperRef = ref<HTMLDivElement | null>(null)
-const { ft } = useHelpi18n()
-
-const showPopover = ref(false)
 
 function onWheel(e: WheelEvent) {
   const el = wrapperRef.value
@@ -68,11 +30,6 @@ function onWheel(e: WheelEvent) {
     el.scrollLeft += e.deltaY
     e.preventDefault()
   }
-}
-
-function onHandleContextMenu(e: MouseEvent) {
-  e.preventDefault()
-  showPopover.value = true
 }
 
 onMounted(() => {
@@ -105,6 +62,5 @@ function handleClick(windowId: number | string) {
 
 const onCloseAllTabs = (windowId: number | string) => {
   emit("closeAllTabs", Number(windowId))
-  showPopover.value = false
 }
 </script>

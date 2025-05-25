@@ -16,22 +16,10 @@
       @mouseenter="handleMouseAction('enter')"
     >
       <div
-        v-if="$slots.header"
-        class="rounded-lg"
-        :class="[
-          !(mode === 'collapse' || (mode === 'hover' && !hovering))
-            ? 'bg-white'
-            : 'bg-transparent',
-          'transition-colors duration-300 ease-in-out',
-        ]"
-      >
-        <slot name="header" />
-      </div>
-      <div
         class="flex-1 rounded-lg"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
-            ? 'bg-white'
+            ? 'bg-card-color'
             : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
@@ -43,7 +31,7 @@
         class="rounded-lg p-[13px]"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
-            ? 'bg-white'
+            ? 'bg-card-color'
             : 'bg-transparent',
           'transition-colors duration-300 ease-in-out',
         ]"
