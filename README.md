@@ -44,15 +44,6 @@ Taby 是一款简约而功能丰富的浏览器新标签页扩展，旨在提升
 
 - [Chrome Web Store](https://chromewebstore.google.com/detail/taby/iifpdfmdgnaogfbdlbmekdphicaaipod)
 
-### 手动安装 | Manual Installation
-
-1. 下载最新版本的 [release](https://github.com/gp0119/Taby/releases)
-2. 解压下载的文件
-3. 在浏览器中转到扩展页面:
-   - Chrome: `chrome://extensions/`
-4. 启用开发者模式
-5. 点击 "加载已解压的扩展" 并选择解压后的文件夹
-
 ## 🛠️ 开发 | Development
 
 ```bash
