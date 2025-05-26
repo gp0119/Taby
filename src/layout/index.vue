@@ -11,7 +11,7 @@
         <LeftActions />
       </template>
     </pinSide>
-    <main class="bg-content-color flex-1 rounded-xl">
+    <main class="flex-1 rounded-xl bg-content-color">
       <navs />
       <content />
     </main>

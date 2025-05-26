@@ -4,8 +4,8 @@
 
 /* 为每个主题定义变量 */
 html[data-theme="light"] {
-  --primary: #18a058;
-  --primary-hover: #0c7a43;
+  --primary: #5dabfe;
+  --primary-hover: #3391ff;
   --bodyBg: #e6eaef;
   --contentBg: #f4f5f7;
   --cardBg: #ffffff;
@@ -32,8 +32,8 @@ html[data-theme="light"] {
 }
 
 html[data-theme="dark"] {
-  --primary: #63e2b7;
-  --primary-hover: #5acea7;
+  --primary: #8acbec;
+  --primary-hover: #70c0e8;
   --bodyBg: #0e1013;
   --contentBg: #18191b;
   --cardBg: #1f2123;

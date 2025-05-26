@@ -3,7 +3,7 @@
     class="relative z-10 h-full translate-x-0 px-2"
     :style="{
       width: `${mode === 'collapse' || (mode === 'hover' && !hovering) ? collapsedWidth : width}px`,
-      transition: 'all 0.2s ease-in-out',
+      transition: 'all 0.1s ease-in-out',
       padding:
         mode === 'collapse' || (mode === 'hover' && !hovering)
           ? '0 0'

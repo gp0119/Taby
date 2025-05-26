@@ -98,7 +98,7 @@ export const useSearchModal = () => {
 
   const openModal = () => {
     modal.create({
-      class: "min-w-[800px] max-w-[1000px] w-[50vw] !bg-body-color",
+      class: "min-w-[800px] max-w-[1000px] w-[50vw] !bg-card-color",
       closable: false,
       autoFocus: true,
       preset: "card",

@@ -1,100 +1,30 @@
 <template>
-  <div class="flex h-[50px] items-center justify-between overflow-hidden px-3">
-    <a
-      href="https://github.com/gp0119/Taby"
-      target="_blank"
-      class="flex flex-shrink-0 items-center justify-center text-primary"
-    >
-      <svg
-        class="h-9"
-        viewBox="0 0 48 48"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <g clip-path="url(#clip0_28_8)">
-          <path
-            d="M12 1H36C42.0751 1 47 5.92487 47 12V36C47 42.0751 42.0751 47 36 47H12C5.92487 47 1 42.0751 1 36V12C1 5.92486 5.92486 1 12 1Z"
-            stroke="var(--primary)"
-            stroke-width="2"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M33.4831 15.0101C33.4831 15.0101 35.9032 21.8385 34.9526 26.8472C33.6703 33.6049 27.6129 36.2488 26.5608 36.4798C19.8219 37.9588 13.8125 34.8217 13.5215 37.3524C12.9313 42.4858 26.7536 36.9765 26.7536 36.9765C26.7536 36.9765 41.9713 31.3061 38.2848 35.2974C34.1581 39.7652 19.3736 41.4332 16.5245 41.2537C8.10648 40.7231 11.1446 35.7015 13.7323 34.4985C13.7323 34.4985 11.8689 29.0449 16.4808 26.5189C21.0922 23.9925 31.1975 24.8745 33.4831 15.0101Z"
-            fill="var(--primary-hover)"
-          />
-          <path
-            d="M23.1883 13.3191C22.9427 13.7443 22.515 13.9569 22.2326 13.794C21.9506 13.6311 21.9206 13.1541 22.1661 12.729C22.4117 12.3039 22.8394 12.0913 23.1219 12.2541C23.4039 12.417 23.4339 12.894 23.1883 13.3191ZM30.6356 10.1983C30.6356 10.1983 31.1366 8.00229 30.7821 6.15943L28.1494 7.95257C28.1494 7.95257 28.4477 6.68143 28.4074 6L25.7031 8.15314C25.7031 8.15314 20.8239 6.33643 18.9261 11.1604C18.9261 11.1604 16.2394 11.0001 15.7183 11.8423C15.7183 11.8423 15.3836 16.791 19.6719 17.9074C23.5419 18.915 23.8183 22.9903 23.8183 22.9903C23.8183 22.9903 30.7556 21.1054 32.1994 17.0554C33.6429 13.0054 30.6356 10.1983 30.6356 10.1983Z"
-            fill="var(--primary)"
-          />
-        </g>
-        <defs>
-          <clipPath id="clip0_28_8">
-            <rect width="48" height="48" fill="white" />
-          </clipPath>
-        </defs>
-      </svg>
-    </a>
-    <PopoverWrapper :message="ft('add', 'space')">
-      <n-button
-        quaternary
-        :focusable="false"
-        size="small"
-        class="ml-3 w-[28px]"
-        :class="[layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show']"
-        @click="onAddSpace"
-      >
-        <template #icon>
-          <n-icon
-            :component="Add"
-            size="24"
-            class="[&_svg]:stroke-current [&_svg]:stroke-[0.5px]"
-          />
-        </template>
-      </n-button>
-    </PopoverWrapper>
-  </div>
+  <svg
+    class="h-9"
+    viewBox="0 0 48 48"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g clip-path="url(#clip0_28_8)">
+      <path
+        d="M12 1H36C42.0751 1 47 5.92487 47 12V36C47 42.0751 42.0751 47 36 47H12C5.92487 47 1 42.0751 1 36V12C1 5.92486 5.92486 1 12 1Z"
+        stroke="var(--primary)"
+        stroke-width="2"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M33.4831 15.0101C33.4831 15.0101 35.9032 21.8385 34.9526 26.8472C33.6703 33.6049 27.6129 36.2488 26.5608 36.4798C19.8219 37.9588 13.8125 34.8217 13.5215 37.3524C12.9313 42.4858 26.7536 36.9765 26.7536 36.9765C26.7536 36.9765 41.9713 31.3061 38.2848 35.2974C34.1581 39.7652 19.3736 41.4332 16.5245 41.2537C8.10648 40.7231 11.1446 35.7015 13.7323 34.4985C13.7323 34.4985 11.8689 29.0449 16.4808 26.5189C21.0922 23.9925 31.1975 24.8745 33.4831 15.0101Z"
+        fill="var(--primary-hover)"
+      />
+      <path
+        d="M23.1883 13.3191C22.9427 13.7443 22.515 13.9569 22.2326 13.794C21.9506 13.6311 21.9206 13.1541 22.1661 12.729C22.4117 12.3039 22.8394 12.0913 23.1219 12.2541C23.4039 12.417 23.4339 12.894 23.1883 13.3191ZM30.6356 10.1983C30.6356 10.1983 31.1366 8.00229 30.7821 6.15943L28.1494 7.95257C28.1494 7.95257 28.4477 6.68143 28.4074 6L25.7031 8.15314C25.7031 8.15314 20.8239 6.33643 18.9261 11.1604C18.9261 11.1604 16.2394 11.0001 15.7183 11.8423C15.7183 11.8423 15.3836 16.791 19.6719 17.9074C23.5419 18.915 23.8183 22.9903 23.8183 22.9903C23.8183 22.9903 30.7556 21.1054 32.1994 17.0554C33.6429 13.0054 30.6356 10.1983 30.6356 10.1983Z"
+        fill="var(--primary)"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_28_8">
+        <rect width="48" height="48" fill="white" />
+      </clipPath>
+    </defs>
+  </svg>
 </template>
-
-<script setup lang="tsx">
-import { useLayoutStore } from "@/store/layout"
-import { Add } from "@vicons/carbon"
-import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useEditDialog } from "@/hooks/useEditDialog.tsx"
-import IconSelect from "@components/icon-select.vue"
-import dataManager from "@/db"
-import { useRefresh } from "@/hooks/useRresh.ts"
-import PopoverWrapper from "./popover-wrapper.vue"
-
-const layoutStore = useLayoutStore()
-const { ft } = useHelpi18n()
-const { open } = useEditDialog()
-const { refreshSpaces } = useRefresh()
-
-function onAddSpace() {
-  const formModel = ref({ title: "", icon: "StorefrontOutline" })
-  open({
-    title: ft("add", "space"),
-    renderContent: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label={`${ft("title")}:`}>
-          <n-input-group>
-            <IconSelect v-model:value={formModel.value.icon} />
-            <n-input
-              v-model:value={formModel.value.title}
-              placeholder={ft("placeholder", "title")}
-            />
-          </n-input-group>
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      if (!formModel.value.title) return
-      await dataManager.addSpace({
-        title: formModel.value.title,
-        icon: formModel.value.icon,
-      })
-      await refreshSpaces()
-    },
-  })
-}
-</script>

@@ -12,7 +12,7 @@
         </template>
       </n-button>
     </template>
-    <n-scrollbar class="max-h-[100px] w-[160px] bg-body-color">
+    <n-scrollbar class="max-h-[100px] w-[160px] bg-card-color">
       <n-space wrap size="small" align="center">
         <div
           v-for="color in COLOR_LIST"

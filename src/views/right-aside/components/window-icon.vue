@@ -9,21 +9,13 @@
   >
     <template #trigger>
       <div
-        class="flex h-10 w-10 flex-shrink-0 cursor-pointer flex-col overflow-hidden rounded-lg border-[3px]"
-        :class="[
-          layoutStore.isRightCollapsed
-            ? active == windowId
-              ? 'group-hover/right-aside:border-primary'
-              : 'border-border-color'
-            : active == windowId
-              ? 'border-primary'
-              : 'border-border-color',
-        ]"
+        class="flex h-10 w-10 flex-shrink-0 cursor-pointer flex-col overflow-hidden rounded-lg border-[3px] border-body-color"
+        :class="[active == windowId ? '!border-primary' : 'hover:opacity-75']"
         @click="handleClick(windowId)"
         @contextmenu="onHandleContextMenu"
       >
         <div
-          class="bg-content-color flex items-center justify-center gap-1 px-0.5 py-1"
+          class="flex items-center justify-center gap-1 bg-content-color px-0.5 py-1"
         >
           <span class="h-1 w-1 rounded-full bg-gray-400" />
           <span class="h-1 w-1 rounded-full bg-gray-400" />
@@ -38,12 +30,12 @@
     </template>
     <template #default>
       <div
-        class="hover:bg-content-color cursor-pointer px-4 py-2"
+        class="cursor-pointer px-4 py-2 hover:bg-content-color"
         @click="onCloseAllTabs(windowId)"
       >
         {{ ft("close-all-tabs") }}
       </div>
-      <div class="hover:bg-content-color cursor-pointer px-4 py-2">
+      <div class="cursor-pointer px-4 py-2 hover:bg-content-color">
         {{ ft("close-all-tabs") }}
       </div>
     </template>
@@ -54,11 +46,9 @@
 import { Card } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useLayoutStore } from "@/store/layout"
 
 const wrapperRef = ref<HTMLDivElement | null>(null)
 const { ft } = useHelpi18n()
-const layoutStore = useLayoutStore()
 const showPopover = ref(false)
 
 function onWheel(e: WheelEvent) {

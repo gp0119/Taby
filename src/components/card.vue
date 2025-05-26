@@ -3,7 +3,7 @@
     class="card group/card border-2 border-transparent"
     :class="{
       '!border-primary': selectIds?.includes(child.id),
-      'duplicate-card': duplicateUrl === child.url,
+      '!border-dashed !border-primary': duplicateUrl === child.url,
     }"
     @click="onHandleClick"
   >
@@ -124,7 +124,7 @@ function onHandleCheckbox(checked: boolean) {
 </script>
 <style>
 .card {
-  @apply w-full cursor-pointer rounded-md bg-card-color shadow-card-shadow;
+  @apply relative w-full cursor-pointer rounded-md bg-card-color shadow-card-shadow;
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
@@ -145,8 +145,5 @@ function onHandleCheckbox(checked: boolean) {
 }
 .edit-button {
   @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
-}
-.duplicate-card {
-  @apply bg-gradient-to-b from-primary to-card-color;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full flex-col" v-bind="$attrs">
-    <Logo />
+    <LogoWrapper />
     <div class="mt-2 w-full flex-1 px-2">
       <SpaceWrapper
         :spaces="allSpaces"
@@ -20,7 +20,7 @@ import SpaceWrapper from "./components/space-wrapper.vue"
 import { SortableEvent } from "vue-draggable-plus"
 import dataManager from "@/db"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
-import Logo from "@/components/logo.vue"
+import LogoWrapper from "./components/logo-wrapper.vue"
 
 const spacesStore = useSpacesStore()
 const { refreshSpaces, refreshTags } = useRefresh()
