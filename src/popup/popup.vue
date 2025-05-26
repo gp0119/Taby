@@ -29,19 +29,21 @@
               :is="space.icon ? ICON_LIST[space.icon] : StorefrontOutline"
             />
           </n-icon>
-          <span class="select-none pl-2">{{ space.title }}</span>
+          <span class="select-none py-1 pl-2">{{ space.title }}</span>
         </template>
         <template #header-extra>
-          <PopoverIcon
-            :message="ft('add', 'collection')"
-            size="20"
-            icon-class="hidden text-[#F65077] group-hover/collection:block"
-            content-class="!p-0"
-            class="!rounded-md !bg-[#F65077] !px-2 !py-1 text-white"
-            arrow-class="!bg-[#F65077]"
-            :icon="AddOutline"
-            @click="onClickHeaderExtra(space.id)"
-          />
+          <PopoverWrapper :message="ft('add', 'collection')">
+            <n-button
+              quaternary
+              size="small"
+              class="hidden w-[28px] group-hover/collection:inline-flex"
+              @click.stop="onClickHeaderExtra(space.id)"
+            >
+              <template #icon>
+                <n-icon size="16" :component="AddOutline" />
+              </template>
+            </n-button>
+          </PopoverWrapper>
         </template>
         <div
           v-if="isAddingCollection"
@@ -67,7 +69,7 @@
             <n-button
               size="small"
               class="rounded-l-none"
-              @click="onAddCollection(space.id)"
+              @click.stop="onAddCollection(space.id)"
             >
               <template #icon>
                 <n-icon size="16">
@@ -84,19 +86,21 @@
               :key="collection.id"
               class="group flex items-center justify-between px-2.5 py-3"
             >
-              <span class="select-none group-hover:text-[#F65077]">
+              <span class="select-none">
                 {{ collection.title }}
               </span>
-              <PopoverIcon
-                :message="gt('save-tabs-to', collection.title)"
-                size="16"
-                icon-class="hidden text-[#F65077] group-hover:block"
-                content-class="!p-0"
-                class="!rounded-md !bg-[#F65077] !px-2 !py-1 text-white"
-                arrow-class="!bg-[#F65077]"
-                :icon="SaveOutline"
-                @click="onSave(collection)"
-              />
+              <PopoverWrapper :message="gt('save-tabs-to', collection.title)">
+                <n-button
+                  quaternary
+                  size="small"
+                  class="hidden w-[28px] group-hover/collection:inline-flex"
+                  @click="onSave(collection)"
+                >
+                  <template #icon>
+                    <n-icon size="16" :component="SaveOutline" />
+                  </template>
+                </n-button>
+              </PopoverWrapper>
             </div>
           </template>
           <template v-if="space.collections.length <= 0 && !isAddingCollection">
@@ -131,8 +135,8 @@ import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useI18n } from "vue-i18n"
 import { useLocalStorage } from "@vueuse/core"
 import { isNewTabPage } from "@/utils"
-import PopoverIcon from "@/components/popover-icon.vue"
 import Logo from "@/components/logo.vue"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const currentLanguage = useLocalStorage("LANG", "en-US")
 const { locale } = useI18n()
