@@ -106,4 +106,5 @@ export default {
   collections: "Collections",
   "delete-collections-confirm": "确定删除这些 Collection 吗?",
   cards: "Cards",
+  "drag-mode": "拖拽模式",
 }

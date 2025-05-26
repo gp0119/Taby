@@ -128,7 +128,7 @@ function onHandleCheckbox(checked: boolean) {
   @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
-  @apply relative flex items-center px-2 py-3;
+  @apply relative flex items-center p-2;
 }
 
 .card-title {

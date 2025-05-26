@@ -10,7 +10,7 @@
     }"
   >
     <div class="flex items-center">
-      <span :class="titleClass" class="text-center">
+      <span :class="titleClass" class="cursor-pointer text-center">
         {{ tag.title }}
       </span>
       <n-icon-wrapper

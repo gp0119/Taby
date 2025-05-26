@@ -11,7 +11,7 @@
     @update:show="sortStore.toggleSortOpen"
   >
     <div
-      class="flex w-full cursor-pointer items-center justify-between px-4 py-3 hover:bg-hover-color"
+      class="flex w-full cursor-pointer items-center justify-between px-4 py-2 hover:bg-hover-color"
     >
       <div class="flex items-center gap-x-2">
         <n-icon-wrapper>

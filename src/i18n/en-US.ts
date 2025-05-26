@@ -112,4 +112,5 @@ export default {
   "delete-collections-confirm":
     "Are you sure you want to delete these collections?",
   cards: "Cards",
+  "drag-mode": "Drag Mode",
 }
