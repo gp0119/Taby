@@ -1,13 +1,13 @@
 <template>
   <div
-    class="relative z-10 h-full translate-x-0 px-2"
+    class="fixed top-0 z-10 h-full translate-x-0 bg-body-color transition-all duration-100 ease-in-out"
+    :class="[
+      side === 'left' ? 'left-0' : 'right-0',
+      mode === 'hover' && hovering ? 'shadow-collection-shadow' : '',
+      mode === 'collapse' || (mode === 'hover' && !hovering) ? 'p-0' : 'px-2',
+    ]"
     :style="{
       width: `${mode === 'collapse' || (mode === 'hover' && !hovering) ? collapsedWidth : width}px`,
-      transition: 'all 0.1s ease-in-out',
-      padding:
-        mode === 'collapse' || (mode === 'hover' && !hovering)
-          ? '0 0'
-          : '0 8px',
     }"
     @mouseleave="handleMouseAction('leave')"
   >
@@ -16,24 +16,22 @@
       @mouseenter="handleMouseAction('enter')"
     >
       <div
-        class="flex-1 rounded-lg"
+        class="flex-1 rounded-lg transition-colors duration-300 ease-in-out"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
             ? 'bg-card-color'
             : 'bg-transparent',
-          'transition-colors duration-300 ease-in-out',
         ]"
       >
         <slot />
       </div>
       <div
         v-if="$slots.footer"
-        class="rounded-lg p-[13px]"
+        class="rounded-lg p-[13px] transition-colors duration-300 ease-in-out"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
             ? 'bg-card-color'
             : 'bg-transparent',
-          'transition-colors duration-300 ease-in-out',
         ]"
       >
         <slot name="footer" />
@@ -46,12 +44,11 @@
     /> -->
     <div
       v-if="mode === 'hover' && hovering"
-      class="absolute top-0 z-[99999] h-full w-4"
+      class="absolute top-0 z-[99999] h-full w-10 bg-transparent"
       :class="{
-        '-right-4': side === 'left',
-        '-left-4': side === 'right',
+        '-right-10': side === 'left',
+        '-left-10': side === 'right',
       }"
-      style="background: transparent"
     />
   </div>
 </template>
@@ -85,5 +82,5 @@ const handleMouseAction = debounce((type: "enter" | "leave") => {
   } else {
     emit("update:hovering", false)
   }
-}, 60)
+}, 120)
 </script>

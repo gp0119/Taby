@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex-center h-[calc(100vh-60px)] flex-col bg-body-color text-center text-2xl text-gray-400"
+    class="flex-center h-[calc(100vh-60px)] flex-col bg-content-color text-center text-2xl text-gray-400"
   >
     <svg
       class="h-40 w-auto"

@@ -11,7 +11,21 @@
         <LeftActions />
       </template>
     </pinSide>
-    <main class="flex-1 rounded-xl bg-content-color">
+    <main
+      class="flex-1 rounded-xl bg-content-color"
+      :style="{
+        paddingLeft:
+          layoutStore.leftLayoutMode === 'collapse' ||
+          layoutStore.leftLayoutMode === 'hover'
+            ? '60px'
+            : '220px',
+        paddingRight:
+          layoutStore.rightLayoutMode === 'collapse' ||
+          layoutStore.rightLayoutMode === 'hover'
+            ? '60px'
+            : '220px',
+      }"
+    >
       <navs />
       <content />
     </main>
