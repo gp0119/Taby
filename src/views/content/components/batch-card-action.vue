@@ -11,7 +11,7 @@
         </template>
         {{ ft("move") }}
       </n-button>
-      <n-button secondary type="error" @click="onHandleDelete">
+      <n-button ghost type="error" @click="onHandleDelete">
         <template #icon>
           <n-icon :size="16" :component="Delete" />
         </template>

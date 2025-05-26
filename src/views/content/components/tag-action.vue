@@ -151,7 +151,7 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
               placeholder={ft("placeholder", "tag")}
             />
             <n-button
-              secondary
+              ghost
               type="error"
               onClick={() => onDeleteTag(tag)}
               v-slots={{

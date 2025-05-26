@@ -14,13 +14,7 @@
       >
         <div class="flex items-center justify-between gap-x-8 px-6 py-4">
           <slot name="default" />
-          <n-button
-            secondary
-            circle
-            size="small"
-            type="error"
-            @click="onCancel"
-          >
+          <n-button ghost circle size="small" type="error" @click="onCancel">
             <template #icon>
               <n-icon :size="20" :component="Close" />
             </template>

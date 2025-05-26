@@ -110,7 +110,7 @@ function onEditSpace() {
             <IconSelect v-model:value={formModel.value.icon} />
             <n-input v-model:value={formModel.value.title} />
             <n-button
-              secondary
+              ghost
               type="error"
               onClick={() => onDeleteSpace()}
               v-slots={{

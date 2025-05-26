@@ -217,7 +217,7 @@ function onEdit(child: iCard) {
       return (
         <div class="flex w-full items-center gap-x-3">
           <n-button
-            secondary
+            ghost
             type="error"
             size="small"
             v-slots={{

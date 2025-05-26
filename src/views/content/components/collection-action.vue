@@ -75,7 +75,7 @@ function onEditCollection(item: CollectionWithCards) {
               placeholder={ft("placeholder", "title")}
             />
             <n-button
-              secondary
+              ghost
               type="error"
               onClick={() => onDeleteCollection(item)}
               v-slots={{
