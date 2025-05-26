@@ -36,7 +36,7 @@ import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import IconSelect from "@components/icon-select.vue"
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import PopoverWrapper from "./popover-wrapper.vue"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 import Logo from "@/components/logo.vue"
 
 const layoutStore = useLayoutStore()
