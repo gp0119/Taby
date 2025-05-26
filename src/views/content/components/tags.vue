@@ -1,5 +1,5 @@
 <template>
-  <n-space v-if="labels.length">
+  <div v-if="labels.length" class="flex items-center gap-x-2">
     <Tag
       v-for="tag in labels"
       :key="tag.id"
@@ -8,7 +8,7 @@
       closeable
       @delete="onDeleteTagFromCollection(tag.id)"
     />
-  </n-space>
+  </div>
 </template>
 
 <script setup lang="ts">

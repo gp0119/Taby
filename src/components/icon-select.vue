@@ -1,9 +1,9 @@
 <template>
   <n-popover
     v-model:show="show"
-    trigger="hover"
-    content-class="!p-0"
+    trigger="click"
     :to="false"
+    content-class="scrollbar-thin scrollbar-gutter-stable max-h-[120px] grid grid-cols-4 gap-2 overflow-scroll"
   >
     <template #trigger>
       <n-button>
@@ -12,21 +12,17 @@
         </template>
       </n-button>
     </template>
-    <n-scrollbar class="max-h-[100px] w-[160px]">
-      <n-space wrap size="small" align="center">
-        <div
-          v-for="(value, key) in ICON_LIST"
-          :key="key"
-          class="flex-center h-[30px] w-[30px] cursor-pointer overflow-hidden border"
-          :class="{
-            'border-primary': selectIcon === key,
-          }"
-          @click="pick(key)"
-        >
-          <n-icon :component="value" />
-        </div>
-      </n-space>
-    </n-scrollbar>
+    <div
+      v-for="(value, key) in ICON_LIST"
+      :key="key"
+      class="flex-center h-[30px] w-[30px] cursor-pointer border"
+      :class="{
+        'border-primary': selectIcon === key,
+      }"
+      @click="pick(key)"
+    >
+      <n-icon :component="value" />
+    </div>
   </n-popover>
 </template>
 

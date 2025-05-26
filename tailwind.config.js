@@ -23,9 +23,6 @@ export default {
         "hover-color": "var(--hoverColor)",
         "shadow-color": "var(--shadowColor)",
       },
-      sepia: {
-        base: "var(--sepia)",
-      },
       borderColor: {
         DEFAULT: "var(--borderColor)",
       },

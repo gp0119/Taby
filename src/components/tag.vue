@@ -1,7 +1,7 @@
 <template>
   <n-tag
     :key="tag.id"
-    class="!rounded px-2"
+    class="cursor-pointer !rounded px-2"
     size="small"
     :color="{
       color: `${tag.color}33`,
@@ -18,7 +18,7 @@
         border-radius="10"
         icon-color="#fff"
         size="12"
-        class="absolute -right-1 -top-1 z-10 hidden cursor-pointer group-hover/tag:block"
+        class="absolute -right-1 -top-1 z-10 hidden group-hover/tag:block"
         @click.stop="onDeleteTag"
       >
         <n-icon :component="Close" />

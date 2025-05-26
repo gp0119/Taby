@@ -1,5 +1,5 @@
 <template>
-  <n-space vertical>
+  <div class="flex flex-col gap-y-3">
     <popoverWrapper
       :message="ft('import')"
       :disabled="!layoutStore.isLeftCollapsed"
@@ -76,7 +76,7 @@
         </span>
       </n-button>
     </popoverWrapper>
-  </n-space>
+  </div>
   <SyncDialog v-model:show="showSyncDialog" />
 </template>
 

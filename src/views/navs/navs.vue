@@ -31,6 +31,7 @@
       <EditSpace :title="title!" :icon="icon!" />
       <TagFilter />
       <CollapseBtn />
+      <LeftMoreAction />
     </div>
     <div class="flex-center gap-x-3">
       <SearchBtn />
@@ -63,6 +64,7 @@ import { useLayoutStore } from "@/store/layout"
 import type { layoutMode } from "@/type"
 import EditSpace from "@/views/navs/components/edit-space.vue"
 import TopDragableAction from "@/views/navs/components/top-dragable-action.vue"
+import LeftMoreAction from "@/views/navs/components/left-more-action.vue"
 
 const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()

@@ -113,4 +113,7 @@ export default {
     "Are you sure you want to delete these collections?",
   cards: "Cards",
   "drag-mode": "Drag Mode",
+  feedback: "Feedback",
+  theme: "Theme",
+  language: "Language",
 }

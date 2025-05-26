@@ -107,4 +107,7 @@ export default {
   "delete-collections-confirm": "确定删除这些 Collection 吗?",
   cards: "Cards",
   "drag-mode": "拖拽模式",
+  feedback: "反馈",
+  theme: "主题",
+  language: "语言",
 }

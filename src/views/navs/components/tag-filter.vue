@@ -1,46 +1,56 @@
 <template>
-  <n-dropdown
+  <n-popover
     trigger="hover"
-    :options="tagOptions"
-    :render-label="renderTagLabel"
-    key-field="id"
-    label-field="title"
     placement="bottom-end"
     :show-arrow="false"
     :show="tagsStore.isTagOpen"
+    style="padding: 0"
     @select="handleTagSelect"
     @update:show="tagsStore.toggleTagOpen"
   >
-    <n-button
-      tertiary
-      :focusable="false"
-      size="small"
-      class="!shadow-btn-shadow"
-    >
-      <template #icon>
-        <n-icon size="20">
-          <TagGroup />
-        </n-icon>
-      </template>
-      <template v-if="tagsStore.selectedTag">
-        <Tag
-          title-class="w-[60px] text-ellipsis"
-          :tag="tagsStore.selectedTag"
-          :closeable="false"
-        />
-      </template>
-      <template v-else>
-        <div class="w-[76px] text-ellipsis leading-6">
-          {{ ft("tag-filter") }}
+    <template #trigger>
+      <n-button
+        tertiary
+        :focusable="false"
+        size="small"
+        class="!shadow-btn-shadow"
+      >
+        <template #icon>
+          <n-icon size="20">
+            <TagGroup />
+          </n-icon>
+        </template>
+        <template v-if="tagsStore.selectedTag">
+          <Tag
+            title-class="w-[60px] text-ellipsis"
+            :tag="tagsStore.selectedTag"
+            :closeable="false"
+          />
+        </template>
+        <template v-else>
+          <div class="w-[76px] text-ellipsis leading-6">
+            {{ ft("tag-filter") }}
+          </div>
+        </template>
+      </n-button>
+    </template>
+    <template #default>
+      <div class="flex flex-col overflow-hidden rounded-lg bg-dialog-color">
+        <div
+          v-for="tag in tagOptions"
+          :key="tag.id"
+          class="flex cursor-pointer select-none items-center gap-x-2 px-4 py-2 hover:bg-hover-color"
+          @click="handleTagSelect(tag.id, tag)"
+        >
+          <Tag :tag="tag" />
         </div>
-      </template>
-    </n-button>
-  </n-dropdown>
+      </div>
+    </template>
+  </n-popover>
 </template>
 
 <script setup lang="tsx">
 import { useTagsStore } from "@/store/tags.ts"
-import { SelectGroupOption, SelectOption } from "naive-ui"
 import { TagGroup } from "@vicons/carbon"
 import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
@@ -48,10 +58,6 @@ import Tag from "@/components/tag.vue"
 
 const tagsStore = useTagsStore()
 const { ft } = useHelpi18n()
-
-const renderTagLabel = (option: SelectOption | SelectGroupOption) => {
-  return <Tag tag={option as unknown as Label} />
-}
 
 const tagOptions = computed(() => {
   const options = tagsStore.collectionsTags.map((tag) => ({
@@ -69,11 +75,12 @@ const tagOptions = computed(() => {
   return options
 })
 
-const handleTagSelect = (_key: string, option: Label) => {
+const handleTagSelect = (_key: number, option: Label) => {
   if (option.id === 0) {
     tagsStore.setSelectedTag(null)
     return
   }
   tagsStore.setSelectedTag(option)
+  tagsStore.toggleTagOpen()
 }
 </script>

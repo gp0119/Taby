@@ -1,5 +1,9 @@
 <template>
-  <n-popover v-model:show="show" trigger="hover" content-class="!p-0">
+  <n-popover
+    v-model:show="show"
+    trigger="hover"
+    content-class="scrollbar-thin scrollbar-gutter-stable max-h-[120px] grid grid-cols-4 gap-2 overflow-scroll"
+  >
     <template #trigger>
       <n-button
         :size="size"
@@ -12,23 +16,15 @@
         </template>
       </n-button>
     </template>
-    <n-scrollbar class="max-h-[100px] w-[160px] bg-card-color">
-      <n-space wrap size="small" align="center">
-        <div
-          v-for="color in COLOR_LIST"
-          :key="color"
-          class="flex-center h-[20px] w-[20px] cursor-pointer select-none overflow-hidden"
-          :style="`background-color: ${color}33; color: ${color};border-color: ${color}4A; border-width: 1px; border-style: solid;`"
-          @click="pickColor(color)"
-        >
-          <n-icon
-            v-if="color === selectedColor"
-            size="12"
-            :component="Checkmark"
-          />
-        </div>
-      </n-space>
-    </n-scrollbar>
+    <div
+      v-for="color in COLOR_LIST"
+      :key="color"
+      class="flex-center h-[20px] w-[20px] cursor-pointer select-none overflow-hidden"
+      :style="`background-color: ${color}33; color: ${color};border-color: ${color}4A; border-width: 1px; border-style: solid;`"
+      @click="pickColor(color)"
+    >
+      <n-icon v-if="color === selectedColor" size="12" :component="Checkmark" />
+    </div>
   </n-popover>
 </template>
 

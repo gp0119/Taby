@@ -1,12 +1,12 @@
 <template>
   <div class="flex w-full items-center justify-between">
-    <div class="flex items-center gap-x-2">
+    <div class="flex select-none items-center gap-x-2">
       <n-icon-wrapper>
         <n-icon size="18" :component="ColorPalette" />
       </n-icon-wrapper>
-      <span>Theme</span>
+      <span>{{ ft("theme") }}</span>
     </div>
-    <div class="flex items-center gap-x-1">
+    <div class="flex items-center gap-x-2">
       <n-button
         :tertiary="theme === 'light'"
         :quaternary="theme === 'dark'"
@@ -36,6 +36,8 @@
 <script setup lang="tsx">
 import { ColorPalette, Light, Moon } from "@vicons/carbon"
 import { useThemeStore } from "@/store/theme.ts"
+import { useHelpi18n } from "@/hooks/useHelpi18n.js"
 
 const { setTheme, theme } = useThemeStore()
+const { ft } = useHelpi18n()
 </script>

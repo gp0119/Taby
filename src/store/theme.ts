@@ -15,7 +15,6 @@ export const useThemeStore = defineStore("theme", () => {
       textSecondary: "#666666",
       borderColor: "#e9e9e9",
       hoverColor: "#f4f5f7",
-      sepia: "0",
     },
     dark: {
       primary: "#8acbec",
@@ -29,7 +28,6 @@ export const useThemeStore = defineStore("theme", () => {
       borderColor: "#353f51",
       hoverColor: "#32363a",
       shadowColor: "rgba(14,17,24,0.8)",
-      sepia: "0.5",
     },
   }
 

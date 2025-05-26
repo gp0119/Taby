@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed top-0 z-10 h-full translate-x-0 bg-body-color transition-all duration-100 ease-in-out"
+    class="fixed bottom-0 top-0 z-10 h-full translate-x-0 bg-body-color transition-all duration-100 ease-in-out"
     :class="[
       side === 'left' ? 'left-0' : 'right-0',
       mode === 'hover' && hovering ? 'shadow-collection-shadow' : '',

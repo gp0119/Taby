@@ -19,8 +19,10 @@
         <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
       </n-text>
     </template>
-    <n-scrollbar class="max-h-[300px]">
-      <n-space v-if="tagsStore.tags.length > 0" vertical>
+    <div
+      class="scrollbar-thin scrollbar-gutter-stable max-h-[300px] overflow-y-auto"
+    >
+      <div v-if="tagsStore.tags.length > 0" class="flex flex-col gap-y-2">
         <div
           v-for="tag in tagsStore.tags"
           :key="tag.id"
@@ -40,11 +42,11 @@
             />
           </PopoverWrapper>
         </div>
-      </n-space>
+      </div>
       <div v-else class="!bg-card-color text-center text-text-secondary">
         {{ ft("no-tags") }}
       </div>
-    </n-scrollbar>
+    </div>
     <template #footer>
       <n-input-group>
         <color-select v-model:value="selectedColor" size="tiny" />

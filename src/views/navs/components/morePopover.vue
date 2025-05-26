@@ -1,9 +1,9 @@
 <template>
   <n-popover
     trigger="hover"
-    placement="bottom-end"
+    placement="bottom"
     :show-arrow="false"
-    style="padding: 0; min-width: 280px"
+    style="padding: 0; width: 220px"
   >
     <template #trigger>
       <n-button
@@ -20,42 +20,26 @@
     <template #default>
       <div class="flex flex-col overflow-hidden rounded-lg bg-dialog-color">
         <div class="flex flex-col">
-          <!--   排序   -->
-          <SortSwitch />
-          <!--   拖拽   -->
-          <div
+          <a
+            href="https://github.com/gp0119/Taby/issues/new"
+            target="_blank"
             class="flex w-full items-center justify-between px-4 py-2 hover:bg-hover-color"
           >
             <div class="flex items-center gap-x-2">
               <n-icon-wrapper>
-                <n-icon size="18" :component="Move" />
+                <n-icon size="18" :component="Forum" />
               </n-icon-wrapper>
-              <span>{{ ft("enable-drag") }}</span>
+              <span>{{ ft("feedback") }}</span>
             </div>
-            <n-switch
-              v-model:value="draggableStore.draggable"
-              @update-value="onToggleDraggable"
+            <n-icon
+              size="20"
+              class="text-text-primary"
+              :component="ChevronForward"
             />
-          </div>
-
-          <!--   查找重复   -->
-          <div
-            class="flex w-full items-center justify-between px-4 py-2 hover:bg-hover-color"
-          >
-            <div class="flex items-center gap-x-2">
-              <n-icon-wrapper>
-                <n-icon size="18" :component="View" />
-              </n-icon-wrapper>
-              <span>{{ ft("enable-duplicate") }}</span>
-            </div>
-            <n-switch
-              v-model:value="duplicateCardStore.isFindDuplicate"
-              @update-value="onToggleFindDuplicate"
-            />
-          </div>
+          </a>
         </div>
 
-        <div class="flex flex-col gap-y-3 border-t bg-hover-color px-4 py-2">
+        <div class="flex flex-col gap-y-3 px-4 py-2">
           <LangSwitch />
           <ThemeSwitch />
         </div>
@@ -66,39 +50,10 @@
 
 <script setup lang="tsx">
 import { useHelpi18n } from "@/hooks/useHelpi18n.js"
-import { useBatchCardStore } from "@/store/batch-card.ts"
-import { useBatchCollectionStore } from "@/store/batch-collection.ts"
-import { useBatchTabsStore } from "@/store/batch-tabs.ts"
-import { useDraggableStore } from "@/store/draggable.js"
-import { useDuplicateCardStore } from "@/store/duplicate-card.js"
-import SortSwitch from "@/views/navs/components/sort-switch.vue"
-import { Move, View } from "@vicons/carbon"
+import { Forum } from "@vicons/carbon"
+import { ChevronForward } from "@vicons/ionicons5"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import LangSwitch from "./lang-switch.vue"
 import ThemeSwitch from "./theme-switch.vue"
-
 const { ft } = useHelpi18n()
-const duplicateCardStore = useDuplicateCardStore()
-const draggableStore = useDraggableStore()
-const batchCardStore = useBatchCardStore()
-const batchCollectionStore = useBatchCollectionStore()
-const batchTabsStore = useBatchTabsStore()
-
-const onToggleDraggable = (value: boolean) => {
-  draggableStore.setDraggable(value)
-  if (value) {
-    batchCardStore.clearSelectedCardIds()
-    batchCollectionStore.clearSelectedCollectionIds()
-    batchTabsStore.clearSelectedTabs()
-  }
-}
-
-const onToggleFindDuplicate = (value: boolean) => {
-  duplicateCardStore.setIsFindDuplicate(value)
-  if (value) {
-    batchCardStore.clearSelectedCardIds()
-    batchCollectionStore.clearSelectedCollectionIds()
-    batchTabsStore.clearSelectedTabs()
-  }
-}
 </script>
