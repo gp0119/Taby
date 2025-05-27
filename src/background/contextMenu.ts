@@ -1,11 +1,13 @@
 import dataManager from "@/db"
-chrome.runtime.onInstalled.addListener(async () => {
+
+async function updateContextMenus() {
+  await chrome.contextMenus.removeAll()
   try {
     const spaces = await dataManager.getAllSpaceWithCollections()
-    console.log("spaces: ", spaces)
+
     chrome.contextMenus.create({
       id: "addTabToSpaceCollection",
-      title: "添加到合集",
+      title: "Add to...",
       contexts: ["all"],
       documentUrlPatterns: ["http://*/*", "https://*/*"],
     })
@@ -16,6 +18,7 @@ chrome.runtime.onInstalled.addListener(async () => {
         title: space.title,
         contexts: ["all"],
       })
+
       space.collections.forEach((collection) => {
         chrome.contextMenus.create({
           parentId: `space-${space.id}`,
@@ -24,19 +27,83 @@ chrome.runtime.onInstalled.addListener(async () => {
           contexts: ["all"],
         })
       })
+
       chrome.contextMenus.create({
         parentId: `space-${space.id}`,
-        id: `new collection`,
-        title: "新建合集",
+        type: "separator",
+        id: `separator-collection-${space.id}`,
+        contexts: ["all"],
+      })
+      chrome.contextMenus.create({
+        parentId: `space-${space.id}`,
+        id: `newCollection-${space.id}`,
+        title: "+ New Collection",
         contexts: ["all"],
       })
     })
-    console.log("Context menu created.")
+
+    chrome.contextMenus.create({
+      parentId: "addTabToSpaceCollection",
+      type: "separator",
+      id: "separator-space",
+      contexts: ["all"],
+    })
+
+    chrome.contextMenus.create({
+      parentId: "addTabToSpaceCollection",
+      id: "newSpace",
+      title: "+ New Space",
+      contexts: ["all"],
+    })
   } catch (error) {
-    console.error("Error during onInstalled listener:", error) // 错误会在这里打印到 SW 控制台
+    console.error("Error updating context menus:", error)
   }
+}
+
+chrome.runtime.onInstalled.addListener(async () => {
+  await updateContextMenus()
 })
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   console.log("Context menu clicked:", info, tab)
+  if (info.menuItemId === "newSpace") {
+    const newSpaceId = await dataManager.addSpace({
+      title: "Untitled",
+    })
+    await chrome.runtime.sendMessage({
+      type: "refreshCollections",
+      spaceId: newSpaceId,
+    })
+    await updateContextMenus()
+  } else if ((info.menuItemId as string).startsWith("newCollection-")) {
+    const spaceId = Number((info.menuItemId as string).split("-")[1])
+    await dataManager.addCollection({
+      title: "Untitled",
+      spaceId: spaceId,
+      labelIds: [],
+    })
+    await chrome.runtime.sendMessage({
+      type: "refreshCollections",
+      spaceId: spaceId,
+    })
+    await updateContextMenus()
+  } else if ((info.menuItemId as string).startsWith("collection-")) {
+    const spaceId = (info.parentMenuItemId as string).split("-")[1]
+    const collectionId = Number((info.menuItemId as string).split("-")[1])
+    const { favIconUrl, title, url } = tab!
+    let faviconId = null
+    if (favIconUrl) {
+      faviconId = await dataManager.addFavicon(favIconUrl)
+    }
+    await dataManager.addCard({
+      title: title || "",
+      url: url || "",
+      collectionId: Number(collectionId),
+      ...(faviconId && { faviconId }),
+    })
+    await chrome.runtime.sendMessage({
+      type: "refreshCollections",
+      spaceId: spaceId,
+    })
+  }
 })

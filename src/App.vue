@@ -47,25 +47,34 @@ watchEffect(() => {
 
 const handleVisibilityChange = debounce(
   async () => {
-    const spaceId = localStorage.getItem("refreshCollections")
-    if (spaceId) {
-      await refreshCollections(Number(spaceId))
-      localStorage.removeItem("refreshCollections")
-    }
     await syncManager.autoUpload()
   },
   3000,
   { leading: true, trailing: false },
 )
 
+const handleMessage = async (message: any) => {
+  if (message.type === "refreshCollections") {
+    await refreshSpaces()
+    await refreshCollections(message.spaceId)
+  }
+}
+
 onMounted(() => {
   document.addEventListener("visibilitychange", handleVisibilityChange)
   window.addEventListener("beforeunload", removeListener)
+  chrome.runtime.onMessage.addListener(handleMessage)
+})
+
+onUnmounted(() => {
+  removeListener()
+  chrome.runtime.onMessage.removeListener(handleMessage)
 })
 
 const removeListener = () => {
   document.removeEventListener("visibilitychange", handleVisibilityChange)
   window.removeEventListener("beforeunload", removeListener)
+  chrome.runtime.onMessage.removeListener(handleMessage)
 }
 
 const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
