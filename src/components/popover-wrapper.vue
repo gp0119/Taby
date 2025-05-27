@@ -11,7 +11,9 @@
     <template #trigger>
       <slot />
     </template>
-    <div class="text-xs">{{ message }}</div>
+    <slot name="message">
+      <div class="text-xs">{{ message }}</div>
+    </slot>
   </n-tooltip>
 </template>
 
@@ -22,7 +24,7 @@ withDefaults(
   defineProps<{
     trigger?: TooltipProps["trigger"]
     placement?: TooltipProps["placement"]
-    message: string
+    message?: string
     disabled?: boolean
   }>(),
   {

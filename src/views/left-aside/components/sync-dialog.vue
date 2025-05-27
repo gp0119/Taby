@@ -8,27 +8,21 @@
   >
     <template #header>
       <span class="mr-1 text-text-primary">{{ ft("sync-with-gist") }}</span>
-      <n-popover
-        trigger="hover"
-        content-class="!p-0"
-        class="!rounded-md text-text-primary"
-        placement="top"
-        style="max-width: 600px"
-      >
-        <template #trigger>
-          <n-icon
-            size="18"
-            class="cursor-pointer text-primary"
-            :component="InformationSquare"
-          />
+      <PopoverWrapper trigger="hover" placement="top" style="max-width: 600px">
+        <n-icon
+          size="18"
+          class="cursor-pointer text-primary"
+          :component="Information"
+        />
+        <template #message>
+          <ul class="list-inside list-disc text-justify text-xs">
+            <li>{{ ft("sync-note-1") }}</li>
+            <li>{{ ft("sync-note-2") }}</li>
+            <li>{{ ft("sync-note-3") }}</li>
+            <li>{{ ft("sync-note-4") }}</li>
+          </ul>
         </template>
-        <ul class="list-inside list-disc text-justify text-xs">
-          <li>{{ ft("sync-note-1") }}</li>
-          <li>{{ ft("sync-note-2") }}</li>
-          <li>{{ ft("sync-note-3") }}</li>
-          <li>{{ ft("sync-note-4") }}</li>
-        </ul>
-      </n-popover>
+      </PopoverWrapper>
     </template>
     <n-form
       ref="formRef"
@@ -112,11 +106,12 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { FormInst, useMessage } from "naive-ui"
 import syncManager from "@/sync/syncManager.ts"
 import { LogoGithub } from "@vicons/ionicons5"
-import { CloudDownload, CloudUpload, InformationSquare } from "@vicons/carbon"
+import { CloudDownload, CloudUpload, Information } from "@vicons/carbon"
 import { debounce } from "lodash-es"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const { ft } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })

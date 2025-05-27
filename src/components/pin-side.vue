@@ -1,6 +1,6 @@
 <template>
   <div
-    class="fixed bottom-0 top-0 z-10 h-full translate-x-0 bg-body-color transition-all duration-100 ease-in-out"
+    class="fixed bottom-0 top-0 z-10 h-full translate-x-0 rounded-xl bg-body-color transition-all duration-100 ease-in-out"
     :class="[
       side === 'left' ? 'left-0' : 'right-0',
       mode === 'hover' && hovering ? 'shadow-collection-shadow' : '',
@@ -16,7 +16,7 @@
       @mouseenter="handleMouseAction('enter')"
     >
       <div
-        class="flex-1 rounded-lg transition-colors duration-300 ease-in-out"
+        class="flex-1 rounded-xl transition-colors duration-300 ease-in-out"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
             ? 'bg-card-color'
@@ -27,7 +27,7 @@
       </div>
       <div
         v-if="$slots.footer"
-        class="rounded-lg p-[13px] transition-colors duration-300 ease-in-out"
+        class="rounded-xl p-[13px] transition-colors duration-300 ease-in-out"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
             ? 'bg-card-color'

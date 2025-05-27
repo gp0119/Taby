@@ -34,9 +34,9 @@
       <LeftMoreAction />
     </div>
     <div class="flex-center gap-x-3">
+      <AddCollection />
       <SearchBtn />
       <MorePopover />
-      <AddCollection />
       <PinIcon
         side="right"
         :mode="layoutStore.rightLayoutMode"

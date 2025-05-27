@@ -14,12 +14,12 @@
     <main
       class="flex-1 rounded-xl bg-content-color"
       :style="{
-        paddingLeft:
+        marginLeft:
           layoutStore.leftLayoutMode === 'collapse' ||
           layoutStore.leftLayoutMode === 'hover'
             ? '60px'
             : '220px',
-        paddingRight:
+        marginRight:
           layoutStore.rightLayoutMode === 'collapse' ||
           layoutStore.rightLayoutMode === 'hover'
             ? '60px'

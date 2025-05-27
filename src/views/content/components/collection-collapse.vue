@@ -1,6 +1,6 @@
 <template>
   <div
-    class="group/item flex h-full w-full flex-col rounded-lg border-2 border-transparent bg-card-color"
+    class="group/item flex h-full w-full flex-col rounded-xl border-2 border-transparent bg-card-color"
     :class="{
       '!border-primary': batchCollectionStore.selectedCollectionIds.includes(
         collection.id,

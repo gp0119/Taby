@@ -13,7 +13,7 @@
         class="w-[28px] !shadow-btn-shadow"
       >
         <template #icon>
-          <n-icon size="18" :component="EllipsisVerticalSharp" />
+          <n-icon size="18" :component="Settings" />
         </template>
       </n-button>
     </template>
@@ -50,9 +50,8 @@
 
 <script setup lang="tsx">
 import { useHelpi18n } from "@/hooks/useHelpi18n.js"
-import { Forum } from "@vicons/carbon"
+import { Forum, Settings } from "@vicons/carbon"
 import { ChevronForward } from "@vicons/ionicons5"
-import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import LangSwitch from "./lang-switch.vue"
 import ThemeSwitch from "./theme-switch.vue"
 const { ft } = useHelpi18n()

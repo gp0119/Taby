@@ -55,9 +55,10 @@ import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
 import { useSpacesStore } from "@/store/spaces"
-import { InformationSquare, FolderMoveTo, Delete } from "@vicons/carbon"
+import { Information, FolderMoveTo, Delete } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 defineProps<{
   cards: iCard[]
@@ -182,22 +183,16 @@ function onEdit(child: iCard) {
           v-slots={{
             label: () => (
               <div class="flex items-center">
-                <n-popover
-                  trigger="hover"
-                  content-class="!p-0"
-                  class="!rounded-md !bg-card-color !px-2 !py-1 text-text-primary"
-                  arrow-class="!bg-card-color"
+                <PopoverWrapper
+                  message={ft("favicon-tip")}
                   placement="top-start"
                   v-slots={{
-                    trigger: () => (
+                    default: () => (
                       <n-icon
                         size="16"
                         class="mr-1 cursor-pointer text-primary"
-                        component={InformationSquare}
+                        component={Information}
                       />
-                    ),
-                    default: () => (
-                      <span class="text-xs">{ft("favicon-tip")}</span>
                     ),
                   }}
                 />
