@@ -8,6 +8,7 @@ import {
   Space,
   Label,
   SpaceWithCollections,
+  Favicon,
 } from "@/type.ts"
 import { db } from "./database.ts"
 
@@ -16,6 +17,26 @@ class DataManager {
   ORDER_STEP: number
   constructor() {
     this.ORDER_STEP = 1000
+    this.initializeDefaultData()
+  }
+
+  private async createDefaultSpace() {
+    await db.spaces.add({
+      title: "My Collections",
+      order: 1000,
+      createdAt: Date.now(),
+      icon: "StorefrontOutline",
+    })
+  }
+
+  private async initializeDefaultData() {
+    const spaceCount = await db.spaces.count()
+    if (spaceCount > 0) return
+    try {
+      await this.createDefaultSpace()
+    } catch (error) {
+      console.error("初始化默认数据失败:", error)
+    }
   }
 
   public static getInstance(): DataManager {
@@ -583,6 +604,201 @@ class DataManager {
         (collection) => collection.spaceId === space.id,
       ),
     }))
+  }
+
+  async getUploadData() {
+    const spaces = await db.spaces.toArray()
+    const collections = await db.collections.toArray()
+    const labels = await db.labels.toArray()
+    const cards = await db.cards.toArray()
+    const favicons = await db.favicons.toArray()
+    return {
+      spaces: spaces.map((space) => ({
+        id: space.id,
+        title: space.title,
+        icon: space.icon,
+        order: space.order,
+        createdAt: space.createdAt,
+      })),
+      collections: collections.map((collection) => ({
+        id: collection.id,
+        title: collection.title,
+        spaceId: collection.spaceId,
+        order: collection.order,
+        labelIds: collection.labelIds,
+        createdAt: collection.createdAt,
+      })),
+      labels: labels.map((label) => ({
+        id: label.id,
+        title: label.title,
+        color: label.color,
+      })),
+      cards: cards.map((card) => ({
+        id: card.id,
+        title: card.title,
+        url: card.url,
+        order: card.order,
+        faviconId: card.faviconId,
+        description: card.description,
+        collectionId: card.collectionId,
+        createdAt: card.createdAt,
+      })),
+      favicons: favicons.map((favicon) => ({
+        id: favicon.id,
+        url: favicon.url,
+      })),
+    }
+  }
+
+  private stripMetadata<T extends { createdAt?: number; id?: number }>(
+    obj: T,
+    additionalFields: (keyof T)[] = [],
+  ): Partial<T> {
+    const { createdAt: _, id: _id, ...rest } = obj
+    const result = { ...rest } as Partial<T>
+    additionalFields.forEach((field) => {
+      if (field in result) {
+        delete result[field]
+      }
+    })
+    return result
+  }
+
+  async exportBySpaceId(spaceIds: number[]) {
+    const spaces = await db.spaces.where("id").anyOf(spaceIds).sortBy("order")
+    const labels = await db.labels.toArray()
+    const labelsMap = new Map(labels.map((label) => [label.id, label]))
+    const favicons = await db.favicons.toArray()
+    const faviconsMap = new Map(
+      favicons.map((favicon) => [favicon.id, favicon.url]),
+    )
+    return Promise.all(
+      spaces.map(async (space) => {
+        const spaceData = this.stripMetadata(space, ["order"])
+        const collections = await db.collections
+          .where({ spaceId: space.id })
+          .sortBy("order")
+
+        const spaceCollections = await Promise.all(
+          collections.map(async (collection) => {
+            const collectionCards = await db.cards
+              .where({ collectionId: collection.id })
+              .sortBy("order")
+
+            return {
+              ...this.stripMetadata(collection, [
+                "order",
+                "labelIds",
+                "spaceId",
+              ]),
+              labels: collection.labelIds
+                .map((labelId) => {
+                  const label = labelsMap.get(labelId)
+                  return label ? this.stripMetadata(label) : null
+                })
+                .filter((label) => label !== null),
+              cards: await Promise.all(
+                collectionCards.map(async (card) => {
+                  return {
+                    ...this.stripMetadata(card, [
+                      "order",
+                      "collectionId",
+                      "faviconId",
+                    ]),
+                    favicon: card.faviconId
+                      ? faviconsMap.get(card.faviconId)
+                      : "",
+                  }
+                }),
+              ),
+            }
+          }),
+        )
+
+        return {
+          ...spaceData,
+          collections: spaceCollections,
+        }
+      }),
+    )
+  }
+
+  async importData(data: {
+    spaces: Space[]
+    collections: Collection[]
+    labels: Label[]
+    cards: Card[]
+    favicons: Favicon[]
+  }) {
+    const tablesToLock: Dexie.Table[] = [
+      db.spaces,
+      db.collections,
+      db.labels,
+      db.cards,
+      db.favicons,
+    ]
+    try {
+      await db.transaction("rw", tablesToLock, async () => {
+        await Promise.all([
+          db.spaces.clear(),
+          db.collections.clear(),
+          db.labels.clear(),
+          db.cards.clear(),
+          db.favicons.clear(),
+        ])
+        const chunkSize = 100
+        if (data.spaces && data.spaces.length > 0) {
+          await db.spaces.bulkPut(data.spaces)
+        }
+        if (data.collections && data.collections.length > 0) {
+          await db.collections.bulkPut(data.collections)
+        }
+        if (data.labels && data.labels.length > 0) {
+          await db.labels.bulkPut(data.labels)
+        }
+        let faviconsToImport: Favicon[] = []
+        if (
+          data.cards &&
+          data.cards.length > 0 &&
+          data.favicons &&
+          data.favicons.length > 0
+        ) {
+          const usedFaviconIds = new Set<number>()
+          data.cards.forEach((card) => {
+            if (card.faviconId && card.faviconId > 0) {
+              usedFaviconIds.add(card.faviconId)
+            }
+          })
+          faviconsToImport = data.favicons.filter((favicon) =>
+            usedFaviconIds.has(favicon.id),
+          )
+        } else {
+          faviconsToImport =
+            data.favicons && data.cards?.length === 0 ? data.favicons : []
+        }
+        if (faviconsToImport.length > 0) {
+          const numChunks = Math.ceil(faviconsToImport.length / chunkSize)
+          for (let i = 0; i < numChunks; i++) {
+            const start = i * chunkSize
+            const end = start + chunkSize
+            const chunk = faviconsToImport.slice(start, end)
+            await db.favicons.bulkPut(chunk)
+          }
+        }
+
+        if (data.cards && data.cards.length > 0) {
+          const numChunks = Math.ceil(data.cards.length / chunkSize)
+          for (let i = 0; i < numChunks; i++) {
+            const start = i * chunkSize
+            const end = start + chunkSize
+            const chunk = data.cards.slice(start, end)
+            await db.cards.bulkPut(chunk)
+          }
+        }
+      })
+    } catch (error) {
+      console.error("Data import failed:", error)
+    }
   }
 }
 

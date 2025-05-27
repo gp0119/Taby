@@ -1,4 +1,4 @@
-import { db } from "@/db/database.ts"
+import dataManager from "@/db"
 
 export function useExport() {
   const download = (data: any) => {
@@ -13,7 +13,7 @@ export function useExport() {
   }
 
   const exportFromTaby = async (spaceIds: number[]) => {
-    const data = await db.exportBySpaceId(spaceIds)
+    const data = await dataManager.exportBySpaceId(spaceIds)
     download(data)
   }
 

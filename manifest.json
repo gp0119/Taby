@@ -9,7 +9,7 @@
   "author": {
     "email": "ganpeng0119@gmail.com"
   },
-  "permissions": ["favicon", "storage", "tabs", "activeTab"],
+  "permissions": ["favicon", "storage", "tabs", "activeTab", "contextMenus"],
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
@@ -18,6 +18,10 @@
       "extension_ids": ["*"]
     }
   ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
   "icons": {
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",

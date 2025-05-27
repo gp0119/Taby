@@ -56,6 +56,7 @@ export default defineConfig({
       input: {
         newtab: path.resolve(__dirname, "newtab.html"),
         popup: path.resolve(__dirname, "popup.html"),
+        background: path.resolve(__dirname, "src/background/service-worker.ts"),
       },
       output: {
         assetFileNames: "assets/[name]-[hash].[ext]", // 静态资源
