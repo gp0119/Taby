@@ -65,7 +65,6 @@ chrome.runtime.onInstalled.addListener(async () => {
 })
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  console.log("Context menu clicked:", info, tab)
   if (info.menuItemId === "newSpace") {
     const newSpaceId = await dataManager.addSpace({
       title: "Untitled",
@@ -106,4 +105,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       spaceId: spaceId,
     })
   }
+})
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.type === "updateContextMenus") {
+    updateContextMenus()
+  }
+  return true
 })
