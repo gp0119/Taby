@@ -1,2 +1,2 @@
 import "./contextMenu"
-console.log("service-worker.ts")
+import "./actionClick"

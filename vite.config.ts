@@ -55,7 +55,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         newtab: path.resolve(__dirname, "newtab.html"),
-        popup: path.resolve(__dirname, "popup.html"),
         background: path.resolve(__dirname, "src/background/service-worker.ts"),
       },
       output: {
@@ -76,7 +75,7 @@ export default defineConfig({
             path.extname(chunkInfo.facadeModuleId!),
           )
           console.log("baseName: ", baseName)
-          const saveArr = ["content", "service-worker", "popup", "newtab"]
+          const saveArr = ["content", "service-worker", "newtab"]
           return `[name]/${saveArr.includes(baseName) ? baseName : chunkInfo.name}.js`
         },
       },
