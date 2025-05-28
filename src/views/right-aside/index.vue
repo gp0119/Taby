@@ -58,6 +58,8 @@ import { useLayoutStore } from "@/store/layout"
 import WindowIconWrapper from "./components/window-icon-wrapper.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { isNewTabPage } from "@/utils"
+import dayjs from "dayjs"
+import { useSpacesStore } from "@/store/spaces"
 
 const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
@@ -77,6 +79,7 @@ const { refreshCollections } = useRefresh()
 const batchTabsStore = useBatchTabsStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchCardStore = useBatchCardStore()
+const spaceStore = useSpacesStore()
 
 async function refreshTabs() {
   await getTabs()
@@ -146,11 +149,37 @@ const onHandleCheckbox = (e: boolean, tab: iCard) => {
   }
 }
 
-const onSaveAllTabs = (windowId: number | string) => {
-  console.log("onSaveAllTabs", windowId, tabs.value[windowId])
+const onSaveAllTabs = async (windowId: number | string) => {
+  const filteredTabs = tabs.value[windowId].filter(
+    (tab) => !isNewTabPage(tab.url),
+  )
+  if (filteredTabs.length <= 0) return
+  const newCollectionId = await dataManager.addCollection({
+    title: dayjs().format("MMM DD [at] HH:mm"),
+    spaceId: spaceStore.activeId,
+    labelIds: [],
+  })
+  const cardIds: number[] = []
+  for (const tab of filteredTabs) {
+    const faviconId = await dataManager.addFavicon(tab.favicon)
+    const cardId = await dataManager.addCard({
+      title: tab.title,
+      url: tab.url,
+      collectionId: newCollectionId!,
+      faviconId: faviconId,
+    })
+    cardIds.push(cardId)
+  }
+  await dataManager.batchUpdateCards(
+    cardIds,
+    { collectionId: newCollectionId! },
+    "END",
+  )
+  await refreshCollections()
 }
 
-const onSaveAllTabsAndClose = (windowId: number | string) => {
-  console.log("onSaveAllTabsAndClose", windowId, tabs.value[windowId])
+const onSaveAllTabsAndClose = async (windowId: number | string) => {
+  await onSaveAllTabs(windowId)
+  await closeAllTabsExceptCurrent(Number(windowId))
 }
 </script>
