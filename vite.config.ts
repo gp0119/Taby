@@ -66,7 +66,9 @@ export default defineConfig({
           "sortable-vendor": ["vue-draggable-plus"],
           "vue-virtual-vendor": ["vue-virtual-scroller"],
           "dexie-vendor": ["dexie"],
-          libs: ["vue", "@vueuse/core", "lodash-es"],
+          "vue-vendor": ["vue", "pinia", "vue-i18n", "@vueuse/core"],
+          "svg-vendor": ["@vicons/ionicons5", "@vicons/carbon"],
+          libs: ["lodash-es", "dayjs", "lz-string"],
         },
         entryFileNames: (chunkInfo) => {
           // 入口文件

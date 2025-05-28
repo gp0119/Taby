@@ -24,11 +24,8 @@ import { useRefresh } from "@/hooks/useRresh"
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
-import { useSettingStore } from "@/store/setting"
-import { useI18n } from "vue-i18n"
 import { useTheme } from "@/hooks/useTheme"
 
-const { locale } = useI18n()
 const { refreshSpaces, refreshCollections } = useRefresh()
 const { themeOverrides, theme } = useTheme()
 
@@ -39,10 +36,6 @@ provide("loading", {
   setLoading: (value: boolean) => {
     loading.value = value
   },
-})
-const settingStore = useSettingStore()
-watchEffect(() => {
-  locale.value = settingStore.getSetting("language")
 })
 
 const handleVisibilityChange = debounce(

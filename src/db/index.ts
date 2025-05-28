@@ -12,14 +12,12 @@ import {
   ExportSpace,
 } from "@/type.ts"
 import { db } from "./database.ts"
-import { debounce } from "lodash-es"
 
 class DataManager {
   private static instance: DataManager
   ORDER_STEP: number
   constructor() {
     this.ORDER_STEP = 1000
-    this.initializeDefaultData()
   }
 
   public static getInstance(): DataManager {
@@ -28,25 +26,6 @@ class DataManager {
     }
     return DataManager.instance
   }
-
-  private async createDefaultSpace() {
-    await db.spaces.add({
-      title: "My Collections",
-      order: 1000,
-      createdAt: Date.now(),
-      icon: "StorefrontOutline",
-    })
-  }
-
-  private initializeDefaultData = debounce(
-    async () => {
-      const spaceCount = await db.spaces.count()
-      if (spaceCount > 0) return
-      await this.createDefaultSpace()
-    },
-    1000,
-    { leading: true, trailing: false },
-  )
 
   async getAllSpaces() {
     return db.spaces.orderBy("order").toArray()

@@ -24,6 +24,7 @@ class SyncManager {
       { leading: false, trailing: true },
     )
     this.addHooks()
+    this.initializeDefaultData()
   }
 
   public static getInstance(): SyncManager {
@@ -32,6 +33,26 @@ class SyncManager {
     }
     return SyncManager.instance
   }
+
+  private async createDefaultSpace() {
+    await db.spaces.add({
+      title: "My Collections",
+      order: 1000,
+      createdAt: Date.now(),
+      icon: "StorefrontOutline",
+    })
+  }
+
+  private initializeDefaultData = debounce(
+    async () => {
+      const spaceCount = await db.spaces.count()
+      if (spaceCount > 0) return
+      await this.createDefaultSpace()
+      this.clearModifiedTable()
+    },
+    1000,
+    { leading: true, trailing: false },
+  )
 
   async addModifiedTable(tableName: string) {
     this.modifiedTables.add(tableName)
@@ -58,12 +79,12 @@ class SyncManager {
     const self = this
     tableMapping.forEach(({ table, name }) => {
       table.hook("creating", function () {
-        console.log("creating", name)
+        // console.log("creating", name)
         self.addModifiedTable(name)
         self.triggerUpload()
       })
       table.hook("updating", function () {
-        console.log("updating")
+        // console.log("updating")
         self.addModifiedTable(name)
         self.triggerUpload()
       })
