@@ -13,6 +13,7 @@
     "@vicons/carbon": "^0.13.0",
     "@vicons/ionicons5": "^0.13.0",
     "@vueuse/core": "^12.8.2",
+    "dayjs": "^1.11.13",
     "dexie": "^4.0.11",
     "lodash-es": "^4.17.21",
     "lz-string": "^1.5.0",

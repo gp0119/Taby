@@ -1,4 +1,5 @@
 import dataManager from "@/db"
+import dayjs from "dayjs"
 
 async function updateContextMenus() {
   await chrome.contextMenus.removeAll()
@@ -67,7 +68,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "newSpace") {
     const newSpaceId = await dataManager.addSpace({
-      title: "Untitled",
+      title: dayjs().format("MMM DD [at] HH:mm"),
     })
     await chrome.runtime.sendMessage({
       type: "refreshCollections",
@@ -77,7 +78,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   } else if ((info.menuItemId as string).startsWith("newCollection-")) {
     const spaceId = Number((info.menuItemId as string).split("-")[1])
     await dataManager.addCollection({
-      title: "Untitled",
+      title: dayjs().format("MMM DD [at] HH:mm"),
       spaceId: spaceId,
       labelIds: [],
     })
@@ -111,5 +112,4 @@ chrome.runtime.onMessage.addListener((request) => {
   if (request.type === "updateContextMenus") {
     updateContextMenus()
   }
-  return true
 })
