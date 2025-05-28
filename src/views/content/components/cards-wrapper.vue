@@ -59,6 +59,7 @@ import { Information, FolderMoveTo, Delete } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import { useSettingStore } from "@/store/setting"
 
 defineProps<{
   cards: iCard[]
@@ -73,14 +74,27 @@ const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
 const spacesStore = useSpacesStore()
 const dialog = useDialog()
+const settingStore = useSettingStore()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(child: any) {
   const activeId = spacesStore.activeId
-  const tab = await chrome.tabs.create({ url: child.url })
+  let tabId: number
+  if (!settingStore.getSetting("openInNewWindow")) {
+    const currentTab = (
+      await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      })
+    )?.[0]
+    tabId = currentTab.id!
+    chrome.tabs.update(tabId, { url: child.url })
+  } else {
+    let tab = await chrome.tabs.create({ url: child.url })
+    tabId = tab.id!
+  }
   if (child.favicon) return
-  const tabId = tab.id!
   onHandleNoFavicon(tabId, child.id, activeId)
 }
 

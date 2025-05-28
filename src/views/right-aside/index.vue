@@ -5,6 +5,8 @@
       :active="activeWindowId"
       @update:active="updateActiveWindowId"
       @close-all-tabs="closeAllTabsExceptCurrent"
+      @save-all-tabs="onSaveAllTabs"
+      @save-all-tabs-and-close="onSaveAllTabsAndClose"
     />
     <div class="scrollbar-none h-[calc(100vh-76px)] overflow-y-auto px-3">
       <TabsWrapper
@@ -142,5 +144,13 @@ const onHandleCheckbox = (e: boolean, tab: iCard) => {
   } else {
     batchTabsStore.removeSelectedTab(tab.id)
   }
+}
+
+const onSaveAllTabs = (windowId: number | string) => {
+  console.log("onSaveAllTabs", windowId, tabs.value[windowId])
+}
+
+const onSaveAllTabsAndClose = (windowId: number | string) => {
+  console.log("onSaveAllTabsAndClose", windowId, tabs.value[windowId])
 }
 </script>

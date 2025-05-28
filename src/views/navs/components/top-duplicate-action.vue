@@ -12,7 +12,7 @@
           )
         "
       />
-      <span class="h-[16px] w-[0.5px] bg-text-primary" />
+      <span class="h-[16px] w-[0.5px] bg-text-secondary" />
       <span class="font-medium">
         {{ duplicateCardStore.currentIndex + 1 }}
         /

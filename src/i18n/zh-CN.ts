@@ -101,6 +101,8 @@ export default {
   "save-tabs-to": "保存标签到{type}",
   "open-all-tabs": "打开所有标签",
   "close-all-tabs": "关闭所有标签",
+  "save-all-tabs": "保存所有标签",
+  "save-all-tabs-and-close": "保存所有标签并关闭",
   "move-collection": "移动 Collection",
   "close-tabs-confirm": "确定关闭这些标签吗?",
   collections: "Collections",
@@ -110,4 +112,8 @@ export default {
   feedback: "反馈",
   theme: "主题",
   language: "语言",
+  setting: "设置",
+  "open-in-new-window": "在新窗口打开",
+  "save-after-operation-time": "操作后多久保存",
+  "hide-right-click-menu": "隐藏右键菜单",
 }

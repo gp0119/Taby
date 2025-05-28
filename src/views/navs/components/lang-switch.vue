@@ -1,15 +1,17 @@
 <template>
   <div class="flex w-full items-center justify-between">
     <div class="flex select-none items-center gap-x-2">
-      <n-icon-wrapper>
-        <n-icon size="18" :component="LanguageOutline" />
-      </n-icon-wrapper>
+      <n-button tertiary size="small" class="w-[28px]">
+        <template #icon>
+          <n-icon size="18" :component="LanguageOutline" />
+        </template>
+      </n-button>
       <span>{{ ft("language") }}</span>
     </div>
     <div class="flex items-center gap-x-2">
       <n-button
-        :tertiary="languageStore.language === 'en-US'"
-        :quaternary="languageStore.language === 'zh-CN'"
+        :tertiary="language === 'en-US'"
+        :quaternary="language === 'zh-CN'"
         size="small"
         class="w-[28px] px-0"
         @click="changeLanguage('en-US')"
@@ -17,8 +19,8 @@
         <span class="text-xs">En</span>
       </n-button>
       <n-button
-        :tertiary="languageStore.language === 'zh-CN'"
-        :quaternary="languageStore.language === 'en-US'"
+        :tertiary="language === 'zh-CN'"
+        :quaternary="language === 'en-US'"
         size="small"
         class="w-[28px] px-0"
         @click="changeLanguage('zh-CN')"
@@ -31,12 +33,13 @@
 
 <script setup lang="tsx">
 import { LanguageOutline } from "@vicons/ionicons5"
-import { useLanguageStore } from "@/store/language"
+import { useSettingStore } from "@/store/setting"
 import { useHelpi18n } from "@/hooks/useHelpi18n.js"
 
-const languageStore = useLanguageStore()
+const settingStore = useSettingStore()
 const { ft } = useHelpi18n()
-const changeLanguage = async (value: string) => {
-  languageStore.setLanguage(value)
+const language = computed(() => settingStore.getSetting("language"))
+const changeLanguage = async (value: "zh-CN" | "en-US") => {
+  settingStore.setSetting("language", value)
 }
 </script>

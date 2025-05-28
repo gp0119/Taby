@@ -52,7 +52,7 @@
           </div>
           <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
             <div
-              class="ml-2 flex cursor-pointer items-center rounded bg-body-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+              class="ml-2 flex cursor-pointer items-center rounded bg-hover-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
               @click="onOpenCollection(collection)"
             >
               {{ collection.cards.length }} cards
@@ -62,7 +62,7 @@
         </div>
         <span
           v-if="collection.labels.length > 0"
-          class="mx-4 h-[16px] w-[0.5px] bg-text-primary"
+          class="mx-4 h-[16px] w-[0.5px] bg-text-secondary"
         />
         <Tags :labels="collection.labels" :collection-id="collection.id" />
       </div>

@@ -10,9 +10,11 @@ html[data-theme="light"] {
   --contentBg: #f4f5f7;
   --cardBg: #ffffff;
   --dialogBg: #ffffff;
-  --textPrimary: #333333;
-  --textSecondary: #666666;
-  --borderColor: #e6eaef;
+  --settingBg: #f2f3f6;
+  --settingCardBg: #f9f9fa;
+  --textPrimary: #1a202c;
+  --textSecondary: #b0b7c1;
+  --borderColor: #e1e7ed;
   --scrollbarColor: #e6eaef;
   --hoverColor: #f4f5f7;
   --hoverShadow:
@@ -37,9 +39,11 @@ html[data-theme="dark"] {
   --contentBg: #18191b;
   --cardBg: #1f2123;
   --dialogBg: #272a2d;
+  --settingBg: #1e2124;
+  --settingCardBg: #212427;
   --textPrimary: #cbd5e1;
-  --textSecondary: #94a3b8;
-  --borderColor: #353f51;
+  --textSecondary: #a1a2a4;
+  --borderColor: #33393d;
   --hoverColor: #32363a;
   --scrollbarColor: #32363a;
   --hoverShadow:

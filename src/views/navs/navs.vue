@@ -22,7 +22,7 @@
               {{ title }}
             </span>
           </div>
-          <span class="h-[16px] w-[0.5px] bg-text-primary" />
+          <span class="h-[16px] w-[0.5px] bg-text-secondary" />
           <span class="whitespace-nowrap font-thin text-text-secondary">
             {{ spacesStore.collections.length }} Collections
           </span>

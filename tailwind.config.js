@@ -17,6 +17,8 @@ export default {
         "content-color": "var(--contentBg)",
         "card-color": "var(--cardBg)",
         "dialog-color": "var(--dialogBg)",
+        "setting-color": "var(--settingBg)",
+        "setting-card-color": "var(--settingCardBg)",
         "text-primary": "var(--textPrimary)",
         "text-secondary": "var(--textSecondary)",
         "border-color": "var(--borderColor)",

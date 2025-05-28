@@ -25,9 +25,11 @@
           <!--   拖拽   -->
           <div class="flex w-full items-center justify-between px-4 py-2">
             <div class="flex select-none items-center gap-x-2">
-              <n-icon-wrapper>
-                <n-icon size="18" :component="Move" />
-              </n-icon-wrapper>
+              <n-button tertiary size="small" class="w-[28px]">
+                <template #icon>
+                  <n-icon size="18" :component="Move" />
+                </template>
+              </n-button>
               <span>{{ ft("enable-drag") }}</span>
             </div>
             <n-switch
@@ -39,9 +41,11 @@
           <!--   查找重复   -->
           <div class="flex w-full items-center justify-between px-4 py-2">
             <div class="flex select-none items-center gap-x-2">
-              <n-icon-wrapper>
-                <n-icon size="18" :component="View" />
-              </n-icon-wrapper>
+              <n-button tertiary size="small" class="w-[28px]">
+                <template #icon>
+                  <n-icon size="18" :component="View" />
+                </template>
+              </n-button>
               <span>{{ ft("enable-duplicate") }}</span>
             </div>
             <n-switch

@@ -14,25 +14,32 @@
         class="flex w-full cursor-pointer items-center justify-between px-4 py-2 hover:bg-hover-color"
       >
         <div class="flex items-center gap-x-2">
-          <n-icon-wrapper>
-            <n-icon
+          <n-button tertiary size="small" class="w-[28px]">
+            <template
               v-if="
                 sortStore.sortOrder === 'title-desc' ||
                 sortStore.sortOrder === 'created-at-desc'
               "
-              size="18"
-              :component="ArrowUp"
-            />
-            <n-icon
+              #icon
+            >
+              >
+              <n-icon size="18" :component="ArrowUp" />
+            </template>
+            <template
               v-else-if="
                 sortStore.sortOrder === 'title-asc' ||
                 sortStore.sortOrder === 'created-at-asc'
               "
-              size="18"
-              :component="ArrowDown"
-            />
-            <n-icon v-else size="20" :component="Draggable" />
-          </n-icon-wrapper>
+              #icon
+            >
+              <n-icon>
+                <n-icon size="18" :component="ArrowDown" />
+              </n-icon>
+            </template>
+            <template v-else #icon>
+              <n-icon size="20" :component="Draggable" />
+            </template>
+          </n-button>
           <span>{{ ft(sortStore.sortOrder ?? "draggable") }}</span>
         </div>
         <n-icon

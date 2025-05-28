@@ -12,6 +12,8 @@
       :index="index"
       @update:active="handleClick"
       @close-all-tabs="onCloseAllTabs"
+      @save-all-tabs="onSaveAllTabs"
+      @save-all-tabs-and-close="onSaveAllTabsAndClose"
     />
   </div>
 </template>
@@ -54,6 +56,8 @@ defineProps<{
 const emit = defineEmits<{
   (e: "update:active", windowId: number): void
   (e: "closeAllTabs", windowId: number): void
+  (e: "saveAllTabs", windowId: number): void
+  (e: "saveAllTabsAndClose", windowId: number): void
 }>()
 
 function handleClick(windowId: number | string) {
@@ -62,5 +66,13 @@ function handleClick(windowId: number | string) {
 
 const onCloseAllTabs = (windowId: number | string) => {
   emit("closeAllTabs", Number(windowId))
+}
+
+const onSaveAllTabs = (windowId: number | string) => {
+  emit("saveAllTabs", Number(windowId))
+}
+
+const onSaveAllTabsAndClose = (windowId: number | string) => {
+  emit("saveAllTabsAndClose", Number(windowId))
 }
 </script>

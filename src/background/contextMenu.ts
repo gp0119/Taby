@@ -112,4 +112,7 @@ chrome.runtime.onMessage.addListener((request) => {
   if (request.type === "updateContextMenus") {
     updateContextMenus()
   }
+  if (request.type === "hide-right-click-menu") {
+    chrome.contextMenus.removeAll()
+  }
 })

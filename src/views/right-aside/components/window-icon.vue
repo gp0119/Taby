@@ -2,10 +2,11 @@
   <n-popover
     trigger="click"
     :show="showPopover"
-    placement="bottom-end"
+    placement="bottom-start"
     :show-arrow="false"
+    :to="false"
     :on-clickoutside="() => (showPopover = false)"
-    style="padding: 0; overflow: hidden"
+    style="padding: 0; overflow: hidden; width: 200px"
   >
     <template #trigger>
       <div
@@ -31,11 +32,20 @@
     <template #default>
       <div
         class="cursor-pointer px-4 py-2 hover:bg-content-color"
+        @click="onSaveAllTabs(windowId)"
+      >
+        {{ ft("save-all-tabs") }}
+      </div>
+      <div
+        class="cursor-pointer px-4 py-2 hover:bg-content-color"
+        @click="onSaveAllTabsAndClose(windowId)"
+      >
+        {{ ft("save-all-tabs-and-close") }}
+      </div>
+      <div
+        class="cursor-pointer px-4 py-2 text-red-500 hover:bg-content-color"
         @click="onCloseAllTabs(windowId)"
       >
-        {{ ft("close-all-tabs") }}
-      </div>
-      <div class="cursor-pointer px-4 py-2 hover:bg-content-color">
         {{ ft("close-all-tabs") }}
       </div>
     </template>
@@ -46,10 +56,22 @@
 import { Card } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { useLayoutStore } from "@/store/layout"
 
+const layoutStore = useLayoutStore()
 const wrapperRef = ref<HTMLDivElement | null>(null)
 const { ft } = useHelpi18n()
 const showPopover = ref(false)
+
+watchEffect(async () => {
+  if (
+    layoutStore.rightLayoutMode === "hover" &&
+    !layoutStore.rightLayoutHovering
+  ) {
+    await nextTick()
+    showPopover.value = false
+  }
+})
 
 function onWheel(e: WheelEvent) {
   const el = wrapperRef.value
@@ -87,6 +109,8 @@ defineProps<{
 const emit = defineEmits<{
   (e: "update:active", windowId: number): void
   (e: "closeAllTabs", windowId: number): void
+  (e: "saveAllTabs", windowId: number): void
+  (e: "saveAllTabsAndClose", windowId: number): void
 }>()
 
 function handleClick(windowId: number | string) {
@@ -95,6 +119,16 @@ function handleClick(windowId: number | string) {
 
 const onCloseAllTabs = (windowId: number | string) => {
   emit("closeAllTabs", Number(windowId))
+  showPopover.value = false
+}
+
+const onSaveAllTabs = (windowId: number | string) => {
+  emit("saveAllTabs", Number(windowId))
+  showPopover.value = false
+}
+
+const onSaveAllTabsAndClose = (windowId: number | string) => {
+  emit("saveAllTabsAndClose", Number(windowId))
   showPopover.value = false
 }
 </script>

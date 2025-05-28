@@ -13,46 +13,47 @@
         class="w-[28px] !shadow-btn-shadow"
       >
         <template #icon>
-          <n-icon size="18" :component="Settings" />
+          <n-icon size="18" :component="EllipsisVerticalSharp" />
         </template>
       </n-button>
     </template>
     <template #default>
       <div class="flex flex-col overflow-hidden rounded-lg bg-dialog-color">
         <div class="flex flex-col">
-          <a
+          <ItemWrapper
+            :icon="Settings"
+            :title="ft('setting')"
+            @click="show = true"
+          />
+          <ItemWrapper
+            tag="a"
             href="https://github.com/gp0119/Taby/issues/new"
             target="_blank"
-            class="flex w-full items-center justify-between px-4 py-2 hover:bg-hover-color"
-          >
-            <div class="flex items-center gap-x-2">
-              <n-icon-wrapper>
-                <n-icon size="18" :component="Forum" />
-              </n-icon-wrapper>
-              <span>{{ ft("feedback") }}</span>
-            </div>
-            <n-icon
-              size="20"
-              class="text-text-primary"
-              :component="ChevronForward"
-            />
-          </a>
+            :icon="Forum"
+            :title="ft('feedback')"
+          />
         </div>
 
-        <div class="flex flex-col gap-y-3 px-4 py-2">
+        <div class="flex flex-col gap-y-3 border-t bg-hover-color px-4 py-2">
           <LangSwitch />
           <ThemeSwitch />
         </div>
       </div>
     </template>
   </n-popover>
+  <SettingDrawer v-model:show="show" />
 </template>
 
 <script setup lang="tsx">
 import { useHelpi18n } from "@/hooks/useHelpi18n.js"
-import { Forum, Settings } from "@vicons/carbon"
-import { ChevronForward } from "@vicons/ionicons5"
+import { Forum } from "@vicons/carbon"
 import LangSwitch from "./lang-switch.vue"
 import ThemeSwitch from "./theme-switch.vue"
+import { EllipsisVerticalSharp } from "@vicons/ionicons5"
+import { Settings } from "@vicons/carbon"
+import SettingDrawer from "./setting-drawer.vue"
+import ItemWrapper from "./item-wrapper.vue"
+
 const { ft } = useHelpi18n()
+const show = ref(false)
 </script>

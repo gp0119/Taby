@@ -106,6 +106,8 @@ export default {
   "save-tabs-to": "Save Tabs to {type}",
   "open-all-tabs": "Open All Tabs",
   "close-all-tabs": "Close All Tabs",
+  "save-all-tabs": "Save All Tabs",
+  "save-all-tabs-and-close": "Save All Tabs and Close",
   "move-collection": "Move Collection",
   "close-tabs-confirm": "Are you sure you want to close these tabs?",
   collections: "Collections",
@@ -116,4 +118,8 @@ export default {
   feedback: "Feedback",
   theme: "Theme",
   language: "Language",
+  setting: "Setting",
+  "open-in-new-window": "Open in New Window",
+  "save-after-operation-time": "Save delay after operation",
+  "hide-right-click-menu": "Hide Right Click Menu",
 }

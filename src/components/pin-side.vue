@@ -78,9 +78,13 @@ const emit = defineEmits<{
 const handleMouseAction = debounce((type: "enter" | "leave") => {
   if (props.mode !== "hover") return
   if (type === "enter") {
-    emit("update:hovering", true)
+    if (!props.hovering) {
+      emit("update:hovering", true)
+    }
   } else {
-    emit("update:hovering", false)
+    if (props.hovering) {
+      emit("update:hovering", false)
+    }
   }
 }, 120)
 </script>

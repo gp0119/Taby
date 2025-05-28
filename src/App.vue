@@ -1,7 +1,7 @@
 <template>
   <n-config-provider
     :theme-overrides="themeOverrides"
-    :theme="themeStore.theme === 'dark' ? darkTheme : lightTheme"
+    :theme="theme === 'dark' ? darkTheme : lightTheme"
     class="h-full"
     abstract
   >
@@ -18,19 +18,19 @@
 </template>
 
 <script setup lang="ts">
-import { useThemeStore } from "@/store/theme.ts"
 import syncManager from "@/sync/syncManager.ts"
-import { GlobalThemeOverrides, darkTheme, lightTheme } from "naive-ui"
+import { darkTheme, lightTheme } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
-const themeStore = useThemeStore()
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
-import { useLanguageStore } from "@/store/language"
+import { useSettingStore } from "@/store/setting"
 import { useI18n } from "vue-i18n"
+import { useTheme } from "@/hooks/useTheme"
 
 const { locale } = useI18n()
 const { refreshSpaces, refreshCollections } = useRefresh()
+const { themeOverrides, theme } = useTheme()
 
 const loading = ref(true)
 
@@ -40,9 +40,9 @@ provide("loading", {
     loading.value = value
   },
 })
-const languageStore = useLanguageStore()
+const settingStore = useSettingStore()
 watchEffect(() => {
-  locale.value = languageStore.language
+  locale.value = settingStore.getSetting("language")
 })
 
 const handleVisibilityChange = debounce(
@@ -77,67 +77,6 @@ const removeListener = () => {
   chrome.runtime.onMessage.removeListener(handleMessage)
 }
 
-const themeOverrides: ComputedRef<GlobalThemeOverrides> = computed(() => ({
-  common: {
-    primaryColor: themeStore.themeColor[themeStore.theme].primary,
-    primaryColorHover: themeStore.themeColor[themeStore.theme].primaryHover,
-    inputColor: themeStore.themeColor[themeStore.theme].cardBackground,
-    popoverColor: themeStore.themeColor[themeStore.theme].cardBackground,
-    hoverColor: themeStore.themeColor[themeStore.theme].hoverColor,
-  },
-  Button: {
-    colorPressedPrimary: themeStore.themeColor[themeStore.theme].primaryHover,
-    waveOpacity: 0,
-    borderRadiusSmall: "6px",
-    borderRadiusMedium: "6px",
-  },
-  Dialog: {
-    borderRadius: "12px",
-  },
-  Input: {
-    color: themeStore.themeColor[themeStore.theme].cardBackground,
-    textColor: themeStore.themeColor[themeStore.theme].textPrimary,
-    boxShadowActive: "none",
-    boxShadowFocus: "none",
-    borderRadius: "6px",
-  },
-  Select: {
-    boxShadowFocus: "none",
-    boxShadowActive: "none",
-  },
-  SelectOption: {
-    color: themeStore.themeColor[themeStore.theme].cardBackground,
-    textColor: themeStore.themeColor[themeStore.theme].textPrimary,
-  },
-  Form: {
-    labelTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
-  },
-  Radio: {
-    buttonColor: themeStore.themeColor[themeStore.theme].cardBackground,
-    buttonTextColor: themeStore.themeColor[themeStore.theme].textPrimary,
-    buttonColorActive: themeStore.themeColor[themeStore.theme].primary,
-    buttonBorderColorActive: themeStore.themeColor[themeStore.theme].primary,
-    buttonTextColorActive: "#fff",
-    buttonBorderRadius: "6px",
-  },
-  Tag: {
-    colorBordered: themeStore.themeColor[themeStore.theme].cardBackground,
-    closeIconColor: themeStore.themeColor[themeStore.theme].textPrimary,
-  },
-  LoadingBar: {
-    colorLoading: "#18A058",
-  },
-  Popover: {
-    borderRadius: "12px",
-  },
-  Dropdown: {
-    borderRadius: "12px",
-  },
-  Card: {
-    borderRadius: "12px",
-  },
-}))
-
 onBeforeMount(async () => {
   const result = await chrome.storage.sync.get([
     SYNC_GIST_TOKEN,
@@ -156,7 +95,6 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
-  themeStore.applyThemeAttribute()
   await new Promise((resolve) => setTimeout(resolve, 100))
   await refreshSpaces()
   await refreshCollections()

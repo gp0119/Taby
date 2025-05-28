@@ -2,7 +2,7 @@ import { db } from "@/db/database.ts"
 import dataManager from "@/db/index.ts"
 import GistManager from "@/sync/gistManager.ts"
 import { SyncData, SyncTokenData } from "@/type.ts"
-import { debounce, isEmpty } from "lodash-es"
+import { debounce, isEmpty, DebouncedFunc } from "lodash-es"
 import {
   SYNC_GIST_TOKEN,
   SYNC_GIST_ID,
@@ -15,8 +15,14 @@ class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
   modifiedTables: Set<string> = new Set()
+  uploadModifiedTablesDebounce: DebouncedFunc<() => Promise<void>>
 
   constructor() {
+    this.uploadModifiedTablesDebounce = debounce(
+      () => this.uploadModifiedTablesImmediate(),
+      this.SYNC_INTERVAL,
+      { leading: false, trailing: true },
+    )
     this.addHooks()
   }
 
@@ -52,12 +58,12 @@ class SyncManager {
     const self = this
     tableMapping.forEach(({ table, name }) => {
       table.hook("creating", function () {
-        // console.log("creating", name, obj)
+        console.log("creating", name)
         self.addModifiedTable(name)
         self.triggerUpload()
       })
       table.hook("updating", function () {
-        // console.log("updating")
+        console.log("updating")
         self.addModifiedTable(name)
         self.triggerUpload()
       })
@@ -97,6 +103,21 @@ class SyncManager {
     GistManager.setEnv(key, value)
   }
 
+  setInterval(value: number) {
+    this.SYNC_INTERVAL = value * 60 * 1000
+    if (
+      this.uploadModifiedTablesDebounce &&
+      typeof this.uploadModifiedTablesDebounce.cancel === "function"
+    ) {
+      this.uploadModifiedTablesDebounce.cancel()
+    }
+    this.uploadModifiedTablesDebounce = debounce(
+      () => this.uploadModifiedTablesImmediate(),
+      this.SYNC_INTERVAL,
+      { leading: false, trailing: true },
+    )
+  }
+
   uploadAll = async () => {
     const data: Partial<SyncData> = await dataManager.getUploadData()
     if (!data) return
@@ -110,6 +131,7 @@ class SyncManager {
 
   uploadModifiedTablesImmediate = async () => {
     const modifiedData: Partial<SyncData> = await this.getModifiedTables()
+    console.log("modifiedData", modifiedData)
     if (isEmpty(modifiedData)) return
     await GistManager.uploadData(modifiedData)
     const now = Date.now()
@@ -117,12 +139,6 @@ class SyncManager {
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
     await this.clearModifiedTable()
   }
-
-  uploadModifiedTablesDebounce = debounce(
-    this.uploadModifiedTablesImmediate,
-    this.SYNC_INTERVAL,
-    { leading: false, trailing: true },
-  )
 
   triggerUpload = async () => {
     localStorage.setItem("lastModifiedTime", Date.now() + "")

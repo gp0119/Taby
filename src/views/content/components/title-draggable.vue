@@ -34,7 +34,7 @@
           </div>
           <span
             v-if="collection.labels.length > 0"
-            class="mx-4 h-[16px] w-[0.5px] bg-text-primary"
+            class="mx-4 h-[16px] w-[0.5px] bg-text-secondary"
           />
           <Tags
             class="pointer-events-none"

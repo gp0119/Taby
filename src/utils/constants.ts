@@ -223,3 +223,31 @@ export const SYNC_GIST_TOKEN = "accessToken"
 export const SYNC_TYPE = "syncType"
 export const REMOTE_LAST_UPDATE_TIME = "remoteLastUpdateTime" // Stored in chrome.storage.sync
 export const LOCAL_LAST_DOWNLOAD_TIME = "localLastDownloadTime" // Stored in localStorage
+
+export const THEME_COLOR = {
+  light: {
+    primary: "#5dabfe",
+    primaryHover: "#3391ff",
+    bodyBg: "#e6eaef",
+    contentBg: "#f4f5f7",
+    cardBg: "#ffffff",
+    dialogBg: "#ffffff",
+    textPrimary: "#1a202c",
+    textSecondary: "#b0b7c1",
+    borderColor: "#e9e9e9",
+    hoverColor: "#f4f5f7",
+  },
+  dark: {
+    primary: "#8acbec",
+    primaryHover: "#70c0e8",
+    bodyBg: "#0e1013",
+    contentBg: "#18191b",
+    cardBg: "#1f2123",
+    dialogBg: "#272a2d",
+    textPrimary: "#cbd5e1",
+    textSecondary: "#a1a2a4",
+    borderColor: "#353f51",
+    hoverColor: "#32363a",
+    shadowColor: "rgba(14,17,24,0.8)",
+  },
+}
