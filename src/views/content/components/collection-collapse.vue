@@ -129,7 +129,6 @@ const onHandleCheckbox = (checked: boolean, collectionId: number) => {
 }
 
 async function onOpenCollection(collection: CollectionWithCards) {
-  console.log("collection: ", collection)
   if (collection.cards.length === 0) return
   const tabs = await openTabs(collection.cards.map((card) => card.url))
   if (settingStore.getSetting("openCardsInGroup") && tabs.length > 0) {
