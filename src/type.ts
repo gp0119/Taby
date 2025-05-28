@@ -85,3 +85,21 @@ export type iSetting = {
   hideRightClickMenu: boolean
   saveAfterOperationTime: number
 }
+
+export interface ExportSpace {
+  title: string
+  icon: string
+  collections: {
+    title: string
+    labels: {
+      title: string
+      color: string
+    }[]
+    cards: {
+      title: string
+      url: string
+      description: string
+      favicon: string
+    }[]
+  }[]
+}

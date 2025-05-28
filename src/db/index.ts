@@ -9,8 +9,10 @@ import {
   Label,
   SpaceWithCollections,
   Favicon,
+  ExportSpace,
 } from "@/type.ts"
 import { db } from "./database.ts"
+import { debounce } from "lodash-es"
 
 class DataManager {
   private static instance: DataManager
@@ -18,6 +20,13 @@ class DataManager {
   constructor() {
     this.ORDER_STEP = 1000
     this.initializeDefaultData()
+  }
+
+  public static getInstance(): DataManager {
+    if (!DataManager.instance) {
+      DataManager.instance = new DataManager()
+    }
+    return DataManager.instance
   }
 
   private async createDefaultSpace() {
@@ -29,22 +38,15 @@ class DataManager {
     })
   }
 
-  private async initializeDefaultData() {
-    const spaceCount = await db.spaces.count()
-    if (spaceCount > 0) return
-    try {
+  private initializeDefaultData = debounce(
+    async () => {
+      const spaceCount = await db.spaces.count()
+      if (spaceCount > 0) return
       await this.createDefaultSpace()
-    } catch (error) {
-      console.error("初始化默认数据失败:", error)
-    }
-  }
-
-  public static getInstance(): DataManager {
-    if (!DataManager.instance) {
-      DataManager.instance = new DataManager()
-    }
-    return DataManager.instance
-  }
+    },
+    1000,
+    { leading: true, trailing: false },
+  )
 
   async getAllSpaces() {
     return db.spaces.orderBy("order").toArray()
@@ -296,10 +298,7 @@ class DataManager {
     return db.labels.update(id, { title, ...(color && { color }) })
   }
 
-  async addCard(
-    card: Pick<Card, "title" | "url" | "collectionId" | "faviconId">,
-    targetIndex?: number,
-  ) {
+  async addCard(card: Omit<Card, "id" | "order">, targetIndex?: number) {
     const cards = await db.cards
       .where("[collectionId+order]")
       .between(
@@ -799,6 +798,92 @@ class DataManager {
     } catch (error) {
       console.error("Data import failed:", error)
     }
+  }
+
+  async importFromToby(lists: CollectionWithCards[]) {
+    db.transaction(
+      "rw",
+      [db.spaces, db.collections, db.cards, db.favicons, db.labels],
+      async () => {
+        const spaceId = await this.addSpace({
+          title: "From Toby",
+          icon: "StorefrontOutline",
+        })
+        for (const list of lists) {
+          const labelIds: number[] = []
+          for (const label of list.labels) {
+            const labelId = await this.getOrCreateLabelWithTitle(label.title)
+            if (labelId) {
+              labelIds.push(labelId)
+            }
+          }
+          const collectionId = await this.addCollection({
+            title: list.title,
+            spaceId,
+            labelIds: labelIds,
+          })
+          await this.batchAddCards(
+            list.cards.map((card, index) => {
+              const now = Date.now()
+              return {
+                title: card.customTitle || card.title,
+                url: card.url,
+                description: card.customDescription || card.description || "",
+                collectionId: collectionId!,
+                order: (index + 1) * 1000,
+                createdAt: now,
+              }
+            }),
+          )
+        }
+      },
+    )
+  }
+
+  async importFromTaby(spaces: ExportSpace[]) {
+    db.transaction(
+      "rw",
+      [db.spaces, db.collections, db.cards, db.favicons, db.labels],
+      async () => {
+        for (const space of spaces) {
+          const spaceId = await this.addSpace({
+            title: space.title,
+            icon: space.icon,
+          })
+          for (const collection of space.collections) {
+            const labelIds: number[] = []
+            for (const label of collection.labels) {
+              const labelId = await this.getOrCreateLabelWithTitle(label.title)
+              if (labelId) {
+                labelIds.push(labelId)
+              }
+            }
+            const collectionId = await this.addCollection({
+              title: collection.title,
+              spaceId,
+              labelIds,
+            })
+            const cards: Omit<Card, "id">[] = []
+            for (const [index, card] of collection.cards.entries()) {
+              let faviconId: number | undefined
+              if (card.favicon) {
+                faviconId = await this.addFavicon(card.favicon)
+              }
+              cards.push({
+                title: card.title,
+                url: card.url,
+                description: card.description,
+                collectionId: collectionId!,
+                ...(faviconId && { faviconId }),
+                order: (index + 1) * 1000,
+                createdAt: Date.now(),
+              })
+            }
+            await this.batchAddCards(cards)
+          }
+        }
+      },
+    )
   }
 }
 

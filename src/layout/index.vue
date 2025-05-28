@@ -47,7 +47,7 @@ import leftAside from "@/views/left-aside/left-aside.vue"
 import rightAside from "@/views/right-aside/index.vue"
 import content from "@/views/content/index.vue"
 import { useLayoutStore } from "@/store/layout"
-import LeftActions from "@/components/left-actions.vue"
+import LeftActions from "@/views/left-aside/components/left-actions.vue"
 
 const layoutStore = useLayoutStore()
 </script>
