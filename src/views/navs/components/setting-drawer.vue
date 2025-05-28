@@ -39,6 +39,22 @@
         <div
           class="rounded-lg border border-border-color bg-setting-card-color py-2"
         >
+          <ItemWrapper
+            :icon="GroupResource"
+            :title="ft('open-cards-in-group')"
+            :hover="false"
+          >
+            <n-switch
+              :value="settingStore.getSetting('openCardsInGroup')"
+              @update-value="
+                settingStore.setSetting('openCardsInGroup', $event)
+              "
+            />
+          </ItemWrapper>
+        </div>
+        <div
+          class="rounded-lg border border-border-color bg-setting-card-color py-2"
+        >
           <div
             class="flex w-full cursor-pointer flex-col justify-between gap-y-2 px-4 py-2"
           >
@@ -86,7 +102,12 @@
 <script setup lang="ts">
 import { useHelpi18n } from "@/hooks/useHelpi18n.js"
 import { Close } from "@vicons/ionicons5"
-import { Launch, Timer, AlignBoxMiddleCenter } from "@vicons/carbon"
+import {
+  Launch,
+  Timer,
+  AlignBoxMiddleCenter,
+  GroupResource,
+} from "@vicons/carbon"
 import ItemWrapper from "./item-wrapper.vue"
 import { useSettingStore } from "@/store/setting"
 

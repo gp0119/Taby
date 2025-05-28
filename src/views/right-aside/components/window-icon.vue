@@ -43,6 +43,12 @@
         {{ ft("save-all-tabs-and-close") }}
       </div>
       <div
+        class="cursor-pointer px-4 py-2 hover:bg-content-color"
+        @click="onCloseDuplicateTabs(windowId)"
+      >
+        {{ ft("close-duplicate-tabs") }}
+      </div>
+      <div
         class="cursor-pointer px-4 py-2 text-red-500 hover:bg-content-color"
         @click="onCloseAllTabs(windowId)"
       >
@@ -111,6 +117,7 @@ const emit = defineEmits<{
   (e: "closeAllTabs", windowId: number): void
   (e: "saveAllTabs", windowId: number): void
   (e: "saveAllTabsAndClose", windowId: number): void
+  (e: "closeDuplicateTabs", windowId: number): void
 }>()
 
 function handleClick(windowId: number | string) {
@@ -129,6 +136,11 @@ const onSaveAllTabs = (windowId: number | string) => {
 
 const onSaveAllTabsAndClose = (windowId: number | string) => {
   emit("saveAllTabsAndClose", Number(windowId))
+  showPopover.value = false
+}
+
+const onCloseDuplicateTabs = (windowId: number | string) => {
+  emit("closeDuplicateTabs", Number(windowId))
   showPopover.value = false
 }
 </script>

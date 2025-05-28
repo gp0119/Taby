@@ -1,5 +1,5 @@
 <template>
-  <div v-if="labels.length" class="flex items-center gap-x-2">
+  <div v-if="labels.length" class="flex items-center gap-x-3">
     <Tag
       v-for="tag in labels"
       :key="tag.id"

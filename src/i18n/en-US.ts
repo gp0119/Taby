@@ -120,6 +120,9 @@ export default {
   language: "Language",
   setting: "Setting",
   "open-in-new-window": "Open in New Window",
+  "open-cards-in-group": "Open Cards in Group",
   "save-after-operation-time": "Save delay after operation",
   "hide-right-click-menu": "Hide Right Click Menu",
+  "group-tabs": "Group Tabs",
+  "close-duplicate-tabs": "Close Duplicate Tabs",
 }

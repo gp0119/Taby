@@ -17,6 +17,7 @@ html[data-theme="light"] {
   --borderColor: #e1e7ed;
   --scrollbarColor: #e6eaef;
   --hoverColor: #f4f5f7;
+  --errorColor: #d03050;
   --hoverShadow:
     rgba(135, 145, 155, 0.3) 0px 3px 8px 0px,
     rgba(135, 145, 155, 0.08) 0px 0px 0px 1px;
@@ -46,6 +47,7 @@ html[data-theme="dark"] {
   --borderColor: #33393d;
   --hoverColor: #32363a;
   --scrollbarColor: #32363a;
+  --errorColor: #e88080;
   --hoverShadow:
     rgba(0, 0, 0, 0.9) 0px 3px 8px 0px, rgba(0, 0, 0, 0.2) 0px 0px 0px 1px;
   --btnShadow:

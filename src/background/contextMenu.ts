@@ -99,6 +99,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       title: title || "",
       url: url || "",
       collectionId: Number(collectionId),
+      description: "",
       ...(faviconId && { faviconId }),
     })
     await chrome.runtime.sendMessage({

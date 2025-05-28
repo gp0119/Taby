@@ -9,7 +9,14 @@
   "author": {
     "email": "ganpeng0119@gmail.com"
   },
-  "permissions": ["favicon", "storage", "tabs", "activeTab", "contextMenus"],
+  "permissions": [
+    "favicon",
+    "storage",
+    "tabs",
+    "activeTab",
+    "contextMenus",
+    "tabGroups"
+  ],
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {

@@ -50,9 +50,10 @@
               {{ collection.title }}
             </span>
           </div>
+          <span class="mx-4 h-[16px] w-[0.5px] bg-text-secondary" />
           <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
             <div
-              class="ml-2 flex cursor-pointer items-center rounded bg-hover-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+              class="flex cursor-pointer items-center rounded bg-hover-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
               @click="onOpenCollection(collection)"
             >
               {{ collection.cards.length }} cards
@@ -94,10 +95,12 @@ import { useDuplicateCardStore } from "@/store/duplicate-card"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useChromeTabs } from "@/hooks/useChromeTabs"
+import { useSettingStore } from "@/store/setting"
 
 const { ft } = useHelpi18n()
+const settingStore = useSettingStore()
 const duplicateCardStore = useDuplicateCardStore()
-const { openTabs } = useChromeTabs()
+const { openTabs, groupTabs } = useChromeTabs()
 const props = defineProps<{
   collection: CollectionWithCards
 }>()
@@ -125,7 +128,13 @@ const onHandleCheckbox = (checked: boolean, collectionId: number) => {
   }
 }
 
-function onOpenCollection(item: CollectionWithCards) {
-  openTabs(item.cards.map((card) => card.url))
+async function onOpenCollection(collection: CollectionWithCards) {
+  console.log("collection: ", collection)
+  if (collection.cards.length === 0) return
+  const tabs = await openTabs(collection.cards.map((card) => card.url))
+  if (settingStore.getSetting("openCardsInGroup") && tabs.length > 0) {
+    const tabsIds = tabs.map((tab) => tab.id!)
+    await groupTabs(tabsIds, collection.title)
+  }
 }
 </script>

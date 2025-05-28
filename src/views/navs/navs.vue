@@ -28,12 +28,12 @@
           </span>
         </div>
       </template>
-      <EditSpace :title="title!" :icon="icon!" />
       <TagFilter />
       <CollapseBtn />
       <LeftMoreAction />
     </div>
     <div class="flex-center gap-x-3">
+      <EditSpace :title="title!" :icon="icon!" />
       <AddCollection />
       <SearchBtn />
       <MorePopover />

@@ -24,6 +24,7 @@ export default {
         "border-color": "var(--borderColor)",
         "hover-color": "var(--hoverColor)",
         "shadow-color": "var(--shadowColor)",
+        "error-color": "var(--errorColor)",
       },
       borderColor: {
         DEFAULT: "var(--borderColor)",

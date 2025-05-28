@@ -14,6 +14,7 @@
       @close-all-tabs="onCloseAllTabs"
       @save-all-tabs="onSaveAllTabs"
       @save-all-tabs-and-close="onSaveAllTabsAndClose"
+      @close-duplicate-tabs="onCloseDuplicateTabs"
     />
   </div>
 </template>
@@ -58,6 +59,7 @@ const emit = defineEmits<{
   (e: "closeAllTabs", windowId: number): void
   (e: "saveAllTabs", windowId: number): void
   (e: "saveAllTabsAndClose", windowId: number): void
+  (e: "closeDuplicateTabs", windowId: number): void
 }>()
 
 function handleClick(windowId: number | string) {
@@ -74,5 +76,9 @@ const onSaveAllTabs = (windowId: number | string) => {
 
 const onSaveAllTabsAndClose = (windowId: number | string) => {
   emit("saveAllTabsAndClose", Number(windowId))
+}
+
+const onCloseDuplicateTabs = (windowId: number | string) => {
+  emit("closeDuplicateTabs", Number(windowId))
 }
 </script>

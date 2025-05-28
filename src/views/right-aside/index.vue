@@ -7,6 +7,7 @@
       @close-all-tabs="closeAllTabsExceptCurrent"
       @save-all-tabs="onSaveAllTabs"
       @save-all-tabs-and-close="onSaveAllTabsAndClose"
+      @close-duplicate-tabs="onCloseDuplicateTabs"
     />
     <div class="scrollbar-none h-[calc(100vh-76px)] overflow-y-auto px-3">
       <TabsWrapper
@@ -69,6 +70,7 @@ const {
   tabs,
   getTabs,
   removeTab,
+  removeTabs,
   activeTab,
   moveTab,
   activeWindowId,
@@ -117,6 +119,7 @@ const onDragEnd = async (evt: SortableEvent) => {
         title,
         url,
         collectionId: Number(toClollectionId),
+        description: "",
         ...(faviconId && { faviconId }),
       },
       newIndex!,
@@ -167,6 +170,7 @@ const onSaveAllTabs = async (windowId: number | string) => {
       url: tab.url,
       collectionId: newCollectionId!,
       faviconId: faviconId,
+      description: "",
     })
     cardIds.push(cardId)
   }
@@ -181,5 +185,20 @@ const onSaveAllTabs = async (windowId: number | string) => {
 const onSaveAllTabsAndClose = async (windowId: number | string) => {
   await onSaveAllTabs(windowId)
   await closeAllTabsExceptCurrent(Number(windowId))
+}
+
+const onCloseDuplicateTabs = async (windowId: number | string) => {
+  const currentTabs = tabs.value[windowId]
+  const urlMap = new Set<string>()
+  const duplicateTabsIds: number[] = []
+  for (const tab of currentTabs) {
+    if (urlMap.has(tab.url)) {
+      duplicateTabsIds.push(tab.id!)
+    } else {
+      urlMap.add(tab.url)
+    }
+  }
+  await removeTabs(duplicateTabsIds)
+  await refreshTabs()
 }
 </script>

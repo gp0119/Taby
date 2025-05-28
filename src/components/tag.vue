@@ -17,8 +17,8 @@
         v-if="closeable"
         border-radius="10"
         icon-color="#fff"
-        size="12"
-        class="absolute -right-1 -top-1 z-10 hidden group-hover/tag:block"
+        size="14"
+        class="bg-error-color absolute -right-1.5 -top-1.5 z-10 hidden group-hover/tag:inline-flex"
         @click.stop="onDeleteTag"
       >
         <n-icon :component="Close" />

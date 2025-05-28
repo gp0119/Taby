@@ -74,9 +74,7 @@ export function useChromeTabs() {
   }
 
   async function openTabs(urls: string[]) {
-    urls.forEach((url) => {
-      chrome.tabs.create({ url })
-    })
+    return Promise.all(urls.map((url) => chrome.tabs.create({ url })))
   }
 
   async function closeAllTabsExceptCurrent(windowId: number) {
@@ -95,6 +93,26 @@ export function useChromeTabs() {
     activeWindowId.value = windowId
   }
 
+  async function groupTabs(tabsIds: number[], title: string) {
+    const groupId = await chrome.tabs.group({ tabIds: tabsIds })
+    const colors = [
+      "grey",
+      "blue",
+      "red",
+      "yellow",
+      "green",
+      "pink",
+      "purple",
+      "cyan",
+      "orange",
+    ] as const
+    await chrome.tabGroups.update(groupId, {
+      title: title,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    })
+    return groupId
+  }
+
   return {
     tabs,
     getTabs,
@@ -107,5 +125,6 @@ export function useChromeTabs() {
     closeAllTabsExceptCurrent,
     activeWindowId,
     updateActiveWindowId,
+    groupTabs,
   }
 }

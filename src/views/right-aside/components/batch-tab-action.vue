@@ -6,13 +6,19 @@
     />
 
     <div class="flex items-center justify-between gap-x-4">
-      <n-button secondary type="primary" @click="onHandleSave">
+      <n-button secondary @click="onHandleSave">
         <template #icon>
           <n-icon :size="16" :component="FolderMoveTo" />
         </template>
         {{ ft("save-tabs") }}
       </n-button>
-      <n-button ghost type="primary" @click="onHandleClose">
+      <n-button secondary @click="onHandleGroup">
+        <template #icon>
+          <n-icon :size="16" :component="FolderMoveTo" />
+        </template>
+        {{ ft("group-tabs") }}
+      </n-button>
+      <n-button ghost type="error" @click="onHandleClose">
         <template #icon>
           <n-icon :size="16" :component="CloseOutline" />
         </template>
@@ -38,7 +44,7 @@ const batchTabsStore = useBatchTabsStore()
 const show = ref(false)
 const { refreshCollections } = useRefresh()
 const { ft, gt } = useHelpi18n()
-const { removeTabs, getTabs } = useChromeTabs()
+const { removeTabs, getTabs, groupTabs } = useChromeTabs()
 
 const clear = () => {
   batchTabsStore.clearSelectedTabs()
@@ -67,6 +73,7 @@ const onHandleSave = async () => {
       url: tab.url,
       collectionId: Number(collectionId),
       faviconId: faviconId,
+      description: "",
     })
     cardIds.push(cardId)
   }
@@ -92,5 +99,11 @@ const onHandleClose = async () => {
       closeDrawer()
     },
   })
+}
+
+const onHandleGroup = async () => {
+  await groupTabs(batchTabsStore.selectedTabIds, "untitled")
+  batchTabsStore.clearSelectedTabs()
+  closeDrawer()
 }
 </script>

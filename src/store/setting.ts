@@ -9,8 +9,8 @@ export const useSettingStore = defineStore("Setting", () => {
   const setting = useLocalStorage<iSetting>("setting", {
     language: "en-US",
     theme: "light",
-    layoutMode: "collapse",
     openInNewWindow: true,
+    openCardsInGroup: false,
     hideRightClickMenu: false,
     saveAfterOperationTime: 5,
   })

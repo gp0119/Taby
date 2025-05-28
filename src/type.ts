@@ -80,10 +80,10 @@ export type layoutMode = "collapse" | "expand" | "hover"
 export type iSetting = {
   language: "zh-CN" | "en-US"
   theme: "light" | "dark"
-  layoutMode: layoutMode
   openInNewWindow: boolean
   hideRightClickMenu: boolean
   saveAfterOperationTime: number
+  openCardsInGroup: boolean
 }
 
 export interface ExportSpace {
