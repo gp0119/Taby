@@ -305,7 +305,7 @@ function onHandleCheckbox(checked: boolean, card: iCard) {
 
 <style scoped>
 .card-wrapper {
-  @apply grid grid-cols-[repeat(auto-fill,minmax(190px,1fr))] gap-5 px-4 pb-4 pt-2;
+  @apply grid grid-cols-[repeat(auto-fill,minmax(184px,1fr))] gap-5 px-4 pb-4 pt-2;
 }
 .empty-text {
   @apply col-span-full text-center text-lg leading-[90px] text-gray-300;
