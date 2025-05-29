@@ -10,7 +10,7 @@
           v-model:value="formModel.title"
           :placeholder="ft('create', 'collection')"
         />
-        <n-button secondary type="primary" @click="onAddCollection">
+        <n-button type="primary" @click="onAddCollection">
           <template #icon>
             <n-icon :component="Add" />
           </template>

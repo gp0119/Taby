@@ -3,10 +3,10 @@ import { useLocalStorage } from "@vueuse/core"
 import type { layoutMode } from "@/type"
 
 export const useLayoutStore = defineStore("Layout", () => {
-  const leftLayoutMode = useLocalStorage<layoutMode>("leftLayoutMode", "hover")
+  const leftLayoutMode = useLocalStorage<layoutMode>("leftLayoutMode", "expand")
   const rightLayoutMode = useLocalStorage<layoutMode>(
     "rightLayoutMode",
-    "hover",
+    "expand",
   )
 
   const leftLayoutHovering = ref<boolean>(false)

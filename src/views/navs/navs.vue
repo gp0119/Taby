@@ -11,9 +11,7 @@
         @update:mode="onChangeLayoutMode($event, 'left')"
       />
       <template v-if="title">
-        <div
-          class="flex shrink-0 flex-nowrap items-center gap-4 rounded px-2.5"
-        >
+        <div class="flex shrink-0 flex-nowrap items-center gap-4">
           <div class="flex-center">
             <n-icon size="18" class="mr-2 text-text-primary">
               <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />

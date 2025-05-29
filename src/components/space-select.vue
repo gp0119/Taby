@@ -14,7 +14,7 @@
           v-model:value="formModel.title"
           :placeholder="ft('create', 'space')"
         />
-        <n-button secondary type="primary" @click="onAddSpace">
+        <n-button type="primary" @click="onAddSpace">
           <template #icon>
             <n-icon :component="Add" />
           </template>
