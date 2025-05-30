@@ -49,7 +49,7 @@ const handleVisibilityChange = debounce(
 const handleMessage = async (message: any) => {
   if (message.type === "refreshCollections") {
     await refreshSpaces()
-    await refreshCollections(message.spaceId)
+    await refreshCollections(Number(message.spaceId))
   }
 }
 
