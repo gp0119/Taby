@@ -1,15 +1,16 @@
 import dataManager from "@/db"
 import dayjs from "dayjs"
+import debounce from "lodash-es/debounce"
 ;(async () => {
   const { hideRightClickMenu } = await chrome.storage.local.get([
     "hideRightClickMenu",
   ])
   if (!hideRightClickMenu) {
-    await updateContextMenus()
+    await _updateContextMenus()
   }
 })()
 
-async function updateContextMenus() {
+async function _updateContextMenus() {
   await chrome.contextMenus.removeAll()
   try {
     const spaces = await dataManager.getAllSpaceWithCollections()
@@ -68,6 +69,8 @@ async function updateContextMenus() {
   }
 }
 
+const updateContextMenus = debounce(_updateContextMenus, 300)
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "newSpace") {
     const newSpaceId = await dataManager.addSpace({
@@ -112,18 +115,18 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 })
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
+chrome.storage.onChanged.addListener(async (changes, namespace) => {
   if (namespace === "local" && changes.hideRightClickMenu) {
     if (changes.hideRightClickMenu.newValue) {
-      chrome.contextMenus.removeAll()
+      await chrome.contextMenus.removeAll()
     } else {
-      updateContextMenus()
+      await updateContextMenus()
     }
   }
 })
 
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener(async (request) => {
   if (request.type === "updateContextMenus") {
-    updateContextMenus()
+    await updateContextMenus()
   }
 })
