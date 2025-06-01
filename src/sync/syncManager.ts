@@ -150,6 +150,8 @@ class SyncManager {
   }
 
   uploadModifiedTablesImmediate = async () => {
+    const { accessToken, gistId } = await this.getToken()
+    if (!accessToken || !gistId) return
     const modifiedData: Partial<SyncData> = await this.getModifiedTables()
     if (isEmpty(modifiedData)) return
     await GistManager.uploadData(modifiedData)
