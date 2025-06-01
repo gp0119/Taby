@@ -1,5 +1,5 @@
 <template>
-  <PopoverWrapper :message="ft('edit', 'space')" placement="bottom-start">
+  <PopoverWrapper :message="ft('edit', 'space')" placement="bottom-end">
     <n-button
       tertiary
       :focusable="false"
