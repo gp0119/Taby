@@ -26,7 +26,7 @@ import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
 import { useTheme } from "@/hooks/useTheme"
 
-const { refreshSpaces, refreshCollections } = useRefresh()
+const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
 const { themeOverrides, theme } = useTheme()
 
 const loading = ref(true)
@@ -91,6 +91,7 @@ onMounted(async () => {
   await new Promise((resolve) => setTimeout(resolve, 100))
   await refreshSpaces()
   await refreshCollections()
+  await updateContextMenus()
   const isDownloaded = await syncManager.autoDownload()
   if (isDownloaded) {
     await refreshSpaces()

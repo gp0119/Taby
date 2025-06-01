@@ -60,7 +60,7 @@ defineProps<{
   collections: CollectionWithCards[]
 }>()
 
-const { refreshCollections } = useRefresh()
+const { refreshCollections, updateContextMenus } = useRefresh()
 
 const onDragEnd = async (event: any) => {
   const { newIndex, oldIndex, item } = event
@@ -68,6 +68,7 @@ const onDragEnd = async (event: any) => {
   const collectionId = item.getAttribute("data-id")
   await dataManager.moveCollection(Number(collectionId), oldIndex, newIndex)
   await refreshCollections()
+  await updateContextMenus()
 }
 </script>
 

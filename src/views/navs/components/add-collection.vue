@@ -30,7 +30,7 @@ import { movePosition } from "@/type"
 
 const { open } = useEditDialog()
 const { ft } = useHelpi18n()
-const { refreshCollections } = useRefresh()
+const { refreshCollections, updateContextMenus } = useRefresh()
 const spacesStore = useSpacesStore()
 function onAddCollection() {
   const formModel = ref<{
@@ -73,6 +73,7 @@ function onAddCollection() {
         formModel.value.position,
       )
       await refreshCollections()
+      await updateContextMenus()
     },
   })
 }

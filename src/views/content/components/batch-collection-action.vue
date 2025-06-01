@@ -51,7 +51,7 @@ import bottomAction from "@/components/bottom-action.vue"
 const show = ref(false)
 const batchCollectionStore = useBatchCollectionStore()
 
-const { refreshCollections } = useRefresh()
+const { refreshCollections, updateContextMenus } = useRefresh()
 const { ft, gt } = useHelpi18n()
 
 const onClose = () => {
@@ -82,7 +82,8 @@ const onHandleMove = async () => {
     position,
   )
   await refreshCollections()
-  refreshCollections(spaceId as number)
+  await refreshCollections(spaceId as number)
+  await updateContextMenus()
   closeDrawer()
 }
 
@@ -95,6 +96,7 @@ const onHandleDelete = async () => {
         batchCollectionStore.selectedCollectionIds,
       )
       await refreshCollections()
+      await updateContextMenus()
       closeDrawer()
     },
   })
@@ -112,6 +114,7 @@ const onHandleMerge = async () => {
     position,
   )
   await refreshCollections()
+  await updateContextMenus()
   closeDrawer()
 }
 </script>

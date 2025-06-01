@@ -15,7 +15,7 @@ async function updateContextMenus() {
   await chrome.contextMenus.removeAll()
   try {
     const spaces = await dataManager.getAllSpaceWithCollections()
-
+    console.log("spaces: ", spaces)
     chrome.contextMenus.create({
       id: "addTabToSpaceCollection",
       title: "Add to...",
@@ -122,5 +122,11 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     } else {
       updateContextMenus()
     }
+  }
+})
+
+chrome.runtime.onMessage.addListener((request) => {
+  if (request.type === "updateContextMenus") {
+    updateContextMenus()
   }
 })

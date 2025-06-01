@@ -23,7 +23,7 @@ import { useDuplicateCardStore } from "@/store/duplicate-card"
 import LogoWrapper from "./components/logo-wrapper.vue"
 
 const spacesStore = useSpacesStore()
-const { refreshSpaces, refreshTags } = useRefresh()
+const { refreshSpaces, refreshTags, updateContextMenus } = useRefresh()
 const duplicateCardStore = useDuplicateCardStore()
 
 const allSpaces = computed(() => spacesStore.spaces)
@@ -35,6 +35,7 @@ const onDragEnd = async (evt: SortableEvent) => {
   const currentSpaceId = itemEl.getAttribute("data-id")
   await dataManager.moveSpace(Number(currentSpaceId), oldIndex!, newIndex!)
   await refreshSpaces()
+  await updateContextMenus()
 }
 
 const { setLoading } = inject("loading") as {

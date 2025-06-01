@@ -574,8 +574,8 @@ class DataManager {
   }
 
   async getAllSpaceWithCollections(): Promise<SpaceWithCollections[]> {
-    const spaces = await db.spaces.toArray()
-    const collections = await db.collections.toArray()
+    const spaces = await db.spaces.orderBy("order").toArray()
+    const collections = await db.collections.orderBy("order").toArray()
     return spaces.map((space) => ({
       ...space,
       collections: collections.filter(
