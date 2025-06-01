@@ -1,7 +1,5 @@
 import dataManager from "@/db"
 import dayjs from "dayjs"
-
-// Service Worker 启动时立即执行
 ;(async () => {
   const { hideRightClickMenu } = await chrome.storage.local.get([
     "hideRightClickMenu",
@@ -15,7 +13,6 @@ async function updateContextMenus() {
   await chrome.contextMenus.removeAll()
   try {
     const spaces = await dataManager.getAllSpaceWithCollections()
-    console.log("spaces: ", spaces)
     chrome.contextMenus.create({
       id: "addTabToSpaceCollection",
       title: "Add to...",

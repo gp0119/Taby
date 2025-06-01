@@ -85,7 +85,6 @@ export const useSearchModal = () => {
     const tabId = tab.id!
     chrome.tabs.onUpdated.addListener(
       async function listener(updatedTabId, changeInfo) {
-        console.log("changeInfo: ", changeInfo)
         if (updatedTabId === tabId && changeInfo.favIconUrl) {
           const favicon = changeInfo.favIconUrl
           if (!favicon) return

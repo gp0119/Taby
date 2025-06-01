@@ -78,7 +78,6 @@ const icon = computed(
 )
 
 function onChangeLayoutMode(mode: layoutMode, side: "left" | "right") {
-  console.log("onChangeLayoutMode", mode, side)
   layoutStore.onUpdateLayoutMode(mode, side)
 }
 </script>

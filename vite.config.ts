@@ -76,7 +76,6 @@ export default defineConfig({
             chunkInfo.facadeModuleId!,
             path.extname(chunkInfo.facadeModuleId!),
           )
-          console.log("baseName: ", baseName)
           const saveArr = ["content", "service-worker", "newtab"]
           return `[name]/${saveArr.includes(baseName) ? baseName : chunkInfo.name}.js`
         },

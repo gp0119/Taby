@@ -101,7 +101,6 @@ class SyncManager {
     const modifiedTables = JSON.parse(
       localStorage.getItem("modifiedTables") || "[]",
     )
-    console.log("modifiedTables: ", modifiedTables)
     for (const tableName of modifiedTables) {
       const table = db[tableName as keyof typeof db]
       modifiedData[tableName as keyof SyncData] = await (
@@ -152,7 +151,6 @@ class SyncManager {
 
   uploadModifiedTablesImmediate = async () => {
     const modifiedData: Partial<SyncData> = await this.getModifiedTables()
-    console.log("modifiedData", modifiedData)
     if (isEmpty(modifiedData)) return
     await GistManager.uploadData(modifiedData)
     const now = Date.now()
@@ -197,17 +195,11 @@ class SyncManager {
           !localDownloadTime ||
           (remoteUpdateTime && remoteUpdateTime > localDownloadTime)
         ) {
-          console.log("Remote Gist potentially newer, downloading...", {
-            remoteUpdateTime,
-            localDownloadTime,
-          })
+          console.log("Remote Gist potentially newer, downloading...")
           await this.triggerDownload()
           resolve(true)
         } else {
-          console.log("Local data is up-to-date, skipping download.", {
-            remoteUpdateTime,
-            localDownloadTime,
-          })
+          console.log("Local data is up-to-date, skipping download.")
           resolve(false)
         }
       } catch (error) {

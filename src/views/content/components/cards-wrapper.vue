@@ -113,7 +113,6 @@ const debounceUpdateCardFavicon = debounce(
 function onHandleNoFavicon(tabId: number, cardId: number, activeId: number) {
   chrome.tabs.onUpdated.addListener(
     async function listener(updatedTabId, changeInfo) {
-      console.log("changeInfo: ", changeInfo)
       if (updatedTabId === tabId && changeInfo.favIconUrl) {
         const favicon = changeInfo.favIconUrl
         if (!favicon) return
