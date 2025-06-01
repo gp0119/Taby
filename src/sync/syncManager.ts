@@ -18,6 +18,9 @@ class SyncManager {
   uploadModifiedTablesDebounce: DebouncedFunc<() => Promise<void>>
 
   constructor() {
+    this.modifiedTables = new Set(
+      JSON.parse(localStorage.getItem("modifiedTables") || "[]") || [],
+    )
     this.uploadModifiedTablesDebounce = debounce(
       () => this.uploadModifiedTablesImmediate(),
       this.SYNC_INTERVAL,
