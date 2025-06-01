@@ -1,6 +1,16 @@
 import dataManager from "@/db"
 import dayjs from "dayjs"
 
+// Service Worker 启动时立即执行
+;(async () => {
+  const { hideRightClickMenu } = await chrome.storage.local.get([
+    "hideRightClickMenu",
+  ])
+  if (!hideRightClickMenu) {
+    await updateContextMenus()
+  }
+})()
+
 async function updateContextMenus() {
   await chrome.contextMenus.removeAll()
   try {
@@ -61,10 +71,6 @@ async function updateContextMenus() {
   }
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
-  await updateContextMenus()
-})
-
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "newSpace") {
     const newSpaceId = await dataManager.addSpace({
@@ -109,11 +115,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 })
 
-chrome.runtime.onMessage.addListener((request) => {
-  if (request.type === "updateContextMenus") {
-    updateContextMenus()
-  }
-  if (request.type === "hide-right-click-menu") {
-    chrome.contextMenus.removeAll()
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === "local" && changes.hideRightClickMenu) {
+    if (changes.hideRightClickMenu.newValue) {
+      chrome.contextMenus.removeAll()
+    } else {
+      updateContextMenus()
+    }
   }
 })

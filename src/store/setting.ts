@@ -27,12 +27,9 @@ export const useSettingStore = defineStore("Setting", () => {
     syncManager.setInterval(setting.value.saveAfterOperationTime)
   })
 
-  watchEffect(() => {
-    if (setting.value.hideRightClickMenu) {
-      chrome.runtime.sendMessage({ type: "hide-right-click-menu" })
-    } else {
-      chrome.runtime.sendMessage({ type: "updateContextMenus" })
-    }
+  watchEffect(async () => {
+    const hideRightClickMenu = setting.value.hideRightClickMenu
+    await chrome.storage.local.set({ hideRightClickMenu })
   })
 
   watchEffect(() => {
