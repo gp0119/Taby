@@ -50,6 +50,12 @@ const handleMessage = async (message: any) => {
   if (message.type === "refreshCollections") {
     await refreshSpaces()
     await refreshCollections(Number(message.spaceId))
+    if (message.modifiedTables) {
+      message.modifiedTables.forEach((table: string) => {
+        syncManager.addModifiedTable(table)
+      })
+      await syncManager.triggerUpload()
+    }
   }
 }
 
