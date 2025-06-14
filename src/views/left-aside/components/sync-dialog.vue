@@ -115,7 +115,7 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const { ft } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
-const { refreshSpaces, refreshCollections } = useRefresh()
+const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
 const syncTypeOptions = ref([
   { label: "GitHub", value: "github" },
   { label: "Gitee", value: "gitee" },
@@ -216,6 +216,7 @@ const handleDownload = () => {
           })
           await refreshSpaces()
           await refreshCollections()
+          await updateContextMenus()
           message.success(ft("success", "download"))
           downloadLoading.value = false
           show.value = false
