@@ -25,7 +25,7 @@
         <div
           class="flex flex-1 select-none items-center justify-center bg-hover-color font-bold text-gray-400"
         >
-          {{ index + 1 }}
+          {{ tabCount }}
         </div>
       </div>
     </template>
@@ -63,6 +63,7 @@ import { Card } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useLayoutStore } from "@/store/layout"
+import { isNewTabPage } from "@/utils"
 
 const layoutStore = useLayoutStore()
 const wrapperRef = ref<HTMLDivElement | null>(null)
@@ -105,12 +106,16 @@ onUnmounted(() => {
   el.removeEventListener("wheel", onWheel)
 })
 
-defineProps<{
+const props = defineProps<{
   tab: Card[]
   active: number | string
   windowId: number | string
   index: number
 }>()
+
+const tabCount = computed(() => {
+  return props.tab.filter((tab) => !isNewTabPage(tab.url)).length
+})
 
 const emit = defineEmits<{
   (e: "update:active", windowId: number): void
