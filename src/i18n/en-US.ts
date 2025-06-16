@@ -65,11 +65,6 @@ export default {
   "delete-cards-confirm": "Are you sure you want to delete these Cards?",
   "download-remote-confirm":
     "Are you sure you want to download remote data? This will overwrite local data, please be careful.",
-  "select-cards":
-    "<span class='text-primary mx-2'>{type}</span> Cards Selected",
-  "select-collections":
-    "<span class='text-primary mx-2'>{type}</span> Collections Selected",
-  "select-tabs": "<span class='text-primary mx-2'>{type}</span> Tabs Selected",
   tab: "Tab",
   "no-tabs": "No tabs",
   "open-tabs": "Opened Tabs",

@@ -1,14 +1,12 @@
 <template>
   <bottom-action v-model:show="show" @close="onClose">
     <div
-      class="flex-center select-none font-medium text-text-secondary"
-      v-html="
-        gt(
-          'select-collections',
-          batchCollectionStore.selectedCollectionIds.length,
-        )
-      "
-    />
+      class="flex-center h-[34px] w-[34px] rounded-lg border-[2px] border-primary text-base"
+      :class="{ 'animate-zoom-in-out': animated }"
+      @animationend="onAnimationEnd"
+    >
+      {{ batchCollectionStore.selectedCollectionIds.length }}
+    </div>
     <div class="flex items-center justify-between gap-x-4">
       <n-button tertiary @click="onHandleMove">
         <template #icon>
@@ -39,7 +37,6 @@
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { ref } from "vue"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
 import { FolderMoveTo, Delete, DirectionMerge } from "@vicons/carbon"
 import dataManager from "@/db"
@@ -47,28 +44,23 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import bottomAction from "@/components/bottom-action.vue"
+import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
 
-const show = ref(false)
 const batchCollectionStore = useBatchCollectionStore()
+const { show, animated, onAnimationEnd } = useAnimatedPresence(
+  () => batchCollectionStore.selectedCollectionIds.length,
+)
 
 const { refreshCollections, updateContextMenus } = useRefresh()
-const { ft, gt } = useHelpi18n()
+const { ft } = useHelpi18n()
 
 const onClose = () => {
   batchCollectionStore.clearSelectedCollectionIds()
 }
 
 const closeDrawer = () => {
-  show.value = false
   batchCollectionStore.clearSelectedCollectionIds()
 }
-
-watch(
-  () => batchCollectionStore.selectedCollectionIds.length,
-  () => {
-    show.value = batchCollectionStore.selectedCollectionIds.length > 0
-  },
-)
 
 const { open: onDeleteComfirm } = useDeleteDialog()
 const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()

@@ -1,9 +1,12 @@
 <template>
   <bottom-action v-model:show="show" @close="onClose">
     <div
-      class="flex-center select-none font-medium text-text-secondary"
-      v-html="gt('select-cards', batchCardStore.selectedCardIds.length)"
-    />
+      class="flex-center h-[34px] w-[34px] rounded-lg border-[2px] border-primary text-base"
+      :class="{ 'animate-zoom-in-out': animated }"
+      @animationend="onAnimationEnd"
+    >
+      {{ batchCardStore.selectedCardIds.length }}
+    </div>
     <div class="flex items-center justify-between gap-x-4">
       <n-button tertiary @click="onHandleMove">
         <template #icon>
@@ -25,33 +28,27 @@
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { ref } from "vue"
 import { useBatchCardStore } from "@/store/batch-card"
 import { FolderMoveTo, Delete } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import bottomAction from "@/components/bottom-action.vue"
+import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
 
 const batchCardStore = useBatchCardStore()
-const show = ref(false)
+const { show, animated, onAnimationEnd } = useAnimatedPresence(
+  () => batchCardStore.selectedCardIds.length,
+)
 const { refreshCollections } = useRefresh()
-const { ft, gt } = useHelpi18n()
+const { ft } = useHelpi18n()
 
 const onClose = () => {
   batchCardStore.clearSelectedCardIds()
 }
 
 const closeDrawer = () => {
-  show.value = false
   batchCardStore.clearSelectedCardIds()
 }
-
-watch(
-  () => batchCardStore.selectedCardIds.length,
-  () => {
-    show.value = batchCardStore.selectedCardIds.length > 0
-  },
-)
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleMove = async () => {

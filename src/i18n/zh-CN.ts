@@ -61,11 +61,6 @@ export default {
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
   "delete-cards-confirm": "确定删除这些 Cards 吗?",
   "download-remote-confirm": "确定下载远程数据吗?这会覆盖本地数据,请谨慎操作",
-  "select-cards":
-    "已选择 <span class='text-primary mx-2'>{type}</span> 个 Card",
-  "select-collections":
-    "已选择 <span class='text-primary mx-2'>{type}</span> 个 Collection",
-  "select-tabs": "已选择 <span class='text-primary mx-2'>{type}</span> 个 Tab",
   tab: "标签页",
   "no-tabs": "这里没有标签",
   "open-tabs": "打开的标签",

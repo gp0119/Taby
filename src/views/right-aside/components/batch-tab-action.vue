@@ -1,9 +1,12 @@
 <template>
   <bottom-action v-model:show="show" @close="clear">
     <div
-      class="flex-center select-none font-medium text-text-secondary"
-      v-html="gt('select-tabs', batchTabsStore.selectedTabIds.length)"
-    />
+      class="flex-center h-[34px] w-[34px] rounded-lg border-[2px] border-primary text-base"
+      :class="{ 'animate-zoom-in-out': animated }"
+      @animationend="onAnimationEnd"
+    >
+      {{ batchTabsStore.selectedTabIds.length }}
+    </div>
 
     <div class="flex items-center justify-between gap-x-4">
       <n-button secondary @click="onHandleSave">
@@ -32,18 +35,20 @@
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
-import { ref } from "vue"
 import { FolderMoveTo, CloseOutline } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import bottomAction from "@/components/bottom-action.vue"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
+import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
 
 const batchTabsStore = useBatchTabsStore()
-const show = ref(false)
+const { show, animated, onAnimationEnd } = useAnimatedPresence(
+  () => batchTabsStore.selectedTabIds.length,
+)
 const { refreshCollections } = useRefresh()
-const { ft, gt } = useHelpi18n()
+const { ft } = useHelpi18n()
 const { removeTabs, getTabs, groupTabs } = useChromeTabs()
 
 const clear = () => {
@@ -51,16 +56,8 @@ const clear = () => {
 }
 
 const closeDrawer = () => {
-  show.value = false
   clear()
 }
-
-watch(
-  () => batchTabsStore.selectedTabIds.length,
-  () => {
-    show.value = batchTabsStore.selectedTabIds.length > 0
-  },
-)
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleSave = async () => {

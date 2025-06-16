@@ -56,11 +56,20 @@ export default {
             opacity: "0",
           },
         },
+        zoomInOut: {
+          "0%, 100%": {
+            transform: "scale(1)",
+          },
+          "50%": {
+            transform: "scale(1.2)",
+          },
+        },
       },
       animation: {
         "scale-in": "scaleIn 0.2s ease-out",
         show: "show 0.2s ease-out",
         hide: "hide 0.2s ease-out",
+        "zoom-in-out": "zoomInOut 0.3s ease-in-out",
       },
       screens: {
         400: "400px",
