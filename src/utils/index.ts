@@ -21,3 +21,8 @@ export function getWsrvFavicon(url: string) {
 export function isNewTabPage(url: string) {
   return url === "chrome://newtab/"
 }
+
+export function getDomain(url: string) {
+  if (!url) return ""
+  return new URL(url)?.hostname ?? ""
+}

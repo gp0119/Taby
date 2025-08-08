@@ -60,6 +60,7 @@ import { useDialog } from "naive-ui"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useSettingStore } from "@/store/setting"
+import { getDomain } from "@/utils"
 
 defineProps<{
   cards: iCard[]
@@ -158,6 +159,7 @@ function onEdit(child: iCard) {
     title: child.title,
     description: child.description,
     favicon: child.favicon,
+    url: child.url,
   })
   openEditDialog({
     title: () => {
@@ -190,7 +192,16 @@ function onEdit(child: iCard) {
           />
         </n-form-item>
         <n-form-item label={`${ft("url")}:`}>
-          <n-input v-model:value={child.url} disabled />
+          <n-input
+            v-model:value={formModel.value.url}
+            onBlur={() => {
+              const originDomain = getDomain(child.url)
+              const newDomain = getDomain(formModel.value.url)
+              if (originDomain !== newDomain) {
+                formModel.value.favicon = undefined
+              }
+            }}
+          />
         </n-form-item>
         <n-form-item
           v-slots={{
@@ -261,6 +272,7 @@ function onEdit(child: iCard) {
                 title: formModel.value.title,
                 description: formModel.value.description,
                 faviconId,
+                url: formModel.value.url,
               })
               await refreshCollections()
               close()

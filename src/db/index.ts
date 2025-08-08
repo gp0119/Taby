@@ -334,12 +334,19 @@ class DataManager {
       title,
       description,
       faviconId,
-    }: { title: string; description?: string; faviconId?: number },
+      url,
+    }: {
+      title: string
+      description?: string
+      faviconId?: number
+      url?: string
+    },
   ) {
     return db.cards.update(id, {
       title,
       description,
       faviconId,
+      url,
     })
   }
 
