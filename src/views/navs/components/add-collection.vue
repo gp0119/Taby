@@ -27,7 +27,15 @@ import { useRefresh } from "@/hooks/useRresh.ts"
 import dataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { movePosition } from "@/type"
+import { useDraggableStore } from "@/store/draggable.js"
+import { useBatchCardStore } from "@/store/batch-card.js"
+import { useBatchCollectionStore } from "@/store/batch-collection.js"
+import { useBatchTabsStore } from "@/store/batch-tabs.js"
 
+const draggableStore = useDraggableStore()
+const batchCardStore = useBatchCardStore()
+const batchCollectionStore = useBatchCollectionStore()
+const batchTabsStore = useBatchTabsStore()
 const { open } = useEditDialog()
 const { ft } = useHelpi18n()
 const { refreshCollections, updateContextMenus } = useRefresh()
@@ -62,19 +70,66 @@ function onAddCollection() {
         </n-form-item>
       </n-form>
     ),
-    onPositiveClick: async () => {
-      if (!formModel.value.title) return
-      await dataManager.addCollection(
-        {
-          title: formModel.value.title,
-          spaceId: spacesStore.activeId,
-          labelIds: [],
-        },
-        formModel.value.position,
+    renderAction: ({ close }) => {
+      return (
+        <div class="flex w-full items-center justify-between gap-2">
+          <n-button
+            type="primary"
+            size="small"
+            class="mr-auto"
+            onClick={async () => {
+              if (!formModel.value.title) return
+              await onHandleAddCollection(formModel)
+              onToggleDraggable(true)
+              close()
+            }}
+          >
+            {ft("save-and-enter-drag-mode")}
+          </n-button>
+          <n-button size="small" onClick={() => close()}>
+            {ft("cancel")}
+          </n-button>
+          <n-button
+            type="primary"
+            size="small"
+            onClick={async () => {
+              if (!formModel.value.title) return
+              await onHandleAddCollection(formModel)
+              close()
+            }}
+          >
+            {ft("confirm")}
+          </n-button>
+        </div>
       )
-      await refreshCollections()
-      await updateContextMenus()
     },
   })
+}
+
+async function onHandleAddCollection(
+  formModel: Ref<{
+    title: string
+    position: movePosition
+  }>,
+) {
+  await dataManager.addCollection(
+    {
+      title: formModel.value.title,
+      spaceId: spacesStore.activeId,
+      labelIds: [],
+    },
+    formModel.value.position,
+  )
+  await refreshCollections()
+  await updateContextMenus()
+}
+
+function onToggleDraggable(value: boolean) {
+  draggableStore.setDraggable(value)
+  if (value) {
+    batchCardStore.clearSelectedCardIds()
+    batchCollectionStore.clearSelectedCollectionIds()
+    batchTabsStore.clearSelectedTabs()
+  }
 }
 </script>

@@ -120,4 +120,5 @@ export default {
   "hide-right-click-menu": "Hide Right Click Menu",
   "group-tabs": "Group Tabs",
   "close-duplicate-tabs": "Close Duplicate Tabs",
+  "save-and-enter-drag-mode": "Save and Enter Drag",
 }

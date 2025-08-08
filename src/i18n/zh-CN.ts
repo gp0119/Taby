@@ -114,4 +114,5 @@ export default {
   "hide-right-click-menu": "隐藏右键菜单",
   "group-tabs": "分组标签",
   "close-duplicate-tabs": "关闭重复标签",
+  "save-and-enter-drag-mode": "保存并进入拖拽",
 }
