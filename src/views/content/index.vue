@@ -6,8 +6,6 @@
       :items="collections"
       :min-item-size="160"
       class="dynamic-scroller-optimize scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-60px)] overflow-y-auto"
-      :prerender="5"
-      :buffer="500"
       key-field="id"
     >
       <template #default="{ item, index, active }">
@@ -17,7 +15,7 @@
           :active="active"
           :data-index="index"
           :data-active="active"
-          :size-dependencies="[item.cards]"
+          :size-dependencies="[item.cards.length]"
           class="py-2 pl-4 pr-2"
         >
           <CollectionCollapse :collection="item">

@@ -168,7 +168,7 @@ function onEdit(child: iCard) {
             size="small"
             class="w-[28px]"
             v-slots={{
-              icon: () => <Favicon child={child} />,
+              icon: () => <Favicon child={child} lazyload={false} />,
             }}
           />
           <span class="ml-2">{ft("edit", "card")}</span>

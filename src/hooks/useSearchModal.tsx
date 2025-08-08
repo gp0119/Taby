@@ -133,8 +133,12 @@ export const useSearchModal = () => {
                   }}
                 >
                   <div class="flex items-center px-2.5 py-1.5 text-text-primary">
-                    <Favicon class="h-[28px] w-[28px]" child={card} />
-                    <div class="flex flex-1 flex-col">
+                    <Favicon
+                      class="h-[28px] w-[28px]"
+                      child={card}
+                      lazyload={false}
+                    />
+                    <div class="ml-2 flex flex-1 flex-col">
                       <span class="flex items-center text-ellipsis">
                         <span
                           v-html={card.title.replace(

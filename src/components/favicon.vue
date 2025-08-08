@@ -1,12 +1,11 @@
 <template>
   <n-avatar
-    :img-props="{
-      crossorigin: 'anonymous',
-      referrerpolicy: 'no-referrer',
-    }"
     :src="innerFavicon"
-    lazy
+    :lazy="lazyload"
     class="card-avatar favicon h-5 w-5"
+    :intersection-observer-options="
+      lazyload ? { root: props.containerClass } : undefined
+    "
   >
     <template #placeholder>
       <div class="flex-center favicon h-5 w-5">
@@ -25,9 +24,16 @@ import { Card } from "@/type.ts"
 import { getGoogleFavicon, getFaviconFromCache, getWsrvFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
-const props = defineProps<{
-  child: Card
-}>()
+const props = withDefaults(
+  defineProps<{
+    child: Card
+    containerClass?: string
+    lazyload?: boolean
+  }>(),
+  {
+    lazyload: true,
+  },
+)
 
 const innerFavicon = computed(() => {
   const { favicon, url } = props.child
