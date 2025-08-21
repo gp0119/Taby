@@ -127,11 +127,11 @@ function onImport() {
         <n-form model={formModel.value}>
           <n-form-item>
             <n-radio-group class="w-full" v-model:value={type.value}>
-              <n-radio-button class="w-1/2 text-center" value="toby">
-                {ft("import-from", "toby")}
-              </n-radio-button>
               <n-radio-button class="w-1/2 text-center" value="taby">
                 {ft("import-from", "taby")}
+              </n-radio-button>
+              <n-radio-button class="w-1/2 text-center" value="toby">
+                {ft("import-from", "toby")}
               </n-radio-button>
             </n-radio-group>
           </n-form-item>
