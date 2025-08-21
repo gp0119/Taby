@@ -6,7 +6,7 @@
     :show="tagsStore.isTagOpen"
     style="padding: 0"
     @select="handleTagSelect"
-    @update:show="tagsStore.toggleTagOpen"
+    @update:show="onUpdateShow"
   >
     <template #trigger>
       <n-button
@@ -82,5 +82,12 @@ const handleTagSelect = (_key: number, option: Label) => {
   }
   tagsStore.setSelectedTag(option)
   tagsStore.toggleTagOpen()
+}
+
+const onUpdateShow = async (show: boolean) => {
+  if (show) {
+    await tagsStore.fetchCollectionsTags()
+  }
+  tagsStore.toggleTagOpen(show)
 }
 </script>

@@ -21,10 +21,12 @@ import { SortableEvent } from "vue-draggable-plus"
 import dataManager from "@/db"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import LogoWrapper from "./components/logo-wrapper.vue"
+import { useTagsStore } from "@/store/tags"
 
 const spacesStore = useSpacesStore()
-const { refreshSpaces, refreshTags, updateContextMenus } = useRefresh()
+const { refreshSpaces, updateContextMenus } = useRefresh()
 const duplicateCardStore = useDuplicateCardStore()
+const tagsStore = useTagsStore()
 
 const allSpaces = computed(() => spacesStore.spaces)
 const activeSpaceId = computed(() => spacesStore.activeId)
@@ -45,7 +47,7 @@ async function onHandleSpaceClick(space: Space) {
   if (space.id === spacesStore.activeId) return
   setLoading(true)
   await spacesStore.setActiveSpace(space.id!)
-  await refreshTags()
+  tagsStore.setSelectedTag(null)
   duplicateCardStore.clearDuplicateCards()
   setLoading(false)
 }
