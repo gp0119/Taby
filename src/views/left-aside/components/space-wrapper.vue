@@ -4,6 +4,7 @@
     item-key="id"
     class="flex flex-col gap-y-1"
     ghost-class="sortable-ghost-dashed-border"
+    :disabled="layoutStore.isLeftCollapsed"
     @end="onDragEnd"
   >
     <div
