@@ -32,19 +32,19 @@ Taby 是一款简约而功能丰富的浏览器新标签页扩展，旨在提升
 ## 📷 截图 | Screenshots
 
 <div align="center">
-  <img src="screenshots/img1.png" alt="Taby Light Mode" width="600">
+  <img src="screenshots/img1.png" alt="img1" width="800">
     <br>
     <br>
-  <img src="screenshots/img2.png" alt="Taby Dark Mode" width="600">
+  <img src="screenshots/img2.png" alt="img2" width="800">
     <br>
     <br>
-  <img src="screenshots/img3.png" alt="Taby Light Mode" width="600">
+  <img src="screenshots/img3.png" alt="img3" width="800">
     <br>
     <br>
-  <img src="screenshots/img4.png" alt="Taby Dark Mode" width="600">
+  <img src="screenshots/img4.png" alt="img4" width="800">
     <br>
     <br>
-  <img src="screenshots/img5.png" alt="Taby Dark Mode" width="600">
+  <img src="screenshots/img5.png" alt="img5" width="800">
 </div>
 
 ## 🚀 安装 | Installation
