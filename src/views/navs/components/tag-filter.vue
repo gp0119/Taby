@@ -17,7 +17,13 @@
       >
         <template #icon>
           <n-icon size="20">
-            <TagGroup />
+            <TagGroup v-if="tagsStore.selectedTagIds.length < 2" />
+            <template v-else>
+              <ShapeIntersect20Regular
+                v-if="tagsStore.tagFilterType === 'AND'"
+              />
+              <ShapeUnion20Regular v-else />
+            </template>
           </n-icon>
         </template>
         <div
