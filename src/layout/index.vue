@@ -27,9 +27,7 @@
       }"
     >
       <navs />
-      <KeepAlive :max="10">
-        <content :key="`space-${spacesStore.activeId}`" />
-      </KeepAlive>
+      <content />
     </main>
     <pinSide
       :mode="layoutStore.rightLayoutMode"
@@ -50,8 +48,6 @@ import rightAside from "@/views/right-aside/index.vue"
 import content from "@/views/content/index.vue"
 import { useLayoutStore } from "@/store/layout"
 import LeftActions from "@/views/left-aside/components/left-actions.vue"
-import { useSpacesStore } from "@/store/spaces"
 
 const layoutStore = useLayoutStore()
-const spacesStore = useSpacesStore()
 </script>
