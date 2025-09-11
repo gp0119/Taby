@@ -1,11 +1,12 @@
 <template>
   <n-popover
-    trigger="hover"
+    trigger="click"
     placement="bottom-end"
     :show-arrow="false"
     class="min-w-[150px]"
+    content-style="padding: 0;"
     :show="isShowTagAction"
-    @update:show="setIsShowTagAction"
+    @update:show="onUpdateShowTagAction"
   >
     <template #trigger>
       <n-button quaternary size="small" class="w-[28px]">
@@ -19,34 +20,31 @@
         <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
       </n-text>
     </template>
-    <div
-      class="scrollbar-thin scrollbar-gutter-stable max-h-[300px] overflow-y-auto"
-    >
-      <div v-if="tagsStore.tags.length > 0" class="flex flex-col gap-y-2">
-        <div
-          v-for="tag in tagsStore.tags"
-          :key="tag.id"
-          class="group/tag flex items-center justify-between"
-        >
-          <Tag
-            :tag="tag"
-            :closeable="false"
+    <template #default>
+      <div class="scrollbar-thin max-h-[400px] overflow-y-auto">
+        <div v-if="tagsStore.tags.length > 0" class="flex flex-col">
+          <div
+            v-for="tag in tagsStore.tags"
+            :key="tag.id"
+            class="group/tag flex cursor-pointer items-center justify-between px-2.5 py-1.5 hover:bg-hover-color"
             @click="addTagforCollection(tag.id)"
-          />
-          <PopoverWrapper :message="ft('edit', 'tag')">
-            <n-icon
-              size="16"
-              :component="TagEdit"
-              class="ml-1 mr-4 hidden cursor-pointer text-primary group-hover/tag:inline-flex"
-              @click="onEditTag(tag)"
-            />
-          </PopoverWrapper>
+          >
+            <Tag :tag="tag" :closeable="false" />
+            <PopoverWrapper :message="ft('edit', 'tag')">
+              <n-icon
+                size="16"
+                :component="TagEdit"
+                class="ml-1 hidden cursor-pointer text-primary group-hover/tag:inline-flex"
+                @click.stop="onEditTag(tag)"
+              />
+            </PopoverWrapper>
+          </div>
+        </div>
+        <div v-else class="!bg-card-color text-center text-text-secondary">
+          {{ ft("no-tags") }}
         </div>
       </div>
-      <div v-else class="!bg-card-color text-center text-text-secondary">
-        {{ ft("no-tags") }}
-      </div>
-    </div>
+    </template>
     <template #footer>
       <n-input-group>
         <color-select v-model:value="selectedColor" size="tiny" />
@@ -57,6 +55,11 @@
           size="tiny"
           maxlength="10"
         />
+        <n-button size="tiny" @click="saveAndAddTag">
+          <template #icon>
+            <n-icon :component="SaveAnnotation" />
+          </template>
+        </n-button>
         <n-button size="tiny" @click="addTag">
           <template #icon>
             <n-icon :component="Checkmark" />
@@ -70,7 +73,13 @@
 <script setup lang="tsx">
 import { COLOR_LIST } from "@/utils/constants.ts"
 import ColorSelect from "@components/color-select.vue"
-import { TagGroup, TagEdit, Checkmark, Delete } from "@vicons/carbon"
+import {
+  TagGroup,
+  TagEdit,
+  Checkmark,
+  Delete,
+  SaveAnnotation,
+} from "@vicons/carbon"
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
 import dataManager from "@/db"
@@ -99,6 +108,12 @@ const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
   setIsShowTagAction: (value: boolean) => void
 }
 
+const onUpdateShowTagAction = (value: boolean) => {
+  selectedColor.value =
+    COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)]
+  setIsShowTagAction(value)
+}
+
 onMounted(async () => {
   await tagsStore.fetchTags()
 })
@@ -110,9 +125,20 @@ const addTag = () => {
   })
   newTag.value.title = ""
 }
+
 const addTagforCollection = async (id: number) => {
   await dataManager.addTagforCollection(props.item.id, id)
   await refreshCollections()
+}
+
+const saveAndAddTag = async () => {
+  if (newTag.value.title === "") return
+  const tagId = await tagsStore.addTag({
+    title: newTag.value.title,
+    color: selectedColor.value,
+  })
+  newTag.value.title = ""
+  await addTagforCollection(tagId)
 }
 
 const { open: openEditDialog } = useEditDialog()

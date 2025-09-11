@@ -18,8 +18,9 @@ export const useTagsStore = defineStore("tags", () => {
   }
 
   async function addTag(tag: Omit<Label, "id">) {
-    await dataManager.addLabel(tag.title, tag.color)
+    const id = await dataManager.addLabel(tag.title, tag.color)
     await fetchTags()
+    return id
   }
 
   async function addSelectedTag(tag: Label) {
