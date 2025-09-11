@@ -113,8 +113,8 @@ withDefaults(
 
 const emit = defineEmits(["click", "edit", "check", "delete"])
 
-function onHandleClick() {
-  emit("click")
+function onHandleClick(e: MouseEvent) {
+  emit("click", e)
 }
 
 function onHandleEdit() {

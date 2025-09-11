@@ -29,7 +29,7 @@
         batchCollectionStore.selectedCollectionIds.length <= 0 &&
         batchTabsStore.selectedTabIds.length <= 0
       "
-      @click="onHandleClick(card)"
+      @click="onHandleClick($event, card)"
       @edit="onEdit(card)"
       @check="onHandleCheckbox($event, card)"
     />
@@ -79,10 +79,13 @@ const settingStore = useSettingStore()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
-async function onHandleClick(child: any) {
+async function onHandleClick(e: MouseEvent, child: any) {
   const activeId = spacesStore.activeId
   let tabId: number
-  if (!settingStore.getSetting("openInNewWindow")) {
+  if (e.ctrlKey || e.metaKey) {
+    const tab = await chrome.tabs.create({ url: child.url, active: false })
+    tabId = tab.id!
+  } else if (!settingStore.getSetting("openInNewWindow")) {
     const currentTab = (
       await chrome.tabs.query({
         active: true,
