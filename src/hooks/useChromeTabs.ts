@@ -73,8 +73,21 @@ export function useChromeTabs() {
     return chrome.tabs.create({ url: url })
   }
 
-  async function openTabs(urls: string[]) {
-    return Promise.all(urls.map((url) => chrome.tabs.create({ url })))
+  async function openTabs(
+    urls: string[],
+    opts: { windowId?: number; background?: boolean } = {},
+  ) {
+    const { windowId, background = false } = opts
+    const result: chrome.tabs.Tab[] = []
+    for (let i = 0; i < urls.length; i++) {
+      const tab = await chrome.tabs.create({
+        url: urls[i],
+        windowId,
+        active: background ? false : i === 0, // 仅第一张前台，其他后台
+      })
+      result.push(tab)
+    }
+    return result
   }
 
   async function closeAllTabsExceptCurrent(windowId: number) {
@@ -93,24 +106,53 @@ export function useChromeTabs() {
     activeWindowId.value = windowId
   }
 
-  async function groupTabs(tabsIds: number[], title: string) {
-    const groupId = await chrome.tabs.group({ tabIds: tabsIds })
-    const colors = [
-      "grey",
-      "blue",
-      "red",
-      "yellow",
-      "green",
-      "pink",
-      "purple",
-      "cyan",
-      "orange",
-    ] as const
+  const GROUP_COLORS = [
+    "grey",
+    "blue",
+    "red",
+    "yellow",
+    "green",
+    "pink",
+    "purple",
+    "cyan",
+    "orange",
+  ] as const
+
+  function randomColor() {
+    return GROUP_COLORS[Math.floor(Math.random() * GROUP_COLORS.length)]
+  }
+
+  async function groupTabs(tabIds: number[], title: string, windowId?: number) {
+    const groupId = await chrome.tabs.group(
+      windowId ? { tabIds, createProperties: { windowId } } : { tabIds },
+    )
+
     await chrome.tabGroups.update(groupId, {
-      title: title,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      title,
+      color: randomColor(),
     })
+
     return groupId
+  }
+
+  async function openInNewWindow(urls: string[]) {
+    const first = urls[0]
+    const win = await chrome.windows.create({ url: first, focused: true })
+    const created: chrome.tabs.Tab[] = []
+
+    // windows.create 可能已返回首个 tab
+    if (win.tabs && win.tabs[0]) created.push(win.tabs[0])
+
+    // 其余 URL 加到同一窗口中，后台创建即可
+    for (let i = 1; i < urls.length; i++) {
+      const tab = await chrome.tabs.create({
+        url: urls[i],
+        windowId: win.id,
+        active: false,
+      })
+      created.push(tab)
+    }
+    return created
   }
 
   return {
@@ -126,5 +168,6 @@ export function useChromeTabs() {
     activeWindowId,
     updateActiveWindowId,
     groupTabs,
+    openInNewWindow,
   }
 }
