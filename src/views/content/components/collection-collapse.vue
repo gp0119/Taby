@@ -8,10 +8,12 @@
     }"
   >
     <div
-      class="group/collection-title flex w-full items-center justify-between px-6 py-3"
+      class="group/collection-title flex w-full items-center justify-between overflow-hidden px-6"
     >
-      <div class="flex-center select-none">
-        <div class="flex-center relative">
+      <div
+        class="flex flex-1 select-none items-center justify-start overflow-hidden"
+      >
+        <div class="flex-center relative py-3">
           <n-checkbox
             class="absolute -left-5 mr-2 hidden w-[20px] group-hover/collection-title:block"
             :class="{
@@ -29,8 +31,9 @@
             "
             @update:checked="onHandleCheckbox($event, collection.id)"
           />
+          <!-- 标题 -->
           <div
-            class="flex-center cursor-pointer text-text-primary"
+            class="flex-center cursor-pointer flex-nowrap text-text-primary"
             :class="{
               '!text-primary':
                 batchCollectionStore.selectedCollectionIds.includes(
@@ -46,28 +49,40 @@
             >
               <ChevronForward />
             </n-icon>
-            <span class="ml-2 text-lg font-medium">
+            <span class="ml-2 whitespace-nowrap text-lg font-medium">
               {{ collection.title }}
             </span>
           </div>
-          <span class="mx-4 h-[16px] w-[0.5px] bg-text-secondary" />
+
+          <span
+            class="mx-4 h-[16px] w-[0.5px] flex-shrink-0 bg-text-secondary"
+          />
+
+          <!-- 卡片数量 -->
           <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
             <div
               class="flex cursor-pointer items-center rounded bg-hover-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
               @click="onOpenCollection(collection)"
             >
-              {{ collection.cards.length }} cards
+              <span class="whitespace-nowrap">
+                {{ collection.cards.length }} cards
+              </span>
               <n-icon size="12" :component="ArrowUpRight" />
             </div>
           </PopoverWrapper>
         </div>
         <span
           v-if="collection.labels.length > 0"
-          class="mx-4 h-[16px] w-[0.5px] bg-text-secondary"
+          class="mx-4 h-[16px] w-[0.5px] flex-shrink-0 bg-text-secondary"
         />
+
+        <!-- 标签 -->
         <Tags :labels="collection.labels" :collection-id="collection.id" />
       </div>
-      <CollectionAction :item="collection" />
+      <!-- 操作 -->
+      <div class="flex min-w-[120px] flex-shrink-0 items-center justify-end">
+        <CollectionAction :item="collection" />
+      </div>
     </div>
 
     <div
