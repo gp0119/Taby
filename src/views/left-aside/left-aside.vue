@@ -47,7 +47,7 @@ async function onHandleSpaceClick(space: Space) {
   if (space.id === spacesStore.activeId) return
   setLoading(true)
   await spacesStore.setActiveSpace(space.id!)
-  tagsStore.setSelectedTag(null)
+  tagsStore.resetSelectedTag()
   duplicateCardStore.clearDuplicateCards()
   setLoading(false)
 }

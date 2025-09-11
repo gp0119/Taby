@@ -112,7 +112,7 @@ const layoutStore = useLayoutStore()
 const showSyncDialog = ref(false)
 
 function onImport() {
-  const type = ref("toby")
+  const type = ref("taby")
   const formModel = ref<{
     spaceId: number
     fileList: UploadFileInfo[]

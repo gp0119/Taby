@@ -18,11 +18,17 @@
         border-radius="10"
         icon-color="#fff"
         size="14"
-        class="bg-error-color absolute -right-1.5 -top-1.5 z-10 hidden group-hover/tag:inline-flex"
+        class="absolute -right-1.5 -top-1.5 z-10 hidden bg-error-color group-hover/tag:inline-flex"
         @click.stop="onDeleteTag"
       >
         <n-icon :component="Close" />
       </n-icon-wrapper>
+      <n-icon
+        v-if="removeable"
+        :component="Close"
+        size="14"
+        @click.stop="onRemoveTag"
+      />
     </div>
   </n-tag>
 </template>
@@ -31,17 +37,28 @@
 import { Label } from "@/type"
 import { Close } from "@vicons/ionicons5"
 
-defineProps<{
-  tag: Label
-  closeable?: boolean
-  titleClass?: string
-}>()
+withDefaults(
+  defineProps<{
+    tag: Label
+    closeable?: boolean
+    titleClass?: string
+    removeable?: boolean
+  }>(),
+  {
+    removeable: false,
+  },
+)
 
 const emit = defineEmits<{
   (e: "delete"): void
+  (e: "remove"): void
 }>()
 
 const onDeleteTag = async () => {
   emit("delete")
+}
+
+const onRemoveTag = async () => {
+  emit("remove")
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
   <n-popover
     trigger="hover"
-    placement="bottom-end"
+    placement="bottom-start"
     :show-arrow="false"
     :show="tagsStore.isTagOpen"
     style="padding: 0"
@@ -13,36 +13,94 @@
         tertiary
         :focusable="false"
         size="small"
-        class="!shadow-btn-shadow"
+        class="min-w-[150px] justify-start !shadow-btn-shadow [&_.n-button\_\_content]:!w-full"
       >
         <template #icon>
           <n-icon size="20">
             <TagGroup />
           </n-icon>
         </template>
-        <template v-if="tagsStore.selectedTag">
-          <Tag
-            title-class="w-[60px] text-ellipsis"
-            :tag="tagsStore.selectedTag"
-            :closeable="false"
-          />
-        </template>
-        <template v-else>
-          <div class="w-[76px] text-ellipsis leading-6">
-            {{ ft("tag-filter") }}
-          </div>
-        </template>
+        <div
+          class="flex w-full max-w-[250px] flex-nowrap items-center justify-between"
+        >
+          <template v-if="tagsStore.selectedTags.length">
+            <div class="scrollbar-none flex flex-1 justify-start overflow-auto">
+              <Tag
+                v-for="tag in tagsStore.selectedTags"
+                :key="tag.id"
+                :tag="tag"
+                removeable
+                class="mr-1 inline-flex"
+                @remove="tagsStore.removeSelectedTag(tag)"
+              />
+            </div>
+            <div class="pl-2" @click="tagsStore.resetSelectedTag">
+              <n-icon-wrapper
+                border-radius="10"
+                icon-color="#fff"
+                size="14"
+                class="block bg-gray-500"
+              >
+                <n-icon :component="Close" />
+              </n-icon-wrapper>
+            </div>
+          </template>
+          <template v-else>
+            <div class="leading-6">
+              {{ ft("tag-filter") }}
+            </div>
+          </template>
+        </div>
       </n-button>
     </template>
     <template #default>
-      <div class="flex flex-col overflow-hidden rounded-lg bg-dialog-color">
+      <div
+        class="flex min-w-[150px] flex-col overflow-hidden rounded-lg bg-dialog-color"
+      >
         <div
-          v-for="tag in tagOptions"
-          :key="tag.id"
-          class="flex cursor-pointer select-none items-center gap-x-2 px-4 py-2 hover:bg-hover-color"
-          @click="handleTagSelect(tag.id, tag)"
+          class="flex items-center gap-x-2 border-b border-solid border-border-color px-4 py-2"
         >
-          <Tag :tag="tag" />
+          <n-tag
+            size="small"
+            class="cursor-pointer"
+            :type="tagsStore.tagFilterType === 'AND' ? 'success' : 'default'"
+            @click="tagsStore.setTagFilterType('AND')"
+          >
+            <span class="text-text-secondary">AND</span>
+            <template #icon>
+              <n-icon :component="ShapeIntersect20Regular" />
+            </template>
+          </n-tag>
+          <n-tag
+            size="small"
+            class="cursor-pointer"
+            :type="tagsStore.tagFilterType === 'OR' ? 'success' : 'default'"
+            @click="tagsStore.setTagFilterType('OR')"
+          >
+            <span class="text-text-secondary">OR</span>
+            <template #icon>
+              <n-icon :component="ShapeUnion20Regular" />
+            </template>
+          </n-tag>
+        </div>
+        <div class="max-h-[60vh] overflow-auto">
+          <div
+            v-for="tag in tagOptions"
+            :key="tag.id"
+            class="flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2 hover:bg-hover-color"
+            :class="{
+              'bg-hover-color': tagsStore.selectedTagIds.includes(tag.id),
+            }"
+            @click="handleTagSelect(tag.id, tag)"
+          >
+            <Tag :tag="tag" />
+            <n-icon
+              v-if="tagsStore.selectedTagIds.includes(tag.id)"
+              class="text-primary"
+              size="14"
+              :component="Checkmark"
+            />
+          </div>
         </div>
       </div>
     </template>
@@ -51,7 +109,8 @@
 
 <script setup lang="tsx">
 import { useTagsStore } from "@/store/tags.ts"
-import { TagGroup } from "@vicons/carbon"
+import { TagGroup, Checkmark, Close } from "@vicons/carbon"
+import { ShapeUnion20Regular, ShapeIntersect20Regular } from "@vicons/fluent"
 import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"
@@ -66,22 +125,15 @@ const tagOptions = computed(() => {
     key: tag.id,
     color: tag.color,
   }))
-  options.unshift({
-    title: ft("clear-label"),
-    id: 0,
-    key: 0,
-    color: "#000000",
-  })
   return options
 })
 
 const handleTagSelect = (_key: number, option: Label) => {
-  if (option.id === 0) {
-    tagsStore.setSelectedTag(null)
+  if (tagsStore.selectedTagIds.includes(option.id)) {
+    tagsStore.removeSelectedTag(option)
     return
   }
-  tagsStore.setSelectedTag(option)
-  tagsStore.toggleTagOpen()
+  tagsStore.addSelectedTag(option)
 }
 
 const onUpdateShow = async (show: boolean) => {

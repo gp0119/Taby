@@ -8,7 +8,9 @@ export const useTagsStore = defineStore("tags", () => {
   const spacesStore = useSpacesStore()
   const tags = ref<Label[]>([])
   const collectionsTags = ref<Label[]>([])
-  const selectedTag = ref<Label | null>(null)
+
+  const selectedTags = ref<Label[]>([])
+  const tagFilterType = ref<"AND" | "OR" | null>("AND")
   const [isTagOpen, toggleTagOpen] = useToggle()
 
   async function fetchTags() {
@@ -19,6 +21,18 @@ export const useTagsStore = defineStore("tags", () => {
     await dataManager.addLabel(tag.title, tag.color)
     await fetchTags()
   }
+
+  async function addSelectedTag(tag: Label) {
+    selectedTags.value.push(tag)
+  }
+
+  async function removeSelectedTag(tag: Label) {
+    selectedTags.value = selectedTags.value.filter((item) => item.id !== tag.id)
+  }
+
+  const selectedTagIds = computed(() => {
+    return selectedTags.value.map((item) => item.id)
+  })
 
   async function removeTag(tag: Label) {
     await dataManager.removeLabel(tag.id)
@@ -40,12 +54,12 @@ export const useTagsStore = defineStore("tags", () => {
     collectionsTags.value = Array.from(collectionsTagIds.values())
   }
 
-  function setSelectedTag(tag: Label | null) {
-    selectedTag.value = tag
+  function resetSelectedTag() {
+    selectedTags.value = []
   }
 
-  function resetSelectedTag() {
-    selectedTag.value = null
+  function setTagFilterType(type: "AND" | "OR" | null) {
+    tagFilterType.value = type
   }
 
   return {
@@ -56,10 +70,14 @@ export const useTagsStore = defineStore("tags", () => {
     updateTag,
     collectionsTags,
     fetchCollectionsTags,
-    selectedTag,
-    setSelectedTag,
     isTagOpen,
     toggleTagOpen,
     resetSelectedTag,
+    tagFilterType,
+    setTagFilterType,
+    selectedTags,
+    addSelectedTag,
+    removeSelectedTag,
+    selectedTagIds,
   }
 })

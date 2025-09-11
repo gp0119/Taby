@@ -67,10 +67,15 @@ const zhCollator = new Intl.Collator("zh")
 
 const filteredCollections = computed(() => {
   let baseCollections = spacesStore.collections
-  if (tagsStore.selectedTag?.id) {
-    return baseCollections.filter((item) =>
-      item.labelIds.includes(tagsStore.selectedTag!.id),
-    )
+  if (tagsStore.selectedTagIds.length) {
+    return baseCollections.filter((item) => {
+      if (tagsStore.tagFilterType === "AND") {
+        return tagsStore.selectedTagIds.every((id) =>
+          item.labelIds.includes(id),
+        )
+      }
+      return tagsStore.selectedTagIds.some((id) => item.labelIds.includes(id))
+    })
   }
   return baseCollections
 })

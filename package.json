@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@vicons/carbon": "^0.13.0",
+    "@vicons/fluent": "^0.13.0",
     "@vicons/ionicons5": "^0.13.0",
     "@vueuse/core": "^12.8.2",
     "dayjs": "^1.11.13",
