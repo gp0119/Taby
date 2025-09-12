@@ -62,7 +62,7 @@
           <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
             <div
               class="flex cursor-pointer items-center rounded bg-hover-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
-              @click="onOpenCollection(collection)"
+              @click="onOpenCollection($event, collection)"
             >
               <span class="whitespace-nowrap">
                 {{ collection.cards.length }} cards
@@ -115,7 +115,7 @@ import { useSettingStore } from "@/store/setting"
 const { ft } = useHelpi18n()
 const settingStore = useSettingStore()
 const duplicateCardStore = useDuplicateCardStore()
-const { openTabs, groupTabs } = useChromeTabs()
+const { openTabs, groupTabs, openInNewWindow } = useChromeTabs()
 const props = defineProps<{
   collection: CollectionWithCards
 }>()
@@ -143,12 +143,28 @@ const onHandleCheckbox = (checked: boolean, collectionId: number) => {
   }
 }
 
-async function onOpenCollection(collection: CollectionWithCards) {
-  if (collection.cards.length === 0) return
-  const tabs = await openTabs(collection.cards.map((card) => card.url))
-  if (settingStore.getSetting("openCardsInGroup") && tabs.length > 0) {
-    const tabsIds = tabs.map((tab) => tab.id!)
-    await groupTabs(tabsIds, collection.title)
+async function onOpenCollection(
+  e: MouseEvent,
+  collection: CollectionWithCards,
+) {
+  if (!collection.cards.length) return
+  const urls = collection.cards.map((c) => c.url)
+  if (e.shiftKey) {
+    const tabs = await openInNewWindow(urls)
+    if (settingStore.getSetting("openCardsInGroup") && tabs.length) {
+      const ids = tabs.map((t) => t.id!).filter(Boolean) as number[]
+      await groupTabs(ids, collection.title, tabs[0].windowId)
+    }
+  } else {
+    const tabs = await openTabs(urls, {
+      windowId: undefined,
+      background: e.ctrlKey || e.metaKey,
+    })
+
+    if (settingStore.getSetting("openCardsInGroup") && tabs.length) {
+      const ids = tabs.map((t) => t.id!).filter(Boolean) as number[]
+      await groupTabs(ids, collection.title)
+    }
   }
 }
 </script>
