@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="click"
+    trigger="hover"
     placement="bottom-end"
     :show-arrow="false"
     class="min-w-[150px]"
@@ -22,7 +22,7 @@
         </n-text>
         <n-input
           v-model:value="tagKeyword"
-          :placeholder="ft('placeholder', 'tag')"
+          :placeholder="ft('search-tag')"
           size="tiny"
           maxlength="10"
         >
@@ -69,12 +69,16 @@
         />
         <n-button size="tiny" @click="saveAndAddTag">
           <template #icon>
-            <n-icon :component="SaveAnnotation" />
+            <PopoverWrapper :message="ft('save-and-add-tag')" placement="top">
+              <n-icon :component="SaveAnnotation" />
+            </PopoverWrapper>
           </template>
         </n-button>
         <n-button size="tiny" @click="addTag">
           <template #icon>
-            <n-icon :component="Checkmark" />
+            <PopoverWrapper :message="ft('save-tag')" placement="top">
+              <n-icon :component="Checkmark" />
+            </PopoverWrapper>
           </template>
         </n-button>
       </n-input-group>
@@ -122,9 +126,12 @@ const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
   setIsShowTagAction: (value: boolean) => void
 }
 
+const getRandomColor = () => {
+  return COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)]
+}
+
 const onUpdateShowTagAction = (value: boolean) => {
-  selectedColor.value =
-    COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)]
+  selectedColor.value = getRandomColor()
   setIsShowTagAction(value)
 }
 
@@ -138,6 +145,7 @@ const addTag = () => {
     color: selectedColor.value,
   })
   newTag.value.title = ""
+  selectedColor.value = getRandomColor()
 }
 
 const addTagforCollection = async (id: number) => {
@@ -152,6 +160,7 @@ const saveAndAddTag = async () => {
     color: selectedColor.value,
   })
   newTag.value.title = ""
+  selectedColor.value = getRandomColor()
   await addTagforCollection(tagId)
 }
 

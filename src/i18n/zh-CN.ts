@@ -115,4 +115,7 @@ export default {
   "group-tabs": "分组标签",
   "close-duplicate-tabs": "关闭重复标签",
   "save-and-enter-drag-mode": "保存并进入拖拽",
+  "save-and-add-tag": "保存并添加标签",
+  "save-tag": "保存标签",
+  "search-tag": "搜索标签",
 }

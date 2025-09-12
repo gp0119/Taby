@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="click"
+    trigger="hover"
     placement="bottom-start"
     :show-arrow="false"
     :show="tagsStore.isTagOpen"
@@ -93,7 +93,7 @@
           <n-input
             v-model:value="filterTag.title"
             class="max-w-[150px]"
-            :placeholder="ft('placeholder', 'tag')"
+            :placeholder="ft('search-tag')"
             size="tiny"
             maxlength="10"
           >

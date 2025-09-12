@@ -121,4 +121,7 @@ export default {
   "group-tabs": "Group Tabs",
   "close-duplicate-tabs": "Close Duplicate Tabs",
   "save-and-enter-drag-mode": "Save and Enter Drag",
+  "save-and-add-tag": "Save and Add Tag",
+  "save-tag": "Save Tag",
+  "search-tag": "Search Tag",
 }
