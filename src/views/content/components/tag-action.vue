@@ -16,15 +16,27 @@
       </n-button>
     </template>
     <template #header>
-      <n-text depth="1">
-        <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
-      </n-text>
+      <div class="flex flex-col gap-y-2">
+        <n-text depth="1">
+          <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
+        </n-text>
+        <n-input
+          v-model:value="tagKeyword"
+          :placeholder="ft('placeholder', 'tag')"
+          size="tiny"
+          maxlength="10"
+        >
+          <template #prefix>
+            <n-icon :component="SearchOutline" />
+          </template>
+        </n-input>
+      </div>
     </template>
     <template #default>
       <div class="scrollbar-thin max-h-[400px] overflow-y-auto">
         <div v-if="tagsStore.tags.length > 0" class="flex flex-col">
           <div
-            v-for="tag in tagsStore.tags"
+            v-for="tag in filterTags"
             :key="tag.id"
             class="group/tag flex cursor-pointer items-center justify-between px-2.5 py-1.5 hover:bg-hover-color"
             @click="addTagforCollection(tag.id)"
@@ -90,6 +102,7 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
 import { useDialog } from "naive-ui"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import { SearchOutline } from "@vicons/ionicons5"
 
 const props = defineProps<{
   item: CollectionWithCards
@@ -99,6 +112,7 @@ const { refreshCollections } = useRefresh()
 const { ft, gt } = useHelpi18n()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
+const tagKeyword = ref("")
 const newTag = ref({
   title: "",
 })
@@ -201,4 +215,13 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
     },
   })
 }
+const searchFilterTag = (tag: { title?: string }) => {
+  return (tag.title ?? "")
+    .toLocaleLowerCase()
+    .includes((tagKeyword.value ?? "").trim().toLocaleLowerCase())
+}
+
+const filterTags = computed(() => {
+  return tagsStore.tags.filter((tag) => searchFilterTag(tag))
+})
 </script>

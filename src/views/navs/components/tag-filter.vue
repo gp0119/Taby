@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    trigger="click"
     placement="bottom-start"
     :show-arrow="false"
     :show="tagsStore.isTagOpen"
@@ -13,7 +13,7 @@
         tertiary
         :focusable="false"
         size="small"
-        class="min-w-[150px] justify-start !shadow-btn-shadow [&_.n-button\_\_content]:!w-full"
+        class="min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button\_\_content]:!w-full"
       >
         <template #icon>
           <n-icon size="20">
@@ -64,34 +64,48 @@
         class="flex min-w-[150px] flex-col overflow-hidden rounded-lg bg-dialog-color"
       >
         <div
-          class="flex items-center gap-x-2 border-b border-solid border-border-color px-4 py-2"
+          class="flex flex-col gap-y-2 border-b border-solid border-border-color px-4 py-2"
         >
-          <n-tag
-            size="small"
-            class="cursor-pointer"
-            :type="tagsStore.tagFilterType === 'AND' ? 'success' : 'default'"
-            @click="tagsStore.setTagFilterType('AND')"
+          <div class="flex items-center gap-x-2">
+            <n-tag
+              size="small"
+              class="flex-1 cursor-pointer justify-center"
+              :type="tagsStore.tagFilterType === 'AND' ? 'success' : 'default'"
+              @click="tagsStore.setTagFilterType('AND')"
+            >
+              <span class="text-text-secondary">AND</span>
+              <template #icon>
+                <n-icon :component="ShapeIntersect20Regular" />
+              </template>
+            </n-tag>
+            <n-tag
+              size="small"
+              class="flex-1 cursor-pointer justify-center"
+              :type="tagsStore.tagFilterType === 'OR' ? 'success' : 'default'"
+              @click="tagsStore.setTagFilterType('OR')"
+            >
+              <span class="text-text-secondary">OR</span>
+              <template #icon>
+                <n-icon :component="ShapeUnion20Regular" />
+              </template>
+            </n-tag>
+          </div>
+          <n-input
+            v-model:value="filterTag.title"
+            class="max-w-[150px]"
+            :placeholder="ft('placeholder', 'tag')"
+            size="tiny"
+            maxlength="10"
           >
-            <span class="text-text-secondary">AND</span>
-            <template #icon>
-              <n-icon :component="ShapeIntersect20Regular" />
+            <template #prefix>
+              <n-icon :component="SearchOutline" />
             </template>
-          </n-tag>
-          <n-tag
-            size="small"
-            class="cursor-pointer"
-            :type="tagsStore.tagFilterType === 'OR' ? 'success' : 'default'"
-            @click="tagsStore.setTagFilterType('OR')"
-          >
-            <span class="text-text-secondary">OR</span>
-            <template #icon>
-              <n-icon :component="ShapeUnion20Regular" />
-            </template>
-          </n-tag>
+          </n-input>
         </div>
-        <div class="max-h-[60vh] overflow-auto">
+
+        <div class="scrollbar-thin max-h-[60vh] overflow-auto">
           <div
-            v-for="tag in tagOptions"
+            v-for="tag in filterTagOptions"
             :key="tag.id"
             class="flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2 hover:bg-hover-color"
             :class="{
@@ -117,10 +131,14 @@
 import { useTagsStore } from "@/store/tags.ts"
 import { TagGroup, Checkmark, Close } from "@vicons/carbon"
 import { ShapeUnion20Regular, ShapeIntersect20Regular } from "@vicons/fluent"
+import { SearchOutline } from "@vicons/ionicons5"
 import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"
 
+const filterTag = ref({
+  title: "",
+})
 const tagsStore = useTagsStore()
 const { ft } = useHelpi18n()
 
@@ -148,4 +166,13 @@ const onUpdateShow = async (show: boolean) => {
   }
   tagsStore.toggleTagOpen(show)
 }
+const searchFilterTag = (tag: { title?: string }) => {
+  return (tag.title ?? "")
+    .toLocaleLowerCase()
+    .includes((filterTag.value.title ?? "").trim().toLocaleLowerCase())
+}
+
+const filterTagOptions = computed(() => {
+  return tagOptions.value.filter((tag) => searchFilterTag(tag))
+})
 </script>
