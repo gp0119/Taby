@@ -88,10 +88,19 @@
               <n-icon :component="ShapeUnion20Regular" />
             </template>
           </n-tag>
+          <n-input
+            v-model:value="filterTag.title"
+            class="!w-[100px]"
+            :placeholder="ft('placeholder', 'tag')"
+            size="tiny"
+            maxlength="10"
+          />
         </div>
+
         <div class="max-h-[60vh] overflow-auto">
           <div
             v-for="tag in tagOptions"
+            v-show="searchFilterTag(tag)"
             :key="tag.id"
             class="flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2 hover:bg-hover-color"
             :class="{
@@ -121,6 +130,9 @@ import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"
 
+const filterTag = ref({
+  title: "",
+})
 const tagsStore = useTagsStore()
 const { ft } = useHelpi18n()
 
@@ -147,5 +159,10 @@ const onUpdateShow = async (show: boolean) => {
     await tagsStore.fetchCollectionsTags()
   }
   tagsStore.toggleTagOpen(show)
+}
+const searchFilterTag = (tag: { title?: string }) => {
+  return (tag.title ?? "")
+    .toLocaleLowerCase()
+    .includes((filterTag.value.title ?? "").trim().toLocaleLowerCase())
 }
 </script>

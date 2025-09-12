@@ -25,6 +25,7 @@
         <div v-if="tagsStore.tags.length > 0" class="flex flex-col">
           <div
             v-for="tag in tagsStore.tags"
+            v-show="searchFilterTag(tag)"
             :key="tag.id"
             class="group/tag flex cursor-pointer items-center justify-between px-2.5 py-1.5 hover:bg-hover-color"
             @click="addTagforCollection(tag.id)"
@@ -200,5 +201,10 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
       await refreshCollections()
     },
   })
+}
+const searchFilterTag = (tag: { title?: string }) => {
+  return (tag.title ?? "")
+    .toLocaleLowerCase()
+    .includes((newTag.value.title ?? "").trim().toLocaleLowerCase())
 }
 </script>
