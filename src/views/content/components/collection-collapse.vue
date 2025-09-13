@@ -8,10 +8,10 @@
     }"
   >
     <div
-      class="group/collection-title flex w-full items-center justify-between overflow-hidden px-6"
+      class="group/collection-title flex w-full items-center justify-between overflow-hidden pr-6"
     >
       <div
-        class="flex flex-1 select-none items-center justify-start overflow-hidden"
+        class="flex flex-1 select-none items-center justify-start overflow-hidden pl-6"
       >
         <div class="flex-center relative py-3">
           <n-checkbox
