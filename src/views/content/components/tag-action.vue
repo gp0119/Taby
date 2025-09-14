@@ -114,7 +114,6 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
-import { useDialog } from "naive-ui"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const props = defineProps<{
@@ -139,8 +138,11 @@ const getRandomColor = () => {
 }
 
 const onUpdateShowTagAction = (value: boolean) => {
-  selectedColor.value = getRandomColor()
   setIsShowTagAction(value)
+  if (value) {
+    selectedColor.value = getRandomColor()
+    newTag.value.title = ""
+  }
 }
 
 onMounted(async () => {
@@ -183,7 +185,6 @@ const saveAndAddTag = async () => {
 
 const { open: openEditDialog } = useEditDialog()
 const { open: openDeleteDialog } = useDeleteDialog()
-const dialog = useDialog()
 const onDeleteTag = async (tag: {
   id: number
   title: string
@@ -201,7 +202,6 @@ const onDeleteTag = async (tag: {
       await dataManager.removeLabel(tag.id)
       await tagsStore.fetchTags()
       await refreshCollections()
-      dialog.destroyAll()
     },
   })
 }
