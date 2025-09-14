@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="click"
+    trigger="hover"
     placement="bottom-end"
     :show-arrow="false"
     class="min-w-[150px]"
@@ -21,11 +21,8 @@
       </n-text>
     </template>
     <template #default>
-      <div class="scrollbar-thin max-h-[500px] overflow-y-auto px-2">
-        <div
-          v-if="tagsStore.tags.length > 0"
-          class="flex flex-col gap-y-1 py-1"
-        >
+      <div class="scrollbar-thin h-[500px] overflow-y-auto px-2">
+        <div v-if="filterTags.length > 0" class="flex flex-col gap-y-1 py-1">
           <div
             v-for="tag in filterTags"
             :key="tag.id"
@@ -62,7 +59,10 @@
             </div>
           </div>
         </div>
-        <div v-else class="!bg-card-color text-center text-text-secondary">
+        <div
+          v-else
+          class="flex h-full items-center justify-center !bg-card-color text-text-secondary"
+        >
           {{ ft("no-tags") }}
         </div>
       </div>
