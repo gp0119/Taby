@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    trigger="click"
     placement="bottom-end"
     :show-arrow="false"
     class="min-w-[150px]"
@@ -16,41 +16,15 @@
       </n-button>
     </template>
     <template #header>
-      <div class="flex flex-col gap-y-2">
-        <n-text depth="1">
-          <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
-        </n-text>
-        <n-input-group>
-          <color-select v-model:value="selectedColor" size="tiny" />
-          <n-input
-            v-model:value="newTag.title"
-            class="!w-[120px]"
-            :placeholder="ft('placeholder', 'tag')"
-            size="tiny"
-            maxlength="10"
-          />
-          <n-button size="tiny" @click="saveAndAddTag">
-            <template #icon>
-              <PopoverWrapper :message="ft('save-and-add-tag')" placement="top">
-                <n-icon :component="SaveAnnotation" />
-              </PopoverWrapper>
-            </template>
-          </n-button>
-          <n-button size="tiny" @click="addTag">
-            <template #icon>
-              <PopoverWrapper :message="ft('save-tag')" placement="top">
-                <n-icon :component="Checkmark" />
-              </PopoverWrapper>
-            </template>
-          </n-button>
-        </n-input-group>
-      </div>
+      <n-text depth="1">
+        <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
+      </n-text>
     </template>
     <template #default>
       <div class="scrollbar-thin max-h-[500px] overflow-y-auto px-2">
         <div
           v-if="tagsStore.tags.length > 0"
-          class="flex flex-col gap-y-1 py-2.5"
+          class="flex flex-col gap-y-1 py-1"
         >
           <div
             v-for="tag in filterTags"
@@ -63,7 +37,7 @@
             <n-icon
               v-if="item.labelIds.includes(tag.id)"
               class="text-primary"
-              size="14"
+              size="16"
               :component="Checkmark"
             />
             <div
@@ -92,6 +66,32 @@
           {{ ft("no-tags") }}
         </div>
       </div>
+    </template>
+    <template #footer>
+      <n-input-group>
+        <color-select v-model:value="selectedColor" size="tiny" />
+        <n-input
+          v-model:value="newTag.title"
+          class="!w-[140px]"
+          :placeholder="ft('placeholder', 'tag')"
+          size="tiny"
+          maxlength="10"
+        />
+        <n-button size="tiny" @click="saveAndAddTag">
+          <template #icon>
+            <PopoverWrapper :message="ft('save-and-add-tag')" placement="top">
+              <n-icon :component="SaveAnnotation" />
+            </PopoverWrapper>
+          </template>
+        </n-button>
+        <n-button size="tiny" @click="addTag">
+          <template #icon>
+            <PopoverWrapper :message="ft('save-tag')" placement="top">
+              <n-icon :component="Checkmark" />
+            </PopoverWrapper>
+          </template>
+        </n-button>
+      </n-input-group>
     </template>
   </n-popover>
 </template>
