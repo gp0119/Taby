@@ -103,7 +103,10 @@
           </n-input>
         </div>
 
-        <div class="scrollbar-thin max-h-[60vh] overflow-auto">
+        <div
+          v-if="filterTagOptions.length > 0"
+          class="scrollbar-thin max-h-[60vh] overflow-auto"
+        >
           <div
             v-for="tag in filterTagOptions"
             :key="tag.id"
@@ -121,6 +124,12 @@
               :component="Checkmark"
             />
           </div>
+        </div>
+        <div
+          v-else
+          class="!bg-card-color py-2.5 text-center text-text-secondary"
+        >
+          {{ ft("no-tags") }}
         </div>
       </div>
     </template>
