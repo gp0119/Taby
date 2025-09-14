@@ -20,68 +20,78 @@
         <n-text depth="1">
           <span class="font-bold text-text-primary">{{ ft("tags") }}</span>
         </n-text>
-        <n-input
-          v-model:value="tagKeyword"
-          :placeholder="ft('search-tag')"
-          size="tiny"
-          maxlength="10"
-        >
-          <template #prefix>
-            <n-icon :component="SearchOutline" />
-          </template>
-        </n-input>
+        <n-input-group>
+          <color-select v-model:value="selectedColor" size="tiny" />
+          <n-input
+            v-model:value="newTag.title"
+            class="!w-[120px]"
+            :placeholder="ft('placeholder', 'tag')"
+            size="tiny"
+            maxlength="10"
+          />
+          <n-button size="tiny" @click="saveAndAddTag">
+            <template #icon>
+              <PopoverWrapper :message="ft('save-and-add-tag')" placement="top">
+                <n-icon :component="SaveAnnotation" />
+              </PopoverWrapper>
+            </template>
+          </n-button>
+          <n-button size="tiny" @click="addTag">
+            <template #icon>
+              <PopoverWrapper :message="ft('save-tag')" placement="top">
+                <n-icon :component="Checkmark" />
+              </PopoverWrapper>
+            </template>
+          </n-button>
+        </n-input-group>
       </div>
     </template>
     <template #default>
-      <div class="scrollbar-thin max-h-[400px] overflow-y-auto">
-        <div v-if="tagsStore.tags.length > 0" class="flex flex-col">
+      <div class="scrollbar-thin max-h-[500px] overflow-y-auto px-2">
+        <div
+          v-if="tagsStore.tags.length > 0"
+          class="flex flex-col gap-y-1 py-2.5"
+        >
           <div
             v-for="tag in filterTags"
             :key="tag.id"
-            class="group/tag flex cursor-pointer items-center justify-between px-2.5 py-1.5 hover:bg-hover-color"
-            @click="addTagforCollection(tag.id)"
+            class="group/tag relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-14 hover:bg-hover-color"
+            :class="{ 'bg-hover-color': item.labelIds.includes(tag.id) }"
+            @click="handleTagSelect(tag.id)"
           >
             <Tag :tag="tag" :closeable="false" />
-            <PopoverWrapper :message="ft('edit', 'tag')">
-              <n-icon
-                size="16"
-                :component="TagEdit"
-                class="ml-1 hidden cursor-pointer text-primary group-hover/tag:inline-flex"
-                @click.stop="onEditTag(tag)"
-              />
-            </PopoverWrapper>
+            <n-icon
+              v-if="item.labelIds.includes(tag.id)"
+              class="text-primary"
+              size="14"
+              :component="Checkmark"
+            />
+            <div
+              class="absolute right-1.5 hidden items-center gap-x-2 group-hover/tag:flex"
+            >
+              <PopoverWrapper :message="ft('edit', 'tag')">
+                <n-icon
+                  size="16"
+                  :component="TagEdit"
+                  class="cursor-pointer text-primary"
+                  @click.stop="onEditTag(tag)"
+                />
+              </PopoverWrapper>
+              <PopoverWrapper :message="ft('delete', 'tag')">
+                <n-icon
+                  size="16"
+                  :component="Delete"
+                  class="cursor-pointer text-error-color"
+                  @click.stop="onDeleteTag(tag)"
+                />
+              </PopoverWrapper>
+            </div>
           </div>
         </div>
         <div v-else class="!bg-card-color text-center text-text-secondary">
           {{ ft("no-tags") }}
         </div>
       </div>
-    </template>
-    <template #footer>
-      <n-input-group>
-        <color-select v-model:value="selectedColor" size="tiny" />
-        <n-input
-          v-model:value="newTag.title"
-          class="!w-[100px]"
-          :placeholder="ft('placeholder', 'tag')"
-          size="tiny"
-          maxlength="10"
-        />
-        <n-button size="tiny" @click="saveAndAddTag">
-          <template #icon>
-            <PopoverWrapper :message="ft('save-and-add-tag')" placement="top">
-              <n-icon :component="SaveAnnotation" />
-            </PopoverWrapper>
-          </template>
-        </n-button>
-        <n-button size="tiny" @click="addTag">
-          <template #icon>
-            <PopoverWrapper :message="ft('save-tag')" placement="top">
-              <n-icon :component="Checkmark" />
-            </PopoverWrapper>
-          </template>
-        </n-button>
-      </n-input-group>
     </template>
   </n-popover>
 </template>
@@ -106,7 +116,6 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
 import { useDialog } from "naive-ui"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
-import { SearchOutline } from "@vicons/ionicons5"
 
 const props = defineProps<{
   item: CollectionWithCards
@@ -116,7 +125,6 @@ const { refreshCollections } = useRefresh()
 const { ft, gt } = useHelpi18n()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
-const tagKeyword = ref("")
 const newTag = ref({
   title: "",
 })
@@ -146,6 +154,15 @@ const addTag = () => {
   })
   newTag.value.title = ""
   selectedColor.value = getRandomColor()
+}
+
+async function handleTagSelect(id: number) {
+  if (props.item.labelIds.includes(id)) {
+    await dataManager.removeTagforCollection(props.item.id, id)
+  } else {
+    await dataManager.addTagforCollection(props.item.id, id)
+  }
+  await refreshCollections()
 }
 
 const addTagforCollection = async (id: number) => {
@@ -227,7 +244,7 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
 const searchFilterTag = (tag: { title?: string }) => {
   return (tag.title ?? "")
     .toLocaleLowerCase()
-    .includes((tagKeyword.value ?? "").trim().toLocaleLowerCase())
+    .includes((newTag.value.title ?? "").trim().toLocaleLowerCase())
 }
 
 const filterTags = computed(() => {
