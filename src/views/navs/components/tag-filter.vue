@@ -59,10 +59,12 @@
         </div>
       </n-button>
     </template>
+    <!-- 标签筛选 -->
     <template #default>
       <div
         class="flex min-w-[150px] flex-col overflow-hidden rounded-lg bg-dialog-color"
       >
+        <!-- 标签筛选类型 -->
         <div
           class="flex flex-col gap-y-2 border-b border-solid border-border-color px-4 py-2"
         >
@@ -90,11 +92,13 @@
               </template>
             </n-tag>
           </div>
+          <!-- 标签筛选输入 -->
           <n-input
-            v-model:value="filterTag.title"
+            ref="tagInputRef"
+            v-model:value="tagKeyword"
             class="max-w-[150px]"
             :placeholder="ft('search-tag')"
-            size="tiny"
+            size="small"
             maxlength="10"
           >
             <template #prefix>
@@ -102,7 +106,7 @@
             </template>
           </n-input>
         </div>
-
+        <!-- 标签筛选选项 -->
         <div
           v-if="filterTagOptions.length > 0"
           class="scrollbar-thin max-h-[60vh] overflow-auto"
@@ -145,11 +149,10 @@ import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"
 
-const filterTag = ref({
-  title: "",
-})
+const tagKeyword = ref("")
 const tagsStore = useTagsStore()
 const { ft } = useHelpi18n()
+const tagInputRef = useTemplateRef("tagInputRef")
 
 const tagOptions = computed(() => {
   const options = tagsStore.collectionsTags.map((tag) => ({
@@ -164,21 +167,25 @@ const tagOptions = computed(() => {
 const handleTagSelect = (_key: number, option: Label) => {
   if (tagsStore.selectedTagIds.includes(option.id)) {
     tagsStore.removeSelectedTag(option)
-    return
+  } else {
+    tagsStore.addSelectedTag(option)
   }
-  tagsStore.addSelectedTag(option)
+  tagKeyword.value = ""
+  tagInputRef.value?.focus()
 }
 
 const onUpdateShow = async (show: boolean) => {
+  tagsStore.toggleTagOpen(show)
   if (show) {
     await tagsStore.fetchCollectionsTags()
+    await nextTick()
+    tagInputRef.value?.focus()
   }
-  tagsStore.toggleTagOpen(show)
 }
 const searchFilterTag = (tag: { title?: string }) => {
   return (tag.title ?? "")
     .toLocaleLowerCase()
-    .includes((filterTag.value.title ?? "").trim().toLocaleLowerCase())
+    .includes((tagKeyword.value ?? "").trim().toLocaleLowerCase())
 }
 
 const filterTagOptions = computed(() => {
