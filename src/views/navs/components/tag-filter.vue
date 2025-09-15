@@ -97,6 +97,7 @@
             :placeholder="ft('search-tag')"
             size="tiny"
             maxlength="10"
+            @keyup="onInputKeyup"
           >
             <template #prefix>
               <n-icon :component="SearchOutline" />
@@ -208,4 +209,13 @@ const keymapUpdateShow = useEventListener(window, "keydown", (e) => {
 onUnmounted(() => {
   keymapUpdateShow()
 })
+
+const onInputKeyup = (e: KeyboardEvent) => {
+  if (e.key !== "Enter") return
+  const options = filterTagOptions.value
+  if (options.length === 1) {
+    const option = options[0]
+    handleTagSelect(option.id, option)
+  }
+}
 </script>

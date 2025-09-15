@@ -77,6 +77,7 @@
           :placeholder="ft('placeholder', 'tag')"
           size="tiny"
           maxlength="10"
+          @keyup="onInputKeyup"
         />
         <n-button size="tiny" @click="saveAndAddTag">
           <template #icon>
@@ -260,5 +261,15 @@ const filterTags = computed(() => {
 const focusNewTagInputSafely = async () => {
   await nextTick()
   newTagInputRef.value?.focus()
+}
+const onInputKeyup = (e: KeyboardEvent) => {
+  if (e.key !== "Enter") return
+  const options = filterTags.value
+  if (options.length === 0) {
+    saveAndAddTag()
+  } else if (options.length === 1) {
+    const option = options[0]
+    handleTagSelect(option.id)
+  }
 }
 </script>
