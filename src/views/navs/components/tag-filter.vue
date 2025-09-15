@@ -91,6 +91,7 @@
             </n-tag>
           </div>
           <n-input
+            ref="searchInputRef"
             v-model:value="filterTag.title"
             class="max-w-[150px]"
             :placeholder="ft('search-tag')"
@@ -144,7 +145,10 @@ import { SearchOutline } from "@vicons/ionicons5"
 import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"
+import type { InputInst } from "naive-ui"
+import { useEventListener } from "@vueuse/core"
 
+const searchInputRef = ref<InputInst | null>(null)
 const filterTag = ref({
   title: "",
 })
@@ -167,13 +171,21 @@ const handleTagSelect = (_key: number, option: Label) => {
     return
   }
   tagsStore.addSelectedTag(option)
+  focusSearchInputSafely()
 }
 
 const onUpdateShow = async (show: boolean) => {
   if (show) {
     await tagsStore.fetchCollectionsTags()
+    tagsStore.toggleTagOpen(show)
+    await focusSearchInputSafely()
+  } else {
+    tagsStore.toggleTagOpen(show)
   }
-  tagsStore.toggleTagOpen(show)
+}
+const focusSearchInputSafely = async () => {
+  await nextTick()
+  searchInputRef.value?.focus()
 }
 const searchFilterTag = (tag: { title?: string }) => {
   return (tag.title ?? "")
@@ -183,5 +195,17 @@ const searchFilterTag = (tag: { title?: string }) => {
 
 const filterTagOptions = computed(() => {
   return tagOptions.value.filter((tag) => searchFilterTag(tag))
+})
+
+const keymapUpdateShow = useEventListener(window, "keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "g") {
+    e.preventDefault()
+    e.stopPropagation()
+    onUpdateShow(true)
+  }
+})
+
+onUnmounted(() => {
+  keymapUpdateShow()
 })
 </script>
