@@ -61,6 +61,7 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { isNewTabPage } from "@/utils"
 import dayjs from "dayjs"
 import { useSpacesStore } from "@/store/spaces"
+import { useEventListener } from "@vueuse/core"
 
 const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
@@ -201,4 +202,33 @@ const onCloseDuplicateTabs = async (windowId: number | string) => {
   await removeTabs(duplicateTabsIds)
   await refreshTabs()
 }
+
+const onKeyMapSaveTabs = useEventListener(window, "keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.shiftKey) {
+      onSaveAllTabsAndClose(activeWindowId.value)
+    } else {
+      onSaveAllTabs(activeWindowId.value)
+    }
+  }
+})
+
+const onKeyMapCloseTabs = useEventListener(window, "keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.shiftKey) {
+      closeAllTabsExceptCurrent(activeWindowId.value)
+    } else {
+      onCloseDuplicateTabs(activeWindowId.value)
+    }
+  }
+})
+
+onUnmounted(() => {
+  onKeyMapSaveTabs()
+  onKeyMapCloseTabs()
+})
 </script>
