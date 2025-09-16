@@ -1,11 +1,11 @@
 <template>
-  <PopoverWrapper :message="ft('placeholder-search')" placement="bottom-end">
+  <PopoverWrapper :message="searchTooltip" placement="bottom-end">
     <n-button
       tertiary
       :focusable="false"
       size="small"
       class="w-[28px] !shadow-btn-shadow"
-      @click="openModal"
+      @click="toggleModal"
     >
       <template #icon>
         <n-icon size="18" :component="Search" />
@@ -22,18 +22,25 @@ import { useSearchModal } from "@/hooks/useSearchModal"
 import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
 import { useSettingStore } from "@/store/setting"
 
-const { ft } = useHelpi18n()
+const { ft, ft2 } = useHelpi18n()
 
-const { openModal } = useSearchModal()
+const { toggleModal } = useSearchModal()
 
-const shortcuts = computed(() => {
-  const sc = useSettingStore().getSetting("shortcutSettings")
-  return [
-    {
-      shortcut: sc.globalSearch,
-      handler: () => openModal(),
-    },
-  ]
+const settingStore = useSettingStore()
+const shortcutsSetting = computed(() =>
+  settingStore.getSetting("shortcutSettings"),
+)
+
+const searchTooltip = computed(() => {
+  const combo = shortcutsSetting.value?.globalSearch
+  return combo ? ft2("search-hint", { combo }) : ft("search-hint-no-shortcut")
 })
+
+const shortcuts = computed(() => [
+  {
+    shortcut: shortcutsSetting.value?.globalSearch,
+    handler: () => toggleModal(),
+  },
+])
 useShortcutHotkeys(shortcuts)
 </script>

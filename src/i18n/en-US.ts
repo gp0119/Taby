@@ -59,7 +59,6 @@ export default {
   "select-file": "Click or drag file to this area to upload",
   "no-collections": "No collections here, please add one.",
   "no-cards": "No cards here, please drag tabs here",
-  "placeholder-search": "Press Ctrl/Cmd + F to search",
   "delete-confirm":
     "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
   "delete-cards-confirm": "Are you sure you want to delete these Cards?",
@@ -135,4 +134,6 @@ export default {
   "reset-shortcut": "Reset",
   "open-tag-filter": "Open Tag Filter",
   "open-tag-filter-hint": "Press {combo} to open tag filter",
+  "search-hint": "Press {combo} to open search",
+  "search-hint-no-shortcut": "Click to open search (no shortcut)",
 }

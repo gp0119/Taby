@@ -57,7 +57,6 @@ export default {
   "select-file": "点击或者拖动文件到该区域来上传",
   "no-collections": "这里没有 collections,请添加",
   "no-cards": "这里是空的,请拖动标签页到这里",
-  "placeholder-search": "按住 Ctrl/Cmd + F 搜索",
   "delete-confirm": "确定删除 <span class='text-primary'>{type}</span> 吗?",
   "delete-cards-confirm": "确定删除这些 Cards 吗?",
   "download-remote-confirm": "确定下载远程数据吗?这会覆盖本地数据,请谨慎操作",
@@ -130,4 +129,6 @@ export default {
   "reset-shortcut": "重置",
   "open-tag-filter": "打开标签筛选",
   "open-tag-filter-hint": "按 {combo} 打开标签筛选",
+  "search-hint": "按 {combo} 打开搜索",
+  "search-hint-no-shortcut": "点击打开搜索（未设置快捷键）",
 }

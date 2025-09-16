@@ -12,6 +12,7 @@ import { useSpacesStore } from "@/store/spaces"
 export const useSearchModal = () => {
   const searchValue = ref("")
   const modal = useModal()
+  const isOpen = ref(false)
   const { refreshCollections } = useRefresh()
   const spacesStore = useSpacesStore()
   const cards = ref<Card[]>([])
@@ -25,6 +26,7 @@ export const useSearchModal = () => {
   const { ft } = useHelpi18n()
 
   const stopEnter = useEventListener(document, "keydown", (e) => {
+    if (!isOpen.value) return
     if (e.key === "Enter") {
       if (cards.value[currentIndex.value]) {
         onHandleClick(cards.value[currentIndex.value])
@@ -33,6 +35,7 @@ export const useSearchModal = () => {
   })
 
   const stopArrow = useEventListener(document, "keydown", (e) => {
+    if (!isOpen.value) return
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
       e.preventDefault()
       if (currentIndex.value === 0 && e.key === "ArrowUp") {
@@ -183,11 +186,24 @@ export const useSearchModal = () => {
         cards.value = []
         currentIndex.value = 0
         modal.destroyAll()
+        isOpen.value = false
       },
     })
+    isOpen.value = true
+  }
+
+  const closeModal = () => {
+    modal.destroyAll()
+    isOpen.value = false
+  }
+
+  const toggleModal = () => {
+    if (isOpen.value) closeModal()
+    else openModal()
   }
 
   return {
     openModal,
+    toggleModal,
   }
 }
