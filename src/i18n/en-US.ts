@@ -133,4 +133,6 @@ export default {
   "shortcut-need-letter": "Press a letter",
   "clear-shortcut": "Clear",
   "reset-shortcut": "Reset",
+  "open-tag-filter": "Open Tag Filter",
+  "open-tag-filter-hint": "Press {combo} to open tag filter",
 }

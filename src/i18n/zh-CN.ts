@@ -128,4 +128,6 @@ export default {
   "shortcut-need-letter": "需要一个字母",
   "clear-shortcut": "清除",
   "reset-shortcut": "重置",
+  "open-tag-filter": "打开标签筛选",
+  "open-tag-filter-hint": "按 {combo} 打开标签筛选",
 }

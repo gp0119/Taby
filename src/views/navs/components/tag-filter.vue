@@ -16,15 +16,17 @@
         class="min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button__content]:!w-full"
       >
         <template #icon>
-          <n-icon size="20">
-            <TagGroup v-if="tagsStore.selectedTagIds.length < 2" />
-            <template v-else>
-              <ShapeIntersect20Regular
-                v-if="tagsStore.tagFilterType === 'AND'"
-              />
-              <ShapeUnion20Regular v-else />
-            </template>
-          </n-icon>
+          <PopoverWrapper :message="tagFilterTooltip" placement="bottom-start">
+            <n-icon size="20">
+              <TagGroup v-if="tagsStore.selectedTagIds.length < 2" />
+              <template v-else>
+                <ShapeIntersect20Regular
+                  v-if="tagsStore.tagFilterType === 'AND'"
+                />
+                <ShapeUnion20Regular v-else />
+              </template>
+            </n-icon>
+          </PopoverWrapper>
         </template>
         <div
           class="flex w-full max-w-[250px] flex-nowrap items-center justify-between"
@@ -150,13 +152,23 @@ import type { InputInst } from "naive-ui"
 import { useSettingStore } from "@/store/setting"
 import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
 import { useEventListener } from "@vueuse/core"
+import PopoverWrapper from "@/components/popover-wrapper.vue"
 
 const searchInputRef = ref<InputInst | null>(null)
 const filterTag = ref({
   title: "",
 })
 const tagsStore = useTagsStore()
-const { ft } = useHelpi18n()
+const { ft, ft2 } = useHelpi18n()
+
+const settingStore = useSettingStore()
+const shortcutsSetting = computed(() =>
+  settingStore.getSetting("shortcutSettings"),
+)
+const tagFilterTooltip = computed(() => {
+  const combo = shortcutsSetting.value?.openTagFilter
+  return combo ? ft2("open-tag-filter-hint", { combo }) : ft("tag-filter")
+})
 
 const tagOptions = computed(() => {
   const options = tagsStore.collectionsTags.map((tag) => ({
@@ -212,15 +224,12 @@ const toggleTagFilter = () => {
   onUpdateShow(!tagsStore.isTagOpen)
 }
 
-const shortcuts = computed(() => {
-  const sc = useSettingStore().getSetting("shortcutSettings")
-  return [
-    {
-      shortcut: sc.openTagFilter,
-      handler: () => toggleTagFilter(),
-    },
-  ]
-})
+const shortcuts = computed(() => [
+  {
+    shortcut: shortcutsSetting.value?.openTagFilter,
+    handler: () => toggleTagFilter(),
+  },
+])
 useShortcutHotkeys(shortcuts)
 
 const activeIndex = ref(0)
