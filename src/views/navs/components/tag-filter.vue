@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    trigger="click"
     placement="bottom-start"
     :show-arrow="false"
     :show="tagsStore.isTagOpen"
@@ -97,7 +97,6 @@
             :placeholder="ft('search-tag')"
             size="tiny"
             maxlength="10"
-            @keyup="onInputKeyup"
           >
             <template #prefix>
               <n-icon :component="SearchOutline" />
@@ -147,7 +146,8 @@ import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"
 import type { InputInst } from "naive-ui"
-import { useEventListener } from "@vueuse/core"
+import { useSettingStore } from "@/store/setting"
+import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
 
 const searchInputRef = ref<InputInst | null>(null)
 const filterTag = ref({
@@ -176,12 +176,11 @@ const handleTagSelect = (_key: number, option: Label) => {
 }
 
 const onUpdateShow = async (show: boolean) => {
+  tagsStore.toggleTagOpen(show)
   if (show) {
     await tagsStore.fetchCollectionsTags()
     tagsStore.toggleTagOpen(show)
     await focusSearchInputSafely()
-  } else {
-    tagsStore.toggleTagOpen(show)
   }
 }
 const focusSearchInputSafely = async () => {
@@ -198,24 +197,14 @@ const filterTagOptions = computed(() => {
   return tagOptions.value.filter((tag) => searchFilterTag(tag))
 })
 
-const keymapUpdateShow = useEventListener(window, "keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "g") {
-    e.preventDefault()
-    e.stopPropagation()
-    onUpdateShow(true)
-  }
+const shortcuts = computed(() => {
+  const sc = useSettingStore().getSetting("shortcutSettings")
+  return [
+    {
+      shortcut: sc.openTagFilter,
+      handler: () => onUpdateShow(true),
+    },
+  ]
 })
-
-onUnmounted(() => {
-  keymapUpdateShow()
-})
-
-const onInputKeyup = (e: KeyboardEvent) => {
-  if (e.key !== "Enter") return
-  const options = filterTagOptions.value
-  if (options.length === 1) {
-    const option = options[0]
-    handleTagSelect(option.id, option)
-  }
-}
+useShortcutHotkeys(shortcuts)
 </script>

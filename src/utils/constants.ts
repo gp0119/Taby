@@ -268,4 +268,5 @@ export const DEFAULT_SHORTCUT_SETTINGS = {
   closeDuplicateTabs: "Ctrl+D",
   closeAllTabs: "Ctrl+Shift+D",
   globalSearch: "Ctrl+F",
+  openTagFilter: "Ctrl+G",
 } as const

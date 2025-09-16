@@ -90,6 +90,7 @@ export type iSetting = {
     closeDuplicateTabs: string
     closeAllTabs: string
     globalSearch: string
+    openTagFilter: string
   }
 }
 
