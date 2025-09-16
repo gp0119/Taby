@@ -13,7 +13,7 @@
         tertiary
         :focusable="false"
         size="small"
-        class="min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button\_\_content]:!w-full"
+        class="min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button__content]:!w-full"
       >
         <template #icon>
           <n-icon size="20">
@@ -106,14 +106,15 @@
 
         <div
           v-if="filterTagOptions.length > 0"
+          ref="listRef"
           class="scrollbar-thin max-h-[60vh] overflow-auto"
         >
           <div
-            v-for="tag in filterTagOptions"
+            v-for="(tag, idx) in filterTagOptions"
             :key="tag.id"
-            class="flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2 hover:bg-hover-color"
+            class="tag-option-item flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2 hover:bg-hover-color"
             :class="{
-              'bg-hover-color': tagsStore.selectedTagIds.includes(tag.id),
+              'bg-hover-color': idx === activeIndex,
             }"
             @click="handleTagSelect(tag.id, tag)"
           >
@@ -148,6 +149,7 @@ import Tag from "@/components/tag.vue"
 import type { InputInst } from "naive-ui"
 import { useSettingStore } from "@/store/setting"
 import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
+import { useEventListener } from "@vueuse/core"
 
 const searchInputRef = ref<InputInst | null>(null)
 const filterTag = ref({
@@ -173,7 +175,14 @@ const handleTagSelect = (_key: number, option: Label) => {
     tagsStore.addSelectedTag(option)
   }
   filterTag.value.title = ""
-  focusSearchInputSafely()
+  nextTick(() => {
+    const idx = filterTagOptions.value.findIndex((t) => t.id === option.id)
+    if (idx >= 0) {
+      activeIndex.value = idx
+      scrollActiveIntoView()
+    }
+    focusSearchInputSafely()
+  })
 }
 
 const onUpdateShow = async (show: boolean) => {
@@ -184,6 +193,7 @@ const onUpdateShow = async (show: boolean) => {
     await focusSearchInputSafely()
   }
 }
+
 const focusSearchInputSafely = async () => {
   await nextTick()
   searchInputRef.value?.focus()
@@ -198,14 +208,86 @@ const filterTagOptions = computed(() => {
   return tagOptions.value.filter((tag) => searchFilterTag(tag))
 })
 
+const toggleTagFilter = () => {
+  onUpdateShow(!tagsStore.isTagOpen)
+}
+
 const shortcuts = computed(() => {
   const sc = useSettingStore().getSetting("shortcutSettings")
   return [
     {
       shortcut: sc.openTagFilter,
-      handler: () => onUpdateShow(true),
+      handler: () => toggleTagFilter(),
     },
   ]
 })
 useShortcutHotkeys(shortcuts)
+
+const activeIndex = ref(0)
+
+watch(
+  () => filterTag.value.title,
+  () => {
+    activeIndex.value = 0
+  },
+)
+
+const moveActive = (delta: number) => {
+  const total = filterTagOptions.value.length
+  if (total === 0) return
+  activeIndex.value = (activeIndex.value + delta + total) % total
+  scrollActiveIntoView()
+}
+
+const trySelectActive = () => {
+  const total = filterTagOptions.value.length
+  if (total === 0) return
+  const tag = filterTagOptions.value[activeIndex.value]
+  if (tag) {
+    handleTagSelect(tag.id, tag as any)
+  }
+}
+
+const listRef = ref<HTMLElement | null>(null)
+const scrollActiveIntoView = async () => {
+  await nextTick()
+  const el = listRef.value
+  if (!el) return
+  const items = el.querySelectorAll<HTMLElement>(".tag-option-item")
+  const target = items[activeIndex.value]
+  if (target) target.scrollIntoView({ block: "nearest" })
+}
+
+let stopKeydown: null | (() => void) = null
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault()
+    e.stopPropagation()
+    moveActive(1)
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault()
+    e.stopPropagation()
+    moveActive(-1)
+  } else if (e.key === "Enter") {
+    e.preventDefault()
+    e.stopPropagation()
+    trySelectActive()
+  }
+}
+
+watch(
+  () => tagsStore.isTagOpen,
+  (open) => {
+    if (open) {
+      activeIndex.value = 0
+      stopKeydown = useEventListener(window, "keydown", onKeydown, {
+        capture: true,
+      })
+    } else if (stopKeydown) {
+      stopKeydown()
+      stopKeydown = null
+    }
+  },
+  { immediate: true },
+)
 </script>
