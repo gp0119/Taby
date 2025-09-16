@@ -50,7 +50,7 @@
 
 <script setup lang="tsx">
 import { useSpacesStore } from "@/store/spaces.ts"
-import MorePopover from "@/views/navs/components/morePopover.vue"
+import MorePopover from "@/views/navs/components/more-popover.vue"
 import TagFilter from "@/views/navs/components/tag-filter.vue"
 import { ICON_LIST } from "@/utils/constants.ts"
 import TopDuplicateAction from "@/views/navs/components/top-duplicate-action.vue"

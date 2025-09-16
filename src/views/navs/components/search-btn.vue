@@ -18,22 +18,22 @@
 import { Search } from "@vicons/ionicons5"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
-import { useEventListener } from "@vueuse/core"
 import { useSearchModal } from "@/hooks/useSearchModal"
+import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
+import { useSettingStore } from "@/store/setting"
 
 const { ft } = useHelpi18n()
 
 const { openModal } = useSearchModal()
 
-const cleanup = useEventListener(window, "keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "f") {
-    e.preventDefault()
-    e.stopPropagation()
-    openModal()
-  }
+const shortcuts = computed(() => {
+  const sc = useSettingStore().getSetting("shortcutSettings")
+  return [
+    {
+      shortcut: sc.globalSearch,
+      handler: () => openModal(),
+    },
+  ]
 })
-
-onUnmounted(() => {
-  cleanup()
-})
+useShortcutHotkeys(shortcuts)
 </script>

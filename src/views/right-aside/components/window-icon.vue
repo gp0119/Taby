@@ -6,7 +6,7 @@
     :show-arrow="false"
     :to="false"
     :on-clickoutside="() => (showPopover = false)"
-    style="padding: 0; overflow: hidden; width: 200px"
+    style="padding: 0; overflow: hidden"
   >
     <template #trigger>
       <div
@@ -31,28 +31,54 @@
     </template>
     <template #default>
       <div
-        class="cursor-pointer px-4 py-2 hover:bg-content-color"
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
         @click="onSaveAllTabs(windowId)"
       >
-        {{ ft("save-all-tabs") }}
+        <span class="whitespace-nowrap">{{ ft("save-all-tabs") }}</span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.saveAllTabs" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
       </div>
       <div
-        class="cursor-pointer px-4 py-2 hover:bg-content-color"
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
         @click="onSaveAllTabsAndClose(windowId)"
       >
-        {{ ft("save-all-tabs-and-close") }}
+        <span class="whitespace-nowrap">
+          {{ ft("save-all-tabs-and-close") }}
+        </span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.saveAllTabsAndClose" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
       </div>
       <div
-        class="cursor-pointer px-4 py-2 hover:bg-content-color"
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
         @click="onCloseDuplicateTabs(windowId)"
       >
-        {{ ft("close-duplicate-tabs") }}
+        <span class="whitespace-nowrap">{{ ft("close-duplicate-tabs") }}</span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.closeDuplicateTabs" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
       </div>
       <div
-        class="cursor-pointer px-4 py-2 text-red-500 hover:bg-content-color"
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 text-red-500 hover:bg-content-color"
         @click="onCloseAllTabs(windowId)"
       >
-        {{ ft("close-all-tabs") }}
+        <span class="whitespace-nowrap">{{ ft("close-all-tabs") }}</span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.closeAllTabs" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
       </div>
     </template>
   </n-popover>
@@ -64,6 +90,8 @@ import { ref, onMounted, onUnmounted } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useLayoutStore } from "@/store/layout"
 import { isNewTabPage } from "@/utils"
+import { useSettingStore } from "@/store/setting"
+import { SHORTCUT_ICON_MAP } from "@/utils/constants"
 
 const layoutStore = useLayoutStore()
 const wrapperRef = ref<HTMLDivElement | null>(null)
@@ -148,4 +176,18 @@ const onCloseDuplicateTabs = (windowId: number | string) => {
   emit("closeDuplicateTabs", Number(windowId))
   showPopover.value = false
 }
+
+const shortcutIconMap = SHORTCUT_ICON_MAP
+
+const settingStore = useSettingStore()
+const displayShortcuts = computed(() => {
+  const sc = settingStore.getSetting("shortcutSettings")
+  const toParts = (s: string) => s.split("+")
+  return {
+    saveAllTabs: toParts(sc.saveAllTabs),
+    saveAllTabsAndClose: toParts(sc.saveAllTabsAndClose),
+    closeDuplicateTabs: toParts(sc.closeDuplicateTabs),
+    closeAllTabs: toParts(sc.closeAllTabs),
+  }
+})
 </script>

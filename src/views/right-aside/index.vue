@@ -61,7 +61,9 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { isNewTabPage } from "@/utils"
 import dayjs from "dayjs"
 import { useSpacesStore } from "@/store/spaces"
-import { useEventListener } from "@vueuse/core"
+// import { useEventListener } from "@vueuse/core"
+import { useSettingStore } from "@/store/setting"
+import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
 
 const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
@@ -203,32 +205,26 @@ const onCloseDuplicateTabs = async (windowId: number | string) => {
   await refreshTabs()
 }
 
-const onKeyMapSaveTabs = useEventListener(window, "keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.shiftKey) {
-      onSaveAllTabsAndClose(activeWindowId.value)
-    } else {
-      onSaveAllTabs(activeWindowId.value)
-    }
-  }
+const shortcuts = computed(() => {
+  const sc = useSettingStore().getSetting("shortcutSettings")
+  return [
+    {
+      shortcut: sc.saveAllTabs,
+      handler: () => onSaveAllTabs(activeWindowId.value),
+    },
+    {
+      shortcut: sc.saveAllTabsAndClose,
+      handler: () => onSaveAllTabsAndClose(activeWindowId.value),
+    },
+    {
+      shortcut: sc.closeDuplicateTabs,
+      handler: () => onCloseDuplicateTabs(activeWindowId.value),
+    },
+    {
+      shortcut: sc.closeAllTabs,
+      handler: () => closeAllTabsExceptCurrent(activeWindowId.value),
+    },
+  ]
 })
-
-const onKeyMapCloseTabs = useEventListener(window, "keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "d") {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.shiftKey) {
-      closeAllTabsExceptCurrent(activeWindowId.value)
-    } else {
-      onCloseDuplicateTabs(activeWindowId.value)
-    }
-  }
-})
-
-onUnmounted(() => {
-  onKeyMapSaveTabs()
-  onKeyMapCloseTabs()
-})
+useShortcutHotkeys(shortcuts)
 </script>

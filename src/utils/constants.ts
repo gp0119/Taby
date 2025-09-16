@@ -84,6 +84,7 @@ import {
   MedalOutline,
   MailOpenOutline,
 } from "@vicons/ionicons5"
+import { MacCommand, MacShift, MacOption } from "@vicons/carbon"
 
 export const COLOR_LIST = [
   // 红色系 (3)
@@ -251,3 +252,20 @@ export const THEME_COLOR = {
     shadowColor: "rgba(14,17,24,0.8)",
   },
 }
+
+// Shortcut key icon mapping
+export const SHORTCUT_ICON_MAP: Record<string, any> = {
+  Ctrl: MacCommand,
+  Cmd: MacCommand,
+  Shift: MacShift,
+  Alt: MacOption,
+}
+
+// Default shortcut settings
+export const DEFAULT_SHORTCUT_SETTINGS = {
+  saveAllTabs: "Ctrl+S",
+  saveAllTabsAndClose: "Ctrl+Shift+S",
+  closeDuplicateTabs: "Ctrl+D",
+  closeAllTabs: "Ctrl+Shift+D",
+  globalSearch: "Ctrl+F",
+} as const
