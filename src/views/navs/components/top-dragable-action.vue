@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import TopAction from "@/components/top-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
-import { useDraggableStore } from "@/store/draggable.js"
+import { useDraggableStore } from "@/store/draggable"
 
 const { ft } = useHelpi18n()
 const show = ref(false)

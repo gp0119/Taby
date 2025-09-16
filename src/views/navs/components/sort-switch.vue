@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="tsx">
-import { useSortStore } from "@/store/sort.js"
+import { useSortStore } from "@/store/sort"
 import { ArrowDown, ArrowUp, Draggable } from "@vicons/carbon"
 import { ChevronForward } from "@vicons/ionicons5"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"

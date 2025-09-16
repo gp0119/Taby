@@ -34,7 +34,7 @@
 <script setup lang="tsx">
 import { LanguageOutline } from "@vicons/ionicons5"
 import { useSettingStore } from "@/store/setting"
-import { useHelpi18n } from "@/hooks/useHelpi18n.js"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 
 const settingStore = useSettingStore()
 const { ft } = useHelpi18n()

@@ -37,7 +37,7 @@
 
 <script setup lang="tsx">
 import { ColorPalette, Light, Moon } from "@vicons/carbon"
-import { useHelpi18n } from "@/hooks/useHelpi18n.js"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useTheme } from "@/hooks/useTheme"
 
 const { setTheme, theme } = useTheme()

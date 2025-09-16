@@ -137,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import { useHelpi18n } from "@/hooks/useHelpi18n.js"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { Close } from "@vicons/ionicons5"
 import {
   Launch,

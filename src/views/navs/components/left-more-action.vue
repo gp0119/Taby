@@ -60,12 +60,12 @@
 </template>
 
 <script setup lang="tsx">
-import { useHelpi18n } from "@/hooks/useHelpi18n.js"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useBatchCardStore } from "@/store/batch-card.ts"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
 import { useBatchTabsStore } from "@/store/batch-tabs.ts"
-import { useDraggableStore } from "@/store/draggable.js"
-import { useDuplicateCardStore } from "@/store/duplicate-card.js"
+import { useDraggableStore } from "@/store/draggable"
+import { useDuplicateCardStore } from "@/store/duplicate-card"
 import SortSwitch from "@/views/navs/components/sort-switch.vue"
 import { Move, View } from "@vicons/carbon"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"

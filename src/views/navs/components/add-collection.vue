@@ -27,10 +27,10 @@ import { useRefresh } from "@/hooks/useRresh.ts"
 import dataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { movePosition } from "@/type"
-import { useDraggableStore } from "@/store/draggable.js"
-import { useBatchCardStore } from "@/store/batch-card.js"
-import { useBatchCollectionStore } from "@/store/batch-collection.js"
-import { useBatchTabsStore } from "@/store/batch-tabs.js"
+import { useDraggableStore } from "@/store/draggable"
+import { useBatchCardStore } from "@/store/batch-card"
+import { useBatchCollectionStore } from "@/store/batch-collection"
+import { useBatchTabsStore } from "@/store/batch-tabs"
 
 const draggableStore = useDraggableStore()
 const batchCardStore = useBatchCardStore()
