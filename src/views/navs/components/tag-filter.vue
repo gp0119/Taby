@@ -169,9 +169,10 @@ const tagOptions = computed(() => {
 const handleTagSelect = (_key: number, option: Label) => {
   if (tagsStore.selectedTagIds.includes(option.id)) {
     tagsStore.removeSelectedTag(option)
-    return
+  } else {
+    tagsStore.addSelectedTag(option)
   }
-  tagsStore.addSelectedTag(option)
+  filterTag.value.title = ""
   focusSearchInputSafely()
 }
 
