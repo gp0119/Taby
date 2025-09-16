@@ -71,11 +71,13 @@
       <n-input-group>
         <color-select v-model:value="selectedColor" size="tiny" />
         <n-input
+          ref="newTagInputRef"
           v-model:value="newTag.title"
           class="!w-[140px]"
           :placeholder="ft('placeholder', 'tag')"
           size="tiny"
           maxlength="10"
+          @keyup="onInputKeyup"
         />
         <n-button size="tiny" @click="saveAndAddTag">
           <template #icon>
@@ -115,6 +117,7 @@ import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import type { InputInst } from "naive-ui"
 
 const props = defineProps<{
   item: CollectionWithCards
@@ -127,6 +130,7 @@ const selectedColor = ref<string>(COLOR_LIST[0])
 const newTag = ref({
   title: "",
 })
+const newTagInputRef = ref<InputInst | null>(null)
 
 const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
   isShowTagAction: boolean
@@ -142,6 +146,7 @@ const onUpdateShowTagAction = (value: boolean) => {
   if (value) {
     selectedColor.value = getRandomColor()
     newTag.value.title = ""
+    focusNewTagInputSafely()
   }
 }
 
@@ -156,6 +161,7 @@ const addTag = () => {
   })
   newTag.value.title = ""
   selectedColor.value = getRandomColor()
+  focusNewTagInputSafely()
 }
 
 async function handleTagSelect(id: number) {
@@ -165,6 +171,7 @@ async function handleTagSelect(id: number) {
     await dataManager.addTagforCollection(props.item.id, id)
   }
   await refreshCollections()
+  await focusNewTagInputSafely()
 }
 
 const addTagforCollection = async (id: number) => {
@@ -181,6 +188,7 @@ const saveAndAddTag = async () => {
   newTag.value.title = ""
   selectedColor.value = getRandomColor()
   await addTagforCollection(tagId)
+  await focusNewTagInputSafely()
 }
 
 const { open: openEditDialog } = useEditDialog()
@@ -250,4 +258,18 @@ const searchFilterTag = (tag: { title?: string }) => {
 const filterTags = computed(() => {
   return tagsStore.tags.filter((tag) => searchFilterTag(tag))
 })
+const focusNewTagInputSafely = async () => {
+  await nextTick()
+  newTagInputRef.value?.focus()
+}
+const onInputKeyup = (e: KeyboardEvent) => {
+  if (e.key !== "Enter") return
+  const options = filterTags.value
+  if (options.length === 0) {
+    saveAndAddTag()
+  } else if (options.length === 1) {
+    const option = options[0]
+    handleTagSelect(option.id)
+  }
+}
 </script>

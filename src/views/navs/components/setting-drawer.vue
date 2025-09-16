@@ -201,6 +201,11 @@ const shortcutList = computed(() => {
       value: settingStore.getSetting("shortcutSettings")?.globalSearch,
       key: "globalSearch" as ShortcutKey,
     },
+    {
+      title: ft("open-tag-filter"),
+      value: settingStore.getSetting("shortcutSettings")?.openTagFilter,
+      key: "openTagFilter" as ShortcutKey,
+    },
   ]
 })
 
