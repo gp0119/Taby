@@ -124,4 +124,13 @@ export default {
   "save-and-add-tag": "Save and Add Tag",
   "save-tag": "Save Tag",
   "search-tag": "Search Tag",
+  "shortcut-settings": "Shortcut Settings",
+  "global-search": "Global Search",
+  "typing-shortcut": "typing shortcut",
+  "shortcut-hint-idle": "Click to record",
+  "shortcut-hint-recording-no-mod": "Ctrl/Cmd/Shift/Alt + a letter",
+  "shortcut-need-mod-keys": "Press a mod key",
+  "shortcut-need-letter": "Press a letter",
+  "clear-shortcut": "Clear",
+  "reset-shortcut": "Reset",
 }

@@ -44,7 +44,7 @@
         </clipPath>
       </defs>
     </svg>
-    <div class="mt-10 text-2xl text-gray-400">
+    <div class="mt-10 select-none text-2xl text-gray-400">
       {{ ft("no-collections") }}
     </div>
   </div>

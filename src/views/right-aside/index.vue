@@ -61,6 +61,9 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { isNewTabPage } from "@/utils"
 import dayjs from "dayjs"
 import { useSpacesStore } from "@/store/spaces"
+// import { useEventListener } from "@vueuse/core"
+import { useSettingStore } from "@/store/setting"
+import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
 
 const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
@@ -201,4 +204,27 @@ const onCloseDuplicateTabs = async (windowId: number | string) => {
   await removeTabs(duplicateTabsIds)
   await refreshTabs()
 }
+
+const shortcuts = computed(() => {
+  const sc = useSettingStore().getSetting("shortcutSettings")
+  return [
+    {
+      shortcut: sc.saveAllTabs,
+      handler: () => onSaveAllTabs(activeWindowId.value),
+    },
+    {
+      shortcut: sc.saveAllTabsAndClose,
+      handler: () => onSaveAllTabsAndClose(activeWindowId.value),
+    },
+    {
+      shortcut: sc.closeDuplicateTabs,
+      handler: () => onCloseDuplicateTabs(activeWindowId.value),
+    },
+    {
+      shortcut: sc.closeAllTabs,
+      handler: () => closeAllTabsExceptCurrent(activeWindowId.value),
+    },
+  ]
+})
+useShortcutHotkeys(shortcuts)
 </script>

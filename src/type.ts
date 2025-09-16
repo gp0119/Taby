@@ -84,6 +84,13 @@ export type iSetting = {
   hideRightClickMenu: boolean
   saveAfterOperationTime: number
   openCardsInGroup: boolean
+  shortcutSettings: {
+    saveAllTabs: string
+    saveAllTabsAndClose: string
+    closeDuplicateTabs: string
+    closeAllTabs: string
+    globalSearch: string
+  }
 }
 
 export interface ExportSpace {

@@ -33,7 +33,7 @@
       @edit="onEdit(card)"
       @check="onHandleCheckbox($event, card)"
     />
-    <div class="empty-text">
+    <div class="empty-text select-none">
       {{ ft("no-cards") }}
     </div>
   </VueDraggable>
