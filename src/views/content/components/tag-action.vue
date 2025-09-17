@@ -22,13 +22,19 @@
     </template>
     <template #default>
       <div class="scrollbar-thin h-[500px] overflow-y-auto px-2">
-        <div v-if="filterTags.length > 0" class="flex flex-col gap-y-1 py-1">
+        <div
+          v-if="filterTags.length > 0"
+          ref="listRef"
+          class="flex flex-col gap-y-1 py-1"
+        >
           <div
-            v-for="tag in filterTags"
+            v-for="(tag, idx) in filterTags"
             :key="tag.id"
-            class="group/tag relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-14 hover:bg-hover-color"
-            :class="{ 'bg-hover-color': item.labelIds.includes(tag.id) }"
-            @click="handleTagSelect(tag.id)"
+            class="group/tag tag-option-item relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-14 hover:bg-hover-color"
+            :class="{
+              'bg-hover-color': idx === activeIndex,
+            }"
+            @click="handleTagSelect(tag.id, idx)"
           >
             <Tag :tag="tag" :closeable="false" />
             <n-icon
@@ -77,7 +83,6 @@
           :placeholder="ft('placeholder', 'tag')"
           size="tiny"
           maxlength="10"
-          @keyup="onInputKeyup"
         />
         <n-button size="tiny" @click="saveAndAddTag">
           <template #icon>
@@ -118,6 +123,7 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog"
 import Tag from "@/components/tag.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import type { InputInst } from "naive-ui"
+import { useEventListener } from "@vueuse/core"
 
 const props = defineProps<{
   item: CollectionWithCards
@@ -133,7 +139,7 @@ const newTag = ref({
 const newTagInputRef = ref<InputInst | null>(null)
 
 const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
-  isShowTagAction: boolean
+  isShowTagAction: Ref<boolean>
   setIsShowTagAction: (value: boolean) => void
 }
 
@@ -153,25 +159,31 @@ const onUpdateShowTagAction = (value: boolean) => {
 onMounted(async () => {
   await tagsStore.fetchTags()
 })
-const addTag = () => {
+const addTag = async () => {
   if (newTag.value.title === "") return
-  tagsStore.addTag({
+  await tagsStore.addTag({
     title: newTag.value.title,
     color: selectedColor.value,
   })
   newTag.value.title = ""
   selectedColor.value = getRandomColor()
-  focusNewTagInputSafely()
+  await nextTick()
+  activeIndex.value = filterTags.value.length
+  scrollActiveIntoView()
 }
 
-async function handleTagSelect(id: number) {
+async function handleTagSelect(id: number, idx?: number) {
+  console.log("id: ", props.item.id, id)
   if (props.item.labelIds.includes(id)) {
     await dataManager.removeTagforCollection(props.item.id, id)
   } else {
     await dataManager.addTagforCollection(props.item.id, id)
   }
   await refreshCollections()
-  await focusNewTagInputSafely()
+  focusNewTagInputSafely()
+  if (idx) {
+    activeIndex.value = idx
+  }
 }
 
 const addTagforCollection = async (id: number) => {
@@ -189,6 +201,9 @@ const saveAndAddTag = async () => {
   selectedColor.value = getRandomColor()
   await addTagforCollection(tagId)
   await focusNewTagInputSafely()
+  await nextTick()
+  activeIndex.value = filterTags.value.length
+  scrollActiveIntoView()
 }
 
 const { open: openEditDialog } = useEditDialog()
@@ -262,14 +277,75 @@ const focusNewTagInputSafely = async () => {
   await nextTick()
   newTagInputRef.value?.focus()
 }
-const onInputKeyup = (e: KeyboardEvent) => {
-  if (e.key !== "Enter") return
-  const options = filterTags.value
-  if (options.length === 0) {
-    saveAndAddTag()
-  } else if (options.length === 1) {
-    const option = options[0]
-    handleTagSelect(option.id)
+
+const activeIndex = ref(0)
+
+watch(
+  () => newTag.value.title,
+  () => {
+    activeIndex.value = 0
+  },
+)
+
+const moveActive = (delta: number) => {
+  const total = filterTags.value.length
+  if (total === 0) return
+  activeIndex.value = (activeIndex.value + delta + total) % total
+  scrollActiveIntoView()
+}
+
+const trySelectActive = async () => {
+  const total = filterTags.value.length
+  if (total === 0) {
+    await saveAndAddTag()
+    return
+  }
+  const tag = filterTags.value[activeIndex.value]
+  if (tag) {
+    handleTagSelect(tag.id)
   }
 }
+
+const listRef = ref<HTMLElement | null>(null)
+const scrollActiveIntoView = async () => {
+  await nextTick()
+  const el = listRef.value
+  if (!el) return
+  const items = el.querySelectorAll<HTMLElement>(".tag-option-item")
+  const target = items[activeIndex.value]
+  if (target) target.scrollIntoView({ block: "nearest" })
+}
+
+let stopKeydown: null | (() => void) = null
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault()
+    e.stopPropagation()
+    moveActive(1)
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault()
+    e.stopPropagation()
+    moveActive(-1)
+  } else if (e.key === "Enter") {
+    e.preventDefault()
+    e.stopPropagation()
+    trySelectActive()
+  }
+}
+
+watch(
+  () => isShowTagAction.value,
+  (open) => {
+    if (open) {
+      activeIndex.value = 0
+      stopKeydown = useEventListener(window, "keydown", onKeydown, {
+        capture: true,
+      })
+    } else if (stopKeydown) {
+      stopKeydown()
+      stopKeydown = null
+    }
+  },
+  { immediate: true },
+)
 </script>
