@@ -34,7 +34,7 @@
             :class="{
               'bg-hover-color': idx === activeIndex,
             }"
-            @click="handleTagSelect(tag.id, idx)"
+            @click="handleTagSelect(tag.id)"
           >
             <Tag :tag="tag" :closeable="false" />
             <n-icon
@@ -147,11 +147,12 @@ const getRandomColor = () => {
   return COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)]
 }
 
-const onUpdateShowTagAction = (value: boolean) => {
+const onUpdateShowTagAction = async (value: boolean) => {
   setIsShowTagAction(value)
   if (value) {
     selectedColor.value = getRandomColor()
     newTag.value.title = ""
+    await nextTick()
     focusNewTagInputSafely()
   }
 }
@@ -166,24 +167,25 @@ const addTag = async () => {
     color: selectedColor.value,
   })
   newTag.value.title = ""
-  selectedColor.value = getRandomColor()
   await nextTick()
-  activeIndex.value = filterTags.value.length
+  activeIndex.value = filterTags.value.length - 1
   scrollActiveIntoView()
+  selectedColor.value = getRandomColor()
+  focusNewTagInputSafely()
 }
 
-async function handleTagSelect(id: number, idx?: number) {
-  console.log("id: ", props.item.id, id)
+async function handleTagSelect(id: number) {
   if (props.item.labelIds.includes(id)) {
     await dataManager.removeTagforCollection(props.item.id, id)
   } else {
     await dataManager.addTagforCollection(props.item.id, id)
   }
   await refreshCollections()
+  newTag.value.title = ""
+  await nextTick()
+  activeIndex.value = filterTags.value.findIndex((tag) => tag.id === id)
+  scrollActiveIntoView()
   focusNewTagInputSafely()
-  if (idx) {
-    activeIndex.value = idx
-  }
 }
 
 const addTagforCollection = async (id: number) => {
@@ -202,7 +204,7 @@ const saveAndAddTag = async () => {
   await addTagforCollection(tagId)
   await focusNewTagInputSafely()
   await nextTick()
-  activeIndex.value = filterTags.value.length
+  activeIndex.value = filterTags.value.length - 1
   scrollActiveIntoView()
 }
 
