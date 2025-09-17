@@ -23,7 +23,7 @@ export const useDeleteDialog = () => {
       content,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
       class: "bg-dialog-color",
-      autoFocus: false,
+      autoFocus: true,
       negativeText: negativeText || ft("cancel"),
       positiveText: positiveText || ft("confirm"),
       onPositiveClick,
