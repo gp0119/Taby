@@ -30,11 +30,12 @@
           <div
             v-for="(tag, idx) in filterTags"
             :key="tag.id"
-            class="group/tag tag-option-item relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-14 hover:bg-hover-color"
+            class="group/tag tag-option-item relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-14"
             :class="{
               'bg-hover-color': idx === activeIndex,
             }"
             @click="handleTagSelect(tag.id)"
+            @mouseenter="activeIndex = idx"
           >
             <Tag :tag="tag" :closeable="false" />
             <n-icon

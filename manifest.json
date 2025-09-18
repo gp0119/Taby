@@ -1,7 +1,7 @@
 {
   "name": "Taby - Simple & Powerful New Tab",
   "manifest_version": 3,
-  "version": "1.2.9",
+  "version": "1.3.0",
   "description": "A simple yet powerful new tab extension to help you efficiently manage tabs and personalize your browsing experience.",
   "chrome_url_overrides": {
     "newtab": "newtab.html"

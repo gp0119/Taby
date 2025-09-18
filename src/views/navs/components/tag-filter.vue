@@ -114,11 +114,12 @@
           <div
             v-for="(tag, idx) in filterTagOptions"
             :key="tag.id"
-            class="tag-option-item flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2 hover:bg-hover-color"
+            class="tag-option-item flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2"
             :class="{
               'bg-hover-color': idx === activeIndex,
             }"
             @click="handleTagSelect(tag.id, tag)"
+            @mouseenter="activeIndex = idx"
           >
             <Tag :tag="tag" />
             <n-icon
