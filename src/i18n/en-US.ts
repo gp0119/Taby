@@ -102,6 +102,12 @@ export default {
   "close-all-tabs": "Close All Tabs",
   "save-all-tabs": "Save All Tabs",
   "save-all-tabs-and-close": "Save All Tabs and Close",
+  "save-all-tabs-confirm": "Are you sure you want to save all tabs?",
+  "save-all-tabs-and-close-confirm":
+    "Are you sure you want to save all tabs and close?",
+  "close-duplicate-tabs-confirm":
+    "Are you sure you want to close duplicate tabs?",
+  "close-all-tabs-confirm": "Are you sure you want to close all tabs?",
   "move-collection": "Move Collection",
   "close-tabs-confirm": "Are you sure you want to close these tabs?",
   collections: "Collections",

@@ -61,9 +61,9 @@ import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { isNewTabPage } from "@/utils"
 import dayjs from "dayjs"
 import { useSpacesStore } from "@/store/spaces"
-// import { useEventListener } from "@vueuse/core"
 import { useSettingStore } from "@/store/setting"
 import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 
 const { ft } = useHelpi18n()
 const layoutStore = useLayoutStore()
@@ -205,24 +205,47 @@ const onCloseDuplicateTabs = async (windowId: number | string) => {
   await refreshTabs()
 }
 
+const { open: openConfirmDialog } = useDeleteDialog()
+
 const shortcuts = computed(() => {
   const sc = useSettingStore().getSetting("shortcutSettings")
   return [
     {
       shortcut: sc.saveAllTabs,
-      handler: () => onSaveAllTabs(activeWindowId.value),
+      handler: () =>
+        openConfirmDialog({
+          title: ft("tips-title"),
+          content: ft("save-all-tabs-confirm"),
+          onPositiveClick: () => onSaveAllTabs(activeWindowId.value),
+        }),
     },
     {
       shortcut: sc.saveAllTabsAndClose,
-      handler: () => onSaveAllTabsAndClose(activeWindowId.value),
+      handler: () =>
+        openConfirmDialog({
+          title: ft("tips-title"),
+          content: ft("save-all-tabs-and-close-confirm"),
+          onPositiveClick: () => onSaveAllTabsAndClose(activeWindowId.value),
+        }),
     },
     {
       shortcut: sc.closeDuplicateTabs,
-      handler: () => onCloseDuplicateTabs(activeWindowId.value),
+      handler: () =>
+        openConfirmDialog({
+          title: ft("tips-title"),
+          content: ft("close-duplicate-tabs-confirm"),
+          onPositiveClick: () => onCloseDuplicateTabs(activeWindowId.value),
+        }),
     },
     {
       shortcut: sc.closeAllTabs,
-      handler: () => closeAllTabsExceptCurrent(activeWindowId.value),
+      handler: () =>
+        openConfirmDialog({
+          title: ft("tips-title"),
+          content: ft("close-all-tabs-confirm"),
+          onPositiveClick: () =>
+            closeAllTabsExceptCurrent(activeWindowId.value),
+        }),
     },
   ]
 })
