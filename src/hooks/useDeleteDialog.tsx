@@ -1,6 +1,8 @@
 import { useDialog, NButton } from "naive-ui"
+import type { DialogReactive } from "naive-ui"
 import { VNodeChild } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
+let activeDialogRef: DialogReactive | null = null
 export const useDeleteDialog = () => {
   const dialog = useDialog()
   const { ft } = useHelpi18n()
@@ -18,6 +20,7 @@ export const useDeleteDialog = () => {
     negativeText?: string
     positiveText?: string
   }) => {
+    if (activeDialogRef) return
     const dialogRef = dialog.error({
       title,
       content,
@@ -28,6 +31,9 @@ export const useDeleteDialog = () => {
       negativeText: negativeText || ft("cancel"),
       positiveText: positiveText || ft("confirm"),
       onPositiveClick,
+      onAfterLeave: () => {
+        activeDialogRef = null
+      },
       action: () => {
         return (
           <div class="flex items-center gap-2">
@@ -53,6 +59,7 @@ export const useDeleteDialog = () => {
         )
       },
     })
+    activeDialogRef = dialogRef
   }
 
   return {
