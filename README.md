@@ -63,13 +63,13 @@ git clone https://github.com/gp0119/Taby.git
 cd Taby
 
 # 安装依赖
-npm install
+pnpm install
 
 # 开发环境运行
-npm run watch-build
+pnpm run dev
 
 # 构建生产版本
-npm run build
+pnpm run build
 ```
 
 ## 🤝 贡献 | Contributing

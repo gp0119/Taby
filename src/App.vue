@@ -3,7 +3,6 @@
     :theme-overrides="themeOverrides"
     :theme="theme === 'dark' ? darkTheme : lightTheme"
     class="h-full"
-    abstract
   >
     <n-loading-bar-provider>
       <n-dialog-provider>
