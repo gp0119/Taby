@@ -58,17 +58,6 @@ const handleMessage = async (message: any) => {
   }
 }
 
-onMounted(() => {
-  document.addEventListener("visibilitychange", handleVisibilityChange)
-  window.addEventListener("beforeunload", removeListener)
-  chrome.runtime.onMessage.addListener(handleMessage)
-})
-
-onUnmounted(() => {
-  removeListener()
-  chrome.runtime.onMessage.removeListener(handleMessage)
-})
-
 const removeListener = () => {
   document.removeEventListener("visibilitychange", handleVisibilityChange)
   window.removeEventListener("beforeunload", removeListener)
@@ -93,6 +82,10 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
+  handleVisibilityChange()
+  document.addEventListener("visibilitychange", handleVisibilityChange)
+  window.addEventListener("beforeunload", removeListener)
+  chrome.runtime.onMessage.addListener(handleMessage)
   await new Promise((resolve) => setTimeout(resolve, 100))
   await refreshSpaces()
   await refreshCollections()
@@ -103,5 +96,10 @@ onMounted(async () => {
     await refreshCollections()
   }
   loading.value = false
+})
+
+onUnmounted(() => {
+  removeListener()
+  chrome.runtime.onMessage.removeListener(handleMessage)
 })
 </script>
