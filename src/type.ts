@@ -111,3 +111,9 @@ export interface ExportSpace {
     }[]
   }[]
 }
+
+export interface GistVersion {
+  version: string
+  committedAt: string
+  url: string
+}

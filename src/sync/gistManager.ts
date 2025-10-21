@@ -167,6 +167,58 @@ class GistManager {
   async downloadAll() {
     return await this.fetchGist()
   }
+
+  async fetchGistVersions() {
+    if (!this.GIST_ID) {
+      throw new Error("未设置 Gist ID")
+    }
+    const res = await this.request<
+      Array<{
+        version: string
+        committed_at: string
+        url: string
+      }>
+    >({
+      endpoint: `/gists/${this.GIST_ID}/commits`,
+      method: "GET",
+    })
+    return res.map((item) => ({
+      version: item.version,
+      committedAt: item.committed_at,
+      url: item.url,
+    }))
+  }
+
+  async fetchGistByVersion(version: string) {
+    if (!this.GIST_ID) {
+      throw new Error("未设置 Gist ID")
+    }
+    const res = await this.request<{
+      files: {
+        spaces: { content: string }
+        collections: { content: string }
+        labels: { content: string }
+        cards: { content: string }
+        favicons: { content: string }
+      }
+    }>({
+      endpoint: `/gists/${this.GIST_ID}/${version}`,
+      method: "GET",
+    })
+    const { spaces, collections, labels, cards, favicons } = res.files
+    const remoteData: SyncData = {
+      spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
+      collections: collections
+        ? JSON.parse(decompressFromUTF16(collections.content))
+        : [],
+      labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
+      cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
+      favicons: favicons
+        ? JSON.parse(decompressFromUTF16(favicons.content))
+        : [],
+    }
+    return remoteData
+  }
 }
 
 export default GistManager.getInstance()

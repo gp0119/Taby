@@ -15,9 +15,9 @@
       </span>
       <n-icon-wrapper
         v-if="closeable"
-        border-radius="10"
+        :border-radius="10"
         icon-color="#fff"
-        size="14"
+        :size="14"
         class="absolute -right-1.5 -top-1.5 z-10 hidden bg-error-color group-hover/tag:inline-flex"
         @click.stop="onDeleteTag"
       >
@@ -26,7 +26,7 @@
       <n-icon
         v-if="removeable"
         :component="Close"
-        size="14"
+        :size="14"
         @click.stop="onRemoveTag"
       />
     </div>
