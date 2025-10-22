@@ -224,23 +224,6 @@ const handleRollback = (version: GistVersion) => {
         await refreshCollections()
         await updateContextMenus()
         message.success(ft("rollback-success"))
-
-        // 询问是否上传
-        setTimeout(() => {
-          open({
-            title: ft("tips-title"),
-            content: ft("rollback-upload-confirm"),
-            onPositiveClick: async () => {
-              try {
-                await syncManager.uploadAll()
-                message.success(ft("success", "upload"))
-              } catch (error) {
-                console.error("Failed to upload:", error)
-                message.error(ft("fail", "upload"))
-              }
-            },
-          })
-        }, 500)
       } catch (error) {
         console.error("Failed to rollback:", error)
         message.error(ft("rollback-failed"))
