@@ -47,7 +47,7 @@
         </p>
       </div>
 
-      <div v-else-if="versions.length === 0 && !loading" class="py-4">
+      <div v-else-if="versions.length === 0" class="py-4">
         <n-empty
           size="small"
           :description="ft('no-versions')"
@@ -111,7 +111,6 @@ const message = useMessage()
 const { open } = useDeleteDialog()
 const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
 
-const CACHE_KEY = "gist_versions_cache"
 const CACHE_EXPIRE_TIME = 5 * 60 * 1000 // 5分钟过期
 
 const hasGistConfig = computed(() => {
@@ -122,6 +121,12 @@ const hasGistConfig = computed(() => {
 
 const isGitee = computed(() => {
   return localStorage.getItem(SYNC_TYPE) === "gitee"
+})
+
+const cacheKey = computed(() => {
+  const gistId = localStorage.getItem(SYNC_GIST_ID) || "default"
+  const syncType = localStorage.getItem(SYNC_TYPE) || "github"
+  return `gist_versions_cache_${syncType}_${gistId}`
 })
 
 const loading = ref(false)
@@ -135,7 +140,7 @@ const formatDate = (date: string) => {
 // 从缓存加载版本列表
 const loadFromCache = () => {
   try {
-    const cached = localStorage.getItem(CACHE_KEY)
+    const cached = localStorage.getItem(cacheKey.value)
     if (cached) {
       const { data, timestamp } = JSON.parse(cached)
       // 检查缓存是否过期
@@ -144,11 +149,13 @@ const loadFromCache = () => {
         return true
       } else {
         // 缓存过期，清除
-        localStorage.removeItem(CACHE_KEY)
+        localStorage.removeItem(cacheKey.value)
       }
     }
   } catch (error) {
     console.error("Failed to load cache:", error)
+    // 清除损坏的缓存
+    localStorage.removeItem(cacheKey.value)
   }
   return false
 }
@@ -157,7 +164,7 @@ const loadFromCache = () => {
 const saveToCache = (data: GistVersion[]) => {
   try {
     localStorage.setItem(
-      CACHE_KEY,
+      cacheKey.value,
       JSON.stringify({
         data,
         timestamp: Date.now(),
@@ -169,7 +176,7 @@ const saveToCache = (data: GistVersion[]) => {
 }
 
 const handleGetData = async () => {
-  if (!hasGistConfig.value) return
+  if (!hasGistConfig.value || isGitee.value) return
 
   try {
     loading.value = true
@@ -182,7 +189,7 @@ const handleGetData = async () => {
     }
   } catch (error) {
     console.error("Failed to fetch versions:", error)
-    message.error("获取版本历史失败")
+    message.error(ft("fetch-versions-failed"))
   } finally {
     loading.value = false
   }
@@ -190,7 +197,16 @@ const handleGetData = async () => {
 
 // 组件加载时尝试从缓存加载
 onMounted(() => {
-  if (hasGistConfig.value) {
+  if (hasGistConfig.value && !isGitee.value) {
+    loadFromCache()
+  }
+})
+
+// 监听配置变化
+watch([hasGistConfig, isGitee, cacheKey], ([hasConfig, gitee]) => {
+  if (!hasConfig || gitee) {
+    versions.value = []
+  } else {
     loadFromCache()
   }
 })

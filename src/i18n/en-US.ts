@@ -159,4 +159,6 @@ export default {
   "get-data": "Get Version History",
   "config-gist-sync": "Please configure Gist sync first",
   "gitee-no-version-support": "Gitee does not support version history",
+  "fetch-versions-failed": "Failed to fetch version history",
+  "versions-loaded": "{count} version(s) loaded",
 }

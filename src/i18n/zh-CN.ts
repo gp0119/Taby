@@ -152,4 +152,6 @@ export default {
   "get-data": "获取历史版本",
   "config-gist-sync": "请先配置 Gist 同步",
   "gitee-no-version-support": "Gitee 暂不支持版本历史功能",
+  "fetch-versions-failed": "获取版本历史失败",
+  "versions-loaded": "已加载 {count} 个版本",
 }
