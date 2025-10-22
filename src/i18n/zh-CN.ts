@@ -142,8 +142,7 @@ export default {
   "loading-versions": "加载中...",
   "no-versions": "暂无历史版本",
   "rollback-to-version": "回溯到此版本",
-  "rollback-confirm":
-    "确定回溯到此版本吗？这将覆盖当前数据。<br/><span class='text-yellow-500 mt-2 block'>注意：回溯后不会自动上传，如需保留请手动上传。</span>",
+  "rollback-confirm": "确定回溯到此版本吗？这将覆盖当前数据。",
   "rollback-success": "回溯成功",
   "rollback-failed": "回溯失败",
   "rollback-upload-confirm": "回溯成功！是否立即上传到 Gist？",

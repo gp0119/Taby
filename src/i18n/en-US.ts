@@ -150,7 +150,7 @@ export default {
   "no-versions": "No version history",
   "rollback-to-version": "Rollback to this version",
   "rollback-confirm":
-    "Are you sure you want to rollback to this version? This will overwrite current data.<br/><span class='text-yellow-500 mt-2 block'>Note: Data will not be automatically uploaded after rollback. Please upload manually if needed.</span>",
+    "Are you sure you want to rollback to this version? This will overwrite current data.",
   "rollback-success": "Rollback successful",
   "rollback-failed": "Rollback failed",
   "rollback-upload-confirm": "Rollback successful! Upload to Gist now?",

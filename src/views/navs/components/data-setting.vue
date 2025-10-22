@@ -93,13 +93,11 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { SYNC_GIST_TOKEN, SYNC_GIST_ID, SYNC_TYPE } from "@/utils/constants.ts"
 import { GistVersion } from "@/type.ts"
 import GistManager from "@/sync/gistManager.ts"
 import dataManager from "@/db/index.ts"
-import syncManager from "@/sync/syncManager.ts"
 import { useMessage } from "naive-ui"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
@@ -214,7 +212,7 @@ watch([hasGistConfig, isGitee, cacheKey], ([hasConfig, gitee]) => {
 const handleRollback = (version: GistVersion) => {
   open({
     title: ft("tips-title"),
-    content: () => h("div", { innerHTML: ft("rollback-confirm") }),
+    content: ft("rollback-confirm"),
     onPositiveClick: async () => {
       try {
         rollbackLoading.value = version.version
