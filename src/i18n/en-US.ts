@@ -157,4 +157,6 @@ export default {
   "version-time": "Version Time",
   "current-version": "Current Version",
   "get-data": "Get Version History",
+  "config-gist-sync": "Please configure Gist sync first",
+  "gitee-no-version-support": "Gitee does not support version history",
 }

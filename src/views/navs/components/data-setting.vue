@@ -12,7 +12,7 @@
             v-if="versions.length > 0"
             size="small"
             :loading="loading"
-            :disabled="!hasGistConfig"
+            :disabled="!hasGistConfig || isGitee"
             @click="handleGetData"
           >
             <template #icon>
@@ -24,7 +24,7 @@
             type="primary"
             size="small"
             :loading="loading"
-            :disabled="!hasGistConfig"
+            :disabled="!hasGistConfig || isGitee"
             @click="handleGetData"
           >
             {{ ft("get-data") }}
@@ -33,7 +33,11 @@
       </div>
 
       <div v-if="!hasGistConfig" class="text-xs text-text-secondary">
-        请先配置 Gist 同步
+        {{ ft("config-gist-sync") }}
+      </div>
+
+      <div v-else-if="isGitee" class="text-xs text-text-secondary">
+        {{ ft("gitee-no-version-support") }}
       </div>
 
       <div v-else-if="loading" class="py-4 text-center">
@@ -91,7 +95,7 @@
 <script setup lang="ts">
 import { h } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
+import { SYNC_GIST_TOKEN, SYNC_GIST_ID, SYNC_TYPE } from "@/utils/constants.ts"
 import { GistVersion } from "@/type.ts"
 import GistManager from "@/sync/gistManager.ts"
 import dataManager from "@/db/index.ts"
@@ -114,6 +118,10 @@ const hasGistConfig = computed(() => {
   const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
   const gistId = localStorage.getItem(SYNC_GIST_ID)
   return !!(accessToken && gistId)
+})
+
+const isGitee = computed(() => {
+  return localStorage.getItem(SYNC_TYPE) === "gitee"
 })
 
 const loading = ref(false)

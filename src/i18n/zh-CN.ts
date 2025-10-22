@@ -150,4 +150,6 @@ export default {
   "version-time": "版本时间",
   "current-version": "当前版本",
   "get-data": "获取历史版本",
+  "config-gist-sync": "请先配置 Gist 同步",
+  "gitee-no-version-support": "Gitee 暂不支持版本历史功能",
 }
