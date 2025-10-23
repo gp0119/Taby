@@ -166,18 +166,27 @@ const handleSyncTypeChange = (value: string) => {
   localStorage.setItem(SYNC_GIST_ID, "")
   syncManager.setEnv(SYNC_GIST_ID, "")
   chrome.storage.sync.set({ [SYNC_GIST_ID]: "" })
+
+  // 清空修改的表
+  syncManager.clearModifiedTable()
 }
 
 const handleAccessTokenChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_TOKEN, value)
   syncManager.setEnv(SYNC_GIST_TOKEN, value)
   chrome.storage.sync.set({ [SYNC_GIST_TOKEN]: value })
+
+  // 清空修改的表
+  syncManager.clearModifiedTable()
 }, 1000)
 
 const handleGistIdChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_ID, value)
   syncManager.setEnv(SYNC_GIST_ID, value)
   chrome.storage.sync.set({ [SYNC_GIST_ID]: value })
+
+  // 清空修改的表
+  syncManager.clearModifiedTable()
 }, 1000)
 
 const handleUpload = () => {

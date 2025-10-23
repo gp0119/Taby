@@ -109,7 +109,7 @@ const message = useMessage()
 const { open } = useDeleteDialog()
 const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
 
-const CACHE_EXPIRE_TIME = 5 * 60 * 1000 // 5分钟过期
+const CACHE_EXPIRE_TIME = 60 * 60 * 1000 // 1小时过期
 
 const hasGistConfig = computed(() => {
   const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
