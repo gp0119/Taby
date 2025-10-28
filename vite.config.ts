@@ -7,6 +7,8 @@ import vueJsx from "@vitejs/plugin-vue-jsx"
 import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.config"
 import zip from "vite-plugin-zip-pack"
+import fs from "fs"
+import path from "path"
 
 export default defineConfig({
   plugins: [
@@ -14,6 +16,19 @@ export default defineConfig({
     crx({ manifest }),
     zip({ outDir: "release", outFileName: "release.zip" }),
     vueJsx({}),
+    {
+      name: "remove-vite-manifest",
+      closeBundle() {
+        const manifestPath = path.resolve(__dirname, "dist/.vite/manifest.json")
+        if (fs.existsSync(manifestPath)) {
+          fs.unlinkSync(manifestPath)
+          const viteDir = path.resolve(__dirname, "dist/.vite")
+          if (fs.readdirSync(viteDir).length === 0) {
+            fs.rmdirSync(viteDir)
+          }
+        }
+      },
+    },
     AutoImport({
       imports: [
         "vue",
