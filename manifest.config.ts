@@ -21,6 +21,7 @@ export default defineManifest({
     "contextMenus",
     "tabGroups",
   ],
+  optional_permissions: ["bookmarks"],
   host_permissions: ["<all_urls>"],
   web_accessible_resources: [
     {

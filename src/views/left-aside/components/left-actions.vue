@@ -99,6 +99,7 @@ import SpaceSelect from "@/components/space-select.vue"
 import SyncDialog from "@/views/left-aside/components/sync-dialog.vue"
 import { useLayoutStore } from "@/store/layout"
 import popoverWrapper from "@/components/popover-wrapper.vue"
+import Bookmarks from "@/views/left-aside/components/bookmarks.vue"
 
 const { ft } = useHelpi18n()
 const spacesStore = useSpacesStore()
@@ -122,32 +123,40 @@ function onImport() {
   })
   open({
     title: ft("import"),
+    className: "!w-[600px]",
     renderContent: () => {
       return (
         <n-form model={formModel.value}>
           <n-form-item>
             <n-radio-group class="w-full" v-model:value={type.value}>
-              <n-radio-button class="w-1/2 text-center" value="taby">
+              <n-radio-button class="w-1/3 text-center" value="taby">
                 {ft("import-from", "taby")}
               </n-radio-button>
-              <n-radio-button class="w-1/2 text-center" value="toby">
+              <n-radio-button class="w-1/3 text-center" value="toby">
                 {ft("import-from", "toby")}
+              </n-radio-button>
+              <n-radio-button class="w-1/3 text-center" value="bookmarks">
+                {ft("import-from-bookmarks")}
               </n-radio-button>
             </n-radio-group>
           </n-form-item>
-          <n-form-item label-placement="left">
-            <n-upload
-              directory-dnd
-              v-model:fileList={formModel.value.fileList}
-              accept=".json"
-              max={1}
-            >
-              <n-upload-dragger class="flex flex-col items-center bg-card-color text-text-secondary">
-                <n-icon size="32" component={Upload} />
-                <span class="mt-2.5">{ft("select-file")}</span>
-              </n-upload-dragger>
-            </n-upload>
-          </n-form-item>
+          {type.value === "taby" || type.value === "toby" ? (
+            <n-form-item label-placement="left">
+              <n-upload
+                directory-dnd
+                v-model:fileList={formModel.value.fileList}
+                accept=".json"
+                max={1}
+              >
+                <n-upload-dragger class="flex flex-col items-center bg-card-color text-text-secondary">
+                  <n-icon size="32" component={Upload} />
+                  <span class="mt-2.5">{ft("select-file")}</span>
+                </n-upload-dragger>
+              </n-upload>
+            </n-form-item>
+          ) : (
+            <Bookmarks />
+          )}
         </n-form>
       )
     },

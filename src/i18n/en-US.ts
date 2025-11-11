@@ -161,4 +161,5 @@ export default {
   "gitee-no-version-support": "Gitee does not support version history",
   "fetch-versions-failed": "Failed to fetch version history",
   "versions-loaded": "{count} version(s) loaded",
+  "import-from-bookmarks": "Import From Bookmarks",
 }

@@ -14,8 +14,10 @@ export function useEditDialog() {
     onNegativeClick,
     positiveText,
     negativeText,
+    className,
   }: {
     title: string | (() => VNode)
+    className?: string
     renderContent: () => VNode
     renderAction?: (props: { close: () => void }) => VNode
     onPositiveClick?: () => void
@@ -27,7 +29,7 @@ export function useEditDialog() {
     const dialogRef = dialog.create({
       title,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
-      class: "bg-dialog-color",
+      class: `bg-dialog-color ${className}`,
       autoFocus: true,
       closeFocusable: false,
       negativeText: negativeText || ft("cancel"),

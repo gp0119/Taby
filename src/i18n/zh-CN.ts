@@ -153,4 +153,5 @@ export default {
   "gitee-no-version-support": "Gitee 暂不支持版本历史功能",
   "fetch-versions-failed": "获取版本历史失败",
   "versions-loaded": "已加载 {count} 个版本",
+  "import-from-bookmarks": "从书签导入",
 }
