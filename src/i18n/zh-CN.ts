@@ -154,4 +154,5 @@ export default {
   "fetch-versions-failed": "获取版本历史失败",
   "versions-loaded": "已加载 {count} 个版本",
   "import-from-bookmarks": "从书签导入",
+  "grant access": "授予权限",
 }

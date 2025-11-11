@@ -161,6 +161,7 @@ function onImport() {
       )
     },
     onPositiveClick: async () => {
+      if (type.value === "bookmarks") return
       if (!formModel.value.fileList.length) return
       loadingBar.start()
       try {

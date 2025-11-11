@@ -162,4 +162,5 @@ export default {
   "fetch-versions-failed": "Failed to fetch version history",
   "versions-loaded": "{count} version(s) loaded",
   "import-from-bookmarks": "Import From Bookmarks",
+  "grant access": "Grant Access",
 }
