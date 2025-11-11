@@ -16,7 +16,7 @@
       @mouseenter="handleMouseAction('enter')"
     >
       <div
-        class="flex-1 rounded-xl transition-colors duration-300 ease-in-out"
+        class="flex-1 overflow-y-hidden rounded-xl transition-colors duration-300 ease-in-out"
         :class="[
           !(mode === 'collapse' || (mode === 'hover' && !hovering))
             ? 'bg-card-color'
