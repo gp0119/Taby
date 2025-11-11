@@ -2,7 +2,7 @@
   <div>
     <div
       v-if="!isHasRight"
-      class="relative flex w-full flex-col justify-center gap-y-4 bg-white p-4"
+      class="relative flex w-full flex-col justify-center gap-y-4 bg-card-color p-4"
     >
       <n-skeleton height="20px" class="opacity-30" />
       <n-skeleton height="20px" class="opacity-30" />
@@ -19,11 +19,11 @@
       <div
         v-for="folder in bookmarkFolders"
         :key="folder.id"
-        class="flex items-center justify-between rounded-md border border-gray-200 p-3 hover:bg-gray-50"
+        class="flex items-center justify-between rounded-md border border-border-color p-3 hover:bg-hover-color"
       >
         <div class="flex-1">
-          <div class="font-medium">{{ folder.title }}</div>
-          <div class="text-sm text-gray-500">
+          <div class="font-medium text-text-primary">{{ folder.title }}</div>
+          <div class="text-xs text-text-secondary">
             {{ folder.children?.length || 0 }} {{ ft("card") }}
           </div>
         </div>
@@ -38,7 +38,7 @@
       </div>
       <div
         v-if="bookmarkFolders.length === 0"
-        class="text-center text-gray-400"
+        class="text-center text-text-secondary"
       >
         {{ ft("no-collections") }}
       </div>
