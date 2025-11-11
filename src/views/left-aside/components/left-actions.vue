@@ -107,7 +107,7 @@ const loadingBar = useLoadingBar()
 const { open } = useEditDialog()
 const { importFromToby, importFromTaby } = useImport()
 const { exportFromTaby } = useExport()
-const { refreshSpaces, refreshCollections } = useRefresh()
+const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
 const message = useMessage()
 const layoutStore = useLayoutStore()
 const showSyncDialog = ref(false)
@@ -172,6 +172,7 @@ function onImport() {
         }
         await refreshSpaces()
         await refreshCollections()
+        await updateContextMenus()
         message.success(ft("success", "import"))
       } finally {
         loadingBar.finish()

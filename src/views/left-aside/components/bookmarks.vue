@@ -57,7 +57,7 @@ const bookmarksTree = ref<chrome.bookmarks.BookmarkTreeNode[]>([])
 const importingId = ref<string | null>(null)
 const isImporting = ref(false)
 const spacesStore = useSpacesStore()
-const { refreshCollections } = useRefresh()
+const { refreshCollections, updateContextMenus } = useRefresh()
 const { ft } = useHelpi18n()
 
 const bookmarkFolders = computed(() => {
@@ -117,6 +117,7 @@ async function importFolder(folder: chrome.bookmarks.BookmarkTreeNode) {
       })
     }
     await refreshCollections()
+    await updateContextMenus()
   } catch (error) {
     console.error("Import bookmarks failed:", error)
   } finally {
