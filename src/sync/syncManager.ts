@@ -26,6 +26,9 @@ class SyncManager {
       this.SYNC_INTERVAL,
       { leading: false, trailing: true },
     )
+
+    this.checkDataIntegrity()
+
     this.addHooks()
     this.initializeDefaultData()
   }
@@ -56,6 +59,42 @@ class SyncManager {
     1000,
     { leading: true, trailing: false },
   )
+
+  private async checkDataIntegrity() {
+    try {
+      // 如果有 modifiedTables 记录，检查数据库是否真的有内容
+      if (this.modifiedTables.size > 0) {
+        const [spaceCount, collectionCount, cardCount] = await Promise.all([
+          db.spaces.count(),
+          db.collections.count(),
+          db.cards.count(),
+        ])
+
+        // 如果数据库完全为空，或者只有默认 space（没有 collection 和 card）
+        // 说明数据可能被清除了
+        const isEmptyOrDefault =
+          spaceCount === 0 ||
+          (spaceCount === 1 && collectionCount === 0 && cardCount === 0)
+
+        if (isEmptyOrDefault) {
+          console.warn("检测到数据异常：有修改记录但数据库内容缺失")
+
+          // 清理本地同步状态
+          this.clearModifiedTable()
+
+          // 尝试从远程恢复
+          const { accessToken, gistId } = await this.getToken()
+          if (accessToken && gistId) {
+            console.log("尝试从远程恢复数据...")
+            await this.triggerDownload()
+            return // 恢复成功后，不需要创建默认数据
+          }
+        }
+      }
+    } catch (error) {
+      console.error("数据完整性检查失败:", error)
+    }
+  }
 
   async addModifiedTable(tableName: string) {
     this.modifiedTables.add(tableName)
@@ -157,6 +196,23 @@ class SyncManager {
     if (!accessToken || !gistId) return
     const modifiedData: Partial<SyncData> = await this.getModifiedTables()
     if (isEmpty(modifiedData)) return
+
+    // 检查是否只是默认的空数据
+    const spacesData = modifiedData.spaces || []
+    const collectionsData = modifiedData.collections || []
+    const cardsData = modifiedData.cards || []
+
+    // 如果只有1个 space 且没有 collection 或 card，可能是默认数据
+    if (
+      spacesData.length <= 1 &&
+      collectionsData.length === 0 &&
+      cardsData.length === 0
+    ) {
+      console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
+      await this.triggerDownload()
+      return
+    }
+
     await GistManager.uploadData(modifiedData)
     const now = Date.now()
     await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
