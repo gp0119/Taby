@@ -82,7 +82,10 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
-  handleVisibilityChange()
+  const isRecovered = await syncManager.waitForInit()
+  if (!isRecovered) {
+    handleVisibilityChange()
+  }
   document.addEventListener("visibilitychange", handleVisibilityChange)
   window.addEventListener("beforeunload", removeListener)
   chrome.runtime.onMessage.addListener(handleMessage)
@@ -90,11 +93,15 @@ onMounted(async () => {
   await refreshSpaces()
   await refreshCollections()
   await updateContextMenus()
-  const isDownloaded = await syncManager.autoDownload()
-  if (isDownloaded) {
-    await refreshSpaces()
-    await refreshCollections()
+
+  if (!isRecovered) {
+    const isDownloaded = await syncManager.autoDownload()
+    if (isDownloaded) {
+      await refreshSpaces()
+      await refreshCollections()
+    }
   }
+
   loading.value = false
 })
 

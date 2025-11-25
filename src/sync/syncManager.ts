@@ -16,6 +16,7 @@ class SyncManager {
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
   modifiedTables: Set<string> = new Set()
   uploadModifiedTablesDebounce: DebouncedFunc<() => Promise<void>>
+  private initPromise: Promise<boolean>
 
   constructor() {
     this.modifiedTables = new Set(
@@ -27,10 +28,10 @@ class SyncManager {
       { leading: false, trailing: true },
     )
 
-    this.checkDataIntegrity()
-
     this.addHooks()
-    this.initializeDefaultData()
+
+    // 启动异步初始化
+    this.initPromise = this.initialize()
   }
 
   public static getInstance(): SyncManager {
@@ -38,6 +39,22 @@ class SyncManager {
       SyncManager.instance = new SyncManager()
     }
     return SyncManager.instance
+  }
+
+  // 异步初始化：先检查完整性，再决定是否创建默认数据
+  private async initialize(): Promise<boolean> {
+    const isRecovered = await this.checkDataIntegrity()
+
+    if (!isRecovered) {
+      await this.initializeDefaultData()
+    }
+
+    return isRecovered
+  }
+
+  // 等待初始化完成（供外部调用）
+  async waitForInit(): Promise<boolean> {
+    return await this.initPromise
   }
 
   private async createDefaultSpace() {
@@ -49,51 +66,39 @@ class SyncManager {
     })
   }
 
-  private initializeDefaultData = debounce(
-    async () => {
-      const spaceCount = await db.spaces.count()
-      if (spaceCount > 0) return
-      await this.createDefaultSpace()
-      this.clearModifiedTable()
-    },
-    1000,
-    { leading: true, trailing: false },
-  )
+  private async initializeDefaultData() {
+    const spaceCount = await db.spaces.count()
+    if (spaceCount > 0) return
+    await this.createDefaultSpace()
+    this.clearModifiedTable()
+  }
 
-  private async checkDataIntegrity() {
+  async checkDataIntegrity(): Promise<boolean> {
     try {
-      // 如果有 modifiedTables 记录，检查数据库是否真的有内容
-      if (this.modifiedTables.size > 0) {
-        const [spaceCount, collectionCount, cardCount] = await Promise.all([
-          db.spaces.count(),
-          db.collections.count(),
-          db.cards.count(),
-        ])
+      const [spaceCount, collectionCount, cardCount] = await Promise.all([
+        db.spaces.count(),
+        db.collections.count(),
+        db.cards.count(),
+      ])
 
-        // 如果数据库完全为空，或者只有默认 space（没有 collection 和 card）
-        // 说明数据可能被清除了
-        const isEmptyOrDefault =
-          spaceCount === 0 ||
-          (spaceCount === 1 && collectionCount === 0 && cardCount === 0)
+      const isEmptyOrDefault =
+        spaceCount === 0 ||
+        (spaceCount === 1 && collectionCount === 0 && cardCount === 0)
 
-        if (isEmptyOrDefault) {
-          console.warn("检测到数据异常：有修改记录但数据库内容缺失")
+      if (isEmptyOrDefault) {
+        const { accessToken, gistId } = await this.getToken()
 
-          // 清理本地同步状态
+        if (accessToken && gistId) {
+          console.warn("检测到数据丢失，从远程恢复...")
           this.clearModifiedTable()
-
-          // 尝试从远程恢复
-          const { accessToken, gistId } = await this.getToken()
-          if (accessToken && gistId) {
-            console.log("尝试从远程恢复数据...")
-            await this.triggerDownload()
-            return // 恢复成功后，不需要创建默认数据
-          }
+          await this.triggerDownload()
+          return true
         }
       }
     } catch (error) {
       console.error("数据完整性检查失败:", error)
     }
+    return false
   }
 
   async addModifiedTable(tableName: string) {
