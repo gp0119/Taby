@@ -112,6 +112,7 @@ import { useRefresh } from "@/hooks/useRresh.ts"
 import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import Gitee from "@/components/gitee.vue"
 
 const { ft } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
@@ -138,7 +139,7 @@ const renderLabel = (option: any) => {
   return (
     <div class="flex items-center">
       {option.value === "gitee" ? (
-        <gitee size="14" />
+        <Gitee class="text-[14px]" />
       ) : (
         <n-icon size="14" component={LogoGithub} />
       )}
