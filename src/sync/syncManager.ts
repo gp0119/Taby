@@ -17,6 +17,7 @@ class SyncManager {
   modifiedTables: Set<string> = new Set()
   uploadModifiedTablesDebounce: DebouncedFunc<() => Promise<void>>
   private initPromise: Promise<boolean>
+  private isUploading = false
 
   constructor() {
     this.modifiedTables = new Set(
@@ -101,7 +102,7 @@ class SyncManager {
     return false
   }
 
-  async addModifiedTable(tableName: string) {
+  addModifiedTable(tableName: string) {
     this.modifiedTables.add(tableName)
     localStorage.setItem(
       "modifiedTables",
@@ -109,7 +110,7 @@ class SyncManager {
     )
   }
 
-  async clearModifiedTable() {
+  clearModifiedTable() {
     this.modifiedTables.clear()
     localStorage.removeItem("modifiedTables")
     localStorage.removeItem("lastModifiedTime")
@@ -197,32 +198,38 @@ class SyncManager {
   }
 
   uploadModifiedTablesImmediate = async () => {
-    const { accessToken, gistId } = await this.getToken()
-    if (!accessToken || !gistId) return
-    const modifiedData: Partial<SyncData> = await this.getModifiedTables()
-    if (isEmpty(modifiedData)) return
+    if (this.isUploading) return
+    this.isUploading = true
+    try {
+      const { accessToken, gistId } = await this.getToken()
+      if (!accessToken || !gistId) return
+      const modifiedData: Partial<SyncData> = await this.getModifiedTables()
+      if (isEmpty(modifiedData)) return
 
-    // 检查是否只是默认的空数据
-    const spacesData = modifiedData.spaces || []
-    const collectionsData = modifiedData.collections || []
-    const cardsData = modifiedData.cards || []
+      // 检查是否只是默认的空数据
+      const spacesData = modifiedData.spaces || []
+      const collectionsData = modifiedData.collections || []
+      const cardsData = modifiedData.cards || []
 
-    // 如果只有1个 space 且没有 collection 或 card，可能是默认数据
-    if (
-      spacesData.length <= 1 &&
-      collectionsData.length === 0 &&
-      cardsData.length === 0
-    ) {
-      console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
-      await this.triggerDownload()
-      return
+      // 如果只有1个 space 且没有 collection 或 card，可能是默认数据
+      if (
+        spacesData.length <= 1 &&
+        collectionsData.length === 0 &&
+        cardsData.length === 0
+      ) {
+        console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
+        await this.triggerDownload()
+        return
+      }
+
+      await GistManager.uploadData(modifiedData)
+      const now = Date.now()
+      await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
+      localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
+      this.clearModifiedTable()
+    } finally {
+      this.isUploading = false
     }
-
-    await GistManager.uploadData(modifiedData)
-    const now = Date.now()
-    await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
-    localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
-    await this.clearModifiedTable()
   }
 
   triggerUpload = async () => {
@@ -238,41 +245,38 @@ class SyncManager {
     return data
   }
 
-  autoDownload = async () => {
-    return new Promise(async (resolve) => {
-      const { accessToken, gistId } = await this.getToken()
-      if (!accessToken || !gistId) {
-        resolve(false)
-        return
-      }
-      try {
-        const syncStorage = await chrome.storage.sync.get([
-          REMOTE_LAST_UPDATE_TIME,
-        ])
-        const remoteUpdateTime = syncStorage[REMOTE_LAST_UPDATE_TIME]
-        const localDownloadTimeStr = localStorage.getItem(
-          LOCAL_LAST_DOWNLOAD_TIME,
-        )
-        const localDownloadTime = localDownloadTimeStr
-          ? Number(localDownloadTimeStr)
-          : 0
+  autoDownload = async (): Promise<boolean> => {
+    const { accessToken, gistId } = await this.getToken()
+    if (!accessToken || !gistId) {
+      return false
+    }
+    try {
+      const syncStorage = await chrome.storage.sync.get([
+        REMOTE_LAST_UPDATE_TIME,
+      ])
+      const remoteUpdateTime = syncStorage[REMOTE_LAST_UPDATE_TIME]
+      const localDownloadTimeStr = localStorage.getItem(
+        LOCAL_LAST_DOWNLOAD_TIME,
+      )
+      const localDownloadTime = localDownloadTimeStr
+        ? Number(localDownloadTimeStr)
+        : 0
 
-        if (
-          !localDownloadTime ||
-          (remoteUpdateTime && remoteUpdateTime > localDownloadTime)
-        ) {
-          console.log("Remote Gist potentially newer, downloading...")
-          await this.triggerDownload()
-          resolve(true)
-        } else {
-          console.log("Local data is up-to-date, skipping download.")
-          resolve(false)
-        }
-      } catch (error) {
-        console.error("Error during autoDownload check:", error)
-        resolve(false)
+      if (
+        !localDownloadTime ||
+        (remoteUpdateTime && remoteUpdateTime > localDownloadTime)
+      ) {
+        console.log("Remote Gist potentially newer, downloading...")
+        await this.triggerDownload()
+        return true
+      } else {
+        console.log("Local data is up-to-date, skipping download.")
+        return false
       }
-    })
+    } catch (error) {
+      console.error("Error during autoDownload check:", error)
+      return false
+    }
   }
 
   autoUpload = async () => {
@@ -286,7 +290,7 @@ class SyncManager {
         tables.length > 0 &&
         Date.now() - Number(lastModifiedTime) > this.SYNC_INTERVAL
       ) {
-        this.uploadModifiedTablesImmediate()
+        await this.uploadModifiedTablesImmediate()
       }
     } else {
       localStorage.removeItem("lastModifiedTime")

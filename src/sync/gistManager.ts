@@ -142,22 +142,30 @@ class GistManager {
     })
     const { spaces, collections, labels, cards, favicons } = res.files
     const remoteData: SyncData = {
-      spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
-      collections: collections
-        ? JSON.parse(decompressFromUTF16(collections.content))
-        : [],
-      labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
-      cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
-      favicons: favicons
-        ? JSON.parse(decompressFromUTF16(favicons.content))
-        : [],
+      spaces: this.parseCompressed(spaces?.content),
+      collections: this.parseCompressed(collections?.content),
+      labels: this.parseCompressed(labels?.content),
+      cards: this.parseCompressed(cards?.content),
+      favicons: this.parseCompressed(favicons?.content),
     }
     return remoteData
+  }
+
+  private parseCompressed(content: string | undefined): any[] {
+    if (!content) return []
+    const decompressed = decompressFromUTF16(content)
+    if (!decompressed) return []
+    try {
+      return JSON.parse(decompressed)
+    } catch {
+      return []
+    }
   }
 
   async uploadData(data: Partial<SyncData>) {
     if (!this.GIST_ID) {
       this.GIST_ID = await this.createGist(data as SyncData)
+      localStorage.setItem(SYNC_GIST_ID, this.GIST_ID)
     } else {
       await this.updateGist(data)
     }
@@ -207,15 +215,11 @@ class GistManager {
     })
     const { spaces, collections, labels, cards, favicons } = res.files
     const remoteData: SyncData = {
-      spaces: spaces ? JSON.parse(decompressFromUTF16(spaces.content)) : [],
-      collections: collections
-        ? JSON.parse(decompressFromUTF16(collections.content))
-        : [],
-      labels: labels ? JSON.parse(decompressFromUTF16(labels.content)) : [],
-      cards: cards ? JSON.parse(decompressFromUTF16(cards.content)) : [],
-      favicons: favicons
-        ? JSON.parse(decompressFromUTF16(favicons.content))
-        : [],
+      spaces: this.parseCompressed(spaces?.content),
+      collections: this.parseCompressed(collections?.content),
+      labels: this.parseCompressed(labels?.content),
+      cards: this.parseCompressed(cards?.content),
+      favicons: this.parseCompressed(favicons?.content),
     }
     return remoteData
   }
