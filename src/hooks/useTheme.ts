@@ -22,7 +22,7 @@ export const useTheme = () => {
       borderRadiusMedium: "6px",
     },
     Dialog: {
-      borderRadius: "12px",
+      borderRadius: "18px",
     },
     Input: {
       color: currentThemeColor.value.cardBg,

@@ -15,7 +15,11 @@
       <template #icon>
         <n-icon
           size="20"
-          :component="expandStore.isCollapseAll ? RowCollapse : RowExpand"
+          :component="RowCollapse"
+          class="transition-transform duration-300 ease-in-out"
+          :class="{
+            'rotate-180': !expandStore.isCollapseAll,
+          }"
         />
       </template>
     </n-button>
@@ -26,7 +30,7 @@
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useExpandStore } from "@/store/expand"
-import { RowCollapse, RowExpand } from "@vicons/carbon"
+import { RowCollapse } from "@vicons/carbon"
 
 const { ft } = useHelpi18n()
 const expandStore = useExpandStore()
