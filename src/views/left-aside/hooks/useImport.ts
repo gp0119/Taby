@@ -16,13 +16,13 @@ export function useImport() {
             lists: CollectionWithCards[]
           } = JSON.parse(event.target?.result as string)
           if (!lists.lists || !lists.lists.length) {
-            throw new Error(ft("invalid-file", "Toby"))
+            throw new Error(ft("invalid-file", "toby"))
           }
           await dataManager.importFromToby(lists.lists)
           resolve(true)
         } catch (error) {
           reject(error)
-          message.error(ft("invalid-file", "Toby"))
+          message.error(ft("invalid-file", "toby"))
         }
       }
     })
@@ -36,13 +36,13 @@ export function useImport() {
         try {
           const spaces = JSON.parse(event.target?.result as string)
           if (!spaces || !spaces.length) {
-            throw new Error(ft("invalid-file", "Taby"))
+            throw new Error(ft("invalid-file", "taby"))
           }
           await dataManager.importFromTaby(spaces)
           resolve(true)
         } catch (error) {
           reject(error)
-          message.error(ft("invalid-file", "Taby"))
+          message.error(ft("invalid-file", "taby"))
         }
       }
     })
