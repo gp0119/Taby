@@ -13,10 +13,10 @@
         v-for="collection in collections"
         :key="collection.id"
         :data-id="collection.id"
-        class="my-2 flex w-full cursor-move items-center justify-between rounded-lg border-2 border-transparent bg-white px-6 py-3"
+        class="my-2 flex w-full cursor-move items-center justify-between rounded-lg border-2 border-transparent bg-white px-6"
       >
         <div class="flex-center select-none">
-          <div class="flex-center">
+          <div class="flex-center py-3">
             <n-icon
               size="18"
               class="w-[20px] text-text-secondary"

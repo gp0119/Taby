@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="labels.length"
-    class="scrollbar-none flex items-center gap-x-3 overflow-auto pr-3"
+    class="scrollbar-none flex items-center gap-x-3 overflow-auto py-3 pr-3"
   >
     <Tag
       v-for="tag in labels"
