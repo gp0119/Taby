@@ -264,7 +264,7 @@ class SyncManager {
 
       if (
         !localDownloadTime ||
-        (remoteUpdateTime && remoteUpdateTime > localDownloadTime)
+        (remoteUpdateTime && Number(remoteUpdateTime) > localDownloadTime)
       ) {
         console.log("Remote Gist potentially newer, downloading...")
         await this.triggerDownload()
