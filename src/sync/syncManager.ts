@@ -206,17 +206,15 @@ class SyncManager {
       const modifiedData: Partial<SyncData> = await this.getModifiedTables()
       if (isEmpty(modifiedData)) return
 
-      // 检查是否只是默认的空数据
-      const spacesData = modifiedData.spaces || []
-      const collectionsData = modifiedData.collections || []
-      const cardsData = modifiedData.cards || []
+      // 检查整个数据库是否只是默认的空数据（而不是只检查 modifiedData）
+      const [spaceCount, collectionCount, cardCount] = await Promise.all([
+        db.spaces.count(),
+        db.collections.count(),
+        db.cards.count(),
+      ])
 
-      // 如果只有1个 space 且没有 collection 或 card，可能是默认数据
-      if (
-        spacesData.length <= 1 &&
-        collectionsData.length === 0 &&
-        cardsData.length === 0
-      ) {
+      // 如果数据库只有1个 space 且没有 collection 或 card，可能是默认数据
+      if (spaceCount <= 1 && collectionCount === 0 && cardCount === 0) {
         console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
         await this.triggerDownload()
         return
