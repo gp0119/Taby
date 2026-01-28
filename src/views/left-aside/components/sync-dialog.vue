@@ -238,14 +238,17 @@ watch(show, (value) => {
     const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
     const gistId = localStorage.getItem(SYNC_GIST_ID)
     const syncType = localStorage.getItem(SYNC_TYPE)
+    if (syncType) {
+      formModel.value.syncType = syncType
+      syncManager.setEnv(SYNC_TYPE, syncType)
+    }
     if (accessToken) {
       formModel.value.accessToken = accessToken
+      syncManager.setEnv(SYNC_GIST_TOKEN, accessToken)
     }
     if (gistId) {
       formModel.value.gistId = gistId
-    }
-    if (syncType) {
-      formModel.value.syncType = syncType
+      syncManager.setEnv(SYNC_GIST_ID, gistId)
     }
   }
 })

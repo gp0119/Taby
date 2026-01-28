@@ -855,7 +855,7 @@ class DataManager {
   }
 
   async importFromToby(lists: CollectionWithCards[]) {
-    db.transaction(
+    await db.transaction(
       "rw",
       [db.spaces, db.collections, db.cards, db.favicons, db.labels],
       async () => {
@@ -895,7 +895,7 @@ class DataManager {
   }
 
   async importFromTaby(spaces: ExportSpace[]) {
-    db.transaction(
+    await db.transaction(
       "rw",
       [db.spaces, db.collections, db.cards, db.favicons, db.labels],
       async () => {
