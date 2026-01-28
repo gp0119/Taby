@@ -4,6 +4,8 @@
     preset="dialog"
     title-class="[&_.n-base-icon]:hidden !text-text-primary"
     class="bg-card-color"
+    :close-on-esc="false"
+    :mask-closable="false"
     :auto-focus="false"
   >
     <template #header>
@@ -167,27 +169,18 @@ const handleSyncTypeChange = (value: string) => {
   localStorage.setItem(SYNC_GIST_ID, "")
   syncManager.setEnv(SYNC_GIST_ID, "")
   chrome.storage.sync.set({ [SYNC_GIST_ID]: "" })
-
-  // 清空修改的表
-  syncManager.clearModifiedTable()
 }
 
 const handleAccessTokenChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_TOKEN, value)
   syncManager.setEnv(SYNC_GIST_TOKEN, value)
   chrome.storage.sync.set({ [SYNC_GIST_TOKEN]: value })
-
-  // 清空修改的表
-  syncManager.clearModifiedTable()
 }, 1000)
 
 const handleGistIdChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_ID, value)
   syncManager.setEnv(SYNC_GIST_ID, value)
   chrome.storage.sync.set({ [SYNC_GIST_ID]: value })
-
-  // 清空修改的表
-  syncManager.clearModifiedTable()
 }, 1000)
 
 const handleUpload = () => {
@@ -195,6 +188,7 @@ const handleUpload = () => {
     try {
       uploadLoading.value = true
       const gistId = await syncManager.uploadAll()
+      console.log("gistId: ", gistId)
       formModel.value.gistId = gistId as string
       localStorage.setItem(SYNC_GIST_ID, gistId as string)
       await chrome.storage.sync.set({

@@ -17,7 +17,7 @@ class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
   modifiedTables: Set<TableName> = new Set()
-  private uploadDebounce: DebouncedFunc<() => Promise<void>>
+  private uploadDebounce: DebouncedFunc<() => Promise<string | undefined>>
   private initPromise: Promise<boolean>
   private isUploading = false
 
@@ -162,7 +162,7 @@ class SyncManager {
   }
 
   // 立即上传修改的数据
-  uploadImmediate = async () => {
+  uploadImmediate = async (): Promise<string | undefined> => {
     if (this.isUploading) return
     this.isUploading = true
     try {
@@ -191,6 +191,7 @@ class SyncManager {
       await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
       this.clearModifiedTables()
+      return gistId
     } finally {
       this.isUploading = false
     }
@@ -203,7 +204,7 @@ class SyncManager {
   }
 
   // 手动上传全部数据（用于设置页面的"上传"按钮）
-  uploadAll = async () => {
+  uploadAll = async (): Promise<string | undefined> => {
     const allTables: TableName[] = [
       "spaces",
       "collections",
@@ -212,7 +213,7 @@ class SyncManager {
       "favicons",
     ]
     allTables.forEach((t) => this.addModifiedTable(t))
-    await this.uploadImmediate()
+    return await this.uploadImmediate()
   }
 
   triggerDownload = async () => {
