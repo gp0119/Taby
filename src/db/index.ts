@@ -13,9 +13,13 @@ import {
 } from "@/type.ts"
 import { db } from "./database.ts"
 
+type TableName = "spaces" | "collections" | "labels" | "cards" | "favicons"
+
 class DataManager {
   private static instance: DataManager
   ORDER_STEP: number
+  private onModify?: (table: TableName) => void
+
   constructor() {
     this.ORDER_STEP = 1000
   }
@@ -27,6 +31,16 @@ class DataManager {
     return DataManager.instance
   }
 
+  // 设置数据修改回调（供 syncManager 调用）
+  setOnModify(callback: (table: TableName) => void) {
+    this.onModify = callback
+  }
+
+  // 通知数据已修改
+  private notifyModify(table: TableName) {
+    this.onModify?.(table)
+  }
+
   async getAllSpaces() {
     return db.spaces.orderBy("order").toArray()
   }
@@ -34,12 +48,14 @@ class DataManager {
   async addSpace(space: InsertType<Space, "id" | "order">) {
     const lastSpace = await db.spaces.orderBy("order").last()
     const { title, icon } = space
-    return db.spaces.add({
+    const result = await db.spaces.add({
       title: title || "",
       ...(icon && { icon }),
       order: lastSpace ? lastSpace.order + this.ORDER_STEP : this.ORDER_STEP,
       createdAt: Date.now(),
     })
+    this.notifyModify("spaces")
+    return result
   }
 
   async removeSpace(id: number) {
@@ -59,10 +75,15 @@ class DataManager {
         await db.spaces.delete(id)
       },
     )
+    this.notifyModify("spaces")
+    this.notifyModify("collections")
+    this.notifyModify("cards")
   }
 
   async updateSpaceTitle(id: number, title: string, icon?: string) {
-    return db.spaces.update(id, { title, ...(icon && { icon }) })
+    const result = await db.spaces.update(id, { title, ...(icon && { icon }) })
+    this.notifyModify("spaces")
+    return result
   }
 
   async moveSpace(spaceId: number, oldIndex: number, newIndex: number) {
@@ -78,6 +99,7 @@ class DataManager {
         })
       }),
     )
+    this.notifyModify("spaces")
   }
 
   async getAllCollections() {
@@ -88,6 +110,7 @@ class DataManager {
     collection: Omit<Collection, "id" | "order">,
     position: movePosition = "END",
   ) {
+    let result: number | undefined
     if (position === "HEAD") {
       const collections = await db.collections
         .where("[spaceId+order]")
@@ -104,7 +127,7 @@ class DataManager {
               order: (index + 1) * this.ORDER_STEP,
             })
           } else {
-            await db.collections.add({
+            result = await db.collections.add({
               title: collection.title || "",
               spaceId: collection.spaceId,
               labelIds: collection.labelIds,
@@ -122,7 +145,7 @@ class DataManager {
           [collection.spaceId, Dexie.maxKey],
         )
         .last()
-      return db.collections.add({
+      result = await db.collections.add({
         title: collection.title || "",
         spaceId: collection.spaceId,
         labelIds: collection.labelIds,
@@ -130,6 +153,8 @@ class DataManager {
         createdAt: Date.now(),
       })
     }
+    this.notifyModify("collections")
+    return result
   }
 
   async removeCollection(id: number) {
@@ -137,14 +162,18 @@ class DataManager {
       await db.cards.where("collectionId").equals(id).delete()
       await db.collections.delete(id)
     })
+    this.notifyModify("collections")
+    this.notifyModify("cards")
   }
 
   async updateCollectionTitle(collectionId: number, title: string) {
-    return db.collections.update(collectionId, { title })
+    const result = await db.collections.update(collectionId, { title })
+    this.notifyModify("collections")
+    return result
   }
 
   async addTagforCollection(collectionId: number, tagId: number) {
-    return db.transaction("rw", db.collections, async () => {
+    const result = await db.transaction("rw", db.collections, async () => {
       const collection = await db.collections.get(collectionId)
       if (!collection) return
 
@@ -156,10 +185,12 @@ class DataManager {
         labelIds: Array.from(labelIdSet),
       })
     })
+    this.notifyModify("collections")
+    return result
   }
 
   async removeTagforCollection(collectionId: number, tagId: number) {
-    return db.transaction("rw", db.collections, async () => {
+    const result = await db.transaction("rw", db.collections, async () => {
       const collection = await db.collections.get(collectionId)
       if (!collection) return
 
@@ -171,6 +202,8 @@ class DataManager {
         labelIds: Array.from(labelIdSet),
       })
     })
+    this.notifyModify("collections")
+    return result
   }
 
   async moveCollection(
@@ -192,6 +225,7 @@ class DataManager {
         })
       }),
     )
+    this.notifyModify("collections")
   }
 
   async moveCollectionToSpace(collectionId: number, targetSpaceId: number) {
@@ -205,6 +239,7 @@ class DataManager {
       spaceId: Number(targetSpaceId),
       order: lastCollection ? lastCollection.order + this.ORDER_STEP : 1000,
     })
+    this.notifyModify("collections")
   }
 
   async getLabels() {
@@ -212,17 +247,21 @@ class DataManager {
   }
 
   async addLabel(title: string, color: string) {
-    return db.labels.add({ title, color })
+    const result = await db.labels.add({ title, color })
+    this.notifyModify("labels")
+    return result
   }
 
-  async getOrCreateLabelWithTitle(title: string) {
+  async getOrCreateLabelWithTitle(title: string, notify = true) {
     const label = await db.labels.where("title").equals(title).first()
     if (label) return label.id
     const randomIndex = Math.floor(Math.random() * COLOR_LIST.length)
-    return (await db.labels.add({
+    const result = (await db.labels.add({
       title,
       color: COLOR_LIST[randomIndex],
     })) as number
+    if (notify) this.notifyModify("labels")
+    return result
   }
 
   async getCardsByTitleOrUrl(titleOrUrl: string) {
@@ -270,11 +309,19 @@ class DataManager {
         })
       }),
     )
-    return db.labels.delete(id)
+    const result = await db.labels.delete(id)
+    this.notifyModify("labels")
+    this.notifyModify("collections")
+    return result
   }
 
   async updateLabel(id: number, title: string, color?: string) {
-    return db.labels.update(id, { title, ...(color && { color }) })
+    const result = await db.labels.update(id, {
+      title,
+      ...(color && { color }),
+    })
+    this.notifyModify("labels")
+    return result
   }
 
   async addCard(card: Omit<Card, "id" | "order">, targetIndex?: number) {
@@ -286,10 +333,11 @@ class DataManager {
       )
       .toArray()
 
+    let result: number
     // 如果没有指定位置或者集合为空，添加到末尾
     if (typeof targetIndex === "undefined" || cards.length === 0) {
       const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
-      return db.cards.add({
+      result = await db.cards.add({
         title: card.title || "",
         url: card.url || "",
         collectionId: card.collectionId,
@@ -298,37 +346,41 @@ class DataManager {
         order: lastOrder + this.ORDER_STEP,
         createdAt: Date.now(),
       })
+    } else {
+      // 在指定位置插入
+      const newOrder = (targetIndex + 1) * this.ORDER_STEP
+
+      // 更新目标位置后所有卡片的顺序
+      await Promise.all(
+        cards.slice(targetIndex).map(async (existingCard, index) => {
+          await db.cards.update(existingCard.id, {
+            order: newOrder + (index + 1) * this.ORDER_STEP,
+          })
+        }),
+      )
+
+      // 添加新卡片
+      result = await db.cards.add({
+        title: card.title || "",
+        url: card.url || "",
+        collectionId: card.collectionId,
+        faviconId: card.faviconId,
+        description: "",
+        order: newOrder,
+        createdAt: Date.now(),
+      })
     }
-
-    // 在指定位置插入
-    const newOrder = (targetIndex + 1) * this.ORDER_STEP
-
-    // 更新目标位置后所有卡片的顺序
-    await Promise.all(
-      cards.slice(targetIndex).map(async (existingCard, index) => {
-        await db.cards.update(existingCard.id, {
-          order: newOrder + (index + 1) * this.ORDER_STEP,
-        })
-      }),
-    )
-
-    // 添加新卡片
-    return db.cards.add({
-      title: card.title || "",
-      url: card.url || "",
-      collectionId: card.collectionId,
-      faviconId: card.faviconId,
-      description: "",
-      order: newOrder,
-      createdAt: Date.now(),
-    })
+    this.notifyModify("cards")
+    return result
   }
 
   async removeCard(id: number) {
-    return db.cards.delete(id)
+    const result = await db.cards.delete(id)
+    this.notifyModify("cards")
+    return result
   }
 
-  updateCard(
+  async updateCard(
     id: number,
     {
       title,
@@ -342,17 +394,22 @@ class DataManager {
       url?: string
     },
   ) {
-    return db.cards.update(id, {
+    const result = await db.cards.update(id, {
       title,
       description,
       faviconId,
       url,
     })
+    this.notifyModify("cards")
+    return result
   }
 
   async updateCardFavicon(id: number, favicon: string) {
-    const faviconId = await this.addFavicon(favicon)
-    return db.cards.update(id, { faviconId })
+    const faviconId = await this.addFavicon(favicon, false)
+    const result = await db.cards.update(id, { faviconId })
+    this.notifyModify("cards")
+    this.notifyModify("favicons")
+    return result
   }
 
   async moveCard(cardId: number, oldIndex: number, newIndex: number) {
@@ -374,6 +431,7 @@ class DataManager {
         })
       }),
     )
+    this.notifyModify("cards")
   }
 
   async moveCardToCollection(
@@ -395,28 +453,29 @@ class DataManager {
     if (typeof targetIndex === "undefined") {
       const lastOrder =
         targetCards.length > 0 ? targetCards[targetCards.length - 1].order : 0
-      return db.cards.update(cardId, {
+      await db.cards.update(cardId, {
         collectionId: targetCollectionId,
         order: lastOrder + this.ORDER_STEP,
       })
+    } else {
+      targetCards.splice(targetIndex, 0, currentCard)
+
+      await Promise.all(
+        targetCards.map(async (card, index) => {
+          if (card.id === cardId) {
+            await db.cards.update(cardId, {
+              collectionId: targetCollectionId,
+              order: (index + 1) * this.ORDER_STEP,
+            })
+          } else {
+            await db.cards.update(card.id, {
+              order: (index + 1) * this.ORDER_STEP,
+            })
+          }
+        }),
+      )
     }
-
-    targetCards.splice(targetIndex, 0, currentCard)
-
-    await Promise.all(
-      targetCards.map(async (card, index) => {
-        if (card.id === cardId) {
-          await db.cards.update(cardId, {
-            collectionId: targetCollectionId,
-            order: (index + 1) * this.ORDER_STEP,
-          })
-        } else {
-          await db.cards.update(card.id, {
-            order: (index + 1) * this.ORDER_STEP,
-          })
-        }
-      }),
-    )
+    this.notifyModify("cards")
   }
 
   async batchUpdateCards(
@@ -424,7 +483,7 @@ class DataManager {
     updateData: Partial<Card>,
     position?: movePosition,
   ) {
-    return db.transaction("rw", db.cards, async () => {
+    await db.transaction("rw", db.cards, async () => {
       if (updateData.collectionId !== undefined) {
         const allCollections = await db.cards
           .where("[collectionId+order]")
@@ -457,12 +516,14 @@ class DataManager {
         )
       }
     })
+    this.notifyModify("cards")
   }
 
   async batchDeleteCards(cardIds: number[]) {
     await db.transaction("rw", db.cards, async () => {
       await db.cards.bulkDelete(cardIds)
     })
+    this.notifyModify("cards")
   }
 
   async batchUpdateCollections(
@@ -470,7 +531,7 @@ class DataManager {
     updateData: Partial<Collection>,
     position?: movePosition,
   ) {
-    return db.transaction("rw", db.collections, async () => {
+    await db.transaction("rw", db.collections, async () => {
       if (updateData.spaceId !== undefined) {
         const allSpaces = await db.collections
           .where("[spaceId+order]")
@@ -509,6 +570,7 @@ class DataManager {
         )
       }
     })
+    this.notifyModify("collections")
   }
 
   async batchDeleteCollections(collectionIds: number[]) {
@@ -516,6 +578,8 @@ class DataManager {
       await db.cards.where("collectionId").anyOf(collectionIds).delete()
       await db.collections.bulkDelete(collectionIds)
     })
+    this.notifyModify("collections")
+    this.notifyModify("cards")
   }
 
   async getCardWithCollectionIds(collectionIds: number[]) {
@@ -564,16 +628,20 @@ class DataManager {
     )
   }
 
-  async batchAddCards(cards: Omit<Card, "id">[]) {
-    return db.cards.bulkAdd(cards)
+  async batchAddCards(cards: Omit<Card, "id">[], notify = true) {
+    const result = await db.cards.bulkAdd(cards)
+    if (notify) this.notifyModify("cards")
+    return result
   }
 
-  async addFavicon(url: string | undefined) {
+  async addFavicon(url: string | undefined, notify = true) {
     if (!url) return
     const _url = url.trim()
     const isExist = await db.favicons.where("url").equals(_url).first()
     if (isExist) return isExist.id
-    return db.favicons.add({ url: _url })
+    const result = await db.favicons.add({ url: _url })
+    if (notify) this.notifyModify("favicons")
+    return result
   }
 
   async getFaviconById(id: number) {
