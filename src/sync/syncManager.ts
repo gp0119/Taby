@@ -16,15 +16,22 @@ type TableName = "spaces" | "collections" | "labels" | "cards" | "favicons"
 class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
-  modifiedTables: Set<TableName> = new Set()
-  private uploadDebounce: DebouncedFunc<() => Promise<string | undefined>>
+  uploadDebounce: DebouncedFunc<() => Promise<string | undefined>>
   private initPromise: Promise<boolean>
   private isUploading = false
 
+  // 从 localStorage 读取 modifiedTables
+  get modifiedTables(): Set<TableName> {
+    const stored = localStorage.getItem("modifiedTables")
+    return new Set(stored ? JSON.parse(stored) : [])
+  }
+
+  // 写入 modifiedTables 到 localStorage
+  set modifiedTables(value: Set<TableName>) {
+    localStorage.setItem("modifiedTables", JSON.stringify([...value]))
+  }
+
   constructor() {
-    this.modifiedTables = new Set(
-      JSON.parse(localStorage.getItem("modifiedTables") || "[]") || [],
-    )
     this.uploadDebounce = debounce(
       () => this.uploadImmediate(),
       this.SYNC_INTERVAL,
@@ -105,18 +112,16 @@ class SyncManager {
     return false
   }
 
-  // 添加修改的表
-  addModifiedTable(tableName: TableName) {
-    this.modifiedTables.add(tableName)
-    localStorage.setItem(
-      "modifiedTables",
-      JSON.stringify([...this.modifiedTables]),
-    )
+  // 添加修改的表（支持单个或数组）
+  addModifiedTable(tableNames: TableName | TableName[]) {
+    const current = this.modifiedTables
+    const names = Array.isArray(tableNames) ? tableNames : [tableNames]
+    names.forEach((name) => current.add(name))
+    this.modifiedTables = current
     localStorage.setItem("lastModifiedTime", Date.now() + "")
   }
 
   clearModifiedTables() {
-    this.modifiedTables.clear()
     localStorage.removeItem("modifiedTables")
     localStorage.removeItem("lastModifiedTime")
   }
@@ -167,31 +172,33 @@ class SyncManager {
     this.isUploading = true
     try {
       const { accessToken, gistId } = await this.getToken()
-      if (!accessToken || !gistId) return
+      if (!accessToken) return
       if (this.modifiedTables.size === 0) return
 
-      // 检查整个数据库是否只是默认的空数据
-      const [spaceCount, collectionCount, cardCount] = await Promise.all([
-        db.spaces.count(),
-        db.collections.count(),
-        db.cards.count(),
-      ])
+      // 有 gistId 时才检查是否为空数据（防止覆盖远程数据）
+      if (gistId) {
+        const [spaceCount, collectionCount, cardCount] = await Promise.all([
+          db.spaces.count(),
+          db.collections.count(),
+          db.cards.count(),
+        ])
 
-      if (spaceCount <= 1 && collectionCount === 0 && cardCount === 0) {
-        console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
-        await this.triggerDownload()
-        return
+        if (spaceCount <= 1 && collectionCount === 0 && cardCount === 0) {
+          console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
+          await this.triggerDownload()
+          return
+        }
       }
 
       const data = await this.getModifiedData()
       if (!data || Object.keys(data).length === 0) return
 
-      await GistManager.uploadData(data)
+      const newGistId = await GistManager.uploadData(data)
       const now = Date.now()
       await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
       this.clearModifiedTables()
-      return gistId
+      return newGistId
     } finally {
       this.isUploading = false
     }

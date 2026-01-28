@@ -38,6 +38,7 @@ class DataManager {
 
   // 通知数据已修改
   private notifyModify(table: TableName) {
+    console.log("notifyModify: ", table)
     this.onModify?.(table)
   }
 
@@ -50,9 +51,9 @@ class DataManager {
     const { title, icon } = space
     const result = await db.spaces.add({
       title: title || "",
-      ...(icon && { icon }),
       order: lastSpace ? lastSpace.order + this.ORDER_STEP : this.ORDER_STEP,
       createdAt: Date.now(),
+      icon: icon || "StorefrontOutline",
     })
     this.notifyModify("spaces")
     return result

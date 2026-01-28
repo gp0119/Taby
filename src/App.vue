@@ -46,14 +46,13 @@ const handleVisibilityChange = debounce(
 )
 
 const handleMessage = async (message: any) => {
+  console.log("message: ", message)
   if (message.type === "refreshCollections") {
     await refreshSpaces()
     await refreshCollections(Number(message.spaceId))
     if (message.modifiedTables) {
-      message.modifiedTables.forEach((table: string) => {
-        syncManager.addModifiedTable(table)
-      })
-      await syncManager.triggerUpload()
+      syncManager.addModifiedTable(message.modifiedTables)
+      syncManager.uploadDebounce()
     }
   }
 }
@@ -71,13 +70,13 @@ onBeforeMount(async () => {
     SYNC_TYPE,
   ])
   if (result.syncType) {
-    localStorage.setItem("syncType", result.syncType)
+    localStorage.setItem("syncType", String(result.syncType))
   }
   if (result.accessToken) {
-    localStorage.setItem("accessToken", result.accessToken)
+    localStorage.setItem("accessToken", String(result.accessToken))
   }
   if (result.gistId) {
-    localStorage.setItem("gistId", result.gistId)
+    localStorage.setItem("gistId", String(result.gistId))
   }
 })
 
