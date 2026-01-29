@@ -37,6 +37,7 @@
     >
       <right-aside />
     </pinSide>
+    <UploadBtn />
   </div>
 </template>
 
@@ -48,6 +49,7 @@ import rightAside from "@/views/right-aside/index.vue"
 import content from "@/views/content/index.vue"
 import { useLayoutStore } from "@/store/layout"
 import LeftActions from "@/views/left-aside/components/left-actions.vue"
+import UploadBtn from "@/components/upload-btn.vue"
 
 const layoutStore = useLayoutStore()
 </script>

@@ -38,7 +38,6 @@ class DataManager {
 
   // 通知数据已修改
   private notifyModify(table: TableName) {
-    console.log("notifyModify: ", table)
     this.onModify?.(table)
   }
 

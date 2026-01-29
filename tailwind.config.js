@@ -64,12 +64,21 @@ export default {
             transform: "scale(1.2)",
           },
         },
+        flip: {
+          "0%, 100%": {
+            transform: "rotate(0deg)",
+          },
+          "50%": {
+            transform: "rotate(180deg)",
+          },
+        },
       },
       animation: {
         "scale-in": "scaleIn 0.2s ease-out",
         show: "show 0.2s ease-out",
         hide: "hide 0.2s ease-out",
         "zoom-in-out": "zoomInOut 0.3s ease-in-out",
+        flip: "flip 2s ease-in-out infinite",
       },
       screens: {
         400: "400px",
