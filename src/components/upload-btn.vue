@@ -1,32 +1,39 @@
 <template>
-  <PopoverWrapper
+  <n-float-button-group
     v-if="remainingText"
-    :message="`${remainingText}后上传，点击立即上传`"
+    :right="16"
+    :bottom="16"
+    class="!z-[9999]"
   >
-    <div class="relative">
-      <span
-        v-if="uploading"
-        class="animate-glow-pulse absolute bottom-4 right-4 z-[9998] h-9 w-9 rounded-full border-2 border-primary"
-      ></span>
-      <n-float-button
-        :right="16"
-        :bottom="16"
-        :width="36"
-        :height="36"
-        :loading="uploading"
-        class="!z-[9999]"
-        @click="handleUpload"
-      >
-        <n-icon :component="HourglassOutline" size="18" class="animate-flip" />
-      </n-float-button>
-    </div>
-  </PopoverWrapper>
+    <n-tooltip
+      placement="left"
+      :show-arrow="false"
+      to="body"
+      :disabled="uploading"
+    >
+      <template #trigger>
+        <div class="relative">
+          <span
+            v-if="uploading"
+            class="absolute inset-0 h-10 w-10 animate-glow-pulse rounded-full border-2 border-primary"
+          ></span>
+          <n-float-button :loading="uploading" @click="handleUpload">
+            <n-icon
+              :component="HourglassOutline"
+              size="18"
+              class="animate-flip"
+            />
+          </n-float-button>
+        </div>
+      </template>
+      <span class="text-xs">{{ remainingText }}后上传，点击立即上传</span>
+    </n-tooltip>
+  </n-float-button-group>
 </template>
 
 <script setup lang="ts">
 import { HourglassOutline } from "@vicons/ionicons5"
 import { useSettingStore } from "@/store/setting"
-import PopoverWrapper from "@/components/popover-wrapper.vue"
 import syncManager from "@/sync/syncManager"
 import { SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants"
 
