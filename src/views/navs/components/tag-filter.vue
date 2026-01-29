@@ -44,9 +44,9 @@
             </div>
             <div class="pl-2" @click="tagsStore.resetSelectedTag">
               <n-icon-wrapper
-                border-radius="10"
+                :border-radius="10"
                 icon-color="#fff"
-                size="14"
+                :size="14"
                 class="block bg-gray-500"
               >
                 <n-icon :component="Close" />
