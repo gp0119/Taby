@@ -1,3 +1,4 @@
+import { ref } from "vue"
 import { Card } from "@/type.ts"
 
 export function useChromeTabs() {
@@ -123,8 +124,14 @@ export function useChromeTabs() {
   }
 
   async function groupTabs(tabIds: number[], title: string, windowId?: number) {
+    if (tabIds.length === 0) return
     const groupId = await chrome.tabs.group(
-      windowId ? { tabIds, createProperties: { windowId } } : { tabIds },
+      windowId
+        ? {
+            tabIds: tabIds as [number, ...number[]],
+            createProperties: { windowId },
+          }
+        : { tabIds: tabIds as [number, ...number[]] },
     )
 
     await chrome.tabGroups.update(groupId, {
@@ -138,6 +145,7 @@ export function useChromeTabs() {
   async function openInNewWindow(urls: string[]) {
     const first = urls[0]
     const win = await chrome.windows.create({ url: first, focused: true })
+    if (!win) return []
     const created: chrome.tabs.Tab[] = []
 
     // windows.create 可能已返回首个 tab

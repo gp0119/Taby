@@ -74,6 +74,7 @@ export default [
       "vue/singleline-html-element-content-newline": "off",
       "vue/no-v-html": "off",
       "vue/html-indent": "off",
+      "vue/html-self-closing": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
