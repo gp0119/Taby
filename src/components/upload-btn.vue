@@ -22,6 +22,7 @@ import { HourglassOutline } from "@vicons/ionicons5"
 import { useSettingStore } from "@/store/setting"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import syncManager from "@/sync/syncManager"
+import { SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants"
 
 const settingStore = useSettingStore()
 
@@ -43,7 +44,18 @@ const getModifiedTablesSize = () => {
   return stored ? JSON.parse(stored).length : 0
 }
 
+const hasSyncConfig = () => {
+  const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
+  const gistId = localStorage.getItem(SYNC_GIST_ID)
+  return !!(accessToken && gistId)
+}
+
 const updateRemainingTime = () => {
+  if (!hasSyncConfig()) {
+    remainingMs.value = null
+    return
+  }
+
   if (getModifiedTablesSize() === 0) {
     remainingMs.value = null
     return
