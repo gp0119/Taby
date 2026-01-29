@@ -156,30 +156,25 @@ const handleSyncTypeChange = (value: string) => {
   chrome.storage.sync.set({ [SYNC_TYPE]: value })
   formModel.value.syncType = value
   localStorage.setItem(SYNC_TYPE, value)
-  syncManager.setEnv(SYNC_TYPE, value)
 
   // 清空accessToken
   formModel.value.accessToken = ""
   localStorage.setItem(SYNC_GIST_TOKEN, "")
-  syncManager.setEnv(SYNC_GIST_TOKEN, "")
   chrome.storage.sync.set({ [SYNC_GIST_TOKEN]: "" })
 
   // 清空gistId
   formModel.value.gistId = ""
   localStorage.setItem(SYNC_GIST_ID, "")
-  syncManager.setEnv(SYNC_GIST_ID, "")
   chrome.storage.sync.set({ [SYNC_GIST_ID]: "" })
 }
 
 const handleAccessTokenChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_TOKEN, value)
-  syncManager.setEnv(SYNC_GIST_TOKEN, value)
   chrome.storage.sync.set({ [SYNC_GIST_TOKEN]: value })
 }, 1000)
 
 const handleGistIdChange = debounce((value: string) => {
   localStorage.setItem(SYNC_GIST_ID, value)
-  syncManager.setEnv(SYNC_GIST_ID, value)
   chrome.storage.sync.set({ [SYNC_GIST_ID]: value })
 }, 1000)
 
@@ -240,15 +235,12 @@ watch(show, (value) => {
     const syncType = localStorage.getItem(SYNC_TYPE)
     if (syncType) {
       formModel.value.syncType = syncType
-      syncManager.setEnv(SYNC_TYPE, syncType)
     }
     if (accessToken) {
       formModel.value.accessToken = accessToken
-      syncManager.setEnv(SYNC_GIST_TOKEN, accessToken)
     }
     if (gistId) {
       formModel.value.gistId = gistId
-      syncManager.setEnv(SYNC_GIST_ID, gistId)
     }
   }
 })

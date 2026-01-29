@@ -36,10 +36,6 @@ class GistManager {
     return GistManager.instance
   }
 
-  setEnv(key: string, value: string) {
-    localStorage.setItem(key, value)
-  }
-
   async request<T>(options: {
     endpoint: string
     method: "GET" | "POST" | "PATCH" | "DELETE"

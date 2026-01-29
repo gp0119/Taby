@@ -148,10 +148,6 @@ class SyncManager {
     }
   }
 
-  setEnv(key: string, value: string) {
-    GistManager.setEnv(key, value)
-  }
-
   setInterval(value: number) {
     this.SYNC_INTERVAL = value * 60 * 1000
     if (
