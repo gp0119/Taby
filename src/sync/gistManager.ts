@@ -9,41 +9,35 @@ import {
 import { compressToUTF16, decompressFromUTF16 } from "lz-string"
 
 class GistManager {
-  private API = GITHUB_API
-  private ACCESS_TOKEN = ""
-  private GIST_ID = ""
   private static instance: GistManager
+
+  // 从 localStorage 读取，确保多页面同步
+  private get API() {
+    const syncType = localStorage.getItem(SYNC_TYPE)
+    return syncType === "gitee" ? GITEE_API : GITHUB_API
+  }
+
+  private get ACCESS_TOKEN() {
+    return localStorage.getItem(SYNC_GIST_TOKEN) || ""
+  }
+
+  private get GIST_ID() {
+    return localStorage.getItem(SYNC_GIST_ID) || ""
+  }
+
+  private set GIST_ID(value: string) {
+    localStorage.setItem(SYNC_GIST_ID, value)
+  }
+
   public static getInstance(): GistManager {
     if (!GistManager.instance) {
       GistManager.instance = new GistManager()
     }
     return GistManager.instance
   }
-  constructor() {
-    this.getEnv()
-  }
-
-  getEnv() {
-    const syncType = localStorage.getItem(SYNC_TYPE)
-    const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
-    const gistId = localStorage.getItem(SYNC_GIST_ID)
-    if (syncType === "gitee") {
-      this.API = GITEE_API
-    } else {
-      this.API = GITHUB_API
-    }
-    this.ACCESS_TOKEN = accessToken || ""
-    this.GIST_ID = gistId || ""
-  }
 
   setEnv(key: string, value: string) {
-    if (key === SYNC_TYPE) {
-      this.API = value === "gitee" ? GITEE_API : GITHUB_API
-    } else if (key === SYNC_GIST_TOKEN) {
-      this.ACCESS_TOKEN = value
-    } else if (key === SYNC_GIST_ID) {
-      this.GIST_ID = value
-    }
+    localStorage.setItem(key, value)
   }
 
   async request<T>(options: {

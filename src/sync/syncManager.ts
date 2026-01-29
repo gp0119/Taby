@@ -19,6 +19,7 @@ class SyncManager {
   uploadDebounce: DebouncedFunc<() => Promise<string | undefined>>
   private initPromise: Promise<boolean>
   private isUploading = false
+  private autoUploadTimer: ReturnType<typeof setTimeout> | null = null
 
   // 从 localStorage 读取 modifiedTables
   get modifiedTables(): Set<TableName> {
@@ -207,6 +208,11 @@ class SyncManager {
   // 供 dataManager 调用：标记修改的表并触发延迟上传
   triggerUpload = (tableName: TableName) => {
     this.addModifiedTable(tableName)
+    // 清除 autoUpload 的定时器，由 uploadDebounce 接管
+    if (this.autoUploadTimer) {
+      clearTimeout(this.autoUploadTimer)
+      this.autoUploadTimer = null
+    }
     this.uploadDebounce()
   }
 
@@ -271,11 +277,21 @@ class SyncManager {
 
     if (this.modifiedTables.size > 0) {
       const lastModifiedTime = localStorage.getItem("lastModifiedTime")
-      if (
-        lastModifiedTime &&
-        Date.now() - Number(lastModifiedTime) > this.SYNC_INTERVAL
-      ) {
+      if (!lastModifiedTime) return
+
+      const elapsed = Date.now() - Number(lastModifiedTime)
+      if (elapsed > this.SYNC_INTERVAL) {
         await this.uploadImmediate()
+      } else {
+        // 计算剩余时间，设置定时上传
+        if (this.autoUploadTimer) {
+          clearTimeout(this.autoUploadTimer)
+        }
+        const remaining = this.SYNC_INTERVAL - elapsed
+        this.autoUploadTimer = setTimeout(
+          () => this.uploadImmediate(),
+          remaining,
+        )
       }
     }
   }

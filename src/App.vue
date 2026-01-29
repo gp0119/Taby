@@ -46,7 +46,6 @@ const handleVisibilityChange = debounce(
 )
 
 const handleMessage = async (message: any) => {
-  console.log("message: ", message)
   if (message.type === "refreshCollections") {
     await refreshSpaces()
     await refreshCollections(Number(message.spaceId))
