@@ -131,7 +131,7 @@ const props = defineProps<{
 }>()
 
 const { refreshCollections } = useRefresh()
-const { ft, gt } = useHelpi18n()
+const { ft, t } = useHelpi18n()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
 const newTag = ref({
@@ -219,10 +219,11 @@ const onDeleteTag = async (tag: {
   openDeleteDialog({
     title: ft("delete", "tag"),
     content: () => (
-      <span
-        class="text-text-primary"
-        v-html={gt("delete-confirm", tag.title)}
-      />
+      <span class="text-text-primary">
+        {t("delete-confirm-prefix")}
+        <span class="text-primary">{tag.title}</span>
+        {t("delete-confirm-suffix")}
+      </span>
     ),
     onPositiveClick: async () => {
       await dataManager.removeLabel(tag.id)

@@ -59,8 +59,8 @@ export default {
   "select-file": "Click or drag file to this area to upload",
   "no-collections": "No collections here, please add one.",
   "no-cards": "No cards here, please drag tabs here",
-  "delete-confirm":
-    "Are you sure you want to delete <span class='text-primary'>{type}</span>?",
+  "delete-confirm-prefix": "Are you sure you want to delete ",
+  "delete-confirm-suffix": "?",
   "delete-cards-confirm": "Are you sure you want to delete these Cards?",
   "download-remote-confirm":
     "Are you sure you want to download remote data? This will overwrite local data, please be careful.",
@@ -73,11 +73,10 @@ export default {
   "no-search-result": "No search results",
   "sync-type": "Sync Type",
   "sync-with-gist": "Sync with Gist",
-  "duplicate-cards": "<span class='font-medium'>{type}</span> Duplicated Cards",
   next: "Next",
   previous: "Prev",
-  "current-duplicate-count":
-    "Current <span class='font-medium text-primary mx-1'>{type}</span> Duplicated",
+  "current-duplicate-count-prefix": "Current ",
+  "current-duplicate-count-suffix": " Duplicated",
   save: "Save",
   merge: "Merge",
   "merge-to": "Merge to",

@@ -69,7 +69,7 @@ defineProps<{
 
 const { refreshCollections } = useRefresh()
 const batchCardStore = useBatchCardStore()
-const { ft, gt } = useHelpi18n()
+const { ft, t } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
@@ -131,10 +131,11 @@ async function onDeleteCard(card: iCard) {
   openDeleteDialog({
     title: ft("delete", "card"),
     content: () => (
-      <span
-        class="text-text-primary"
-        v-html={gt("delete-confirm", card.title)}
-      />
+      <span class="text-text-primary">
+        {t("delete-confirm-prefix")}
+        <span class="text-primary">{card.title}</span>
+        {t("delete-confirm-suffix")}
+      </span>
     ),
     onPositiveClick: async () => {
       await dataManager.removeCard(card.id)
