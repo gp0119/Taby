@@ -26,7 +26,7 @@ import { useRefresh } from "@/hooks/useRresh.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 
 const spacesStore = useSpacesStore()
-const { ft, t } = useHelpi18n()
+const { ft } = useHelpi18n()
 const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
@@ -77,9 +77,9 @@ function onDeleteSpace() {
     title: ft("delete", "space"),
     content: () => (
       <span class="text-text-primary">
-        {t("delete-confirm-prefix")}
+        {ft("delete-confirm-prefix")}
         <span class="text-primary">{props.title || ""}</span>
-        {t("delete-confirm-suffix")}
+        {ft("delete-confirm-suffix")}
       </span>
     ),
     onPositiveClick: async () => {

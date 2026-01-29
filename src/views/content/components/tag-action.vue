@@ -131,7 +131,7 @@ const props = defineProps<{
 }>()
 
 const { refreshCollections } = useRefresh()
-const { ft, t } = useHelpi18n()
+const { ft } = useHelpi18n()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
 const newTag = ref({
@@ -220,9 +220,9 @@ const onDeleteTag = async (tag: {
     title: ft("delete", "tag"),
     content: () => (
       <span class="text-text-primary">
-        {t("delete-confirm-prefix")}
+        {ft("delete-confirm-prefix")}
         <span class="text-primary">{tag.title}</span>
-        {t("delete-confirm-suffix")}
+        {ft("delete-confirm-suffix")}
       </span>
     ),
     onPositiveClick: async () => {

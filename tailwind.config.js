@@ -72,6 +72,18 @@ export default {
             transform: "rotate(180deg)",
           },
         },
+        glowPulse: {
+          "0%, 100%": {
+            opacity: "0.4",
+            transform: "scale(1)",
+            boxShadow: "0 0 4px var(--primary)",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.1)",
+            boxShadow: "0 0 16px var(--primary)",
+          },
+        },
       },
       animation: {
         "scale-in": "scaleIn 0.2s ease-out",
@@ -79,6 +91,7 @@ export default {
         hide: "hide 0.2s ease-out",
         "zoom-in-out": "zoomInOut 0.3s ease-in-out",
         flip: "flip 2s ease-in-out infinite",
+        "glow-pulse": "glowPulse 1.5s ease-in-out infinite",
       },
       screens: {
         400: "400px",

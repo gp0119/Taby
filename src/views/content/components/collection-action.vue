@@ -44,7 +44,7 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 
-const { ft, gt, t } = useHelpi18n()
+const { ft, gt } = useHelpi18n()
 defineProps<{
   item: CollectionWithCards
 }>()
@@ -100,9 +100,9 @@ function onDeleteCollection(item: CollectionWithCards) {
     title: ft("delete", "collection"),
     content: () => (
       <span class="text-text-primary">
-        {t("delete-confirm-prefix")}
+        {ft("delete-confirm-prefix")}
         <span class="text-primary">{item.title}</span>
-        {t("delete-confirm-suffix")}
+        {ft("delete-confirm-suffix")}
       </span>
     ),
     onPositiveClick: async () => {

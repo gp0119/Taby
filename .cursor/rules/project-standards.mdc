@@ -1,0 +1,215 @@
+---
+description: Taby 项目通用编码规范和最佳实践
+alwaysApply: true
+---
+
+# Taby 项目编码规范
+
+## Vue 组件规范
+
+### Composition API
+
+- 使用 `<script setup lang="ts">` 语法
+- 使用 `ref`, `computed`, `watch`, `watchEffect` 等 Composition API
+- 使用 `defineProps`, `defineEmits`, `defineModel` 定义组件接口
+
+```vue
+<!-- ✅ GOOD -->
+<script setup lang="ts">
+const props = defineProps<{
+  title: string
+  count?: number
+}>()
+
+const emit = defineEmits<{
+  (e: "update", value: string): void
+}>()
+
+const show = defineModel<boolean>("show", { default: false })
+</script>
+```
+
+### 组件命名
+
+- 组件文件名使用 kebab-case（如 `upload-btn.vue`）
+- 组件内部使用 PascalCase（如 `<PopoverWrapper>`）
+
+### 模板规范
+
+- 使用 Tailwind CSS 类名进行样式设置
+- 使用 CSS 变量（如 `var(--primary)`）而非硬编码颜色
+- 使用 Naive UI 组件库（`n-button`, `n-icon` 等）
+
+```vue
+<!-- ✅ GOOD -->
+<div class="rounded-xl bg-card-color shadow-card-shadow">
+  <n-button ghost circle size="small" type="error">
+    <template #icon>
+      <n-icon :component="Close" />
+    </template>
+  </n-button>
+</div>
+```
+
+## TypeScript 规范
+
+### 类型定义
+
+- 优先使用类型推断，必要时显式声明类型
+- 使用 `interface` 定义对象类型（见 `src/type.ts`）
+- 函数参数和返回值明确类型
+
+```typescript
+// ✅ GOOD
+const handleClick = async (id: number): Promise<void> => {
+  await syncManager.uploadImmediate()
+}
+
+// ✅ GOOD - 使用类型推断
+const count = ref(0)
+const doubled = computed(() => count.value * 2)
+```
+
+### 未使用变量
+
+- 未使用的变量/参数使用 `_` 前缀（如 `_unusedParam`）
+- ESLint 配置已忽略 `^_` 开头的变量
+
+## 状态管理
+
+### Pinia Store
+
+- 使用 `defineStore` 创建 store
+- 使用 Composition API 风格（setup 函数）
+- 使用 `@vueuse/core` 的 `useLocalStorage` 进行持久化
+
+```typescript
+// ✅ GOOD
+export const useSettingStore = defineStore("Setting", () => {
+  const setting = useLocalStorage<iSetting>("setting", {
+    language: "en-US",
+    theme: "light",
+  })
+
+  const getSetting = <K extends keyof iSetting>(key: K) => {
+    return setting.value[key]
+  }
+
+  return { setting, getSetting }
+})
+```
+
+## 样式规范
+
+### Tailwind CSS
+
+- 优先使用 Tailwind 工具类
+- 使用项目自定义颜色（如 `bg-card-color`, `text-primary`）
+- 使用自定义动画（如 `animate-glow-pulse`, `animate-flip`）
+- 响应式断点使用项目自定义 screens（400px, 600px, 800px 等）
+
+```vue
+<!-- ✅ GOOD -->
+<div
+  class="fixed left-1/2 top-2 z-10 -translate-x-1/2 rounded-xl bg-card-color shadow-card-shadow"
+>
+  <span class="animate-glow-pulse absolute bottom-4 right-4 z-[9998] h-9 w-9 rounded-full border-2 border-primary"></span>
+</div>
+```
+
+### CSS 变量
+
+- 主题颜色通过 CSS 变量定义（`var(--primary)`, `var(--cardBg)` 等）
+- 在 Tailwind config 中映射为工具类
+
+## 工具函数
+
+### 导入规范
+
+- 使用 `@/` 别名导入项目文件
+- 使用 `lodash-es` 的工具函数（如 `debounce`, `throttle`）
+- 使用 `@vueuse/core` 的组合式函数
+
+```typescript
+// ✅ GOOD
+import { debounce } from "lodash-es"
+import { useLocalStorage } from "@vueuse/core"
+import syncManager from "@/sync/syncManager"
+```
+
+## 异步操作
+
+### 错误处理
+
+- 使用 `try-catch` 处理异步操作
+- 在 `finally` 中清理状态（如 loading 状态）
+
+```typescript
+// ✅ GOOD
+const handleUpload = async () => {
+  uploading.value = true
+  try {
+    await syncManager.uploadImmediate()
+    remainingMs.value = null
+  } finally {
+    uploading.value = false
+  }
+}
+```
+
+## 生命周期
+
+### 清理资源
+
+- 在 `onUnmounted` 中清理定时器、事件监听器等
+- 使用 `onBeforeMount` 进行初始化数据加载
+
+```typescript
+// ✅ GOOD
+let timer: ReturnType<typeof setInterval>
+onMounted(() => {
+  timer = setInterval(updateRemainingTime, 1000)
+})
+
+onUnmounted(() => {
+  clearInterval(timer)
+})
+```
+
+## 国际化
+
+### i18n 使用
+
+- 使用 `vue-i18n` 进行文本国际化
+- 支持中英文（`zh-CN`, `en-US`）
+
+## Chrome Extension API
+
+### 异步 API
+
+- Chrome API 调用使用 `await`
+- 使用 `chrome.storage.local` 或 `chrome.storage.sync` 存储数据
+- 使用 `chrome.runtime.onMessage` 处理消息通信
+
+```typescript
+// ✅ GOOD
+const result = await chrome.storage.sync.get([SYNC_GIST_TOKEN, SYNC_GIST_ID])
+chrome.runtime.onMessage.addListener(handleMessage)
+```
+
+## 代码组织
+
+### 文件结构
+
+- 组件放在 `src/components/` 或对应 views 的 `components/` 目录
+- Store 放在 `src/store/` 目录
+- 工具函数放在 `src/utils/` 目录
+- Hooks 放在 `src/hooks/` 目录
+- 类型定义集中在 `src/type.ts`
+
+### 命名约定
+
+- 文件名：kebab-case（如 `upload-btn.vue`, `syncManager.ts`）
+- 变量/函数：camelCase（如 `handleUpload`, `remainingMs`）
+- 常量：UPPER_SNAKE_CASE（如 `SYNC_GIST_TOKEN`）
+- 类型/接口：i 前缀 + PascalCase（如 `iSetting`）

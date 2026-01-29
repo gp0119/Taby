@@ -69,7 +69,7 @@ defineProps<{
 
 const { refreshCollections } = useRefresh()
 const batchCardStore = useBatchCardStore()
-const { ft, t } = useHelpi18n()
+const { ft } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
@@ -132,9 +132,9 @@ async function onDeleteCard(card: iCard) {
     title: ft("delete", "card"),
     content: () => (
       <span class="text-text-primary">
-        {t("delete-confirm-prefix")}
+        {ft("delete-confirm-prefix")}
         <span class="text-primary">{card.title}</span>
-        {t("delete-confirm-suffix")}
+        {ft("delete-confirm-suffix")}
       </span>
     ),
     onPositiveClick: async () => {

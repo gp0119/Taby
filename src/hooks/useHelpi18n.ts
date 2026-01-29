@@ -19,6 +19,5 @@ export const useHelpi18n = () => {
     ft,
     gt,
     ft2,
-    t,
   }
 }

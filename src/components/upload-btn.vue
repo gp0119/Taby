@@ -3,17 +3,23 @@
     v-if="remainingText"
     :message="`${remainingText}后上传，点击立即上传`"
   >
-    <n-float-button
-      :right="16"
-      :bottom="16"
-      :width="36"
-      :height="36"
-      :loading="uploading"
-      class="!z-[9999]"
-      @click="handleUpload"
-    >
-      <n-icon :component="HourglassOutline" size="18" class="animate-flip" />
-    </n-float-button>
+    <div class="relative">
+      <span
+        v-if="uploading"
+        class="animate-glow-pulse absolute bottom-4 right-4 z-[9998] h-9 w-9 rounded-full border-2 border-primary"
+      ></span>
+      <n-float-button
+        :right="16"
+        :bottom="16"
+        :width="36"
+        :height="36"
+        :loading="uploading"
+        class="!z-[9999]"
+        @click="handleUpload"
+      >
+        <n-icon :component="HourglassOutline" size="18" class="animate-flip" />
+      </n-float-button>
+    </div>
   </PopoverWrapper>
 </template>
 
