@@ -155,6 +155,7 @@ const renderLabel = (option: any) => {
 
 const handleSyncTypeChange = (value: string) => {
   if (value === formModel.value.syncType) return
+  void syncManager.resetSyncTargetState()
   // type
   chrome.storage.sync.set({ [SYNC_TYPE]: value })
   formModel.value.syncType = value
@@ -177,6 +178,9 @@ const handleAccessTokenChange = debounce((value: string) => {
 }, 1000)
 
 const handleGistIdChange = debounce((value: string) => {
+  if (value !== localStorage.getItem(SYNC_GIST_ID)) {
+    void syncManager.resetSyncTargetState()
+  }
   localStorage.setItem(SYNC_GIST_ID, value)
   chrome.storage.sync.set({ [SYNC_GIST_ID]: value })
 }, 1000)

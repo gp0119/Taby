@@ -73,6 +73,12 @@ class SyncManager {
     this.onRemoteImported = cb
   }
 
+  async resetSyncTargetState(): Promise<void> {
+    GistManager.clearSyncedRemoteState()
+    localStorage.removeItem(LOCAL_LAST_DOWNLOAD_TIME)
+    await chrome.storage.sync.remove(REMOTE_LAST_UPDATE_TIME)
+  }
+
   isDirty(): boolean {
     return this._dirtyToken !== null
   }
