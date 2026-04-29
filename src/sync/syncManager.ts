@@ -229,20 +229,18 @@ class SyncManager {
   }
 
   setInterval(value: number) {
-    this.SYNC_INTERVAL = value * 60 * 1000
+    const nextInterval = value * 60 * 1000
+    if (nextInterval === this.SYNC_INTERVAL) return
+
+    this.SYNC_INTERVAL = nextInterval
     if (this.uploadDebounce) {
-      // 切换前先把 pending 的 trailing 调用 flush 出去，避免“调小了同步间隔反而推迟”。
-      // flush 会触发实际上传（异步），不需要 await 也能让其继续跑完。
-      if (typeof this.uploadDebounce.flush === "function") {
-        try {
-          this.uploadDebounce.flush()
-        } catch (err) {
-          console.warn("uploadDebounce.flush() failed:", err)
-        }
-      }
       if (typeof this.uploadDebounce.cancel === "function") {
         this.uploadDebounce.cancel()
       }
+    }
+    if (this.autoUploadTimer) {
+      clearTimeout(this.autoUploadTimer)
+      this.autoUploadTimer = null
     }
     this.uploadDebounce = debounce(
       () => this.safeUpload(),
@@ -252,6 +250,23 @@ class SyncManager {
         trailing: true,
         maxWait: Math.max(this.SYNC_INTERVAL, 30 * 60 * 1000),
       },
+    )
+    this.scheduleDirtyUpload()
+  }
+
+  private scheduleDirtyUpload() {
+    const dirtyToken = this._dirtyToken
+    if (dirtyToken === null) return
+
+    const elapsed = Date.now() - dirtyToken
+    if (elapsed >= this.SYNC_INTERVAL) {
+      void this.safeUpload()
+      return
+    }
+
+    this.autoUploadTimer = setTimeout(
+      () => this.safeUpload(),
+      this.SYNC_INTERVAL - elapsed,
     )
   }
 
