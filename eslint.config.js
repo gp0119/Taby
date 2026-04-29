@@ -1,6 +1,7 @@
 import globals from "globals"
 import tseslint from "typescript-eslint"
 import pluginVue from "eslint-plugin-vue"
+import vueParser from "vue-eslint-parser"
 import fs from "node:fs"
 import js from "@eslint/js"
 import configPrettier from "eslint-config-prettier"
@@ -21,8 +22,18 @@ const autoImportConfig = readJsonFile("./.eslintrc-auto-import.json")
 
 export default [
   {
+    ignores: [
+      "dist/**",
+      "release/**",
+      "node_modules/**",
+      ".cursor/**",
+      ".idea/**",
+      ".eslintrc-auto-import.json",
+    ],
+  },
+  {
+    files: ["**/*.{js,mjs,cjs,ts,tsx,vue}"],
     ...js.configs.recommended,
-    ignores: ["dist/**", "node_modules/**", ".eslintrc-auto-import.json"],
     plugins: {
       prettier: pluginPrettier,
       tailwindcss: pluginTailwindcss,
@@ -34,7 +45,7 @@ export default [
     },
   },
   {
-    files: ["**/*.{js,mjs,cjs,ts,vue}"],
+    files: ["**/*.{js,mjs,cjs,ts,tsx,vue}"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -50,6 +61,7 @@ export default [
   {
     files: ["**/*.vue"],
     languageOptions: {
+      parser: vueParser,
       parserOptions: {
         parser: tseslint.parser,
         extraFileExtensions: [".vue"],
