@@ -23,7 +23,18 @@ class DataBase extends Dexie {
   }
 
   public static getInstance(): DataBase {
-    if (!DataBase.instance || !DataBase.instance.isOpen()) {
+    if (!DataBase.instance) {
+      DataBase.instance = new DataBase()
+      return DataBase.instance
+    }
+    if (!DataBase.instance.isOpen()) {
+      // 旧实例已关闭（被显式 close、versionchange 或外部删库触发）。
+      // 显式 close() 一次确保内部 listener / pending tx 被清掉，再重建。
+      try {
+        DataBase.instance.close()
+      } catch {
+        /* ignore */
+      }
       DataBase.instance = new DataBase()
     }
     return DataBase.instance

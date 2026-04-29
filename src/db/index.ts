@@ -31,6 +31,26 @@ class DataManager {
     return DataManager.instance
   }
 
+  // 计算把一个 item 插入 prev / next 之间应使用的 order 值。
+  // 返回 null 表示密度过低（gap < 1），调用方需要做整表 rebalance。
+  // 这样移动 / 在中间插入只需要 1 次 IDB write，而不是 N 次。
+  private orderBetween(
+    prev: { order: number } | null | undefined,
+    next: { order: number } | null | undefined,
+  ): number | null {
+    const STEP = this.ORDER_STEP
+    if (!prev && !next) return STEP
+    if (!prev) {
+      const n = next!.order
+      if (n < 2) return null
+      return n / 2
+    }
+    if (!next) return prev.order + STEP
+    const gap = next.order - prev.order
+    if (gap < 1) return null
+    return (prev.order + next.order) / 2
+  }
+
   // 设置数据修改回调（供 syncManager 调用）
   setOnModify(callback: (table: TableName) => void) {
     this.onModify = callback
@@ -87,19 +107,28 @@ class DataManager {
   }
 
   async moveSpace(spaceId: number, oldIndex: number, newIndex: number) {
+    if (oldIndex === newIndex) return
     await db.transaction("rw", db.spaces, async () => {
       const currentSpace = await db.spaces.get(spaceId)
       if (!currentSpace) return
       const allSpaces = await db.spaces.orderBy("order").toArray()
-      allSpaces.splice(oldIndex, 1)
-      allSpaces.splice(newIndex, 0, currentSpace)
-      await Promise.all(
-        allSpaces.map(async (space, index) => {
-          await db.spaces.update(space.id, {
-            order: (index + 1) * this.ORDER_STEP,
-          })
-        }),
-      )
+      const filtered = allSpaces.filter((s) => s.id !== spaceId)
+      const prev = newIndex > 0 ? filtered[newIndex - 1] : null
+      const next = newIndex < filtered.length ? filtered[newIndex] : null
+      const newOrder = this.orderBetween(prev, next)
+      if (newOrder !== null) {
+        await db.spaces.update(spaceId, { order: newOrder })
+      } else {
+        // 密度过低，整表 rebalance
+        filtered.splice(newIndex, 0, currentSpace)
+        await Promise.all(
+          filtered.map((space, index) =>
+            db.spaces.update(space.id, {
+              order: (index + 1) * this.ORDER_STEP,
+            }),
+          ),
+        )
+      }
     })
     this.notifyModify("spaces")
   }
@@ -122,24 +151,37 @@ class DataManager {
             [collection.spaceId, Dexie.maxKey],
           )
           .toArray()
-        collections.unshift(collection as Collection)
-        await Promise.all(
-          collections.map(async (c, index) => {
-            if (c.id) {
-              await db.collections.update(c.id, {
-                order: (index + 1) * this.ORDER_STEP,
-              })
-            } else {
-              result = await db.collections.add({
-                title: c.title || "",
-                spaceId: c.spaceId,
-                labelIds: c.labelIds,
-                order: (index + 1) * this.ORDER_STEP,
-                createdAt: Date.now(),
-              })
-            }
-          }),
-        )
+        const first = collections[0]
+        const newOrder = this.orderBetween(null, first)
+        if (newOrder !== null) {
+          result = await db.collections.add({
+            title: collection.title || "",
+            spaceId: collection.spaceId,
+            labelIds: collection.labelIds,
+            order: newOrder,
+            createdAt: Date.now(),
+          })
+        } else {
+          // 密度过低 → 整组 rebalance（保留旧逻辑作为兜底）
+          collections.unshift(collection as Collection)
+          await Promise.all(
+            collections.map(async (c, index) => {
+              if (c.id) {
+                await db.collections.update(c.id, {
+                  order: (index + 1) * this.ORDER_STEP,
+                })
+              } else {
+                result = await db.collections.add({
+                  title: c.title || "",
+                  spaceId: c.spaceId,
+                  labelIds: c.labelIds,
+                  order: (index + 1) * this.ORDER_STEP,
+                  createdAt: Date.now(),
+                })
+              }
+            }),
+          )
+        }
       } else if (position === "END") {
         const lastCollection = await db.collections
           .where("[spaceId+order]")
@@ -215,21 +257,29 @@ class DataManager {
     oldIndex: number,
     newIndex: number,
   ) {
+    if (oldIndex === newIndex) return
     await db.transaction("rw", db.collections, async () => {
       const currentCollection = await db.collections.get(collectionId)
       if (!currentCollection) return
       const allCollections = await db.collections
         .where({ spaceId: currentCollection.spaceId })
         .sortBy("order")
-      allCollections.splice(oldIndex, 1)
-      allCollections.splice(newIndex, 0, currentCollection)
-      await Promise.all(
-        allCollections.map(async (collection, index) => {
-          await db.collections.update(collection.id, {
-            order: (index + 1) * this.ORDER_STEP,
-          })
-        }),
-      )
+      const filtered = allCollections.filter((c) => c.id !== collectionId)
+      const prev = newIndex > 0 ? filtered[newIndex - 1] : null
+      const next = newIndex < filtered.length ? filtered[newIndex] : null
+      const newOrder = this.orderBetween(prev, next)
+      if (newOrder !== null) {
+        await db.collections.update(collectionId, { order: newOrder })
+      } else {
+        filtered.splice(newIndex, 0, currentCollection)
+        await Promise.all(
+          filtered.map((collection, index) =>
+            db.collections.update(collection.id, {
+              order: (index + 1) * this.ORDER_STEP,
+            }),
+          ),
+        )
+      }
     })
     this.notifyModify("collections")
   }
@@ -345,37 +395,48 @@ class DataManager {
         )
         .toArray()
 
-      // 如果没有指定位置或者集合为空，添加到末尾
-      if (typeof targetIndex === "undefined" || cards.length === 0) {
-        const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
-        return await db.cards.add({
-          title: card.title || "",
-          url: card.url || "",
-          collectionId: card.collectionId,
-          faviconId: card.faviconId,
-          description: "",
-          order: lastOrder + this.ORDER_STEP,
-          createdAt: Date.now(),
-        })
-      }
-      // 在指定位置插入
-      const newOrder = (targetIndex + 1) * this.ORDER_STEP
-      // 更新目标位置后所有卡片的顺序
-      await Promise.all(
-        cards.slice(targetIndex).map(async (existingCard, index) => {
-          await db.cards.update(existingCard.id, {
-            order: newOrder + (index + 1) * this.ORDER_STEP,
-          })
-        }),
-      )
-      return await db.cards.add({
+      const baseRecord = {
         title: card.title || "",
         url: card.url || "",
         collectionId: card.collectionId,
         faviconId: card.faviconId,
         description: "",
-        order: newOrder,
         createdAt: Date.now(),
+      }
+
+      // 没指定位置 / 集合为空 / targetIndex 在尾部 → 直接追加，1 次写
+      if (
+        typeof targetIndex === "undefined" ||
+        cards.length === 0 ||
+        targetIndex >= cards.length
+      ) {
+        const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
+        return await db.cards.add({
+          ...baseRecord,
+          order: lastOrder + this.ORDER_STEP,
+        })
+      }
+
+      // 在中间插入：用相邻 prev / next 的中间值，1 次写
+      const prev = targetIndex > 0 ? cards[targetIndex - 1] : null
+      const next = cards[targetIndex]
+      const midOrder = this.orderBetween(prev, next)
+      if (midOrder !== null) {
+        return await db.cards.add({ ...baseRecord, order: midOrder })
+      }
+
+      // 密度过低 → 整组 rebalance 兜底
+      const newOrderAtIdx = (targetIndex + 1) * this.ORDER_STEP
+      await Promise.all(
+        cards.slice(targetIndex).map(async (existingCard, index) => {
+          await db.cards.update(existingCard.id, {
+            order: newOrderAtIdx + (index + 1) * this.ORDER_STEP,
+          })
+        }),
+      )
+      return await db.cards.add({
+        ...baseRecord,
+        order: newOrderAtIdx,
       })
     })
     this.notifyModify("cards")
@@ -421,6 +482,7 @@ class DataManager {
   }
 
   async moveCard(cardId: number, oldIndex: number, newIndex: number) {
+    if (oldIndex === newIndex) return
     await db.transaction("rw", db.cards, async () => {
       const currentCard = await db.cards.get(cardId)
       if (!currentCard) return
@@ -431,15 +493,22 @@ class DataManager {
           [currentCard.collectionId, Dexie.maxKey],
         )
         .toArray()
-      allCards.splice(oldIndex, 1)
-      allCards.splice(newIndex, 0, currentCard)
-      await Promise.all(
-        allCards.map(async (card, index) => {
-          await db.cards.update(card.id, {
-            order: (index + 1) * this.ORDER_STEP,
-          })
-        }),
-      )
+      const filtered = allCards.filter((c) => c.id !== cardId)
+      const prev = newIndex > 0 ? filtered[newIndex - 1] : null
+      const next = newIndex < filtered.length ? filtered[newIndex] : null
+      const newOrder = this.orderBetween(prev, next)
+      if (newOrder !== null) {
+        await db.cards.update(cardId, { order: newOrder })
+      } else {
+        filtered.splice(newIndex, 0, currentCard)
+        await Promise.all(
+          filtered.map((card, index) =>
+            db.cards.update(card.id, {
+              order: (index + 1) * this.ORDER_STEP,
+            }),
+          ),
+        )
+      }
     })
     this.notifyModify("cards")
   }
@@ -461,12 +530,27 @@ class DataManager {
         )
         .toArray()
 
-      if (typeof targetIndex === "undefined") {
+      // 跨 collection：currentCard 不在 targetCards 中，无需 filter
+      if (
+        typeof targetIndex === "undefined" ||
+        targetIndex >= targetCards.length
+      ) {
         const lastOrder =
           targetCards.length > 0 ? targetCards[targetCards.length - 1].order : 0
         await db.cards.update(cardId, {
           collectionId: targetCollectionId,
           order: lastOrder + this.ORDER_STEP,
+        })
+        return
+      }
+
+      const prev = targetIndex > 0 ? targetCards[targetIndex - 1] : null
+      const next = targetCards[targetIndex]
+      const newOrder = this.orderBetween(prev, next)
+      if (newOrder !== null) {
+        await db.cards.update(cardId, {
+          collectionId: targetCollectionId,
+          order: newOrder,
         })
       } else {
         targetCards.splice(targetIndex, 0, currentCard)
