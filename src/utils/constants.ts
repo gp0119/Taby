@@ -224,6 +224,11 @@ export const SYNC_GIST_TOKEN = "accessToken"
 export const SYNC_TYPE = "syncType"
 export const REMOTE_LAST_UPDATE_TIME = "remoteLastUpdateTime" // Stored in chrome.storage.sync
 export const LOCAL_LAST_DOWNLOAD_TIME = "localLastDownloadTime" // Stored in localStorage
+// 上次同步成功后看到的远端 Gist updated_at（ISO 8601 字符串），用于上传前的冲突检测。
+// 仅本设备使用，不需要跨设备共享 → 放 localStorage。
+export const SYNC_LAST_REMOTE_UPDATED_AT = "syncLastRemoteUpdatedAt"
+// 上次成功 GET / PATCH / POST Gist 时拿到的 ETag，用于条件 GET（If-None-Match）减少流量。
+export const SYNC_LAST_ETAG = "syncLastEtag"
 
 export const THEME_COLOR = {
   light: {

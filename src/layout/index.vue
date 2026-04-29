@@ -38,6 +38,7 @@
       <right-aside />
     </pinSide>
     <UploadBtn />
+    <SyncConflictHandler />
   </div>
 </template>
 
@@ -50,6 +51,7 @@ import content from "@/views/content/index.vue"
 import { useLayoutStore } from "@/store/layout"
 import LeftActions from "@/views/left-aside/components/left-actions.vue"
 import UploadBtn from "@/components/upload-btn.vue"
+import SyncConflictHandler from "@/components/sync-conflict-handler.vue"
 
 const layoutStore = useLayoutStore()
 </script>

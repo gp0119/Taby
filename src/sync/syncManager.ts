@@ -20,6 +20,32 @@ import {
 
 const UPLOAD_LOCK_NAME = "taby-sync-upload"
 
+export type ConflictResolution = "local" | "remote" | "cancel"
+
+export interface ConflictInfo {
+  localDirtyAt: number | null
+  remoteUpdatedAt: string
+  remoteData: SyncData
+}
+
+export type ConflictHandler = (
+  info: ConflictInfo,
+) => Promise<ConflictResolution>
+
+export class SyncConflictCancelledError extends Error {
+  constructor() {
+    super("Upload cancelled by user due to remote conflict.")
+    this.name = "SyncConflictCancelledError"
+  }
+}
+
+export class SyncConflictResolvedRemoteError extends Error {
+  constructor() {
+    super("Upload skipped: user chose to use remote data on conflict.")
+    this.name = "SyncConflictResolvedRemoteError"
+  }
+}
+
 class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
@@ -30,6 +56,22 @@ class SyncManager {
   // dirty token 内存缓存（持久化在 chrome.storage.local，由 SW/SPA 共享）。
   // 启动时通过 hydrateDirty() 同步，运行中通过 onDirtyChanged 监听跨 context 变更。
   private _dirtyToken: DirtyToken | null = null
+
+  // 冲突处理钩子，由 UI 层注入（弹窗让用户选择 local / remote / cancel）。
+  // 没有注入时退化为：仍然检测冲突，但默认按 "local"（保留原有行为，只是日志告警）。
+  private conflictHandler?: ConflictHandler
+
+  setConflictHandler(handler: ConflictHandler | undefined) {
+    this.conflictHandler = handler
+  }
+
+  // 远端数据被覆盖到本地后调用（例如冲突时用户选了 remote、或 autoDownload 触发后），
+  // 由 UI 层注入用于刷新 store / 上下文菜单等。
+  private onRemoteImported?: () => void | Promise<void>
+
+  setOnRemoteImported(cb: (() => void | Promise<void>) | undefined) {
+    this.onRemoteImported = cb
+  }
 
   isDirty(): boolean {
     return this._dirtyToken !== null
@@ -47,11 +89,37 @@ class SyncManager {
     return next
   }
 
+  // 包装 uploadImmediate：把已知的"用户取消 / 选择 remote"等期望异常吞掉，
+  // 仅记录真正的错误，避免 unhandled rejection 噪声。供 debounce / setTimeout 等无 try/catch 的调用处使用。
+  private safeUpload = async (
+    force: boolean = false,
+  ): Promise<string | undefined> => {
+    try {
+      return await this.uploadImmediate(force)
+    } catch (err) {
+      if (
+        err instanceof SyncConflictCancelledError ||
+        err instanceof SyncConflictResolvedRemoteError
+      ) {
+        console.log("[sync] upload skipped:", err.message)
+        return undefined
+      }
+      console.error("[sync] upload failed:", err)
+      return undefined
+    }
+  }
+
   constructor() {
     this.uploadDebounce = debounce(
-      () => this.uploadImmediate(),
+      () => this.safeUpload(),
       this.SYNC_INTERVAL,
-      { leading: false, trailing: true },
+      {
+        leading: false,
+        trailing: true,
+        // 用户连续操作时不会无限延迟上传：最多 30 分钟必然触发一次。
+        // 同时保证 maxWait ≥ wait（lodash 限制）。
+        maxWait: Math.max(this.SYNC_INTERVAL, 30 * 60 * 1000),
+      },
     )
 
     // 设置数据修改回调
@@ -156,42 +224,63 @@ class SyncManager {
 
   setInterval(value: number) {
     this.SYNC_INTERVAL = value * 60 * 1000
-    if (
-      this.uploadDebounce &&
-      typeof this.uploadDebounce.cancel === "function"
-    ) {
-      this.uploadDebounce.cancel()
+    if (this.uploadDebounce) {
+      // 切换前先把 pending 的 trailing 调用 flush 出去，避免“调小了同步间隔反而推迟”。
+      // flush 会触发实际上传（异步），不需要 await 也能让其继续跑完。
+      if (typeof this.uploadDebounce.flush === "function") {
+        try {
+          this.uploadDebounce.flush()
+        } catch (err) {
+          console.warn("uploadDebounce.flush() failed:", err)
+        }
+      }
+      if (typeof this.uploadDebounce.cancel === "function") {
+        this.uploadDebounce.cancel()
+      }
     }
     this.uploadDebounce = debounce(
-      () => this.uploadImmediate(),
+      () => this.safeUpload(),
       this.SYNC_INTERVAL,
-      { leading: false, trailing: true },
+      {
+        leading: false,
+        trailing: true,
+        maxWait: Math.max(this.SYNC_INTERVAL, 30 * 60 * 1000),
+      },
     )
   }
 
   // 全量上传当前所有表数据。
   // - force=true 时即使没有 dirty 也会强制上传（设置页"上传"按钮）。
   // - 跨 Tab 互斥：用 navigator.locks 只允许同时一个 Tab 上传，其它 Tab 立即返回 undefined。
+  // - 冲突检测：上传前 GET 一次 Gist（带 If-None-Match），如果远端被其它设备改过且
+  //   updated_at 比本地记录的 lastSeen 新，调用 conflictHandler 让用户决定
+  //   local（覆盖远端）/ remote（接受远端）/ cancel（保留 dirty）。
+  //   no handler 时默认 local（保持向后兼容，只是 console.warn）。
   uploadImmediate = async (
     force: boolean = false,
   ): Promise<string | undefined> => {
-    // 跨 Tab 互斥；ifAvailable=true 表示锁被占时不排队，直接返回 null
     const runUpload = async (): Promise<string | undefined> => {
-      const { accessToken } = await this.getToken()
+      const { accessToken, gistId } = await this.getToken()
       if (!accessToken) return
 
       const dirtyToken = this._dirtyToken
       if (!force && dirtyToken === null) return
+
+      // 冲突检测：仅当已经有 Gist 存在时检查（首次 createGist 不需要）
+      if (gistId) {
+        const decided = await this.detectAndResolveConflict()
+        if (decided === "remote") throw new SyncConflictResolvedRemoteError()
+        if (decided === "cancel") throw new SyncConflictCancelledError()
+        // "local" 或 "no-conflict" → 继续 PATCH 覆盖
+      }
 
       const data = await dataManager.getUploadData()
       const newGistId = await GistManager.uploadData(data)
       const now = Date.now()
       await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(now))
-      // 仅当上传期间没有新的修改时才清除 dirty
       if (dirtyToken !== null) {
         await clearDirtyIfUnchangedAsync(dirtyToken)
-        // 清除后立即同步内存缓存（onChanged 回调可能稍后才到）
         if (this._dirtyToken === dirtyToken) {
           this._dirtyToken = null
         }
@@ -210,6 +299,75 @@ class SyncManager {
       )
     }
     return await runUpload()
+  }
+
+  // 返回 "local" / "remote" / "cancel" / "no-conflict"。
+  // - no-conflict / local：调用方继续 PATCH。
+  // - remote：调用方应停止上传（已经把远端 import 进来）。
+  // - cancel：调用方应停止上传，保留 dirty。
+  private async detectAndResolveConflict(): Promise<
+    "no-conflict" | ConflictResolution
+  > {
+    let meta: Awaited<ReturnType<typeof GistManager.fetchGistMeta>>
+    try {
+      meta = await GistManager.fetchGistMeta()
+    } catch (err) {
+      // 网络问题等：放过，后续 PATCH 失败也是相同的失败模式
+      console.warn("Conflict pre-check fetch failed, skipping:", err)
+      return "no-conflict"
+    }
+    if (meta.notModified) return "no-conflict"
+
+    const lastSeen = GistManager.getLastRemoteUpdatedAt()
+    const remoteUpdatedAt = meta.updatedAt ?? ""
+
+    // lastSeen 缺失通常意味着首次上传 / 元数据被清。保守处理：当远端有数据时也按冲突走，
+    // 避免“配了一个共用的 gistId 但本地从没拉过远端”的场景被覆盖。
+    const isConflict = lastSeen
+      ? !!remoteUpdatedAt && remoteUpdatedAt > lastSeen
+      : !!remoteUpdatedAt && !!meta.data?.spaces?.length
+
+    if (!isConflict) return "no-conflict"
+
+    if (!this.conflictHandler) {
+      console.warn(
+        "Sync conflict detected but no conflict handler registered; defaulting to local-overwrite. " +
+          "Remote updated_at:",
+        remoteUpdatedAt,
+        "lastSeen:",
+        lastSeen,
+      )
+      return "local"
+    }
+
+    let decision: ConflictResolution
+    try {
+      decision = await this.conflictHandler({
+        localDirtyAt: this._dirtyToken,
+        remoteUpdatedAt,
+        remoteData: meta.data!,
+      })
+    } catch (err) {
+      console.warn("conflictHandler threw, treating as cancel:", err)
+      return "cancel"
+    }
+
+    if (decision === "remote") {
+      // 接受远端：用 fetchGistMeta 已经拿到的数据 import，避免再多一次 GET
+      await dataManager.importData(meta.data!)
+      await clearDirtyAsync()
+      this._dirtyToken = null
+      GistManager.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+      localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
+      // 通知 UI 刷新（store + 上下文菜单等）
+      try {
+        await this.onRemoteImported?.()
+      } catch (err) {
+        console.warn("onRemoteImported callback failed:", err)
+      }
+    }
+    // local / cancel 不在这里改任何持久化状态，由调用方处理后续 PATCH 或保留 dirty
+    return decision
   }
 
   // 供 dataManager 调用：标记 dirty 并触发延迟上传
@@ -256,6 +414,11 @@ class SyncManager {
     await clearDirtyAsync()
     this._dirtyToken = null
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
+    try {
+      await this.onRemoteImported?.()
+    } catch (err) {
+      console.warn("onRemoteImported callback failed:", err)
+    }
     return data
   }
 
@@ -263,23 +426,9 @@ class SyncManager {
     const { accessToken, gistId } = await this.getToken()
     if (!accessToken || !gistId) return false
 
-    // 关键安全步骤：本地有未上传修改时，先尝试 flush，避免被远端覆盖。
-    // flush 失败则放弃本次 autoDownload，宁可等到下次上传，也不丢本地数据。
-    if (this.isDirty()) {
-      try {
-        await this.uploadImmediate(true)
-      } catch (err) {
-        console.warn(
-          "Pre-download flush failed; skipping autoDownload to protect local data:",
-          err,
-        )
-        return false
-      }
-      // flush 成功后远端就是本地副本，无需再下载
-      return false
-    }
-
     try {
+      // 先用 chrome.storage.sync 上的 REMOTE_LAST_UPDATE_TIME 做廉价检查，
+      // 没必要每次 visibilitychange 都打 GitHub API。
       const syncStorage = await chrome.storage.sync.get([
         REMOTE_LAST_UPDATE_TIME,
       ])
@@ -291,17 +440,30 @@ class SyncManager {
         ? Number(localDownloadTimeStr)
         : 0
 
-      if (
+      const shouldDownload =
         !localDownloadTime ||
-        (remoteUpdateTime && Number(remoteUpdateTime) > localDownloadTime)
-      ) {
-        console.log("Remote Gist potentially newer, downloading...")
-        await this.triggerDownload()
-        return true
-      } else {
-        console.log("Local data is up-to-date, skipping download.")
+        (!!remoteUpdateTime && Number(remoteUpdateTime) > localDownloadTime)
+
+      if (!shouldDownload) {
         return false
       }
+
+      // 远端比本地新。如果本地还有未上传的修改，先 flush 保护本地数据，
+      // 把 last-write-wins 的责任交给冲突检测路径。
+      if (this.isDirty()) {
+        try {
+          await this.safeUpload(true)
+        } catch (err) {
+          console.warn("Pre-download flush failed; aborting autoDownload:", err)
+          return false
+        }
+        // flush 后本地状态 ≈ 远端，没必要再下载
+        return false
+      }
+
+      console.log("Remote Gist potentially newer, downloading...")
+      await this.triggerDownload()
+      return true
     } catch (error) {
       console.error("Error during autoDownload check:", error)
       return false
@@ -317,13 +479,13 @@ class SyncManager {
 
     const elapsed = Date.now() - dirtyToken
     if (elapsed > this.SYNC_INTERVAL) {
-      await this.uploadImmediate()
+      await this.safeUpload()
     } else {
       if (this.autoUploadTimer) {
         clearTimeout(this.autoUploadTimer)
       }
       const remaining = this.SYNC_INTERVAL - elapsed
-      this.autoUploadTimer = setTimeout(() => this.uploadImmediate(), remaining)
+      this.autoUploadTimer = setTimeout(() => this.safeUpload(), remaining)
     }
   }
 }

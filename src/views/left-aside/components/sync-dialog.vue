@@ -106,7 +106,10 @@
 <script setup lang="tsx">
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { FormInst, useMessage } from "naive-ui"
-import syncManager from "@/sync/syncManager.ts"
+import syncManager, {
+  SyncConflictCancelledError,
+  SyncConflictResolvedRemoteError,
+} from "@/sync/syncManager.ts"
 import { LogoGithub } from "@vicons/ionicons5"
 import { CloudDownload, CloudUpload, Information } from "@vicons/carbon"
 import { debounce } from "lodash-es"
@@ -192,8 +195,15 @@ const handleUpload = () => {
       message.success(ft("success", "upload"))
       uploadLoading.value = false
       show.value = false
-    } catch {
-      message.error(ft("fail", "upload"))
+    } catch (err) {
+      if (err instanceof SyncConflictResolvedRemoteError) {
+        message.success(ft("success", "download"))
+        show.value = false
+      } else if (err instanceof SyncConflictCancelledError) {
+        message.info("已取消上传")
+      } else {
+        message.error(ft("fail", "upload"))
+      }
       uploadLoading.value = false
     }
   })

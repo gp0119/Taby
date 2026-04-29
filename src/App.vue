@@ -39,7 +39,11 @@ provide("loading", {
 
 const handleVisibilityChange = debounce(
   async () => {
+    // 先按照 5 分钟窗口尝试上传本地的脏数据；
+    // 再触发一次 autoDownload —— 它内部只有"远端真的比本地新"时才打 API，
+    // 廉价路径下只是读一次 chrome.storage.sync。
     await syncManager.autoUpload()
+    await syncManager.autoDownload()
   },
   3000,
   { leading: true, trailing: false },
@@ -78,24 +82,30 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
+  // 注册：远端覆盖本地（冲突→remote / triggerDownload）后由 syncManager 统一刷新 UI。
+  syncManager.setOnRemoteImported(async () => {
+    await refreshSpaces()
+    await refreshCollections()
+    await updateContextMenus()
+  })
+
   const isRecovered = await syncManager.waitForInit()
-  if (!isRecovered) {
-    handleVisibilityChange()
-  }
   document.addEventListener("visibilitychange", handleVisibilityChange)
   window.addEventListener("beforeunload", removeListener)
   chrome.runtime.onMessage.addListener(handleMessage)
+
+  // 初次渲染：用 IDB 里现有的数据填好 UI。
+  // 如果 waitForInit 已经从远端恢复过（isRecovered=true），onRemoteImported 已被触发，
+  // 但首次注册回调早于 init 完成，所以这里再保险刷一次。
   await new Promise((resolve) => setTimeout(resolve, 100))
   await refreshSpaces()
   await refreshCollections()
   await updateContextMenus()
 
+  // 启动时主动跑一次 visibility 流：上传脏数据 + 拉取远端更新（带冲突检测）。
+  // 如果 isRecovered 说明刚从远端恢复，没必要再来一遍。
   if (!isRecovered) {
-    const isDownloaded = await syncManager.autoDownload()
-    if (isDownloaded) {
-      await refreshSpaces()
-      await refreshCollections()
-    }
+    handleVisibilityChange()
   }
 
   loading.value = false
@@ -104,5 +114,6 @@ onMounted(async () => {
 onUnmounted(() => {
   removeListener()
   chrome.runtime.onMessage.removeListener(handleMessage)
+  syncManager.setOnRemoteImported(undefined)
 })
 </script>
