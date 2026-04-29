@@ -6,6 +6,7 @@ import { NaiveUiResolver } from "unplugin-vue-components/resolvers"
 import vueJsx from "@vitejs/plugin-vue-jsx"
 import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.config"
+import pkg from "./package.json"
 import zip from "vite-plugin-zip-pack"
 import fs from "fs"
 import path from "path"
@@ -14,7 +15,7 @@ export default defineConfig({
   plugins: [
     vue(),
     crx({ manifest }),
-    zip({ outDir: "release", outFileName: "release.zip" }),
+    zip({ outDir: "release", outFileName: `${pkg.version}.zip` }),
     vueJsx({}),
     {
       name: "remove-vite-manifest",
