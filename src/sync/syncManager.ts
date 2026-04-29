@@ -9,43 +9,42 @@ import {
   LOCAL_LAST_DOWNLOAD_TIME,
   REMOTE_LAST_UPDATE_TIME,
 } from "@/utils/constants.ts"
+import {
+  getDirtyToken as getDirtyTokenAsync,
+  markDirtyAsync,
+  clearDirty as clearDirtyAsync,
+  clearDirtyIfUnchanged as clearDirtyIfUnchangedAsync,
+  onDirtyChanged,
+  DirtyToken,
+} from "@/sync/dirtyStorage.ts"
 
-const DIRTY_KEY = "lastModifiedTime"
+const UPLOAD_LOCK_NAME = "taby-sync-upload"
 
 class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
   uploadDebounce: DebouncedFunc<() => Promise<string | undefined>>
   private initPromise: Promise<boolean>
-  private isUploading = false
   private autoUploadTimer: ReturnType<typeof setTimeout> | null = null
 
-  // 是否有未上传的修改。dirty 标记复用 lastModifiedTime：
-  // - markDirty() 会写入一个单调递增的值（毫秒级时间戳；同毫秒内会 +1 保证递增）
-  // - uploadImmediate 在上传前快照该值，上传成功后只在值未变时才清除，
-  //   这样可以避免“上传期间的新修改”被误清造成 lost-update
+  // dirty token 内存缓存（持久化在 chrome.storage.local，由 SW/SPA 共享）。
+  // 启动时通过 hydrateDirty() 同步，运行中通过 onDirtyChanged 监听跨 context 变更。
+  private _dirtyToken: DirtyToken | null = null
+
   isDirty(): boolean {
-    return localStorage.getItem(DIRTY_KEY) !== null
+    return this._dirtyToken !== null
   }
 
-  // 获取当前 dirty token；不存在时返回 null
-  private getDirtyToken(): string | null {
-    return localStorage.getItem(DIRTY_KEY)
+  // 给 UI 用的 dirty 时间戳（最近一次修改的近似时间），未 dirty 时返回 null
+  getDirtyTimestamp(): number | null {
+    return this._dirtyToken
   }
 
-  // 标记本地有未上传的修改
-  markDirty() {
-    const cur = Number(localStorage.getItem(DIRTY_KEY) ?? 0)
-    const next = Math.max(cur + 1, Date.now())
-    localStorage.setItem(DIRTY_KEY, String(next))
-  }
-
-  // 上传成功后调用：仅当 dirty token 没被新修改改动时清除
-  private clearDirtyIfUnchanged(token: string | null) {
-    if (token === null) return
-    if (localStorage.getItem(DIRTY_KEY) === token) {
-      localStorage.removeItem(DIRTY_KEY)
-    }
+  // 标记本地有未上传的修改（异步落盘到 chrome.storage.local）
+  async markDirty(): Promise<DirtyToken> {
+    const next = await markDirtyAsync()
+    this._dirtyToken = next
+    return next
   }
 
   constructor() {
@@ -58,6 +57,19 @@ class SyncManager {
     // 设置数据修改回调
     dataManager.setOnModify(() => this.triggerUpload())
 
+    // 监听 dirty 在其它 context（例如 SW 后台脚本）中的变化，
+    // 收到变化后更新内存缓存并按需触发延迟上传。
+    onDirtyChanged((newToken) => {
+      this._dirtyToken = newToken
+      if (newToken !== null) {
+        if (this.autoUploadTimer) {
+          clearTimeout(this.autoUploadTimer)
+          this.autoUploadTimer = null
+        }
+        this.uploadDebounce()
+      }
+    })
+
     // 启动异步初始化
     this.initPromise = this.initialize()
   }
@@ -69,15 +81,23 @@ class SyncManager {
     return SyncManager.instance
   }
 
-  // 异步初始化：先检查完整性，再决定是否创建默认数据
+  // 异步初始化：先同步 dirty 状态，再检查完整性，最后决定是否创建默认数据
   private async initialize(): Promise<boolean> {
+    await this.hydrateDirty()
     const isRecovered = await this.checkDataIntegrity()
-
     if (!isRecovered) {
       await this.initializeDefaultData()
     }
-
     return isRecovered
+  }
+
+  private async hydrateDirty() {
+    try {
+      this._dirtyToken = await getDirtyTokenAsync()
+    } catch (err) {
+      console.warn("hydrateDirty failed:", err)
+      this._dirtyToken = null
+    }
   }
 
   // 等待初始化完成（供外部调用）
@@ -98,26 +118,23 @@ class SyncManager {
     const spaceCount = await db.spaces.count()
     if (spaceCount > 0) return
     await this.createDefaultSpace()
-    // 默认数据不算用户修改，清掉 dirty 标记避免误上传
-    localStorage.removeItem(DIRTY_KEY)
+    // 默认数据不算用户修改
+    await clearDirtyAsync()
+    this._dirtyToken = null
   }
 
   async checkDataIntegrity(): Promise<boolean> {
     try {
       const spaceCount = await db.spaces.count()
-
-      // 仅当本地“真的空”（spaces=0）且没有任何待上传的本地修改时，
-      // 才尝试从远端恢复。1 space + 0 collections 是合法状态（用户刚建/清空）。
+      // 仅当本地"真的空"且没有任何待上传修改时，才尝试从远端恢复
       if (spaceCount === 0 && !this.isDirty()) {
         const { accessToken, gistId } = await this.getToken()
-
         if (accessToken && gistId) {
           console.warn("检测到本地数据为空，尝试从远程恢复...")
           try {
             await this.triggerDownload()
             return true
           } catch (err) {
-            // 远端也是空 / 无效 → 不视为恢复成功，让上层走 initializeDefaultData
             console.warn("远程恢复失败，回退到默认初始化:", err)
           }
         }
@@ -153,17 +170,17 @@ class SyncManager {
   }
 
   // 全量上传当前所有表数据。
-  // force=true 时即使没有 dirty 标记也会强制上传（用于设置页“上传”按钮）。
+  // - force=true 时即使没有 dirty 也会强制上传（设置页"上传"按钮）。
+  // - 跨 Tab 互斥：用 navigator.locks 只允许同时一个 Tab 上传，其它 Tab 立即返回 undefined。
   uploadImmediate = async (
     force: boolean = false,
   ): Promise<string | undefined> => {
-    if (this.isUploading) return
-    this.isUploading = true
-    try {
+    // 跨 Tab 互斥；ifAvailable=true 表示锁被占时不排队，直接返回 null
+    const runUpload = async (): Promise<string | undefined> => {
       const { accessToken } = await this.getToken()
       if (!accessToken) return
 
-      const dirtyToken = this.getDirtyToken()
+      const dirtyToken = this._dirtyToken
       if (!force && dirtyToken === null) return
 
       const data = await dataManager.getUploadData()
@@ -171,18 +188,35 @@ class SyncManager {
       const now = Date.now()
       await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(now))
-      // 仅当上传期间没有新的修改时才清除 dirty 标记
-      this.clearDirtyIfUnchanged(dirtyToken)
+      // 仅当上传期间没有新的修改时才清除 dirty
+      if (dirtyToken !== null) {
+        await clearDirtyIfUnchangedAsync(dirtyToken)
+        // 清除后立即同步内存缓存（onChanged 回调可能稍后才到）
+        if (this._dirtyToken === dirtyToken) {
+          this._dirtyToken = null
+        }
+      }
       return newGistId
-    } finally {
-      this.isUploading = false
     }
+
+    if (typeof navigator !== "undefined" && navigator.locks) {
+      return await navigator.locks.request(
+        UPLOAD_LOCK_NAME,
+        { mode: "exclusive", ifAvailable: true },
+        async (lock) => {
+          if (!lock) return undefined // 另一个 Tab 正在上传
+          return await runUpload()
+        },
+      )
+    }
+    return await runUpload()
   }
 
   // 供 dataManager 调用：标记 dirty 并触发延迟上传
   triggerUpload = () => {
-    this.markDirty()
-    // 清除 autoUpload 的定时器，由 uploadDebounce 接管
+    void this.markDirty().catch((err) => {
+      console.error("markDirty failed:", err)
+    })
     if (this.autoUploadTimer) {
       clearTimeout(this.autoUploadTimer)
       this.autoUploadTimer = null
@@ -190,13 +224,20 @@ class SyncManager {
     this.uploadDebounce()
   }
 
-  // 手动上传全部数据（用于设置页面的"上传"按钮），强制上传。
-  uploadAll = async (): Promise<string | undefined> => {
-    return await this.uploadImmediate(true)
+  // 手动上传全部数据（设置页面"上传"按钮）。失败抛错，避免调用方拿到 undefined
+  // 误把假 gistId 写入存储破坏配置。
+  uploadAll = async (): Promise<string> => {
+    const result = await this.uploadImmediate(true)
+    if (!result) {
+      throw new Error(
+        "Upload skipped: another upload is in progress or no access token configured.",
+      )
+    }
+    return result
   }
 
-  // allowEmpty: 用户在 UI 中显式确认覆盖时（例如同步对话框、版本回滚）才允许传 true，
-  // 用 empty 远端数据覆盖本地。所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
+  // allowEmpty: 用户在 UI 中显式确认覆盖时（同步对话框、版本回滚）才允许传 true。
+  // 所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
   triggerDownload = async (
     options: { allowEmpty?: boolean } = {},
   ): Promise<SyncData> => {
@@ -212,16 +253,32 @@ class SyncManager {
 
     await dataManager.importData(data)
     // 下载覆盖后本地不再有未上传的修改
-    localStorage.removeItem(DIRTY_KEY)
+    await clearDirtyAsync()
+    this._dirtyToken = null
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
     return data
   }
 
   autoDownload = async (): Promise<boolean> => {
     const { accessToken, gistId } = await this.getToken()
-    if (!accessToken || !gistId) {
+    if (!accessToken || !gistId) return false
+
+    // 关键安全步骤：本地有未上传修改时，先尝试 flush，避免被远端覆盖。
+    // flush 失败则放弃本次 autoDownload，宁可等到下次上传，也不丢本地数据。
+    if (this.isDirty()) {
+      try {
+        await this.uploadImmediate(true)
+      } catch (err) {
+        console.warn(
+          "Pre-download flush failed; skipping autoDownload to protect local data:",
+          err,
+        )
+        return false
+      }
+      // flush 成功后远端就是本地副本，无需再下载
       return false
     }
+
     try {
       const syncStorage = await chrome.storage.sync.get([
         REMOTE_LAST_UPDATE_TIME,
@@ -255,14 +312,13 @@ class SyncManager {
     const { accessToken, gistId } = await this.getToken()
     if (!accessToken || !gistId) return
 
-    const dirtyToken = this.getDirtyToken()
+    const dirtyToken = this._dirtyToken
     if (dirtyToken === null) return
 
-    const elapsed = Date.now() - Number(dirtyToken)
+    const elapsed = Date.now() - dirtyToken
     if (elapsed > this.SYNC_INTERVAL) {
       await this.uploadImmediate()
     } else {
-      // 计算剩余时间，设置定时上传
       if (this.autoUploadTimer) {
         clearTimeout(this.autoUploadTimer)
       }

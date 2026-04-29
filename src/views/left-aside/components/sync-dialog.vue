@@ -183,12 +183,11 @@ const handleUpload = () => {
     try {
       uploadLoading.value = true
       const gistId = await syncManager.uploadAll()
-      console.log("gistId: ", gistId)
-      formModel.value.gistId = gistId as string
-      localStorage.setItem(SYNC_GIST_ID, gistId as string)
+      formModel.value.gistId = gistId
+      localStorage.setItem(SYNC_GIST_ID, gistId)
       await chrome.storage.sync.set({
         [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-        [SYNC_GIST_ID]: gistId as string,
+        [SYNC_GIST_ID]: gistId,
       })
       message.success(ft("success", "upload"))
       uploadLoading.value = false

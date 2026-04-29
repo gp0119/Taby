@@ -1,6 +1,17 @@
 import dataManager from "@/db"
 import dayjs from "dayjs"
 import debounce from "lodash-es/debounce"
+import { markDirtyAsync } from "@/sync/dirtyStorage.ts"
+
+// SW 里的 DataManager 实例和 SPA 的不是同一个（不同进程），所以这里独立
+// 注册一个 onModify，把 SW 中通过 dataManager 做的所有 IndexedDB 修改
+// 都写入共享的 dirty 标记（chrome.storage.local），让 SPA 启动 / 接收
+// chrome.storage.onChanged 通知后能感知并触发同步上传。
+dataManager.setOnModify(() => {
+  void markDirtyAsync().catch((err) => {
+    console.error("Background markDirty failed:", err)
+  })
+})
 ;(async () => {
   const { hideRightClickMenu } = await chrome.storage.local.get([
     "hideRightClickMenu",

@@ -64,15 +64,15 @@ const updateRemainingTime = () => {
     return
   }
 
-  const lastModifiedTime = localStorage.getItem("lastModifiedTime")
-  if (!lastModifiedTime) {
+  const dirtyAt = syncManager.getDirtyTimestamp()
+  if (dirtyAt === null) {
     remainingMs.value = null
     return
   }
 
   const syncInterval =
     settingStore.getSetting("saveAfterOperationTime") * 60 * 1000
-  const elapsed = Date.now() - Number(lastModifiedTime)
+  const elapsed = Date.now() - dirtyAt
   const remaining = syncInterval - elapsed
 
   remainingMs.value = remaining > 0 ? remaining : 0

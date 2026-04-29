@@ -49,11 +49,8 @@ const handleMessage = async (message: any) => {
   if (message.type === "refreshCollections") {
     await refreshSpaces()
     await refreshCollections(Number(message.spaceId))
-    // 后台脚本通知本地数据有变更（不再细分具体表，全量上传）
-    if (message.modified || message.modifiedTables) {
-      syncManager.markDirty()
-      syncManager.uploadDebounce()
-    }
+    // 后台脚本对 IndexedDB 的修改会通过 chrome.storage.local 的 dirty 标记
+    // 自动通知 syncManager（onDirtyChanged 监听），这里无需重复 markDirty。
   }
 }
 
