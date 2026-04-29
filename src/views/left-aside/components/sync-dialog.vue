@@ -208,7 +208,8 @@ const handleDownload = () => {
       formRef.value?.validate().then(async () => {
         try {
           downloadLoading.value = true
-          await syncManager.triggerDownload()
+          // 用户已通过确认对话框显式同意覆盖本地，允许 remote 为空时也照常下载
+          await syncManager.triggerDownload({ allowEmpty: true })
           await chrome.storage.sync.set({
             [SYNC_GIST_TOKEN]: formModel.value.accessToken,
             [SYNC_GIST_ID]: formModel.value.gistId,

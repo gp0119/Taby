@@ -79,7 +79,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await chrome.runtime.sendMessage({
       type: "refreshCollections",
       spaceId: newSpaceId,
-      modifiedTables: ["spaces"],
+      modified: true,
     })
     await updateContextMenus()
   } else if ((info.menuItemId as string).startsWith("newCollection-")) {
@@ -92,7 +92,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await chrome.runtime.sendMessage({
       type: "refreshCollections",
       spaceId: spaceId,
-      modifiedTables: ["collections"],
+      modified: true,
     })
     await updateContextMenus()
   } else if ((info.menuItemId as string).startsWith("collection-")) {
@@ -113,7 +113,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     await chrome.runtime.sendMessage({
       type: "refreshCollections",
       spaceId: spaceId,
-      modifiedTables: ["cards", "favicons"],
+      modified: true,
     })
   }
 })

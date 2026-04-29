@@ -52,11 +52,6 @@ const handleUpload = async () => {
   }
 }
 
-const getModifiedTablesSize = () => {
-  const stored = localStorage.getItem("modifiedTables")
-  return stored ? JSON.parse(stored).length : 0
-}
-
 const hasSyncConfig = () => {
   const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
   const gistId = localStorage.getItem(SYNC_GIST_ID)
@@ -64,12 +59,7 @@ const hasSyncConfig = () => {
 }
 
 const updateRemainingTime = () => {
-  if (!hasSyncConfig()) {
-    remainingMs.value = null
-    return
-  }
-
-  if (getModifiedTablesSize() === 0) {
+  if (!hasSyncConfig() || !syncManager.isDirty()) {
     remainingMs.value = null
     return
   }

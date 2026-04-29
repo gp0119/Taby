@@ -783,6 +783,10 @@ class DataManager {
     cards: Card[]
     favicons: Favicon[]
   }) {
+    if (!data || typeof data !== "object") {
+      throw new Error("importData: invalid data payload")
+    }
+
     const tablesToLock: Dexie.Table[] = [
       db.spaces,
       db.collections,
@@ -790,68 +794,66 @@ class DataManager {
       db.cards,
       db.favicons,
     ]
-    try {
-      await db.transaction("rw", tablesToLock, async () => {
-        await Promise.all([
-          db.spaces.clear(),
-          db.collections.clear(),
-          db.labels.clear(),
-          db.cards.clear(),
-          db.favicons.clear(),
-        ])
-        const chunkSize = 100
-        if (data.spaces && data.spaces.length > 0) {
-          await db.spaces.bulkPut(data.spaces)
-        }
-        if (data.collections && data.collections.length > 0) {
-          await db.collections.bulkPut(data.collections)
-        }
-        if (data.labels && data.labels.length > 0) {
-          await db.labels.bulkPut(data.labels)
-        }
-        let faviconsToImport: Favicon[] = []
-        if (
-          data.cards &&
-          data.cards.length > 0 &&
-          data.favicons &&
-          data.favicons.length > 0
-        ) {
-          const usedFaviconIds = new Set<number>()
-          data.cards.forEach((card) => {
-            if (card.faviconId && card.faviconId > 0) {
-              usedFaviconIds.add(card.faviconId)
-            }
-          })
-          faviconsToImport = data.favicons.filter((favicon) =>
-            usedFaviconIds.has(favicon.id),
-          )
-        } else {
-          faviconsToImport =
-            data.favicons && data.cards?.length === 0 ? data.favicons : []
-        }
-        if (faviconsToImport.length > 0) {
-          const numChunks = Math.ceil(faviconsToImport.length / chunkSize)
-          for (let i = 0; i < numChunks; i++) {
-            const start = i * chunkSize
-            const end = start + chunkSize
-            const chunk = faviconsToImport.slice(start, end)
-            await db.favicons.bulkPut(chunk)
+    // 注意：不再 try/catch 吞掉错误。事务失败时会自动回滚，
+    // 调用方需要据此感知失败、避免误把 LOCAL_LAST_DOWNLOAD_TIME 等元信息落库。
+    await db.transaction("rw", tablesToLock, async () => {
+      await Promise.all([
+        db.spaces.clear(),
+        db.collections.clear(),
+        db.labels.clear(),
+        db.cards.clear(),
+        db.favicons.clear(),
+      ])
+      const chunkSize = 100
+      if (data.spaces && data.spaces.length > 0) {
+        await db.spaces.bulkPut(data.spaces)
+      }
+      if (data.collections && data.collections.length > 0) {
+        await db.collections.bulkPut(data.collections)
+      }
+      if (data.labels && data.labels.length > 0) {
+        await db.labels.bulkPut(data.labels)
+      }
+      let faviconsToImport: Favicon[] = []
+      if (
+        data.cards &&
+        data.cards.length > 0 &&
+        data.favicons &&
+        data.favicons.length > 0
+      ) {
+        const usedFaviconIds = new Set<number>()
+        data.cards.forEach((card) => {
+          if (card.faviconId && card.faviconId > 0) {
+            usedFaviconIds.add(card.faviconId)
           }
+        })
+        faviconsToImport = data.favicons.filter((favicon) =>
+          usedFaviconIds.has(favicon.id),
+        )
+      } else {
+        faviconsToImport =
+          data.favicons && data.cards?.length === 0 ? data.favicons : []
+      }
+      if (faviconsToImport.length > 0) {
+        const numChunks = Math.ceil(faviconsToImport.length / chunkSize)
+        for (let i = 0; i < numChunks; i++) {
+          const start = i * chunkSize
+          const end = start + chunkSize
+          const chunk = faviconsToImport.slice(start, end)
+          await db.favicons.bulkPut(chunk)
         }
+      }
 
-        if (data.cards && data.cards.length > 0) {
-          const numChunks = Math.ceil(data.cards.length / chunkSize)
-          for (let i = 0; i < numChunks; i++) {
-            const start = i * chunkSize
-            const end = start + chunkSize
-            const chunk = data.cards.slice(start, end)
-            await db.cards.bulkPut(chunk)
-          }
+      if (data.cards && data.cards.length > 0) {
+        const numChunks = Math.ceil(data.cards.length / chunkSize)
+        for (let i = 0; i < numChunks; i++) {
+          const start = i * chunkSize
+          const end = start + chunkSize
+          const chunk = data.cards.slice(start, end)
+          await db.cards.bulkPut(chunk)
         }
-      })
-    } catch (error) {
-      console.error("Data import failed:", error)
-    }
+      }
+    })
   }
 
   async importFromToby(lists: CollectionWithCards[]) {

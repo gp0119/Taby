@@ -9,9 +9,8 @@ import {
   LOCAL_LAST_DOWNLOAD_TIME,
   REMOTE_LAST_UPDATE_TIME,
 } from "@/utils/constants.ts"
-import { EntityTable } from "dexie"
 
-type TableName = "spaces" | "collections" | "labels" | "cards" | "favicons"
+const DIRTY_KEY = "lastModifiedTime"
 
 class SyncManager {
   private static instance: SyncManager
@@ -21,15 +20,32 @@ class SyncManager {
   private isUploading = false
   private autoUploadTimer: ReturnType<typeof setTimeout> | null = null
 
-  // 从 localStorage 读取 modifiedTables
-  get modifiedTables(): Set<TableName> {
-    const stored = localStorage.getItem("modifiedTables")
-    return new Set(stored ? JSON.parse(stored) : [])
+  // 是否有未上传的修改。dirty 标记复用 lastModifiedTime：
+  // - markDirty() 会写入一个单调递增的值（毫秒级时间戳；同毫秒内会 +1 保证递增）
+  // - uploadImmediate 在上传前快照该值，上传成功后只在值未变时才清除，
+  //   这样可以避免“上传期间的新修改”被误清造成 lost-update
+  isDirty(): boolean {
+    return localStorage.getItem(DIRTY_KEY) !== null
   }
 
-  // 写入 modifiedTables 到 localStorage
-  set modifiedTables(value: Set<TableName>) {
-    localStorage.setItem("modifiedTables", JSON.stringify([...value]))
+  // 获取当前 dirty token；不存在时返回 null
+  private getDirtyToken(): string | null {
+    return localStorage.getItem(DIRTY_KEY)
+  }
+
+  // 标记本地有未上传的修改
+  markDirty() {
+    const cur = Number(localStorage.getItem(DIRTY_KEY) ?? 0)
+    const next = Math.max(cur + 1, Date.now())
+    localStorage.setItem(DIRTY_KEY, String(next))
+  }
+
+  // 上传成功后调用：仅当 dirty token 没被新修改改动时清除
+  private clearDirtyIfUnchanged(token: string | null) {
+    if (token === null) return
+    if (localStorage.getItem(DIRTY_KEY) === token) {
+      localStorage.removeItem(DIRTY_KEY)
+    }
   }
 
   constructor() {
@@ -40,7 +56,7 @@ class SyncManager {
     )
 
     // 设置数据修改回调
-    dataManager.setOnModify((table: TableName) => this.triggerUpload(table))
+    dataManager.setOnModify(() => this.triggerUpload())
 
     // 启动异步初始化
     this.initPromise = this.initialize()
@@ -82,61 +98,34 @@ class SyncManager {
     const spaceCount = await db.spaces.count()
     if (spaceCount > 0) return
     await this.createDefaultSpace()
-    this.clearModifiedTables()
+    // 默认数据不算用户修改，清掉 dirty 标记避免误上传
+    localStorage.removeItem(DIRTY_KEY)
   }
 
   async checkDataIntegrity(): Promise<boolean> {
     try {
-      const [spaceCount, collectionCount, cardCount] = await Promise.all([
-        db.spaces.count(),
-        db.collections.count(),
-        db.cards.count(),
-      ])
+      const spaceCount = await db.spaces.count()
 
-      const isEmptyOrDefault =
-        spaceCount === 0 ||
-        (spaceCount === 1 && collectionCount === 0 && cardCount === 0)
-
-      if (isEmptyOrDefault) {
+      // 仅当本地“真的空”（spaces=0）且没有任何待上传的本地修改时，
+      // 才尝试从远端恢复。1 space + 0 collections 是合法状态（用户刚建/清空）。
+      if (spaceCount === 0 && !this.isDirty()) {
         const { accessToken, gistId } = await this.getToken()
 
         if (accessToken && gistId) {
-          console.warn("检测到数据丢失，从远程恢复...")
-          this.clearModifiedTables()
-          await this.triggerDownload()
-          return true
+          console.warn("检测到本地数据为空，尝试从远程恢复...")
+          try {
+            await this.triggerDownload()
+            return true
+          } catch (err) {
+            // 远端也是空 / 无效 → 不视为恢复成功，让上层走 initializeDefaultData
+            console.warn("远程恢复失败，回退到默认初始化:", err)
+          }
         }
       }
     } catch (error) {
       console.error("数据完整性检查失败:", error)
     }
     return false
-  }
-
-  // 添加修改的表（支持单个或数组）
-  addModifiedTable(tableNames: TableName | TableName[]) {
-    const current = this.modifiedTables
-    const names = Array.isArray(tableNames) ? tableNames : [tableNames]
-    names.forEach((name) => current.add(name))
-    this.modifiedTables = current
-    localStorage.setItem("lastModifiedTime", Date.now() + "")
-  }
-
-  clearModifiedTables() {
-    localStorage.removeItem("modifiedTables")
-    localStorage.removeItem("lastModifiedTime")
-  }
-
-  // 获取修改的表数据
-  private async getModifiedData(): Promise<Partial<SyncData>> {
-    const modifiedData: Partial<SyncData> = {}
-    for (const tableName of this.modifiedTables) {
-      const table = db[tableName as keyof typeof db]
-      modifiedData[tableName as keyof SyncData] = await (
-        table as EntityTable<any, any>
-      ).toArray()
-    }
-    return modifiedData
   }
 
   getToken = async (): Promise<SyncTokenData> => {
@@ -163,47 +152,36 @@ class SyncManager {
     )
   }
 
-  // 立即上传修改的数据
-  uploadImmediate = async (): Promise<string | undefined> => {
+  // 全量上传当前所有表数据。
+  // force=true 时即使没有 dirty 标记也会强制上传（用于设置页“上传”按钮）。
+  uploadImmediate = async (
+    force: boolean = false,
+  ): Promise<string | undefined> => {
     if (this.isUploading) return
     this.isUploading = true
     try {
-      const { accessToken, gistId } = await this.getToken()
+      const { accessToken } = await this.getToken()
       if (!accessToken) return
-      if (this.modifiedTables.size === 0) return
 
-      // 有 gistId 时才检查是否为空数据（防止覆盖远程数据）
-      if (gistId) {
-        const [spaceCount, collectionCount, cardCount] = await Promise.all([
-          db.spaces.count(),
-          db.collections.count(),
-          db.cards.count(),
-        ])
+      const dirtyToken = this.getDirtyToken()
+      if (!force && dirtyToken === null) return
 
-        if (spaceCount <= 1 && collectionCount === 0 && cardCount === 0) {
-          console.warn("检测到疑似默认空数据，不上传。尝试从远程下载...")
-          await this.triggerDownload()
-          return
-        }
-      }
-
-      const data = await this.getModifiedData()
-      if (!data || Object.keys(data).length === 0) return
-
+      const data = await dataManager.getUploadData()
       const newGistId = await GistManager.uploadData(data)
       const now = Date.now()
       await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
-      localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, now + "")
-      this.clearModifiedTables()
+      localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(now))
+      // 仅当上传期间没有新的修改时才清除 dirty 标记
+      this.clearDirtyIfUnchanged(dirtyToken)
       return newGistId
     } finally {
       this.isUploading = false
     }
   }
 
-  // 供 dataManager 调用：标记修改的表并触发延迟上传
-  triggerUpload = (tableName: TableName) => {
-    this.addModifiedTable(tableName)
+  // 供 dataManager 调用：标记 dirty 并触发延迟上传
+  triggerUpload = () => {
+    this.markDirty()
     // 清除 autoUpload 的定时器，由 uploadDebounce 接管
     if (this.autoUploadTimer) {
       clearTimeout(this.autoUploadTimer)
@@ -212,24 +190,30 @@ class SyncManager {
     this.uploadDebounce()
   }
 
-  // 手动上传全部数据（用于设置页面的"上传"按钮）
+  // 手动上传全部数据（用于设置页面的"上传"按钮），强制上传。
   uploadAll = async (): Promise<string | undefined> => {
-    const allTables: TableName[] = [
-      "spaces",
-      "collections",
-      "labels",
-      "cards",
-      "favicons",
-    ]
-    allTables.forEach((t) => this.addModifiedTable(t))
-    return await this.uploadImmediate()
+    return await this.uploadImmediate(true)
   }
 
-  triggerDownload = async () => {
+  // allowEmpty: 用户在 UI 中显式确认覆盖时（例如同步对话框、版本回滚）才允许传 true，
+  // 用 empty 远端数据覆盖本地。所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
+  triggerDownload = async (
+    options: { allowEmpty?: boolean } = {},
+  ): Promise<SyncData> => {
+    const { allowEmpty = false } = options
     const data = await GistManager.downloadAll()
+
+    const isRemoteEmpty = !data?.spaces || data.spaces.length === 0
+    if (isRemoteEmpty && !allowEmpty) {
+      throw new Error(
+        "Remote data is empty or invalid; aborting download to protect local data.",
+      )
+    }
+
     await dataManager.importData(data)
-    this.clearModifiedTables()
-    localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, Date.now() + "")
+    // 下载覆盖后本地不再有未上传的修改
+    localStorage.removeItem(DIRTY_KEY)
+    localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
     return data
   }
 
@@ -271,24 +255,19 @@ class SyncManager {
     const { accessToken, gistId } = await this.getToken()
     if (!accessToken || !gistId) return
 
-    if (this.modifiedTables.size > 0) {
-      const lastModifiedTime = localStorage.getItem("lastModifiedTime")
-      if (!lastModifiedTime) return
+    const dirtyToken = this.getDirtyToken()
+    if (dirtyToken === null) return
 
-      const elapsed = Date.now() - Number(lastModifiedTime)
-      if (elapsed > this.SYNC_INTERVAL) {
-        await this.uploadImmediate()
-      } else {
-        // 计算剩余时间，设置定时上传
-        if (this.autoUploadTimer) {
-          clearTimeout(this.autoUploadTimer)
-        }
-        const remaining = this.SYNC_INTERVAL - elapsed
-        this.autoUploadTimer = setTimeout(
-          () => this.uploadImmediate(),
-          remaining,
-        )
+    const elapsed = Date.now() - Number(dirtyToken)
+    if (elapsed > this.SYNC_INTERVAL) {
+      await this.uploadImmediate()
+    } else {
+      // 计算剩余时间，设置定时上传
+      if (this.autoUploadTimer) {
+        clearTimeout(this.autoUploadTimer)
       }
+      const remaining = this.SYNC_INTERVAL - elapsed
+      this.autoUploadTimer = setTimeout(() => this.uploadImmediate(), remaining)
     }
   }
 }
