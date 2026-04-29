@@ -15,7 +15,6 @@
           :active="active"
           :data-index="index"
           :data-active="active"
-          :size-dependencies="[item.cards.length]"
           class="py-2 pl-4 pr-2"
         >
           <CollectionCollapse :collection="item">
