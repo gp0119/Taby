@@ -342,6 +342,15 @@ class SyncManager {
     const lastSeen = GistManager.getLastRemoteUpdatedAt()
     const remoteUpdatedAt = meta.updatedAt ?? ""
 
+    if (!lastSeen && remoteUpdatedAt) {
+      const canBootstrapBaseline =
+        await this.canBootstrapMissingRemoteBaseline(remoteUpdatedAt)
+      if (canBootstrapBaseline) {
+        GistManager.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+        return "no-conflict"
+      }
+    }
+
     // lastSeen 缺失通常意味着首次上传 / 元数据被清。保守处理：当远端有数据时也按冲突走，
     // 避免“配了一个共用的 gistId 但本地从没拉过远端”的场景被覆盖。
     const isConflict = lastSeen
@@ -389,6 +398,31 @@ class SyncManager {
     }
     // local / cancel 不在这里改任何持久化状态，由调用方处理后续 PATCH 或保留 dirty
     return decision
+  }
+
+  private async canBootstrapMissingRemoteBaseline(
+    remoteUpdatedAt: string,
+  ): Promise<boolean> {
+    const localDownloadTime = Number(
+      localStorage.getItem(LOCAL_LAST_DOWNLOAD_TIME) || 0,
+    )
+    if (!localDownloadTime) return false
+
+    const remoteUpdatedMs = Date.parse(remoteUpdatedAt)
+    if (!Number.isNaN(remoteUpdatedMs) && remoteUpdatedMs > localDownloadTime) {
+      return false
+    }
+
+    try {
+      const syncStorage = await chrome.storage.sync.get([
+        REMOTE_LAST_UPDATE_TIME,
+      ])
+      const remoteUpdateTime = Number(syncStorage[REMOTE_LAST_UPDATE_TIME] || 0)
+      return !remoteUpdateTime || remoteUpdateTime <= localDownloadTime
+    } catch (err) {
+      console.warn("Failed to read remote update marker:", err)
+      return false
+    }
   }
 
   // 供 dataManager 调用：标记 dirty 并触发延迟上传
