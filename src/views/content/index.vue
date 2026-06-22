@@ -44,6 +44,7 @@ import { useDraggableStore } from "@/store/draggable.ts"
 import { useSortStore } from "@/store/sort.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
 import { useTagsStore } from "@/store/tags.ts"
+import { useSettingStore } from "@/store/setting.ts"
 import CardsWrapper from "@/views/content/components/cards-wrapper.vue"
 import TitleDragable from "@/views/content/components/title-draggable.vue"
 import { DynamicScroller, DynamicScrollerItem } from "vue-virtual-scroller"
@@ -61,6 +62,7 @@ const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
 const sortStore = useSortStore()
 const draggableStore = useDraggableStore()
+const settingStore = useSettingStore()
 
 const { loading } = inject("loading", {
   loading: false,
@@ -162,6 +164,7 @@ function getScrollPosition(scroller: HTMLElement): StoredScrollPosition {
 }
 
 function handleScroll(event: Event) {
+  if (!settingStore.getSetting("rememberScrollPosition")) return
   const target = event.target as HTMLElement
   saveScrollPosition(spacesStore.activeId, getScrollPosition(target))
 }
@@ -176,9 +179,20 @@ watch(
     () => spacesStore.activeId,
     () => collections.value.length,
     () => draggableStore.draggable,
+    () => settingStore.getSetting("rememberScrollPosition"),
   ],
-  async ([isLoading, spaceId, collectionCount, isDraggable]) => {
+  async ([
+    isLoading,
+    spaceId,
+    collectionCount,
+    isDraggable,
+    rememberScrollPosition,
+  ]) => {
     if (isLoading || isDraggable || !collectionCount) return
+    if (!rememberScrollPosition) {
+      restoredSpaceId = null
+      return
+    }
     if (restoredSpaceId === spaceId) return
 
     await nextTick()
@@ -233,8 +247,21 @@ watch(
   },
 )
 
+watch(
+  () => settingStore.getSetting("rememberScrollPosition"),
+  (enabled) => {
+    restoredSpaceId = null
+    if (!enabled) {
+      saveScrollPosition.cancel()
+      scrollPositions.value = {}
+    }
+  },
+)
+
 onBeforeUnmount(() => {
-  saveScrollPosition.flush()
+  if (settingStore.getSetting("rememberScrollPosition")) {
+    saveScrollPosition.flush()
+  }
   saveScrollPosition.cancel()
 })
 </script>

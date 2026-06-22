@@ -81,6 +81,7 @@ export type iSetting = {
   language: "zh-CN" | "en-US"
   theme: "light" | "dark"
   openInNewWindow: boolean
+  rememberScrollPosition: boolean
   hideRightClickMenu: boolean
   saveAfterOperationTime: number
   openCardsInGroup: boolean
