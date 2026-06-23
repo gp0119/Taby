@@ -4,6 +4,7 @@
     <DynamicScroller
       v-else-if="collections?.length"
       ref="scrollerRef"
+      :key="spacesStore.activeId"
       :items="collections"
       :min-item-size="160"
       class="dynamic-scroller-optimize scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-60px)] overflow-y-auto"
