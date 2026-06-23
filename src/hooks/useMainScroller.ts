@@ -6,6 +6,7 @@ import { debounce } from "lodash-es"
 import {
   nextTick,
   onBeforeUnmount,
+  onMounted,
   unref,
   watch,
   type ComputedRef,
@@ -41,14 +42,32 @@ interface UseMainScrollerOptions {
 export function useMainScroller(options: UseMainScrollerOptions) {
   const spacesStore = useSpacesStore()
   const settingStore = useSettingStore()
+  let isActivePage = document.visibilityState === "visible"
   const scrollPositions = useLocalStorage<ScrollPositions>(
     "mainScrollPositions",
     {},
   )
   let restoredSpaceId: number | null = null
 
+  async function refreshActivePageState() {
+    const currentTab = await chrome.tabs.getCurrent()
+    if (!currentTab) {
+      isActivePage = false
+      return
+    }
+    const currentWindow = currentTab.windowId
+      ? await chrome.windows.get(currentTab.windowId)
+      : null
+    isActivePage =
+      document.visibilityState === "visible" &&
+      document.hasFocus() &&
+      currentTab.active === true &&
+      currentWindow?.focused === true
+  }
+
   const saveScrollPosition = debounce(
     (spaceId: number, position: StoredScrollPosition) => {
+      if (!isActivePage) return
       scrollPositions.value[spaceId] = position
     },
     200,
@@ -79,6 +98,7 @@ export function useMainScroller(options: UseMainScrollerOptions) {
 
   function handleScroll(event: Event) {
     if (!settingStore.getSetting("rememberScrollPosition")) return
+    if (!isActivePage) return
     const target = event.target as HTMLElement
     saveScrollPosition(spacesStore.activeId, getScrollPosition(target))
   }
@@ -156,7 +176,9 @@ export function useMainScroller(options: UseMainScrollerOptions) {
   watch(
     () => spacesStore.activeId,
     () => {
-      saveScrollPosition.flush()
+      if (isActivePage) {
+        saveScrollPosition.flush()
+      }
       restoredSpaceId = null
     },
   )
@@ -172,11 +194,25 @@ export function useMainScroller(options: UseMainScrollerOptions) {
     },
   )
 
+  onMounted(() => {
+    refreshActivePageState()
+    document.addEventListener("visibilitychange", refreshActivePageState)
+    window.addEventListener("focus", refreshActivePageState)
+    window.addEventListener("blur", refreshActivePageState)
+    chrome.tabs.onActivated.addListener(refreshActivePageState)
+    chrome.windows.onFocusChanged.addListener(refreshActivePageState)
+  })
+
   onBeforeUnmount(() => {
-    if (settingStore.getSetting("rememberScrollPosition")) {
+    if (settingStore.getSetting("rememberScrollPosition") && isActivePage) {
       saveScrollPosition.flush()
     }
     saveScrollPosition.cancel()
+    document.removeEventListener("visibilitychange", refreshActivePageState)
+    window.removeEventListener("focus", refreshActivePageState)
+    window.removeEventListener("blur", refreshActivePageState)
+    chrome.tabs.onActivated.removeListener(refreshActivePageState)
+    chrome.windows.onFocusChanged.removeListener(refreshActivePageState)
   })
 
   return {
