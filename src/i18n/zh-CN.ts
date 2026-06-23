@@ -114,6 +114,7 @@ export default {
   general: "通用",
   data: "数据",
   "open-in-new-window": "在新窗口打开",
+  "remember-scroll-position": "记住浏览位置",
   "open-cards-in-group": "打开卡片时自动分组",
   "save-after-operation-time": "操作后多久保存",
   "hide-right-click-menu": "隐藏右键菜单",

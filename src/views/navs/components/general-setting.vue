@@ -1,9 +1,10 @@
 <template>
   <div class="flex flex-col gap-y-4">
-    <!-- 新窗口设置 -->
+    <!-- 开关设置 -->
     <div
       class="rounded-lg border border-border-color bg-setting-card-color py-2"
     >
+      <!-- 新窗口设置 -->
       <ItemWrapper
         :icon="Launch"
         :title="ft('open-in-new-window')"
@@ -14,12 +15,9 @@
           @update-value="settingStore.setSetting('openInNewWindow', $event)"
         />
       </ItemWrapper>
-    </div>
-    <!-- 按组打开 -->
-    <div
-      class="rounded-lg border border-border-color bg-setting-card-color py-2"
-    >
+      <!-- 按组打开 -->
       <ItemWrapper
+        class="border-t border-border-color"
         :icon="GroupResource"
         :title="ft('open-cards-in-group')"
         :hover="false"
@@ -27,6 +25,32 @@
         <n-switch
           :value="settingStore.getSetting('openCardsInGroup')"
           @update-value="settingStore.setSetting('openCardsInGroup', $event)"
+        />
+      </ItemWrapper>
+      <!-- 记住浏览位置 -->
+      <ItemWrapper
+        class="border-t border-border-color"
+        :icon="AutoScroll"
+        :title="ft('remember-scroll-position')"
+        :hover="false"
+      >
+        <n-switch
+          :value="settingStore.getSetting('rememberScrollPosition')"
+          @update-value="
+            settingStore.setSetting('rememberScrollPosition', $event)
+          "
+        />
+      </ItemWrapper>
+      <!-- 隐藏右键菜单 -->
+      <ItemWrapper
+        class="border-t border-border-color"
+        :icon="AlignBoxMiddleCenter"
+        :title="ft('hide-right-click-menu')"
+        :hover="false"
+      >
+        <n-switch
+          :value="settingStore.getSetting('hideRightClickMenu')"
+          @update-value="settingStore.setSetting('hideRightClickMenu', $event)"
         />
       </ItemWrapper>
     </div>
@@ -56,21 +80,6 @@
           "
         />
       </div>
-    </div>
-    <!-- 隐藏右键菜单 -->
-    <div
-      class="rounded-lg border border-border-color bg-setting-card-color py-2"
-    >
-      <ItemWrapper
-        :icon="AlignBoxMiddleCenter"
-        :title="ft('hide-right-click-menu')"
-        :hover="false"
-      >
-        <n-switch
-          :value="settingStore.getSetting('hideRightClickMenu')"
-          @update-value="settingStore.setSetting('hideRightClickMenu', $event)"
-        />
-      </ItemWrapper>
     </div>
     <!-- 快捷键设置 -->
     <div
@@ -115,6 +124,7 @@ import {
   AlignBoxMiddleCenter,
   GroupResource,
   Keyboard,
+  AutoScroll,
 } from "@vicons/carbon"
 import ItemWrapper from "./item-wrapper.vue"
 import { useSettingStore } from "@/store/setting"

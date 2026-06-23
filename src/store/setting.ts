@@ -11,6 +11,7 @@ export const useSettingStore = defineStore("Setting", () => {
     language: "en-US",
     theme: "light",
     openInNewWindow: true,
+    rememberScrollPosition: false,
     openCardsInGroup: false,
     hideRightClickMenu: false,
     saveAfterOperationTime: 5,

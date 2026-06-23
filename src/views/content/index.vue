@@ -3,10 +3,13 @@
     <SkeletonContent v-if="loading" />
     <DynamicScroller
       v-else-if="collections?.length"
+      ref="scrollerRef"
+      :key="spacesStore.activeId"
       :items="collections"
       :min-item-size="160"
       class="dynamic-scroller-optimize scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-60px)] overflow-y-auto"
       key-field="id"
+      @scroll.passive="handleScroll"
     >
       <template #default="{ item, index, active }">
         <DynamicScrollerItem
@@ -52,6 +55,10 @@ import BatchCollectionAction from "./components/batch-collection-action.vue"
 import SkeletonContent from "@/components/skeleton-content.vue"
 import { Collection } from "@/type"
 import EmptySpace from "@/components/empty-space.vue"
+import {
+  useMainScroller,
+  type DynamicScrollerInstance,
+} from "@/hooks/useMainScroller"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
@@ -101,6 +108,15 @@ function sortCollections(a: Collection, b: Collection) {
       return 0
   }
 }
+
+const scrollerRef = ref<DynamicScrollerInstance | null>(null)
+
+const { handleScroll } = useMainScroller({
+  collections,
+  draggable: computed(() => draggableStore.draggable),
+  loading,
+  scrollerRef,
+})
 </script>
 
 <style scoped>

@@ -121,6 +121,7 @@ export default {
   general: "General",
   data: "Data",
   "open-in-new-window": "Open in New Window",
+  "remember-scroll-position": "Remember Scroll Position",
   "open-cards-in-group": "Open Cards in Group",
   "save-after-operation-time": "Save delay after operation",
   "hide-right-click-menu": "Hide Right Click Menu",
