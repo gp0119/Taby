@@ -37,14 +37,7 @@
           }"
         >
           <template #icon>
-            <favicon
-              :child="child"
-              :container-class="
-                type === 'card'
-                  ? '.dynamic-scroller-optimize'
-                  : '.right-aside-area'
-              "
-            />
+            <favicon :child="child" />
           </template>
         </n-button>
 

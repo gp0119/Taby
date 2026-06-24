@@ -3,9 +3,6 @@
     :src="innerFavicon"
     :lazy="lazyload"
     class="card-avatar favicon h-5 w-5"
-    :intersection-observer-options="
-      lazyload ? { root: props.containerClass } : undefined
-    "
   >
     <template #placeholder>
       <div class="flex-center favicon h-5 w-5">
@@ -27,7 +24,6 @@ import { DocumentUnknown } from "@vicons/carbon"
 const props = withDefaults(
   defineProps<{
     child: Card
-    containerClass?: string
     lazyload?: boolean
   }>(),
   {
