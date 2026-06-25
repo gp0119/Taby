@@ -1,22 +1,20 @@
 import { useLocalStorage } from "@vueuse/core"
-import { onBeforeUnmount, onMounted, watch, type Ref } from "vue"
+import { onBeforeUnmount, onMounted, unref, watch, type Ref } from "vue"
+import type { ComponentPublicInstance, ShallowUnwrapRef } from "vue"
+import type {
+  CacheSnapshot,
+  DynamicScrollerExposed,
+} from "vue-virtual-scroller"
+import type { Collection } from "@/type"
 
-// vue-virtual-scroller 暴露的尺寸数据（按 item id 记录测量到的高度）。
-export interface ScrollerSizeData {
-  keys: (string | number)[]
-  sizes: (number | null)[]
-}
+export type MainScrollerRef = ShallowUnwrapRef<
+  DynamicScrollerExposed<Collection>
+> &
+  Pick<ComponentPublicInstance, "$el">
 
 // 持久化的快照额外带上测量时的容器宽度，用于跨宽度失效。
-export interface ScrollerSizeSnapshot extends ScrollerSizeData {
+export interface ScrollerSizeSnapshot extends CacheSnapshot {
   width: number
-}
-
-// scroller 实例上本 hook 用到的最小接口。
-export interface SizeCacheScroller {
-  $el?: HTMLElement
-  cacheSnapshot?: ScrollerSizeData
-  restoreCache: (snapshot: ScrollerSizeData) => void
 }
 
 interface SizeCaches {
@@ -24,14 +22,14 @@ interface SizeCaches {
 }
 
 export function useScrollerSizeCache(
-  scrollerRef: Ref<SizeCacheScroller | null>,
+  scrollerRef: Ref<MainScrollerRef | null>,
   getActiveSpaceId: () => number,
 ) {
   const sizeCaches = useLocalStorage<SizeCaches>("mainScrollSizeCaches", {})
 
   function capture(spaceId: number) {
     const scroller = scrollerRef.value
-    const snapshot = scroller?.cacheSnapshot
+    const snapshot = unref(scroller?.cacheSnapshot)
     const width = scroller?.$el?.clientWidth
     if (snapshot?.keys?.length && width) {
       // console.log("capture size", width)

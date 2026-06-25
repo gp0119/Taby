@@ -58,12 +58,9 @@ import { Collection } from "@/type"
 import EmptySpace from "@/components/empty-space.vue"
 import {
   useScrollerSizeCache,
-  type SizeCacheScroller,
+  type MainScrollerRef,
 } from "@/hooks/useScrollerSizeCache"
-import {
-  useScrollPosition,
-  type ScrollPositionScroller,
-} from "@/hooks/useScrollPosition"
+import { useScrollPosition } from "@/hooks/useScrollPosition"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
@@ -114,9 +111,7 @@ function sortCollections(a: Collection, b: Collection) {
   }
 }
 
-const scrollerRef = ref<(SizeCacheScroller & ScrollPositionScroller) | null>(
-  null,
-)
+const scrollerRef = ref<MainScrollerRef | null>(null)
 
 // 先恢复 item 高度缓存，再恢复滚动偏移：两个 hook 的挂载 watch 按调用顺序触发，
 // 保证 scrollToPosition 时高度已就位，落点才准确。

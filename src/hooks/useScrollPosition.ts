@@ -3,18 +3,13 @@ import { useSpacesStore } from "@/store/spaces"
 import { useLocalStorage } from "@vueuse/core"
 import { debounce } from "lodash-es"
 import { onBeforeUnmount, watch, type Ref } from "vue"
-
-export interface ScrollPositionScroller {
-  scrollToPosition: (position: number) => void
-}
+import type { MainScrollerRef } from "@/hooks/useScrollerSizeCache"
 
 interface ScrollOffsets {
   [spaceId: number]: number
 }
 
-export function useScrollPosition(
-  scrollerRef: Ref<ScrollPositionScroller | null>,
-) {
+export function useScrollPosition(scrollerRef: Ref<MainScrollerRef | null>) {
   const spacesStore = useSpacesStore()
   const settingStore = useSettingStore()
   const offsets = useLocalStorage<ScrollOffsets>("mainScrollPositions", {})
