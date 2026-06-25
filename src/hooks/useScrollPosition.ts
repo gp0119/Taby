@@ -15,30 +15,37 @@ export function useScrollPosition(scrollerRef: Ref<MainScrollerRef | null>) {
   const offsets = useLocalStorage<ScrollOffsets>("mainScrollPositions", {})
 
   const save = debounce((spaceId: number, scrollTop: number) => {
-    if (spaceId !== spacesStore.activeId) return
-    // console.log("save scrollTop", scrollTop)
+    console.log("save scrollTop", scrollTop)
     offsets.value[spaceId] = scrollTop
   }, 200)
 
   function handleScroll(event: Event) {
     if (!settingStore.getSetting("rememberScrollPosition")) return
+    if (document.visibilityState !== "visible") return
     const target = event.target as HTMLElement
     if (Number(target.dataset.spaceId) !== spacesStore.activeId) return
     save(spacesStore.activeId, target.scrollTop)
   }
 
+  async function restore() {
+    const scroller = scrollerRef.value
+    if (!scroller) return
+    if (!settingStore.getSetting("rememberScrollPosition")) return
+    const saved = offsets.value[spacesStore.activeId]
+    await nextTick()
+    console.log("scrollToPosition", saved)
+    scroller.scrollToPosition(saved)
+  }
+
   // scroller 重建后（ref 从 null 变为新实例）回填当前 space 的滚动偏移。
-  watch(
-    () => scrollerRef.value,
-    async (scroller) => {
-      if (!scroller) return
-      if (!settingStore.getSetting("rememberScrollPosition")) return
-      const saved = offsets.value[spacesStore.activeId]
-      await nextTick()
-      // console.log("scrollToPosition", saved)
-      scroller.scrollToPosition(saved)
-    },
-  )
+  watch(() => scrollerRef.value, restore)
+
+  // tab 从后台切回前台时，其它 tab 可能已更新了偏移，重新对齐一次。
+  function handleVisibilityChange() {
+    if (document.visibilityState !== "visible") return
+    restore()
+  }
+  document.addEventListener("visibilitychange", handleVisibilityChange)
 
   // 切换 space 前把待写入的偏移落盘。
   watch(
@@ -60,6 +67,7 @@ export function useScrollPosition(scrollerRef: Ref<MainScrollerRef | null>) {
   onBeforeUnmount(() => {
     save.flush()
     save.cancel()
+    document.removeEventListener("visibilitychange", handleVisibilityChange)
   })
 
   return { handleScroll }
