@@ -115,16 +115,24 @@ const debounceUpdateCardFavicon = debounce(
 )
 
 function onHandleNoFavicon(tabId: number, cardId: number, activeId: number) {
-  chrome.tabs.onUpdated.addListener(
-    async function listener(updatedTabId, changeInfo) {
-      if (updatedTabId === tabId && changeInfo.favIconUrl) {
-        const favicon = changeInfo.favIconUrl
-        if (!favicon) return
-        debounceUpdateCardFavicon(cardId, favicon, activeId)
-        chrome.tabs.onUpdated.removeListener(listener)
-      }
-    },
-  )
+  let timer: ReturnType<typeof setTimeout>
+  function listener(
+    updatedTabId: number,
+    changeInfo: chrome.tabs.OnUpdatedInfo,
+  ) {
+    if (updatedTabId === tabId && changeInfo.favIconUrl) {
+      const favicon = changeInfo.favIconUrl
+      if (!favicon) return
+      debounceUpdateCardFavicon(cardId, favicon, activeId)
+      cleanup()
+    }
+  }
+  function cleanup() {
+    clearTimeout(timer)
+    chrome.tabs.onUpdated.removeListener(listener)
+  }
+  chrome.tabs.onUpdated.addListener(listener)
+  timer = setTimeout(cleanup, 3000)
 }
 
 async function onDeleteCard(card: iCard) {
