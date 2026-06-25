@@ -27,7 +27,7 @@ const props = withDefaults(
     lazyload?: boolean
   }>(),
   {
-    lazyload: true,
+    lazyload: false,
   },
 )
 

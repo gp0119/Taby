@@ -15,7 +15,6 @@ export function useScrollPosition(scrollerRef: Ref<MainScrollerRef | null>) {
   const offsets = useLocalStorage<ScrollOffsets>("mainScrollPositions", {})
 
   const save = debounce((spaceId: number, scrollTop: number) => {
-    console.log("save scrollTop", scrollTop)
     offsets.value[spaceId] = scrollTop
   }, 200)
 
@@ -33,7 +32,6 @@ export function useScrollPosition(scrollerRef: Ref<MainScrollerRef | null>) {
     if (!settingStore.getSetting("rememberScrollPosition")) return
     const saved = offsets.value[spacesStore.activeId]
     await nextTick()
-    console.log("scrollToPosition", saved)
     scroller.scrollToPosition(saved)
   }
 

@@ -1,11 +1,12 @@
 <template>
+  <slot v-if="disabled" />
   <n-tooltip
+    v-else
     v-bind="$attrs"
     :keep-alive-on-hover="false"
     :trigger="trigger"
     :show-arrow="false"
     :placement="placement"
-    :disabled="disabled"
     content-class="!p-0"
   >
     <template #trigger>

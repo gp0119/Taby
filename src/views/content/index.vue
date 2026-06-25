@@ -122,7 +122,5 @@ const { handleScroll } = useScrollPosition(scrollerRef)
 <style scoped>
 .dynamic-scroller-optimize :deep(.vue-recycle-scroller__item-view) {
   overflow: visible !important;
-  transform: translateZ(0);
-  will-change: transform;
 }
 </style>
