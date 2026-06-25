@@ -5,6 +5,7 @@
       v-else-if="collections?.length"
       ref="scrollerRef"
       :key="spacesStore.activeId"
+      :data-space-id="spacesStore.activeId"
       :items="collections"
       :min-item-size="160"
       class="dynamic-scroller-optimize scrollbar-thin scrollbar-gutter-stable h-[calc(100vh-60px)] overflow-y-auto"
@@ -56,9 +57,13 @@ import SkeletonContent from "@/components/skeleton-content.vue"
 import { Collection } from "@/type"
 import EmptySpace from "@/components/empty-space.vue"
 import {
-  useMainScroller,
-  type DynamicScrollerInstance,
-} from "@/hooks/useMainScroller"
+  useScrollerSizeCache,
+  type SizeCacheScroller,
+} from "@/hooks/useScrollerSizeCache"
+import {
+  useScrollPosition,
+  type ScrollPositionScroller,
+} from "@/hooks/useScrollPosition"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
@@ -109,14 +114,14 @@ function sortCollections(a: Collection, b: Collection) {
   }
 }
 
-const scrollerRef = ref<DynamicScrollerInstance | null>(null)
+const scrollerRef = ref<(SizeCacheScroller & ScrollPositionScroller) | null>(
+  null,
+)
 
-const { handleScroll } = useMainScroller({
-  collections,
-  draggable: computed(() => draggableStore.draggable),
-  loading,
-  scrollerRef,
-})
+// 先恢复 item 高度缓存，再恢复滚动偏移：两个 hook 的挂载 watch 按调用顺序触发，
+// 保证 scrollToPosition 时高度已就位，落点才准确。
+useScrollerSizeCache(scrollerRef, () => spacesStore.activeId)
+const { handleScroll } = useScrollPosition(scrollerRef)
 </script>
 
 <style scoped>
