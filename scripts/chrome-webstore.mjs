@@ -71,14 +71,10 @@ try {
     fail(`Upload failed. State: ${uploadState}`)
   }
 
-  if (args.publish) {
-    const publish = await publishItem(token)
+  const publish = await publishItem(token)
 
-    console.log("Publish response:")
-    console.log(JSON.stringify(publish, null, 2))
-  } else {
-    console.log("Uploaded only. Run with --publish to submit it for review.")
-  }
+  console.log("Publish response:")
+  console.log(JSON.stringify(publish, null, 2))
 } catch (error) {
   fail(error.message)
 }
@@ -130,7 +126,6 @@ function parseArgs(argv) {
   const parsed = {
     blockOnWarnings: false,
     help: false,
-    publish: false,
     skipReview: false,
     staged: false,
     zip: "",
@@ -141,10 +136,7 @@ function parseArgs(argv) {
       continue
     } else if (arg === "--help" || arg === "-h") {
       parsed.help = true
-    } else if (arg === "--publish") {
-      parsed.publish = true
     } else if (arg === "--staged") {
-      parsed.publish = true
       parsed.staged = true
     } else if (arg === "--skip-review") {
       parsed.skipReview = true
@@ -273,8 +265,7 @@ function printHelp() {
   console.log(`
 Usage:
   pnpm run chrome:upload
-  pnpm run chrome:publish
-  node scripts/chrome-webstore.mjs --zip=release/1.3.7.zip --publish
+  node scripts/chrome-webstore.mjs --zip=release/${pkg.version}.zip
 
 Required .env values:
   CLIENT_ID
@@ -287,7 +278,6 @@ Optional .env values:
   ZIP_FILE
 
 Options:
-  --publish            Submit the uploaded package for review.
   --staged             Submit for review, then stage instead of immediate publish after approval.
   --skip-review        Ask Chrome Web Store to skip review if the item qualifies.
   --block-on-warnings  Fail publish if validation returns warnings.

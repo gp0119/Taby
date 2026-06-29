@@ -1,0 +1,131 @@
+name: Chrome Web Store Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chrome-webstore-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+  PNPM_VERSION: "11.7.0"
+
+jobs:
+  build:
+    name: Build extension package
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      zip_name: ${{ steps.version.outputs.zip_name }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check tag version
+        id: version
+        run: |
+          VERSION="$(node -p "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "package.json version ($VERSION) must match tag ${GITHUB_REF_NAME}." >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "zip_name=$VERSION.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Validate package
+        run: |
+          ZIP="release/${{ steps.version.outputs.zip_name }}"
+          MANIFEST="/tmp/taby-manifest.json"
+
+          if [ ! -f "$ZIP" ]; then
+            echo "Expected package not found: $ZIP" >&2
+            exit 1
+          fi
+
+          if ! unzip -Z1 "$ZIP" | grep -qx "manifest.json"; then
+            echo "Package must contain manifest.json at the zip root." >&2
+            exit 1
+          fi
+
+          unzip -p "$ZIP" manifest.json > "$MANIFEST"
+          MANIFEST_VERSION="$(node -p "JSON.parse(require('node:fs').readFileSync('$MANIFEST', 'utf8')).version")"
+
+          if [ "$MANIFEST_VERSION" != "${{ steps.version.outputs.version }}" ]; then
+            echo "manifest.json version ($MANIFEST_VERSION) must match package version ${{ steps.version.outputs.version }}." >&2
+            exit 1
+          fi
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-webstore-${{ steps.version.outputs.version }}
+          path: release/${{ steps.version.outputs.zip_name }}
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish to Chrome Web Store
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: chrome-webstore-production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chrome-webstore-${{ needs.build.outputs.version }}
+          path: release
+
+      - name: Publish package
+        env:
+          CLIENT_ID: ${{ secrets.CHROME_WEBSTORE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_WEBSTORE_REFRESH_TOKEN }}
+          PUBLISHER_ID: ${{ secrets.CHROME_WEBSTORE_PUBLISHER_ID }}
+          EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
+          ZIP_FILE: release/${{ needs.build.outputs.zip_name }}
+        run: |
+          for key in CLIENT_ID CLIENT_SECRET REFRESH_TOKEN PUBLISHER_ID EXTENSION_ID; do
+            if [ -z "${!key}" ]; then
+              echo "Missing GitHub secret mapped to $key." >&2
+              exit 1
+            fi
+          done
+
+          node scripts/chrome-webstore.mjs

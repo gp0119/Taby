@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "chrome:upload": "node scripts/chrome-webstore.mjs",
-    "chrome:publish": "node scripts/chrome-webstore.mjs --publish",
     "preview": "vite preview"
   },
   "dependencies": {
