@@ -2,7 +2,14 @@ import { useSettingStore } from "@/store/setting"
 import { useSpacesStore } from "@/store/spaces"
 import { useLocalStorage } from "@vueuse/core"
 import { debounce } from "lodash-es"
-import { onBeforeUnmount, onMounted, unref, watch, type Ref } from "vue"
+import {
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  unref,
+  watch,
+  type Ref,
+} from "vue"
 import type { ComponentPublicInstance, ShallowUnwrapRef } from "vue"
 import type {
   CacheSnapshot,
@@ -37,6 +44,16 @@ interface SizeCaches {
   [spaceId: number]: ScrollerSizeSnapshot
 }
 
+function nextFrame() {
+  return new Promise<void>((resolve) => {
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(() => resolve())
+      return
+    }
+    setTimeout(resolve)
+  })
+}
+
 export function useScrollPosition(
   scrollerRef: Ref<MainScrollerRef | null>,
   getItems: () => Collection[],
@@ -48,6 +65,8 @@ export function useScrollPosition(
     MAIN_SCROLL_SIZE_CACHES_KEY,
     {},
   )
+  let resizeObserver: ResizeObserver | null = null
+  let observedScrollerWidth = 0
 
   const enabled = () => settingStore.getSetting("rememberScrollPosition")
 
@@ -59,6 +78,75 @@ export function useScrollPosition(
     save.cancel()
     anchors.value = {}
     sizeCaches.value = {}
+  }
+
+  function removeSizeCache(spaceId: number) {
+    if (!(spaceId in sizeCaches.value)) return
+    const nextCaches = { ...sizeCaches.value }
+    delete nextCaches[spaceId]
+    sizeCaches.value = nextCaches
+  }
+
+  function resetCurrentScroller() {
+    const scroller = scrollerRef.value
+    if (!scroller) return
+    scroller.forceUpdate(true)
+    scroller.scrollToPosition(0)
+    const el = scroller.$el as HTMLElement | undefined
+    if (el) el.scrollTop = 0
+  }
+
+  function resetAfterDataReplace() {
+    resetStoredPosition()
+    resetCurrentScroller()
+    void nextTick(async () => {
+      resetCurrentScroller()
+      await nextFrame()
+      resetCurrentScroller()
+    })
+  }
+
+  function captureCurrentAnchor(): ScrollAnchor | null {
+    const scroller = scrollerRef.value
+    const el = scroller?.$el as HTMLElement | undefined
+    if (!scroller || !el) return null
+
+    const scrollerRect = el.getBoundingClientRect()
+    const itemEls = Array.from(el.querySelectorAll<HTMLElement>("[data-index]"))
+    let best: { index: number; offset: number; score: number } | null = null
+
+    for (const itemEl of itemEls) {
+      const index = Number(itemEl.dataset.index)
+      if (!Number.isInteger(index)) continue
+
+      const rect = itemEl.getBoundingClientRect()
+      if (rect.bottom <= scrollerRect.top || rect.top >= scrollerRect.bottom) {
+        continue
+      }
+
+      const score = Math.max(rect.top, scrollerRect.top) - scrollerRect.top
+      if (!best || score < best.score) {
+        best = {
+          index,
+          offset: Math.max(0, scrollerRect.top - rect.top),
+          score,
+        }
+      }
+    }
+
+    if (best) {
+      const item = getItems()[best.index]
+      if (item) return { key: item.id, offset: best.offset }
+    }
+
+    const scrollTop = el.scrollTop
+    const index = scroller.findItemIndex(scrollTop)
+    const item = getItems()[index]
+    if (!item) return null
+    return {
+      key: item.id,
+      offset: scrollTop - scroller.getItemOffset(index),
+    }
   }
 
   function handleScroll(event: Event) {
@@ -84,6 +172,16 @@ export function useScrollPosition(
     const scroller = scrollerRef.value
     const snapshot = unref(scroller?.cacheSnapshot)
     const width = scroller?.$el?.clientWidth
+    if (
+      width &&
+      observedScrollerWidth &&
+      Math.abs(width - observedScrollerWidth) >= 1
+    ) {
+      observedScrollerWidth = width
+      removeSizeCache(spaceId)
+      scroller?.forceUpdate(true)
+      return
+    }
     if (snapshot?.keys?.length && width) {
       sizeCaches.value[spaceId] = {
         width,
@@ -104,10 +202,10 @@ export function useScrollPosition(
   }
 
   // 按锚点把滚动定位回顶部那一项。
-  async function restoreScroll() {
+  async function restoreScroll(spaceId = spacesStore.activeId) {
     const scroller = scrollerRef.value
     if (!scroller) return
-    const anchor = anchors.value[spacesStore.activeId]
+    const anchor = anchors.value[spaceId]
     if (!anchor) return
     const index = getItems().findIndex((item) => item.id === anchor.key)
     if (index === -1) return
@@ -115,12 +213,53 @@ export function useScrollPosition(
     // 避免首帧 scrollHeight 偏小把目标位置裁剪掉。
     await nextTick()
     const el = scroller.$el as HTMLElement
-    for (let i = 0; i < 5; i++) {
+    let stableFrames = 0
+    for (let i = 0; i < 8; i++) {
+      if (spacesStore.activeId !== spaceId || scrollerRef.value !== scroller) {
+        return
+      }
       scroller.scrollToItem(index, { offset: anchor.offset })
-      await new Promise(requestAnimationFrame)
+      await nextFrame()
       const target = scroller.getItemOffset(index) + anchor.offset
-      if (Math.abs(el.scrollTop - target) < 1) break
+      if (Math.abs(el.scrollTop - target) < 1) {
+        stableFrames += 1
+        if (stableFrames >= 2) break
+      } else {
+        stableFrames = 0
+      }
     }
+  }
+
+  function handleScrollerWidthChange() {
+    if (!enabled()) return
+    const scroller = scrollerRef.value
+    if (!scroller) return
+
+    const spaceId = spacesStore.activeId
+    save.flush()
+    const anchor = captureCurrentAnchor()
+    if (anchor) anchors.value[spaceId] = anchor
+    removeSizeCache(spaceId)
+    scroller.forceUpdate(true)
+    void restoreScroll(spaceId)
+  }
+
+  function observeScrollerWidth(scroller: MainScrollerRef | null) {
+    resizeObserver?.disconnect()
+    resizeObserver = null
+    observedScrollerWidth = 0
+
+    const el = scroller?.$el as HTMLElement | undefined
+    if (!el || typeof ResizeObserver === "undefined") return
+
+    observedScrollerWidth = el.clientWidth
+    resizeObserver = new ResizeObserver(() => {
+      const width = el.clientWidth
+      if (!width || Math.abs(width - observedScrollerWidth) < 1) return
+      observedScrollerWidth = width
+      handleScrollerWidthChange()
+    })
+    resizeObserver.observe(el)
   }
 
   // scroller 重建后（ref 从 null 变为新实例）先回填高度缓存、再按锚点定位，
@@ -128,6 +267,7 @@ export function useScrollPosition(
   watch(
     () => scrollerRef.value,
     (scroller) => {
+      observeScrollerWidth(scroller)
       if (!scroller || !enabled()) return
       restoreSize()
       restoreScroll()
@@ -163,11 +303,14 @@ export function useScrollPosition(
     }
   })
 
-  watch(mainScrollPositionResetVersion, resetStoredPosition, { flush: "sync" })
+  watch(mainScrollPositionResetVersion, resetAfterDataReplace, {
+    flush: "sync",
+  })
 
   onBeforeUnmount(() => {
     save.flush()
     save.cancel()
+    resizeObserver?.disconnect()
     document.removeEventListener("visibilitychange", handleVisibilityChange)
     window.removeEventListener("pagehide", captureActive)
   })
