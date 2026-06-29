@@ -17,8 +17,7 @@ import type {
 } from "vue-virtual-scroller"
 import type { Collection } from "@/type"
 import {
-  MAIN_SCROLL_ANCHORS_KEY,
-  MAIN_SCROLL_SIZE_CACHES_KEY,
+  MAIN_SCROLL_POSITION_CACHE_KEY,
   mainScrollPositionResetVersion,
 } from "@/utils/scrollPositionStorage"
 
@@ -32,16 +31,24 @@ interface ScrollAnchor {
   offset: number
 }
 
-interface ScrollAnchors {
-  [spaceId: number]: ScrollAnchor
-}
-
 interface ScrollerSizeSnapshot extends CacheSnapshot {
   width: number
 }
 
-interface SizeCaches {
-  [spaceId: number]: ScrollerSizeSnapshot
+interface ScrollPositionCacheEntry {
+  key?: number
+  offset?: number
+  width?: number
+  keys?: CacheSnapshot["keys"]
+  sizes?: CacheSnapshot["sizes"]
+}
+
+interface ScrollPositionCache {
+  [spaceId: number]: ScrollPositionCacheEntry | undefined
+}
+
+interface RestoreScrollOptions {
+  flushPendingSave?: boolean
 }
 
 function nextFrame() {
@@ -60,10 +67,9 @@ export function useScrollPosition(
 ) {
   const spacesStore = useSpacesStore()
   const settingStore = useSettingStore()
-  const anchors = useLocalStorage<ScrollAnchors>(MAIN_SCROLL_ANCHORS_KEY, {})
-  const sizeCaches = useLocalStorage<SizeCaches>(
-    MAIN_SCROLL_SIZE_CACHES_KEY,
-    {},
+  const scrollCache = useLocalStorage<ScrollPositionCache>(
+    MAIN_SCROLL_POSITION_CACHE_KEY,
+    createScrollPositionCache(),
   )
   let resizeObserver: ResizeObserver | null = null
   let observedScrollerWidth = 0
@@ -73,8 +79,33 @@ export function useScrollPosition(
 
   const enabled = () => settingStore.getSetting("rememberScrollPosition")
 
+  function createScrollPositionCache(): ScrollPositionCache {
+    return {}
+  }
+
+  function getSpaceCache(spaceId: number): ScrollPositionCacheEntry {
+    scrollCache.value[spaceId] ??= {}
+    return scrollCache.value[spaceId]!
+  }
+
+  function hasAnchor(
+    cache: ScrollPositionCacheEntry | undefined,
+  ): cache is ScrollPositionCacheEntry & ScrollAnchor {
+    return typeof cache?.key === "number" && typeof cache.offset === "number"
+  }
+
+  function hasSizeSnapshot(
+    cache: ScrollPositionCacheEntry | undefined,
+  ): cache is ScrollPositionCacheEntry & ScrollerSizeSnapshot {
+    return (
+      typeof cache?.width === "number" &&
+      Array.isArray(cache.keys) &&
+      Array.isArray(cache.sizes)
+    )
+  }
+
   const save = debounce((spaceId: number, anchor: ScrollAnchor) => {
-    anchors.value[spaceId] = anchor
+    Object.assign(getSpaceCache(spaceId), anchor)
   }, 200)
 
   const saveAnchorAfterResize = debounce((spaceId: number) => {
@@ -82,20 +113,25 @@ export function useScrollPosition(
     if (restoringSpaceId === spaceId) return
     save.flush()
     const anchor = captureCurrentAnchor()
-    if (anchor) anchors.value[spaceId] = anchor
+    if (anchor) Object.assign(getSpaceCache(spaceId), anchor)
   }, 150)
 
   function resetStoredPosition() {
     save.cancel()
-    anchors.value = {}
-    sizeCaches.value = {}
+    scrollCache.value = createScrollPositionCache()
   }
 
   function removeSizeCache(spaceId: number) {
-    if (!(spaceId in sizeCaches.value)) return
-    const nextCaches = { ...sizeCaches.value }
-    delete nextCaches[spaceId]
-    sizeCaches.value = nextCaches
+    const cache = scrollCache.value[spaceId]
+    if (!hasSizeSnapshot(cache)) return
+
+    const nextCache = { ...scrollCache.value }
+    if (hasAnchor(cache)) {
+      nextCache[spaceId] = { key: cache.key, offset: cache.offset }
+    } else {
+      delete nextCache[spaceId]
+    }
+    scrollCache.value = nextCache
   }
 
   function markSizeCacheDirty(spaceId: number) {
@@ -205,25 +241,27 @@ export function useScrollPosition(
       return
     }
     if (snapshot?.keys?.length && width) {
-      sizeCaches.value[spaceId] = {
+      Object.assign(getSpaceCache(spaceId), {
         width,
         keys: [...snapshot.keys],
         sizes: [...snapshot.sizes],
-      }
+      })
     }
   }
 
   // scroller 重建后回填高度缓存，让总高度一开始就准确、滚动不跳动。
   function restoreSize() {
     const scroller = scrollerRef.value
-    const cache = sizeCaches.value[spacesStore.activeId]
-    if (!cache || !scroller) return
+    const cache = scrollCache.value[spacesStore.activeId]
+    if (!hasSizeSnapshot(cache) || !scroller) return
     // 高度随容器宽度变化：宽度不一致时缓存失效，放弃回填、让 scroller 重新测量。
     if (cache.width !== scroller.$el?.clientWidth) {
       removeSizeCache(spacesStore.activeId)
       return
     }
-    scroller.restoreCache({ keys: cache.keys, sizes: cache.sizes })
+    if (!scroller.restoreCache({ keys: cache.keys, sizes: cache.sizes })) {
+      removeSizeCache(spacesStore.activeId)
+    }
   }
 
   function alignRenderedItem(
@@ -247,12 +285,15 @@ export function useScrollPosition(
   }
 
   // 按锚点把滚动定位回顶部那一项。
-  async function restoreScroll(spaceId = spacesStore.activeId) {
+  async function restoreScroll(
+    spaceId = spacesStore.activeId,
+    { flushPendingSave = true }: RestoreScrollOptions = {},
+  ) {
     const scroller = scrollerRef.value
     if (!scroller) return
-    save.flush()
-    const anchor = anchors.value[spaceId]
-    if (!anchor) return
+    if (flushPendingSave) save.flush()
+    const anchor = scrollCache.value[spaceId]
+    if (!hasAnchor(anchor)) return
     const index = getItems().findIndex((item) => item.id === anchor.key)
     if (index === -1) return
     const token = restoreToken + 1
@@ -291,7 +332,10 @@ export function useScrollPosition(
       }
     }
     if (restored && spacesStore.activeId === spaceId) {
-      anchors.value[spaceId] = { key: anchor.key, offset: anchor.offset }
+      Object.assign(getSpaceCache(spaceId), {
+        key: anchor.key,
+        offset: anchor.offset,
+      })
     }
   }
 
@@ -337,9 +381,12 @@ export function useScrollPosition(
 
   // tab 从后台切回前台时，其它 tab 可能已更新了锚点，重新对齐一次。
   function handleVisibilityChange() {
-    if (document.visibilityState !== "visible") return
     if (!enabled()) return
-    restoreScroll()
+    if (document.visibilityState !== "visible") {
+      save.flush()
+      return
+    }
+    restoreScroll(spacesStore.activeId, { flushPendingSave: false })
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)
 
