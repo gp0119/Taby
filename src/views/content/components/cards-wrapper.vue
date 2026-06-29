@@ -314,7 +314,6 @@ const onDragEnd = async (evt: any) => {
     )
     item.remove()
   }
-  await refreshCollections()
 }
 
 function onHandleCheckbox(checked: boolean, card: iCard) {

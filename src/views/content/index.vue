@@ -57,10 +57,9 @@ import SkeletonContent from "@/components/skeleton-content.vue"
 import { Collection } from "@/type"
 import EmptySpace from "@/components/empty-space.vue"
 import {
-  useScrollerSizeCache,
+  useScrollPosition,
   type MainScrollerRef,
-} from "@/hooks/useScrollerSizeCache"
-import { useScrollPosition } from "@/hooks/useScrollPosition"
+} from "@/hooks/useScrollPosition"
 
 const spacesStore = useSpacesStore()
 const tagsStore = useTagsStore()
@@ -113,10 +112,7 @@ function sortCollections(a: Collection, b: Collection) {
 
 const scrollerRef = ref<MainScrollerRef | null>(null)
 
-// 先恢复 item 高度缓存，再恢复滚动偏移：两个 hook 的挂载 watch 按调用顺序触发，
-// 保证 scrollToPosition 时高度已就位，落点才准确。
-useScrollerSizeCache(scrollerRef, () => spacesStore.activeId)
-const { handleScroll } = useScrollPosition(scrollerRef)
+const { handleScroll } = useScrollPosition(scrollerRef, () => collections.value)
 </script>
 
 <style scoped>
