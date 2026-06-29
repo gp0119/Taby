@@ -74,6 +74,13 @@ export function useScrollPosition(
     anchors.value[spaceId] = anchor
   }, 200)
 
+  const saveAnchorAfterWidthChange = debounce((spaceId: number) => {
+    if (!enabled() || spacesStore.activeId !== spaceId) return
+    save.flush()
+    const anchor = captureCurrentAnchor()
+    if (anchor) anchors.value[spaceId] = anchor
+  }, 150)
+
   function resetStoredPosition() {
     save.cancel()
     anchors.value = {}
@@ -179,7 +186,6 @@ export function useScrollPosition(
     ) {
       observedScrollerWidth = width
       removeSizeCache(spaceId)
-      scroller?.forceUpdate(true)
       return
     }
     if (snapshot?.keys?.length && width) {
@@ -232,16 +238,9 @@ export function useScrollPosition(
 
   function handleScrollerWidthChange() {
     if (!enabled()) return
-    const scroller = scrollerRef.value
-    if (!scroller) return
-
     const spaceId = spacesStore.activeId
-    save.flush()
-    const anchor = captureCurrentAnchor()
-    if (anchor) anchors.value[spaceId] = anchor
     removeSizeCache(spaceId)
-    scroller.forceUpdate(true)
-    void restoreScroll(spaceId)
+    saveAnchorAfterWidthChange(spaceId)
   }
 
   function observeScrollerWidth(scroller: MainScrollerRef | null) {
@@ -310,6 +309,8 @@ export function useScrollPosition(
   onBeforeUnmount(() => {
     save.flush()
     save.cancel()
+    saveAnchorAfterWidthChange.flush()
+    saveAnchorAfterWidthChange.cancel()
     resizeObserver?.disconnect()
     document.removeEventListener("visibilitychange", handleVisibilityChange)
     window.removeEventListener("pagehide", captureActive)
