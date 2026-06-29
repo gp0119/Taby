@@ -67,6 +67,9 @@ export function useScrollPosition(
   )
   let resizeObserver: ResizeObserver | null = null
   let observedScrollerWidth = 0
+  let restoreToken = 0
+  let restoringSpaceId: number | null = null
+  const sizeCacheDirtySpaceIds = new Set<number>()
 
   const enabled = () => settingStore.getSetting("rememberScrollPosition")
 
@@ -76,6 +79,7 @@ export function useScrollPosition(
 
   const saveAnchorAfterWidthChange = debounce((spaceId: number) => {
     if (!enabled() || spacesStore.activeId !== spaceId) return
+    if (restoringSpaceId === spaceId) return
     save.flush()
     const anchor = captureCurrentAnchor()
     if (anchor) anchors.value[spaceId] = anchor
@@ -92,6 +96,11 @@ export function useScrollPosition(
     const nextCaches = { ...sizeCaches.value }
     delete nextCaches[spaceId]
     sizeCaches.value = nextCaches
+  }
+
+  function markSizeCacheDirty(spaceId: number) {
+    sizeCacheDirtySpaceIds.add(spaceId)
+    removeSizeCache(spaceId)
   }
 
   function resetCurrentScroller() {
@@ -119,12 +128,14 @@ export function useScrollPosition(
     if (!scroller || !el) return null
 
     const scrollerRect = el.getBoundingClientRect()
-    const itemEls = Array.from(el.querySelectorAll<HTMLElement>("[data-index]"))
-    let best: { index: number; offset: number; score: number } | null = null
+    const itemEls = Array.from(
+      el.querySelectorAll<HTMLElement>("[data-collection-id]"),
+    )
+    let best: { key: number; offset: number; score: number } | null = null
 
     for (const itemEl of itemEls) {
-      const index = Number(itemEl.dataset.index)
-      if (!Number.isInteger(index)) continue
+      const key = Number(itemEl.dataset.collectionId)
+      if (!Number.isInteger(key)) continue
 
       const rect = itemEl.getBoundingClientRect()
       if (rect.bottom <= scrollerRect.top || rect.top >= scrollerRect.bottom) {
@@ -134,7 +145,7 @@ export function useScrollPosition(
       const score = Math.max(rect.top, scrollerRect.top) - scrollerRect.top
       if (!best || score < best.score) {
         best = {
-          index,
+          key,
           offset: Math.max(0, scrollerRect.top - rect.top),
           score,
         }
@@ -142,7 +153,7 @@ export function useScrollPosition(
     }
 
     if (best) {
-      const item = getItems()[best.index]
+      const item = getItems().find((item) => item.id === best.key)
       if (item) return { key: item.id, offset: best.offset }
     }
 
@@ -159,6 +170,7 @@ export function useScrollPosition(
   function handleScroll(event: Event) {
     if (!enabled()) return
     if (document.visibilityState !== "visible") return
+    if (restoringSpaceId === spacesStore.activeId) return
     const target = event.target as HTMLElement
     if (Number(target.dataset.spaceId) !== spacesStore.activeId) return
     const scroller = scrollerRef.value
@@ -176,6 +188,10 @@ export function useScrollPosition(
   // 切换 space / 刷新页面前，抓当前 scroller 的 item 高度快照，连同容器宽度落盘。
   function captureSize(spaceId: number) {
     if (!enabled()) return
+    if (sizeCacheDirtySpaceIds.has(spaceId)) {
+      removeSizeCache(spaceId)
+      return
+    }
     const scroller = scrollerRef.value
     const snapshot = unref(scroller?.cacheSnapshot)
     const width = scroller?.$el?.clientWidth
@@ -185,7 +201,7 @@ export function useScrollPosition(
       Math.abs(width - observedScrollerWidth) >= 1
     ) {
       observedScrollerWidth = width
-      removeSizeCache(spaceId)
+      markSizeCacheDirty(spaceId)
       return
     }
     if (snapshot?.keys?.length && width) {
@@ -203,43 +219,86 @@ export function useScrollPosition(
     const cache = sizeCaches.value[spacesStore.activeId]
     if (!cache || !scroller) return
     // 高度随容器宽度变化：宽度不一致时缓存失效，放弃回填、让 scroller 重新测量。
-    if (cache.width !== scroller.$el?.clientWidth) return
+    if (cache.width !== scroller.$el?.clientWidth) {
+      removeSizeCache(spacesStore.activeId)
+      return
+    }
     scroller.restoreCache({ keys: cache.keys, sizes: cache.sizes })
+  }
+
+  function alignRenderedItem(
+    scroller: MainScrollerRef,
+    collectionId: number,
+    offset: number,
+  ) {
+    const el = scroller.$el as HTMLElement
+    const itemEl = el.querySelector<HTMLElement>(
+      `[data-collection-id="${collectionId}"]`,
+    )
+    if (!itemEl) return false
+
+    const scrollerTop = el.getBoundingClientRect().top
+    const itemTop = itemEl.getBoundingClientRect().top
+    const diff = itemTop - (scrollerTop - offset)
+    if (Math.abs(diff) < 1) return true
+
+    scroller.scrollToPosition(el.scrollTop + diff)
+    return false
   }
 
   // 按锚点把滚动定位回顶部那一项。
   async function restoreScroll(spaceId = spacesStore.activeId) {
     const scroller = scrollerRef.value
     if (!scroller) return
+    save.flush()
     const anchor = anchors.value[spaceId]
     if (!anchor) return
     const index = getItems().findIndex((item) => item.id === anchor.key)
     if (index === -1) return
+    const token = restoreToken + 1
+    restoreToken = token
+    restoringSpaceId = spaceId
     // scroller 重建后高度回填需若干帧才稳定，逐帧重对齐直到落点到位，
     // 避免首帧 scrollHeight 偏小把目标位置裁剪掉。
     await nextTick()
-    const el = scroller.$el as HTMLElement
     let stableFrames = 0
-    for (let i = 0; i < 8; i++) {
-      if (spacesStore.activeId !== spaceId || scrollerRef.value !== scroller) {
-        return
+    let restored = false
+    try {
+      for (let i = 0; i < 8; i++) {
+        if (
+          restoreToken !== token ||
+          spacesStore.activeId !== spaceId ||
+          scrollerRef.value !== scroller
+        ) {
+          return
+        }
+        scroller.scrollToItem(index, { offset: anchor.offset })
+        await nextFrame()
+
+        if (alignRenderedItem(scroller, anchor.key, anchor.offset)) {
+          stableFrames += 1
+          if (stableFrames >= 2) {
+            restored = true
+            break
+          }
+        } else {
+          stableFrames = 0
+        }
       }
-      scroller.scrollToItem(index, { offset: anchor.offset })
-      await nextFrame()
-      const target = scroller.getItemOffset(index) + anchor.offset
-      if (Math.abs(el.scrollTop - target) < 1) {
-        stableFrames += 1
-        if (stableFrames >= 2) break
-      } else {
-        stableFrames = 0
+    } finally {
+      if (restoreToken === token && restoringSpaceId === spaceId) {
+        restoringSpaceId = null
       }
+    }
+    if (restored && spacesStore.activeId === spaceId) {
+      anchors.value[spaceId] = { key: anchor.key, offset: anchor.offset }
     }
   }
 
   function handleScrollerWidthChange() {
     if (!enabled()) return
     const spaceId = spacesStore.activeId
-    removeSizeCache(spaceId)
+    markSizeCacheDirty(spaceId)
     saveAnchorAfterWidthChange(spaceId)
   }
 
@@ -268,6 +327,7 @@ export function useScrollPosition(
     (scroller) => {
       observeScrollerWidth(scroller)
       if (!scroller || !enabled()) return
+      sizeCacheDirtySpaceIds.delete(spacesStore.activeId)
       restoreSize()
       restoreScroll()
     },

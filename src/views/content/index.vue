@@ -18,6 +18,7 @@
           :index="index"
           :active="active"
           :data-index="index"
+          :data-collection-id="item.id"
           :data-active="active"
           class="py-2 pl-4 pr-2"
         >
