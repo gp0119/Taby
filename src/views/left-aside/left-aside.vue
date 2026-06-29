@@ -24,7 +24,7 @@ import LogoWrapper from "./components/logo-wrapper.vue"
 import { useTagsStore } from "@/store/tags"
 
 const spacesStore = useSpacesStore()
-const { refreshSpaces, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const duplicateCardStore = useDuplicateCardStore()
 const tagsStore = useTagsStore()
 
@@ -36,7 +36,6 @@ const onDragEnd = async (evt: SortableEvent) => {
   if (newIndex === oldIndex) return
   const currentSpaceId = itemEl.getAttribute("data-id")
   await dataManager.moveSpace(Number(currentSpaceId), oldIndex!, newIndex!)
-  await refreshSpaces()
   await updateContextMenus()
 }
 

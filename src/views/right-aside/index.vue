@@ -44,7 +44,6 @@
 <script setup lang="ts">
 import dataManager from "@/db"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
-import { useRefresh } from "@/hooks/useRresh.ts"
 import { debounce } from "lodash-es"
 import TabsWrapper from "./components/tabs-wrapper.vue"
 import type { SortableEvent } from "vue-draggable-plus"
@@ -80,7 +79,6 @@ const {
   updateActiveWindowId,
   closeAllTabsExceptCurrent,
 } = useChromeTabs()
-const { refreshCollections } = useRefresh()
 const batchTabsStore = useBatchTabsStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchCardStore = useBatchCardStore()
@@ -127,7 +125,6 @@ const onDragEnd = async (evt: SortableEvent) => {
       },
       newIndex!,
     )
-    await refreshCollections()
   } else {
     await moveTab(Number(id), Number(newIndex), Number(windowid))
     await refreshTabs()
@@ -182,7 +179,6 @@ const onSaveAllTabs = async (windowId: number | string) => {
     { collectionId: newCollectionId! },
     "END",
   )
-  await refreshCollections()
 }
 
 const onSaveAllTabsAndClose = async (windowId: number | string) => {

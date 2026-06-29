@@ -6,15 +6,11 @@ import { Card } from "@/type"
 import Favicon from "@/components/favicon.vue"
 import { SearchOutline } from "@vicons/ionicons5"
 import { useEventListener } from "@vueuse/core"
-import { useRefresh } from "@/hooks/useRresh"
-import { useSpacesStore } from "@/store/spaces"
 
 export const useSearchModal = () => {
   const searchValue = ref("")
   const modal = useModal()
   const isOpen = ref(false)
-  const { refreshCollections } = useRefresh()
-  const spacesStore = useSpacesStore()
   const cards = ref<Card[]>([])
   const currentIndex = ref(0)
   const searchCardsFromDb = debounce(async () => {
@@ -68,9 +64,8 @@ export const useSearchModal = () => {
   })
 
   const debounceUpdateCardFavicon = debounce(
-    async (cardId: number, favicon: string, activeId: number) => {
+    async (cardId: number, favicon: string) => {
       await dataManager.updateCardFavicon(cardId, favicon)
-      await refreshCollections(activeId)
     },
     1000,
     {
@@ -83,7 +78,6 @@ export const useSearchModal = () => {
     modal.destroyAll()
     await new Promise((resolve) => setTimeout(resolve, 300))
     const tab = await chrome.tabs.create({ url: child.url })
-    const activeId = spacesStore.activeId
     if (child.favicon) return
     const tabId = tab.id!
     chrome.tabs.onUpdated.addListener(
@@ -91,7 +85,7 @@ export const useSearchModal = () => {
         if (updatedTabId === tabId && changeInfo.favIconUrl) {
           const favicon = changeInfo.favIconUrl
           if (!favicon) return
-          debounceUpdateCardFavicon(child.id, favicon, activeId)
+          debounceUpdateCardFavicon(child.id, favicon)
           chrome.tabs.onUpdated.removeListener(listener)
         }
       },

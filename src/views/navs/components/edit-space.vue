@@ -30,7 +30,7 @@ const { ft } = useHelpi18n()
 const { open } = useEditDialog()
 const { open: deleteDialog } = useDeleteDialog()
 const dialog = useDialog()
-const { refreshSpaces, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 
 const props = defineProps<{
   title: string
@@ -66,7 +66,6 @@ function onEditSpace() {
         formModel.value.title,
         formModel.value.icon,
       )
-      await refreshSpaces()
       await updateContextMenus()
     },
   })
@@ -84,7 +83,6 @@ function onDeleteSpace() {
     ),
     onPositiveClick: async () => {
       await dataManager.removeSpace(spacesStore.activeId)
-      await refreshSpaces()
       await updateContextMenus()
       dialog.destroyAll()
     },

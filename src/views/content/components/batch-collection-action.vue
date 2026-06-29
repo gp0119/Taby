@@ -51,7 +51,7 @@ const { show, animated, onAnimationEnd } = useAnimatedPresence(
   () => batchCollectionStore.selectedCollectionIds.length,
 )
 
-const { refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const { ft } = useHelpi18n()
 
 const onClose = () => {
@@ -73,8 +73,6 @@ const onHandleMove = async () => {
     { spaceId: spaceId! },
     position,
   )
-  await refreshCollections()
-  await refreshCollections(spaceId as number)
   await updateContextMenus()
   closeDrawer()
 }
@@ -87,7 +85,6 @@ const onHandleDelete = async () => {
       await dataManager.batchDeleteCollections(
         batchCollectionStore.selectedCollectionIds,
       )
-      await refreshCollections()
       await updateContextMenus()
       closeDrawer()
     },
@@ -105,7 +102,6 @@ const onHandleMerge = async () => {
     { collectionId: collectionId! },
     position,
   )
-  await refreshCollections()
   await updateContextMenus()
   closeDrawer()
 }

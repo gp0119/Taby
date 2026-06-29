@@ -27,7 +27,6 @@
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
-import { useRefresh } from "@/hooks/useRresh.ts"
 import { useBatchCardStore } from "@/store/batch-card"
 import { FolderMoveTo, Delete } from "@vicons/carbon"
 import dataManager from "@/db"
@@ -39,7 +38,6 @@ const batchCardStore = useBatchCardStore()
 const { show, animated, onAnimationEnd } = useAnimatedPresence(
   () => batchCardStore.selectedCardIds.length,
 )
-const { refreshCollections } = useRefresh()
 const { ft } = useHelpi18n()
 
 const onClose = () => {
@@ -52,14 +50,12 @@ const closeDrawer = () => {
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleMove = async () => {
-  const { collectionId, position, spaceId } = await openDialog()
+  const { collectionId, position } = await openDialog()
   await dataManager.batchUpdateCards(
     batchCardStore.selectedCardIds,
     { collectionId: collectionId! },
     position,
   )
-  await refreshCollections()
-  refreshCollections(spaceId as number)
   closeDrawer()
 }
 
@@ -70,7 +66,6 @@ const onHandleDelete = async () => {
     content: ft("delete-cards-confirm"),
     onPositiveClick: async () => {
       await dataManager.batchDeleteCards(batchCardStore.selectedCardIds)
-      await refreshCollections()
       closeDrawer()
     },
   })

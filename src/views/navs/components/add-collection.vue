@@ -38,7 +38,7 @@ const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
 const { open } = useEditDialog()
 const { ft } = useHelpi18n()
-const { refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const spacesStore = useSpacesStore()
 function onAddCollection() {
   const formModel = ref<{
@@ -120,7 +120,6 @@ async function onHandleAddCollection(
     },
     formModel.value.position,
   )
-  await refreshCollections()
   await updateContextMenus()
 }
 

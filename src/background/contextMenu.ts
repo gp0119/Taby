@@ -84,13 +84,8 @@ const updateContextMenus = debounce(_updateContextMenus, 300)
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "newSpace") {
-    const newSpaceId = await dataManager.addSpace({
+    await dataManager.addSpace({
       title: dayjs().format("MMM DD [at] HH:mm"),
-    })
-    await chrome.runtime.sendMessage({
-      type: "refreshCollections",
-      spaceId: newSpaceId,
-      modified: true,
     })
     await updateContextMenus()
   } else if ((info.menuItemId as string).startsWith("newCollection-")) {
@@ -100,14 +95,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       spaceId: spaceId,
       labelIds: [],
     })
-    await chrome.runtime.sendMessage({
-      type: "refreshCollections",
-      spaceId: spaceId,
-      modified: true,
-    })
     await updateContextMenus()
   } else if ((info.menuItemId as string).startsWith("collection-")) {
-    const spaceId = (info.parentMenuItemId as string).split("-")[1]
     const collectionId = Number((info.menuItemId as string).split("-")[1])
     const { favIconUrl, title, url } = tab!
     let faviconId = null
@@ -120,11 +109,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       collectionId: Number(collectionId),
       description: "",
       ...(faviconId && { faviconId }),
-    })
-    await chrome.runtime.sendMessage({
-      type: "refreshCollections",
-      spaceId: spaceId,
-      modified: true,
     })
   }
 })

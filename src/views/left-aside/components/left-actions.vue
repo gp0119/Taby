@@ -107,7 +107,7 @@ const loadingBar = useLoadingBar()
 const { open } = useEditDialog()
 const { importFromToby, importFromTaby } = useImport()
 const { exportFromTaby } = useExport()
-const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const message = useMessage()
 const layoutStore = useLayoutStore()
 const showSyncDialog = ref(false)
@@ -170,8 +170,6 @@ function onImport() {
         } else {
           await importFromTaby(formModel.value.fileList[0].file!)
         }
-        await refreshSpaces()
-        await refreshCollections()
         await updateContextMenus()
         message.success(ft("success", "import"))
       } finally {

@@ -107,7 +107,7 @@ import { Renew } from "@vicons/carbon"
 const { ft } = useHelpi18n()
 const message = useMessage()
 const { open } = useDeleteDialog()
-const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 
 const CACHE_EXPIRE_TIME = 60 * 60 * 1000 // 1小时过期
 
@@ -218,8 +218,6 @@ const handleRollback = (version: GistVersion) => {
         rollbackLoading.value = version.version
         const data = await GistManager.fetchGistByVersion(version.version)
         await dataManager.importData(data)
-        await refreshSpaces()
-        await refreshCollections()
         await updateContextMenus()
         message.success(ft("rollback-success"))
       } catch (error) {

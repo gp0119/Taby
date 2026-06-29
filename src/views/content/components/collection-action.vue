@@ -49,7 +49,7 @@ defineProps<{
   item: CollectionWithCards
 }>()
 
-const { refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const isShowTagAction = ref(false)
 
 provide("isShowTagAction", {
@@ -88,7 +88,6 @@ function onEditCollection(item: CollectionWithCards) {
     ),
     onPositiveClick: async () => {
       await dataManager.updateCollectionTitle(item.id, formModel.value.title)
-      await refreshCollections()
       await updateContextMenus()
     },
   })
@@ -107,7 +106,6 @@ function onDeleteCollection(item: CollectionWithCards) {
     ),
     onPositiveClick: async () => {
       await dataManager.removeCollection(item.id)
-      await refreshCollections()
       await updateContextMenus()
       dialog.destroyAll()
     },
@@ -124,8 +122,6 @@ async function onMoveCollection(item: CollectionWithCards) {
     { spaceId: spaceId! },
     position,
   )
-  await refreshCollections()
-  await refreshCollections(spaceId as number)
   await updateContextMenus()
 }
 </script>

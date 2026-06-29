@@ -121,7 +121,7 @@ import Gitee from "@/components/gitee.vue"
 
 const { ft } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
-const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const syncTypeOptions = ref([
   { label: "GitHub", value: "github" },
   { label: "Gitee", value: "gitee" },
@@ -227,8 +227,6 @@ const handleDownload = () => {
             [SYNC_GIST_TOKEN]: formModel.value.accessToken,
             [SYNC_GIST_ID]: formModel.value.gistId,
           })
-          await refreshSpaces()
-          await refreshCollections()
           await updateContextMenus()
           message.success(ft("success", "download"))
           downloadLoading.value = false

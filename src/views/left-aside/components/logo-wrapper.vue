@@ -42,7 +42,7 @@ import Logo from "@/components/logo.vue"
 const layoutStore = useLayoutStore()
 const { ft } = useHelpi18n()
 const { open } = useEditDialog()
-const { refreshSpaces, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 
 function onAddSpace() {
   const formModel = ref({ title: "", icon: "StorefrontOutline" })
@@ -67,7 +67,6 @@ function onAddSpace() {
         title: formModel.value.title,
         icon: formModel.value.icon,
       })
-      await refreshSpaces()
       await updateContextMenus()
     },
   })

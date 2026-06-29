@@ -25,7 +25,7 @@ import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
 import { useTheme } from "@/hooks/useTheme"
 
-const { refreshSpaces, refreshCollections, updateContextMenus } = useRefresh()
+const { updateContextMenus } = useRefresh()
 const { themeOverrides, theme } = useTheme()
 
 const loading = ref(true)
@@ -49,19 +49,9 @@ const handleVisibilityChange = debounce(
   { leading: true, trailing: false },
 )
 
-const handleMessage = async (message: any) => {
-  if (message.type === "refreshCollections") {
-    await refreshSpaces()
-    await refreshCollections(Number(message.spaceId))
-    // 后台脚本对 IndexedDB 的修改会通过 chrome.storage.local 的 dirty 标记
-    // 自动通知 syncManager（onDirtyChanged 监听），这里无需重复 markDirty。
-  }
-}
-
 const removeListener = () => {
   document.removeEventListener("visibilitychange", handleVisibilityChange)
   window.removeEventListener("beforeunload", removeListener)
-  chrome.runtime.onMessage.removeListener(handleMessage)
 }
 
 onBeforeMount(async () => {
@@ -82,24 +72,16 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
-  // 注册：远端覆盖本地（冲突→remote / triggerDownload）后由 syncManager 统一刷新 UI。
+  // 远端覆盖本地后，store 由 liveQuery 更新；这里只同步 Chrome 原生菜单。
   syncManager.setOnRemoteImported(async () => {
-    await refreshSpaces()
-    await refreshCollections()
     await updateContextMenus()
   })
 
   const isRecovered = await syncManager.waitForInit()
   document.addEventListener("visibilitychange", handleVisibilityChange)
   window.addEventListener("beforeunload", removeListener)
-  chrome.runtime.onMessage.addListener(handleMessage)
 
-  // 初次渲染：用 IDB 里现有的数据填好 UI。
-  // 如果 waitForInit 已经从远端恢复过（isRecovered=true），onRemoteImported 已被触发，
-  // 但首次注册回调早于 init 完成，所以这里再保险刷一次。
-  await new Promise((resolve) => setTimeout(resolve, 100))
-  await refreshSpaces()
-  await refreshCollections()
+  // 初次渲染：store 由 liveQuery 订阅 IDB；这里只需要同步 Chrome 原生菜单。
   await updateContextMenus()
 
   // 启动时主动跑一次 visibility 流：上传脏数据 + 拉取远端更新（带冲突检测）。
@@ -113,7 +95,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   removeListener()
-  chrome.runtime.onMessage.removeListener(handleMessage)
   syncManager.setOnRemoteImported(undefined)
 })
 </script>

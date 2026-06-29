@@ -43,7 +43,6 @@
 import dataManager from "@/db"
 import Card from "@components/card.vue"
 import { Card as iCard } from "@/type.ts"
-import { useRefresh } from "@/hooks/useRresh.ts"
 import { VueDraggable } from "vue-draggable-plus"
 import { useBatchCardStore } from "@/store/batch-card"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
@@ -54,7 +53,6 @@ import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
-import { useSpacesStore } from "@/store/spaces"
 import { Information, FolderMoveTo, Delete } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
@@ -67,20 +65,17 @@ defineProps<{
   collectionId: number
 }>()
 
-const { refreshCollections } = useRefresh()
 const batchCardStore = useBatchCardStore()
 const { ft } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
-const spacesStore = useSpacesStore()
 const dialog = useDialog()
 const settingStore = useSettingStore()
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(e: MouseEvent, child: any) {
-  const activeId = spacesStore.activeId
   let tabId: number
   if (e.ctrlKey || e.metaKey) {
     const tab = await chrome.tabs.create({ url: child.url, active: false })
@@ -99,13 +94,12 @@ async function onHandleClick(e: MouseEvent, child: any) {
     tabId = tab.id!
   }
   if (child.favicon) return
-  onHandleNoFavicon(tabId, child.id, activeId)
+  onHandleNoFavicon(tabId, child.id)
 }
 
 const debounceUpdateCardFavicon = debounce(
-  async (cardId: number, favicon: string, activeId: number) => {
+  async (cardId: number, favicon: string) => {
     await dataManager.updateCardFavicon(cardId, favicon)
-    await refreshCollections(activeId)
   },
   1000,
   {
@@ -114,7 +108,7 @@ const debounceUpdateCardFavicon = debounce(
   },
 )
 
-function onHandleNoFavicon(tabId: number, cardId: number, activeId: number) {
+function onHandleNoFavicon(tabId: number, cardId: number) {
   let timer: ReturnType<typeof setTimeout>
   function listener(
     updatedTabId: number,
@@ -123,7 +117,7 @@ function onHandleNoFavicon(tabId: number, cardId: number, activeId: number) {
     if (updatedTabId === tabId && changeInfo.favIconUrl) {
       const favicon = changeInfo.favIconUrl
       if (!favicon) return
-      debounceUpdateCardFavicon(cardId, favicon, activeId)
+      debounceUpdateCardFavicon(cardId, favicon)
       cleanup()
     }
   }
@@ -147,7 +141,6 @@ async function onDeleteCard(card: iCard) {
     ),
     onPositiveClick: async () => {
       await dataManager.removeCard(card.id)
-      await refreshCollections()
       dialog.destroyAll()
     },
   })
@@ -155,14 +148,12 @@ async function onDeleteCard(card: iCard) {
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleMove = async (card: iCard) => {
-  const { collectionId, position, spaceId } = await openDialog()
+  const { collectionId, position } = await openDialog()
   await dataManager.batchUpdateCards(
     [card.id],
     { collectionId: collectionId! },
     position,
   )
-  await refreshCollections()
-  refreshCollections(spaceId as number)
   dialog.destroyAll()
 }
 
@@ -286,7 +277,6 @@ function onEdit(child: iCard) {
                 faviconId,
                 url: formModel.value.url,
               })
-              await refreshCollections()
               close()
             }}
           >

@@ -34,7 +34,6 @@
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
-import { useRefresh } from "@/hooks/useRresh.ts"
 import { FolderMoveTo, CloseOutline } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
@@ -47,7 +46,6 @@ const batchTabsStore = useBatchTabsStore()
 const { show, animated, onAnimationEnd } = useAnimatedPresence(
   () => batchTabsStore.selectedTabIds.length,
 )
-const { refreshCollections } = useRefresh()
 const { ft } = useHelpi18n()
 const { removeTabs, getTabs, groupTabs } = useChromeTabs()
 
@@ -79,7 +77,6 @@ const onHandleSave = async () => {
     { collectionId: collectionId! },
     position,
   )
-  await refreshCollections()
   batchTabsStore.clearSelectedTabs()
   closeDrawer()
 }

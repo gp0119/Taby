@@ -117,7 +117,6 @@ import {
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
 import dataManager from "@/db"
-import { useRefresh } from "@/hooks/useRresh"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog"
@@ -130,7 +129,6 @@ const props = defineProps<{
   item: CollectionWithCards
 }>()
 
-const { refreshCollections } = useRefresh()
 const { ft } = useHelpi18n()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
@@ -181,7 +179,6 @@ async function handleTagSelect(id: number) {
   } else {
     await dataManager.addTagforCollection(props.item.id, id)
   }
-  await refreshCollections()
   newTag.value.title = ""
   await nextTick()
   activeIndex.value = filterTags.value.findIndex((tag) => tag.id === id)
@@ -191,7 +188,6 @@ async function handleTagSelect(id: number) {
 
 const addTagforCollection = async (id: number) => {
   await dataManager.addTagforCollection(props.item.id, id)
-  await refreshCollections()
 }
 
 const saveAndAddTag = async () => {
@@ -228,7 +224,6 @@ const onDeleteTag = async (tag: {
     onPositiveClick: async () => {
       await dataManager.removeLabel(tag.id)
       await tagsStore.fetchTags()
-      await refreshCollections()
     },
   })
 }
@@ -264,7 +259,6 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
         formModel.value.color,
       )
       await tagsStore.fetchTags()
-      await refreshCollections()
     },
   })
 }

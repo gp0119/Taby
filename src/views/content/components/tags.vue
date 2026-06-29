@@ -16,7 +16,6 @@
 
 <script setup lang="ts">
 import dataManager from "@/db"
-import { useRefresh } from "@/hooks/useRresh.ts"
 import { Label } from "@/type.ts"
 import Tag from "@/components/tag.vue"
 const props = defineProps<{
@@ -24,9 +23,7 @@ const props = defineProps<{
   collectionId: number
 }>()
 
-const { refreshCollections } = useRefresh()
 const onDeleteTagFromCollection = async (tagId: number) => {
   await dataManager.removeTagforCollection(props.collectionId, tagId)
-  await refreshCollections()
 }
 </script>
