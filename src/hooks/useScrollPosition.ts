@@ -77,7 +77,7 @@ export function useScrollPosition(
     anchors.value[spaceId] = anchor
   }, 200)
 
-  const saveAnchorAfterWidthChange = debounce((spaceId: number) => {
+  const saveAnchorAfterResize = debounce((spaceId: number) => {
     if (!enabled() || spacesStore.activeId !== spaceId) return
     if (restoringSpaceId === spaceId) return
     save.flush()
@@ -298,8 +298,10 @@ export function useScrollPosition(
   function handleScrollerWidthChange() {
     if (!enabled()) return
     const spaceId = spacesStore.activeId
+    // 宽度变化会让动态高度缓存失效；这里只清尺寸快照并记录当前可见锚点，
+    // 让 vue-virtual-scroller 自己完成 resize 重测，避免拖动窗口时闪烁。
     markSizeCacheDirty(spaceId)
-    saveAnchorAfterWidthChange(spaceId)
+    saveAnchorAfterResize(spaceId)
   }
 
   function observeScrollerWidth(scroller: MainScrollerRef | null) {
@@ -369,8 +371,8 @@ export function useScrollPosition(
   onBeforeUnmount(() => {
     save.flush()
     save.cancel()
-    saveAnchorAfterWidthChange.flush()
-    saveAnchorAfterWidthChange.cancel()
+    saveAnchorAfterResize.flush()
+    saveAnchorAfterResize.cancel()
     resizeObserver?.disconnect()
     document.removeEventListener("visibilitychange", handleVisibilityChange)
     window.removeEventListener("pagehide", captureActive)
