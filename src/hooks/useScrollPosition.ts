@@ -9,6 +9,11 @@ import type {
   DynamicScrollerExposed,
 } from "vue-virtual-scroller"
 import type { Collection } from "@/type"
+import {
+  MAIN_SCROLL_ANCHORS_KEY,
+  MAIN_SCROLL_SIZE_CACHES_KEY,
+  mainScrollPositionResetVersion,
+} from "@/utils/scrollPositionStorage"
 
 export type MainScrollerRef = ShallowUnwrapRef<
   DynamicScrollerExposed<Collection>
@@ -38,14 +43,23 @@ export function useScrollPosition(
 ) {
   const spacesStore = useSpacesStore()
   const settingStore = useSettingStore()
-  const anchors = useLocalStorage<ScrollAnchors>("mainScrollAnchors", {})
-  const sizeCaches = useLocalStorage<SizeCaches>("mainScrollSizeCaches", {})
+  const anchors = useLocalStorage<ScrollAnchors>(MAIN_SCROLL_ANCHORS_KEY, {})
+  const sizeCaches = useLocalStorage<SizeCaches>(
+    MAIN_SCROLL_SIZE_CACHES_KEY,
+    {},
+  )
 
   const enabled = () => settingStore.getSetting("rememberScrollPosition")
 
   const save = debounce((spaceId: number, anchor: ScrollAnchor) => {
     anchors.value[spaceId] = anchor
   }, 200)
+
+  function resetStoredPosition() {
+    save.cancel()
+    anchors.value = {}
+    sizeCaches.value = {}
+  }
 
   function handleScroll(event: Event) {
     if (!enabled()) return
@@ -57,7 +71,6 @@ export function useScrollPosition(
     const scrollTop = target.scrollTop
     const index = scroller.findItemIndex(scrollTop)
     const item = getItems()[index]
-    console.log("item: ", item)
     if (!item) return
     save(spacesStore.activeId, {
       key: item.id,
@@ -146,11 +159,11 @@ export function useScrollPosition(
   // 关闭「记忆滚动位置」时清空已存锚点与高度缓存。
   watch(enabled, (on) => {
     if (!on) {
-      save.cancel()
-      anchors.value = {}
-      sizeCaches.value = {}
+      resetStoredPosition()
     }
   })
+
+  watch(mainScrollPositionResetVersion, resetStoredPosition, { flush: "sync" })
 
   onBeforeUnmount(() => {
     save.flush()

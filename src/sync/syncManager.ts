@@ -17,6 +17,7 @@ import {
   onDirtyChanged,
   DirtyToken,
 } from "@/sync/dirtyStorage.ts"
+import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
 
 const UPLOAD_LOCK_NAME = "taby-sync-upload"
 
@@ -385,6 +386,7 @@ class SyncManager {
     if (decision === "remote") {
       // 接受远端：用 fetchGistMeta 已经拿到的数据 import，避免再多一次 GET
       await dataManager.importData(meta.data!)
+      resetMainScrollPosition()
       await clearDirtyAsync()
       this._dirtyToken = null
       GistManager.commitSyncedRemoteState(meta.updatedAt, meta.etag)
@@ -465,6 +467,7 @@ class SyncManager {
     }
 
     await dataManager.importData(data)
+    resetMainScrollPosition()
     // 下载覆盖后本地不再有未上传的修改
     await clearDirtyAsync()
     this._dirtyToken = null

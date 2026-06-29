@@ -51,6 +51,7 @@ import dataManager from "@/db"
 import { useSpacesStore } from "@/store/spaces"
 import { useRefresh } from "@/hooks/useRresh"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
 
 const isHasRight = ref(false)
 const bookmarksTree = ref<chrome.bookmarks.BookmarkTreeNode[]>([])
@@ -116,6 +117,7 @@ async function importFolder(folder: chrome.bookmarks.BookmarkTreeNode) {
         collectionId: collectionId!,
       })
     }
+    resetMainScrollPosition()
     await updateContextMenus()
   } catch (error) {
     console.error("Import bookmarks failed:", error)

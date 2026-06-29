@@ -103,6 +103,7 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import dayjs from "dayjs"
 import { Renew } from "@vicons/carbon"
+import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
 
 const { ft } = useHelpi18n()
 const message = useMessage()
@@ -218,6 +219,7 @@ const handleRollback = (version: GistVersion) => {
         rollbackLoading.value = version.version
         const data = await GistManager.fetchGistByVersion(version.version)
         await dataManager.importData(data)
+        resetMainScrollPosition()
         await updateContextMenus()
         message.success(ft("rollback-success"))
       } catch (error) {

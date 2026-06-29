@@ -2,6 +2,7 @@ import dataManager from "@/db"
 import { CollectionWithCards } from "@/type.ts"
 import { useMessage } from "naive-ui"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
+import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
 
 export function useImport() {
   const message = useMessage()
@@ -19,6 +20,7 @@ export function useImport() {
             throw new Error(ft("invalid-file", "toby"))
           }
           await dataManager.importFromToby(lists.lists)
+          resetMainScrollPosition()
           resolve(true)
         } catch (error) {
           reject(error)
@@ -39,6 +41,7 @@ export function useImport() {
             throw new Error(ft("invalid-file", "taby"))
           }
           await dataManager.importFromTaby(spaces)
+          resetMainScrollPosition()
           resolve(true)
         } catch (error) {
           reject(error)
