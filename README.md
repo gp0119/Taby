@@ -72,28 +72,6 @@ pnpm run dev
 pnpm run build
 ```
 
-## 🚢 发布 | Release
-
-Chrome Web Store 发布由 GitHub tag 触发。tag 必须使用 `vX.Y.Z` 格式，并且 `X.Y.Z` 必须和 `package.json` 的 `version` 一致。
-
-先在 GitHub 配置 `chrome-webstore-production` Environment，建议开启 required reviewers。然后在该 Environment 或仓库 Secrets 中配置：
-
-- `CHROME_WEBSTORE_CLIENT_ID`
-- `CHROME_WEBSTORE_CLIENT_SECRET`
-- `CHROME_WEBSTORE_REFRESH_TOKEN`
-- `CHROME_WEBSTORE_PUBLISHER_ID`
-- `CHROME_WEBSTORE_EXTENSION_ID`
-
-发布命令：
-
-```bash
-VERSION=$(node -p "JSON.parse(require('node:fs').readFileSync('package.json', 'utf8')).version")
-git tag "v$VERSION"
-git push origin "v$VERSION"
-```
-
-GitHub Actions 会自动安装依赖、构建 `release/<version>.zip`、校验 zip 根目录的 `manifest.json`，然后在 `chrome-webstore-production` approval 通过后上传并提交 Chrome Web Store 发布。
-
 ## 🤝 贡献 | Contributing
 
 欢迎贡献！请随时提交 Pull Request 或创建 Issue。
