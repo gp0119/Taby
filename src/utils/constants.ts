@@ -222,6 +222,13 @@ export const GITEE_API = "https://gitee.com/api/v5"
 export const SYNC_GIST_ID = "gistId"
 export const SYNC_GIST_TOKEN = "accessToken"
 export const SYNC_TYPE = "syncType"
+export const SYNC_WEBDAV_PROTOCOL = "webdavProtocol"
+export const SYNC_WEBDAV_HOST = "webdavHost"
+export const SYNC_WEBDAV_PORT = "webdavPort"
+export const SYNC_WEBDAV_FOLDER = "webdavFolder"
+export const SYNC_WEBDAV_FILENAME = "webdavFilename"
+export const SYNC_WEBDAV_USERNAME = "webdavUsername"
+export const SYNC_WEBDAV_PASSWORD = "webdavPassword"
 export const REMOTE_LAST_UPDATE_TIME = "remoteLastUpdateTime" // Stored in chrome.storage.sync
 export const LOCAL_LAST_DOWNLOAD_TIME = "localLastDownloadTime" // Stored in localStorage
 // 上次同步成功后看到的远端 Gist updated_at（ISO 8601 字符串），用于上传前的冲突检测。

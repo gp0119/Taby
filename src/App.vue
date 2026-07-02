@@ -20,7 +20,18 @@
 import syncManager from "@/sync/syncManager.ts"
 import { darkTheme, lightTheme } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
-import { SYNC_TYPE, SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants.ts"
+import {
+  SYNC_GIST_ID,
+  SYNC_GIST_TOKEN,
+  SYNC_TYPE,
+  SYNC_WEBDAV_FILENAME,
+  SYNC_WEBDAV_FOLDER,
+  SYNC_WEBDAV_HOST,
+  SYNC_WEBDAV_PASSWORD,
+  SYNC_WEBDAV_PORT,
+  SYNC_WEBDAV_PROTOCOL,
+  SYNC_WEBDAV_USERNAME,
+} from "@/utils/constants.ts"
 import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
 import { useTheme } from "@/hooks/useTheme"
@@ -59,16 +70,30 @@ onBeforeMount(async () => {
     SYNC_GIST_TOKEN,
     SYNC_GIST_ID,
     SYNC_TYPE,
+    SYNC_WEBDAV_PROTOCOL,
+    SYNC_WEBDAV_HOST,
+    SYNC_WEBDAV_PORT,
+    SYNC_WEBDAV_FOLDER,
+    SYNC_WEBDAV_FILENAME,
+    SYNC_WEBDAV_USERNAME,
+    SYNC_WEBDAV_PASSWORD,
   ])
-  if (result.syncType) {
-    localStorage.setItem("syncType", String(result.syncType))
-  }
-  if (result.accessToken) {
-    localStorage.setItem("accessToken", String(result.accessToken))
-  }
-  if (result.gistId) {
-    localStorage.setItem("gistId", String(result.gistId))
-  }
+  ;[
+    SYNC_TYPE,
+    SYNC_GIST_TOKEN,
+    SYNC_GIST_ID,
+    SYNC_WEBDAV_PROTOCOL,
+    SYNC_WEBDAV_HOST,
+    SYNC_WEBDAV_PORT,
+    SYNC_WEBDAV_FOLDER,
+    SYNC_WEBDAV_FILENAME,
+    SYNC_WEBDAV_USERNAME,
+    SYNC_WEBDAV_PASSWORD,
+  ].forEach((key) => {
+    if (Object.hasOwn(result, key)) {
+      localStorage.setItem(key, String(result[key]))
+    }
+  })
 })
 
 onMounted(async () => {

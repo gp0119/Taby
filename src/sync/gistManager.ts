@@ -55,7 +55,7 @@ class GistManager {
     return localStorage.getItem(SYNC_LAST_REMOTE_UPDATED_AT) || ""
   }
 
-  private getLastEtag(): string {
+  getLastEtag(): string {
     return localStorage.getItem(SYNC_LAST_ETAG) || ""
   }
 
@@ -239,6 +239,10 @@ class GistManager {
       etag: response.headers.get("ETag") ?? undefined,
       data: this.parseFiles(body.files),
     }
+  }
+
+  async fetchRemoteMeta() {
+    return this.fetchGistMeta()
   }
 
   // 由 syncManager 在用户解决冲突后调用，把已知的远端版本提升到给定值

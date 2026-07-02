@@ -35,7 +35,7 @@
 import { HourglassOutline } from "@vicons/ionicons5"
 import { useSettingStore } from "@/store/setting"
 import syncManager from "@/sync/syncManager"
-import { SYNC_GIST_TOKEN, SYNC_GIST_ID } from "@/utils/constants"
+import { hasSyncConfig as hasRemoteSyncConfig } from "@/sync/syncProvider"
 
 const settingStore = useSettingStore()
 
@@ -53,9 +53,7 @@ const handleUpload = async () => {
 }
 
 const hasSyncConfig = () => {
-  const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
-  const gistId = localStorage.getItem(SYNC_GIST_ID)
-  return !!(accessToken && gistId)
+  return hasRemoteSyncConfig("download")
 }
 
 const updateRemainingTime = () => {

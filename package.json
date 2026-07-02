@@ -23,7 +23,8 @@
     "vue": "^3.5.39",
     "vue-draggable-plus": "^0.6.1",
     "vue-i18n": "^11.4.6",
-    "vue-virtual-scroller": "^3.0.4"
+    "vue-virtual-scroller": "^3.0.4",
+    "webdav": "^5.10.0"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.7.0",

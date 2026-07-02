@@ -12,7 +12,7 @@
             v-if="versions.length > 0"
             size="small"
             :loading="loading"
-            :disabled="!hasGistConfig || isGitee"
+            :disabled="!hasGistConfig || !isGithub"
             @click="handleGetData"
           >
             <template #icon>
@@ -24,7 +24,7 @@
             type="primary"
             size="small"
             :loading="loading"
-            :disabled="!hasGistConfig || isGitee"
+            :disabled="!hasGistConfig || !isGithub"
             @click="handleGetData"
           >
             {{ ft("get-data") }}
@@ -32,12 +32,12 @@
         </div>
       </div>
 
-      <div v-if="!hasGistConfig" class="text-xs text-text-secondary">
-        {{ ft("config-gist-sync") }}
+      <div v-if="!isGithub" class="text-xs text-text-secondary">
+        {{ ft("sync-no-version-support") }}
       </div>
 
-      <div v-else-if="isGitee" class="text-xs text-text-secondary">
-        {{ ft("gitee-no-version-support") }}
+      <div v-else-if="!hasGistConfig" class="text-xs text-text-secondary">
+        {{ ft("config-gist-sync") }}
       </div>
 
       <div v-else-if="loading" class="py-4 text-center">
@@ -118,8 +118,9 @@ const hasGistConfig = computed(() => {
   return !!(accessToken && gistId)
 })
 
-const isGitee = computed(() => {
-  return localStorage.getItem(SYNC_TYPE) === "gitee"
+const isGithub = computed(() => {
+  const syncType = localStorage.getItem(SYNC_TYPE)
+  return !syncType || syncType === "github"
 })
 
 const cacheKey = computed(() => {
@@ -175,7 +176,7 @@ const saveToCache = (data: GistVersion[]) => {
 }
 
 const handleGetData = async () => {
-  if (!hasGistConfig.value || isGitee.value) return
+  if (!hasGistConfig.value || !isGithub.value) return
 
   try {
     loading.value = true
@@ -196,14 +197,14 @@ const handleGetData = async () => {
 
 // 组件加载时尝试从缓存加载
 onMounted(() => {
-  if (hasGistConfig.value && !isGitee.value) {
+  if (hasGistConfig.value && isGithub.value) {
     loadFromCache()
   }
 })
 
 // 监听配置变化
-watch([hasGistConfig, isGitee, cacheKey], ([hasConfig, gitee]) => {
-  if (!hasConfig || gitee) {
+watch([hasGistConfig, isGithub, cacheKey], ([hasConfig, github]) => {
+  if (!hasConfig || !github) {
     versions.value = []
   } else {
     loadFromCache()

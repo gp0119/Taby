@@ -1,11 +1,8 @@
 import { db } from "@/db/database.ts"
 import dataManager from "@/db/index.ts"
-import GistManager from "@/sync/gistManager.ts"
-import { SyncData, SyncTokenData } from "@/type.ts"
+import { SyncData } from "@/type.ts"
 import { debounce, DebouncedFunc } from "lodash-es"
 import {
-  SYNC_GIST_TOKEN,
-  SYNC_GIST_ID,
   LOCAL_LAST_DOWNLOAD_TIME,
   REMOTE_LAST_UPDATE_TIME,
 } from "@/utils/constants.ts"
@@ -18,6 +15,12 @@ import {
   DirtyToken,
 } from "@/sync/dirtyStorage.ts"
 import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
+import {
+  getSyncProvider,
+  hasSyncConfig,
+  isWebdavSync,
+  RemoteMeta,
+} from "@/sync/syncProvider.ts"
 
 const UPLOAD_LOCK_NAME = "taby-sync-upload"
 
@@ -75,7 +78,7 @@ class SyncManager {
   }
 
   async resetSyncTargetState(): Promise<void> {
-    GistManager.clearSyncedRemoteState()
+    getSyncProvider().clearSyncedRemoteState()
     localStorage.removeItem(LOCAL_LAST_DOWNLOAD_TIME)
     await chrome.storage.sync.remove(REMOTE_LAST_UPDATE_TIME)
   }
@@ -203,8 +206,7 @@ class SyncManager {
       const spaceCount = await db.spaces.count()
       // 仅当本地"真的空"且没有任何待上传修改时，才尝试从远端恢复
       if (spaceCount === 0 && !this.isDirty()) {
-        const { accessToken, gistId } = await this.getToken()
-        if (accessToken && gistId) {
+        if (hasSyncConfig("download")) {
           console.warn("检测到本地数据为空，尝试从远程恢复...")
           try {
             await this.triggerDownload()
@@ -218,15 +220,6 @@ class SyncManager {
       console.error("数据完整性检查失败:", error)
     }
     return false
-  }
-
-  getToken = async (): Promise<SyncTokenData> => {
-    const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
-    const gistId = localStorage.getItem(SYNC_GIST_ID)
-    return {
-      accessToken: accessToken || "",
-      gistId: gistId || "",
-    }
   }
 
   setInterval(value: number) {
@@ -282,14 +275,13 @@ class SyncManager {
     force: boolean = false,
   ): Promise<string | undefined> => {
     const runUpload = async (): Promise<string | undefined> => {
-      const { accessToken, gistId } = await this.getToken()
-      if (!accessToken) return
+      if (!hasSyncConfig("upload")) return
 
       const dirtyToken = this._dirtyToken
       if (!force && dirtyToken === null) return
 
-      // 冲突检测：仅当已经有 Gist 存在时检查（首次 createGist 不需要）
-      if (gistId) {
+      // 冲突检测：仅当已经有可下载的远端目标时检查（首次创建 Gist 不需要）
+      if (hasSyncConfig("download")) {
         const decided = await this.detectAndResolveConflict()
         if (decided === "remote") throw new SyncConflictResolvedRemoteError()
         if (decided === "cancel") throw new SyncConflictCancelledError()
@@ -297,7 +289,7 @@ class SyncManager {
       }
 
       const data = await dataManager.getUploadData()
-      const newGistId = await GistManager.uploadData(data)
+      const newTargetId = await getSyncProvider().uploadData(data)
       const now = Date.now()
       await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(now))
@@ -307,7 +299,7 @@ class SyncManager {
           this._dirtyToken = null
         }
       }
-      return newGistId
+      return newTargetId
     }
 
     if (typeof navigator !== "undefined" && navigator.locks) {
@@ -330,9 +322,10 @@ class SyncManager {
   private async detectAndResolveConflict(): Promise<
     "no-conflict" | ConflictResolution
   > {
-    let meta: Awaited<ReturnType<typeof GistManager.fetchGistMeta>>
+    let meta: RemoteMeta
+    const provider = getSyncProvider()
     try {
-      meta = await GistManager.fetchGistMeta()
+      meta = await provider.fetchRemoteMeta()
     } catch (err) {
       // 网络问题等：放过，后续 PATCH 失败也是相同的失败模式
       console.warn("Conflict pre-check fetch failed, skipping:", err)
@@ -340,22 +333,27 @@ class SyncManager {
     }
     if (meta.notModified) return "no-conflict"
 
-    const lastSeen = GistManager.getLastRemoteUpdatedAt()
+    const lastSeen = provider.getLastRemoteUpdatedAt()
+    const lastEtag = provider.getLastEtag()
     const remoteUpdatedAt = meta.updatedAt ?? ""
 
     if (!lastSeen && remoteUpdatedAt) {
       const canBootstrapBaseline =
         await this.canBootstrapMissingRemoteBaseline(remoteUpdatedAt)
       if (canBootstrapBaseline) {
-        GistManager.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+        provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
         return "no-conflict"
       }
     }
 
     // lastSeen 缺失通常意味着首次上传 / 元数据被清。保守处理：当远端有数据时也按冲突走，
     // 避免“配了一个共用的 gistId 但本地从没拉过远端”的场景被覆盖。
+    const hasTimestampConflict =
+      !!lastSeen && !!remoteUpdatedAt && remoteUpdatedAt > lastSeen
+    const hasEtagConflict =
+      !!lastSeen && !!lastEtag && !!meta.etag && meta.etag !== lastEtag
     const isConflict = lastSeen
-      ? !!remoteUpdatedAt && remoteUpdatedAt > lastSeen
+      ? !!meta.data && (hasTimestampConflict || hasEtagConflict)
       : !!remoteUpdatedAt && !!meta.data?.spaces?.length
 
     if (!isConflict) return "no-conflict"
@@ -389,7 +387,7 @@ class SyncManager {
       resetMainScrollPosition()
       await clearDirtyAsync()
       this._dirtyToken = null
-      GistManager.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+      provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
       // 通知 UI 刷新（store + 上下文菜单等）
       try {
@@ -451,13 +449,11 @@ class SyncManager {
     return result
   }
 
-  // allowEmpty: 用户在 UI 中显式确认覆盖时（同步对话框、版本回滚）才允许传 true。
-  // 所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
-  triggerDownload = async (
+  private importRemoteData = async (
+    data: SyncData,
     options: { allowEmpty?: boolean } = {},
   ): Promise<SyncData> => {
     const { allowEmpty = false } = options
-    const data = await GistManager.downloadAll()
 
     const isRemoteEmpty = !data?.spaces || data.spaces.length === 0
     if (isRemoteEmpty && !allowEmpty) {
@@ -480,11 +476,23 @@ class SyncManager {
     return data
   }
 
+  // allowEmpty: 用户在 UI 中显式确认覆盖时（同步对话框、版本回滚）才允许传 true。
+  // 所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
+  triggerDownload = async (
+    options: { allowEmpty?: boolean } = {},
+  ): Promise<SyncData> => {
+    const data = await getSyncProvider().downloadAll()
+    return await this.importRemoteData(data, options)
+  }
+
   autoDownload = async (): Promise<boolean> => {
-    const { accessToken, gistId } = await this.getToken()
-    if (!accessToken || !gistId) return false
+    if (!hasSyncConfig("download")) return false
 
     try {
+      if (isWebdavSync()) {
+        return await this.autoDownloadByRemoteMeta()
+      }
+
       // 先用 chrome.storage.sync 上的 REMOTE_LAST_UPDATE_TIME 做廉价检查，
       // 没必要每次 visibilitychange 都打 GitHub API。
       const syncStorage = await chrome.storage.sync.get([
@@ -519,7 +527,7 @@ class SyncManager {
         return false
       }
 
-      console.log("Remote Gist potentially newer, downloading...")
+      console.log("Remote data potentially newer, downloading...")
       await this.triggerDownload()
       return true
     } catch (error) {
@@ -528,9 +536,37 @@ class SyncManager {
     }
   }
 
+  private autoDownloadByRemoteMeta = async (): Promise<boolean> => {
+    const provider = getSyncProvider()
+    const meta = await provider.fetchRemoteMeta()
+    if (meta.notModified || !meta.data) return false
+
+    const lastSeen = provider.getLastRemoteUpdatedAt()
+    const remoteUpdatedAt = meta.updatedAt ?? ""
+    if (
+      !meta.etag &&
+      lastSeen &&
+      remoteUpdatedAt &&
+      remoteUpdatedAt <= lastSeen
+    ) {
+      return false
+    }
+
+    // 远端比本地新。如果本地还有未上传的修改，先 flush 保护本地数据，
+    // 把 last-write-wins 的责任交给冲突检测路径。
+    if (this.isDirty()) {
+      await this.safeUpload(true)
+      return false
+    }
+
+    console.log("Remote WebDAV data potentially newer, downloading...")
+    await this.importRemoteData(meta.data)
+    provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+    return true
+  }
+
   autoUpload = async () => {
-    const { accessToken, gistId } = await this.getToken()
-    if (!accessToken || !gistId) return
+    if (!hasSyncConfig("download")) return
 
     const dirtyToken = this._dirtyToken
     if (dirtyToken === null) return
