@@ -226,7 +226,8 @@ const formModel = ref({
 const isWebdav = computed(() => formModel.value.syncType === "webdav")
 const getSyncLabel = (value: string) => {
   return (
-    syncTypeOptions.value.find((item) => item.value === value)?.label || "GitHub"
+    syncTypeOptions.value.find((item) => item.value === value)?.label ||
+    "GitHub"
   )
 }
 const selectedSyncLabel = computed(() => {

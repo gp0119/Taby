@@ -90,6 +90,56 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  github-release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chrome-webstore-${{ needs.build.outputs.version }}
+          path: release
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ needs.build.outputs.version }}"
+          NOTES_FILE="$RUNNER_TEMP/release-notes.md"
+
+          awk -v version="$VERSION" '
+            $0 ~ "^##[[:space:]]+" version "([[:space:]]|-|$)" { found = 1; next }
+            found && /^##[[:space:]]+/ { exit }
+            found { print }
+          ' CHANGELOG.md | sed '/./,$!d' > "$NOTES_FILE"
+
+          if [ ! -s "$NOTES_FILE" ]; then
+            echo "No changelog entry found for version $VERSION." >&2
+            exit 1
+          fi
+
+          echo "notes_file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          ZIP_FILE: release/${{ needs.build.outputs.zip_name }}
+          NOTES_FILE: ${{ steps.changelog.outputs.notes_file }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" --title "$TAG" --notes-file "$NOTES_FILE"
+            gh release upload "$TAG" "$ZIP_FILE" --clobber
+          else
+            gh release create "$TAG" "$ZIP_FILE" --title "$TAG" --notes-file "$NOTES_FILE"
+          fi
+
   publish:
     name: Publish to Chrome Web Store
     needs: build

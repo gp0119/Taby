@@ -16,7 +16,8 @@ export default {
   "access-token": "AccessToken",
   "gist-id": "GistId",
   "webdav-host": "WebDAV 地址",
-  "webdav-host-placeholder": "域名或 WebDAV 路径，如：dav.example.com/remote.php/dav/files/me",
+  "webdav-host-placeholder":
+    "域名或 WebDAV 路径，如：dav.example.com/remote.php/dav/files/me",
   "webdav-port-placeholder": "可选，如：443",
   "webdav-folder-placeholder": "可选，同步目录，如：taby/backups",
   "webdav-filename-placeholder": "同步文件名，如：taby-sync.json",
