@@ -164,18 +164,20 @@ jobs:
 
       - name: Publish package
         env:
-          CLIENT_ID: ${{ secrets.CHROME_WEBSTORE_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
-          REFRESH_TOKEN: ${{ secrets.CHROME_WEBSTORE_REFRESH_TOKEN }}
-          PUBLISHER_ID: ${{ secrets.CHROME_WEBSTORE_PUBLISHER_ID }}
-          EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
+          PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.CWS_SERVICE_ACCOUNT_JSON_BASE64 }}
+          GOOGLE_APPLICATION_CREDENTIALS: .secrets/chrome-webstore-sa.json
           ZIP_FILE: release/${{ needs.build.outputs.zip_name }}
         run: |
-          for key in CLIENT_ID CLIENT_SECRET REFRESH_TOKEN PUBLISHER_ID EXTENSION_ID; do
+          for key in PUBLISHER_ID EXTENSION_ID SERVICE_ACCOUNT_JSON_BASE64; do
             if [ -z "${!key}" ]; then
               echo "Missing GitHub secret mapped to $key." >&2
               exit 1
             fi
           done
+
+          mkdir -p .secrets
+          echo "$SERVICE_ACCOUNT_JSON_BASE64" | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
 
           node scripts/chrome-webstore.mjs
