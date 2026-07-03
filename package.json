@@ -8,6 +8,7 @@
     "build": "vite build",
     "chrome:upload": "node scripts/chrome-webstore.mjs",
     "edge:upload": "node scripts/edge-addons.mjs",
+    "release": "release-it",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -44,6 +45,7 @@
     "postcss": "^8.5.15",
     "prettier": "3.8.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "release-it": "^20.2.1",
     "tailwindcss": "3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.62.0",
