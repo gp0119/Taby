@@ -288,6 +288,13 @@ const currentWebdavConfig = () => ({
   filename: formModel.value.webdavFilename,
 })
 
+const formatErrorMessage = (fallback: string, err: unknown) => {
+  if (err instanceof Error && err.message) {
+    return `${fallback}: ${err.message}`
+  }
+  return fallback
+}
+
 const handleSyncTypeChange = (value: string) => {
   if (value === formModel.value.syncType) return
 
@@ -340,8 +347,8 @@ const handleTestWebdav = async () => {
       password: formModel.value.webdavPassword,
     })
     message.success(ft("test-connection-success"))
-  } catch {
-    message.error(ft("test-connection-fail"))
+  } catch (err) {
+    message.error(formatErrorMessage(ft("test-connection-fail"), err))
   } finally {
     testLoading.value = false
   }
@@ -371,7 +378,7 @@ const handleUpload = () => {
       } else if (err instanceof SyncConflictCancelledError) {
         message.info("已取消上传")
       } else {
-        message.error(ft("fail", "upload"))
+        message.error(formatErrorMessage(ft("fail", "upload"), err))
       }
       uploadLoading.value = false
     }
@@ -393,8 +400,8 @@ const handleDownload = () => {
           message.success(ft("success", "download"))
           downloadLoading.value = false
           show.value = false
-        } catch {
-          message.error(ft("fail", "download"))
+        } catch (err) {
+          message.error(formatErrorMessage(ft("fail", "download"), err))
           downloadLoading.value = false
         }
       })

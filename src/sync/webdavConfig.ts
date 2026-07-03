@@ -111,18 +111,41 @@ export const testWebdavConnection = async (
   config: WebdavConfig,
   credential: WebdavCredential,
 ) => {
-  const directory = buildWebdavDirectory(config)
-  if (!directory) {
+  const location = buildWebdavLocation(config)
+  if (!location) {
     throw new Error("Missing WebDAV host")
   }
 
   const hasCredentials = !!(credential.username || credential.password)
-  const client = createClient(directory.baseUrl, {
+  const client = createClient(location.baseUrl, {
     authType: hasCredentials ? AuthType.Auto : AuthType.None,
     username: credential.username,
     password: credential.password,
   })
-  const stat = await client.stat(directory.path)
+
+  if (location.directoryPath) {
+    await client.createDirectory(location.directoryPath, { recursive: true })
+  }
+
+  const testFileName = `.taby-webdav-test-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`
+  const testFilePath = location.directoryPath
+    ? `${location.directoryPath}/${testFileName}`
+    : testFileName
+  const didWrite = await client.putFileContents(testFilePath, "ok", {
+    overwrite: true,
+  })
+  if (!didWrite) {
+    throw new Error("WebDAV test file write failed")
+  }
+  try {
+    await client.deleteFile(testFilePath)
+  } catch (err) {
+    console.warn("Failed to clean WebDAV test file:", err)
+  }
+
+  const stat = await client.stat(location.directoryPath || "")
   if ("data" in stat) {
     return stat.data
   }
