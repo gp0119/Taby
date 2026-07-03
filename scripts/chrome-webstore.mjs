@@ -2,6 +2,7 @@
 
 import fs from "node:fs"
 import path from "node:path"
+import crypto from "node:crypto"
 import { fileURLToPath } from "node:url"
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -20,11 +21,9 @@ if (args.help) {
 }
 
 const requiredEnv = [
-  "CLIENT_ID",
-  "CLIENT_SECRET",
-  "REFRESH_TOKEN",
   "PUBLISHER_ID",
   "EXTENSION_ID",
+  "GOOGLE_APPLICATION_CREDENTIALS",
 ]
 
 const missingEnv = requiredEnv.filter((key) => !process.env[key])
@@ -32,6 +31,8 @@ const missingEnv = requiredEnv.filter((key) => !process.env[key])
 if (missingEnv.length > 0) {
   fail(`Missing required .env values: ${missingEnv.join(", ")}`)
 }
+
+const serviceAccountCredentials = getServiceAccountCredentials()
 
 const zipFile = path.resolve(
   rootDir,
@@ -153,24 +154,93 @@ function parseArgs(argv) {
 }
 
 async function getAccessToken() {
-  const response = await fetchJson("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+  console.log(`Using service account: ${serviceAccountCredentials.client_email}`)
+  return getServiceAccountAccessToken(serviceAccountCredentials)
+}
+
+function getServiceAccountCredentials() {
+  const credentialsPath = path.resolve(
+    rootDir,
+    process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  )
+
+  if (!fs.existsSync(credentialsPath)) {
+    fail(`Service account key file not found: ${credentialsPath}`)
+  }
+
+  return parseServiceAccountJson(
+    fs.readFileSync(credentialsPath, "utf8"),
+    credentialsPath,
+  )
+}
+
+function parseServiceAccountJson(value, source) {
+  let credentials
+
+  try {
+    credentials = JSON.parse(value)
+  } catch (error) {
+    fail(`Invalid service account JSON in ${source}: ${error.message}`)
+  }
+
+  if (!credentials.client_email || !credentials.private_key) {
+    fail(
+      `Service account JSON in ${source} must include client_email and private_key.`,
+    )
+  }
+
+  return credentials
+}
+
+async function getServiceAccountAccessToken(credentials) {
+  const now = Math.floor(Date.now() / 1000)
+  const jwtHeader = {
+    alg: "RS256",
+    typ: "JWT",
+    kid: credentials.private_key_id,
+  }
+  const jwtClaimSet = {
+    iss: credentials.client_email,
+    scope: "https://www.googleapis.com/auth/chromewebstore",
+    aud: credentials.token_uri || "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now,
+  }
+
+  const unsignedJwt = `${base64UrlEncode(JSON.stringify(jwtHeader))}.${base64UrlEncode(JSON.stringify(jwtClaimSet))}`
+  const signature = crypto
+    .createSign("RSA-SHA256")
+    .update(unsignedJwt)
+    .sign(credentials.private_key)
+  const assertion = `${unsignedJwt}.${base64UrlEncode(signature)}`
+
+  const response = await fetchJson(
+    credentials.token_uri || "https://oauth2.googleapis.com/token",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion,
+      }),
     },
-    body: new URLSearchParams({
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      refresh_token: process.env.REFRESH_TOKEN,
-      grant_type: "refresh_token",
-    }),
-  })
+  )
 
   if (!response.access_token) {
-    fail("Token response did not include access_token.")
+    fail("Service account token response did not include access_token.")
   }
 
   return response.access_token
+}
+
+function base64UrlEncode(value) {
+  return Buffer.from(value)
+    .toString("base64")
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "")
 }
 
 async function uploadZip(token, filePath) {
@@ -240,14 +310,6 @@ async function fetchJson(url, options = {}) {
 
   if (!response.ok) {
     const message = data.error?.message || text || response.statusText
-    const description = data.error_description || data.error?.status
-
-    if (data.error === "unauthorized_client") {
-      throw new Error(
-        `${response.status} ${response.statusText}: ${message}${description ? ` (${description})` : ""}\n` +
-          "OAuth credentials are not a matching set. Regenerate REFRESH_TOKEN in OAuth Playground with the CLIENT_ID and CLIENT_SECRET from this .env file.",
-      )
-    }
 
     throw new Error(`${response.status} ${response.statusText}: ${message}`)
   }
@@ -268,11 +330,9 @@ Usage:
   node scripts/chrome-webstore.mjs --zip=release/${pkg.version}.zip
 
 Required .env values:
-  CLIENT_ID
-  CLIENT_SECRET
-  REFRESH_TOKEN
   PUBLISHER_ID
   EXTENSION_ID
+  GOOGLE_APPLICATION_CREDENTIALS=path/to/service-account.json
 
 Optional .env values:
   ZIP_FILE

@@ -31,3 +31,5 @@ auto-imports.d.ts
 .eslintrc-auto-import.json
 
 .env
+.secrets/
+service-account*.json
