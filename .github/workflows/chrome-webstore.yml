@@ -126,19 +126,20 @@ jobs:
 
           echo "notes_file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
 
+      - name: Show release notes
+        run: cat "${{ steps.changelog.outputs.notes_file }}"
+
       - name: Create or update release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-          ZIP_FILE: release/${{ needs.build.outputs.zip_name }}
-          NOTES_FILE: ${{ steps.changelog.outputs.notes_file }}
-        run: |
-          if gh release view "$TAG" > /dev/null 2>&1; then
-            gh release edit "$TAG" --title "$TAG" --notes-file "$NOTES_FILE"
-            gh release upload "$TAG" "$ZIP_FILE" --clobber
-          else
-            gh release create "$TAG" "$ZIP_FILE" --title "$TAG" --notes-file "$NOTES_FILE"
-          fi
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          bodyFile: ${{ steps.changelog.outputs.notes_file }}
+          artifacts: release/${{ needs.build.outputs.zip_name }}
+          allowUpdates: true
+          replacesArtifacts: true
+          artifactErrorsFailBuild: true
 
   publish:
     name: Publish to Chrome Web Store
