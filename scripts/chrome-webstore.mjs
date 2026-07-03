@@ -154,7 +154,9 @@ function parseArgs(argv) {
 }
 
 async function getAccessToken() {
-  console.log(`Using service account: ${serviceAccountCredentials.client_email}`)
+  console.log(
+    `Using service account: ${serviceAccountCredentials.client_email}`,
+  )
   return getServiceAccountAccessToken(serviceAccountCredentials)
 }
 

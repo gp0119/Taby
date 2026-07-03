@@ -33,3 +33,4 @@ auto-imports.d.ts
 .env
 .secrets/
 service-account*.json
+RELEASE_FLOW.md

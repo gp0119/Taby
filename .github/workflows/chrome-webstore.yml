@@ -182,3 +182,41 @@ jobs:
           echo "$SERVICE_ACCOUNT_JSON_BASE64" | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
 
           node scripts/chrome-webstore.mjs
+
+  publish-edge:
+    name: Publish to Microsoft Edge Add-ons
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: edge-addons-production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: chrome-webstore-${{ needs.build.outputs.version }}
+          path: release
+
+      - name: Publish package
+        env:
+          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+          ZIP_FILE: release/${{ needs.build.outputs.zip_name }}
+        run: |
+          for key in EDGE_CLIENT_ID EDGE_API_KEY EDGE_PRODUCT_ID; do
+            if [ -z "${!key}" ]; then
+              echo "Missing GitHub secret mapped to $key." >&2
+              exit 1
+            fi
+          done
+
+          node scripts/edge-addons.mjs
