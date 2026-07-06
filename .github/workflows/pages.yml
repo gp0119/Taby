@@ -1,0 +1,75 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "*.md"
+      - "screenshots/**"
+      - "src/assets/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Markdown pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare Pages source
+        run: |
+          mkdir -p pages-src
+
+          find . -maxdepth 1 -name "*.md" -exec cp {} pages-src/ \;
+          cp README.md pages-src/index.md
+
+          mkdir -p pages-src/screenshots pages-src/src/assets
+          cp -R screenshots/. pages-src/screenshots/
+          cp -R src/assets/. pages-src/src/assets/
+
+          cat > pages-src/_config.yml <<'EOF'
+          title: Taby
+          markdown: kramdown
+          permalink: pretty
+          EOF
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: pages-src
+          destination: _site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
