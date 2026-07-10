@@ -5,6 +5,8 @@ import { debounce, DebouncedFunc } from "lodash-es"
 import {
   LOCAL_LAST_DOWNLOAD_TIME,
   REMOTE_LAST_UPDATE_TIME,
+  SYNC_LAST_ETAG,
+  SYNC_LAST_REMOTE_UPDATED_AT,
 } from "@/utils/constants.ts"
 import {
   getDirtyToken as getDirtyTokenAsync,
@@ -79,6 +81,20 @@ class SyncManager {
 
   async resetSyncTargetState(): Promise<void> {
     getSyncProvider().clearSyncedRemoteState()
+    const remoteStateKeys = [SYNC_LAST_ETAG, SYNC_LAST_REMOTE_UPDATED_AT]
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index)
+      if (
+        key &&
+        (remoteStateKeys.some(
+          (stateKey) =>
+            key === stateKey || key.startsWith(`${stateKey}:webdav:`),
+        ) ||
+          key.startsWith("gist_versions_cache_"))
+      ) {
+        localStorage.removeItem(key)
+      }
+    }
     localStorage.removeItem(LOCAL_LAST_DOWNLOAD_TIME)
     await chrome.storage.sync.remove(REMOTE_LAST_UPDATE_TIME)
   }

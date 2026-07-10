@@ -185,7 +185,11 @@ import {
   SYNC_GIST_TOKEN,
   SYNC_TYPE,
   SYNC_WEBDAV_FILENAME,
+  SYNC_WEBDAV_FOLDER,
+  SYNC_WEBDAV_HOST,
   SYNC_WEBDAV_PASSWORD,
+  SYNC_WEBDAV_PORT,
+  SYNC_WEBDAV_PROTOCOL,
   SYNC_WEBDAV_USERNAME,
 } from "@/utils/constants.ts"
 import {
@@ -202,6 +206,16 @@ import Gitee from "@/components/gitee.vue"
 const { ft, ft2 } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
 const { updateContextMenus } = useRefresh()
+const gistConfigKeys = [SYNC_GIST_TOKEN, SYNC_GIST_ID]
+const webdavConfigKeys = [
+  SYNC_WEBDAV_PROTOCOL,
+  SYNC_WEBDAV_HOST,
+  SYNC_WEBDAV_PORT,
+  SYNC_WEBDAV_FOLDER,
+  SYNC_WEBDAV_FILENAME,
+  SYNC_WEBDAV_USERNAME,
+  SYNC_WEBDAV_PASSWORD,
+]
 const syncTypeOptions = ref([
   { label: "GitHub", value: "github" },
   { label: "Gitee", value: "gitee" },
@@ -320,16 +334,22 @@ const hasSyncTargetChanged = () => {
 
 const persistCurrentConfig = async () => {
   const targetChanged = hasSyncTargetChanged()
+  const inactiveConfigKeys = isWebdav.value ? gistConfigKeys : webdavConfigKeys
+  inactiveConfigKeys.forEach((key) => localStorage.removeItem(key))
+  await chrome.storage.sync.remove(inactiveConfigKeys)
 
-  const webdavValues = persistWebdavConfig(currentWebdavConfig())
-  const values = {
-    [SYNC_TYPE]: formModel.value.syncType,
-    [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-    [SYNC_GIST_ID]: formModel.value.gistId,
-    ...webdavValues,
-    [SYNC_WEBDAV_USERNAME]: formModel.value.webdavUsername,
-    [SYNC_WEBDAV_PASSWORD]: formModel.value.webdavPassword,
-  }
+  const values: Record<string, string> = isWebdav.value
+    ? {
+        [SYNC_TYPE]: formModel.value.syncType,
+        ...persistWebdavConfig(currentWebdavConfig()),
+        [SYNC_WEBDAV_USERNAME]: formModel.value.webdavUsername,
+        [SYNC_WEBDAV_PASSWORD]: formModel.value.webdavPassword,
+      }
+    : {
+        [SYNC_TYPE]: formModel.value.syncType,
+        [SYNC_GIST_TOKEN]: formModel.value.accessToken,
+        [SYNC_GIST_ID]: formModel.value.gistId,
+      }
   Object.entries(values).forEach(([key, value]) => {
     localStorage.setItem(key, value)
   })
