@@ -1,4 +1,4 @@
-import { SyncData } from "@/type.ts"
+import { SyncData, SyncIdentityRegistry } from "@/type.ts"
 import {
   SYNC_LAST_ETAG,
   SYNC_LAST_REMOTE_UPDATED_AT,
@@ -122,6 +122,61 @@ class WebdavManager {
       labels: Array.isArray(maybeData.labels) ? maybeData.labels : [],
       cards: Array.isArray(maybeData.cards) ? maybeData.cards : [],
       favicons: Array.isArray(maybeData.favicons) ? maybeData.favicons : [],
+      identity: this.normalizeIdentity(maybeData.identity),
+    }
+  }
+
+  private normalizeIdentity(
+    identity: unknown,
+  ): SyncIdentityRegistry | undefined {
+    if (!identity || typeof identity !== "object") return undefined
+    const candidate = identity as Partial<SyncIdentityRegistry>
+    if (candidate.schemaVersion !== 2 || !candidate.tables) return undefined
+    const tableNames = [
+      "spaces",
+      "collections",
+      "labels",
+      "cards",
+      "favicons",
+    ] as const
+    if (
+      tableNames.some(
+        (tableName) =>
+          !candidate.tables?.[tableName] ||
+          typeof candidate.tables[tableName] !== "object",
+      )
+    ) {
+      return undefined
+    }
+    return candidate as SyncIdentityRegistry
+  }
+
+  private getIdentityFilePath(filePath: string) {
+    const slashIndex = filePath.lastIndexOf("/")
+    const directory = slashIndex >= 0 ? filePath.slice(0, slashIndex + 1) : ""
+    const fileName = slashIndex >= 0 ? filePath.slice(slashIndex + 1) : filePath
+    const extensionIndex = fileName.lastIndexOf(".")
+    if (extensionIndex <= 0) {
+      return `${filePath}.identity-v2`
+    }
+    return `${directory}${fileName.slice(0, extensionIndex)}.identity-v2${fileName.slice(extensionIndex)}`
+  }
+
+  private async fetchIdentity(
+    client: WebDAVClient,
+    filePath: string,
+  ): Promise<SyncIdentityRegistry | undefined> {
+    try {
+      const content = await client.getFileContents(
+        this.getIdentityFilePath(filePath),
+        { format: "text" },
+      )
+      return this.normalizeIdentity(JSON.parse(String(content)))
+    } catch (error) {
+      if (!this.isNotFoundError(error)) {
+        console.warn("Failed to read WebDAV identity sidecar:", error)
+      }
+      return undefined
     }
   }
 
@@ -168,10 +223,11 @@ class WebdavManager {
       await this.ensureDirectory(client, directoryPath)
     }
     const updatedAt = new Date().toISOString()
+    const normalizedData = this.normalizeData(data)
     const payload: WebdavPayload = {
       version: 1,
       updatedAt,
-      data: this.normalizeData(data),
+      data: normalizedData,
     }
     await client.putFileContents(filePath, JSON.stringify(payload), {
       overwrite: true,
@@ -179,6 +235,18 @@ class WebdavManager {
         "Content-Type": "application/json",
       },
     })
+    if (normalizedData.identity) {
+      await client.putFileContents(
+        this.getIdentityFilePath(filePath),
+        JSON.stringify(normalizedData.identity),
+        {
+          overwrite: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      )
+    }
     try {
       const stat = await this.statFile(client, filePath)
       this.saveSyncedRemoteState(
@@ -241,6 +309,8 @@ class WebdavManager {
 
     const content = await client.getFileContents(filePath, { format: "text" })
     const payload = this.parsePayload(JSON.parse(String(content)))
+    const identity = await this.fetchIdentity(client, filePath)
+    if (!payload.data.identity && identity) payload.data.identity = identity
     return {
       notModified: false,
       updatedAt: remoteUpdatedAt || payload.updatedAt,

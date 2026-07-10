@@ -10,8 +10,11 @@ import {
   SpaceWithCollections,
   Favicon,
   ExportSpace,
+  EntityUid,
+  SyncData,
 } from "@/type.ts"
 import { db } from "./database.ts"
+import { createEntityUid, isEntityUid } from "@/utils/entityUid.ts"
 
 type TableName = "spaces" | "collections" | "labels" | "cards" | "favicons"
 
@@ -61,19 +64,41 @@ class DataManager {
     this.onModify?.(table)
   }
 
+  private async addWithUid<T>(
+    insert: (uid: EntityUid) => Promise<T>,
+  ): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await insert(createEntityUid())
+      } catch (error) {
+        if (
+          attempt === 2 ||
+          !(error instanceof Error) ||
+          error.name !== "ConstraintError"
+        ) {
+          throw error
+        }
+      }
+    }
+    throw new Error("Unable to generate a unique entity UID")
+  }
+
   async getAllSpaces() {
     return db.spaces.orderBy("order").toArray()
   }
 
-  async addSpace(space: InsertType<Space, "id" | "order">) {
+  async addSpace(space: InsertType<Space, "id" | "uid" | "order">) {
     const lastSpace = await db.spaces.orderBy("order").last()
     const { title, icon } = space
-    const result = await db.spaces.add({
-      title: title || "",
-      order: lastSpace ? lastSpace.order + this.ORDER_STEP : this.ORDER_STEP,
-      createdAt: Date.now(),
-      icon: icon || "StorefrontOutline",
-    })
+    const result = await this.addWithUid((uid) =>
+      db.spaces.add({
+        uid,
+        title: title || "",
+        order: lastSpace ? lastSpace.order + this.ORDER_STEP : this.ORDER_STEP,
+        createdAt: Date.now(),
+        icon: icon || "StorefrontOutline",
+      }),
+    )
     this.notifyModify("spaces")
     return result
   }
@@ -138,7 +163,7 @@ class DataManager {
   }
 
   async addCollection(
-    collection: Omit<Collection, "id" | "order">,
+    collection: Omit<Collection, "id" | "uid" | "order">,
     position: movePosition = "END",
   ) {
     let result: number | undefined
@@ -154,13 +179,16 @@ class DataManager {
         const first = collections[0]
         const newOrder = this.orderBetween(null, first)
         if (newOrder !== null) {
-          result = await db.collections.add({
-            title: collection.title || "",
-            spaceId: collection.spaceId,
-            labelIds: collection.labelIds,
-            order: newOrder,
-            createdAt: Date.now(),
-          })
+          result = await this.addWithUid((uid) =>
+            db.collections.add({
+              uid,
+              title: collection.title || "",
+              spaceId: collection.spaceId,
+              labelIds: collection.labelIds,
+              order: newOrder,
+              createdAt: Date.now(),
+            }),
+          )
         } else {
           // 密度过低 → 整组 rebalance（保留旧逻辑作为兜底）
           collections.unshift(collection as Collection)
@@ -171,13 +199,16 @@ class DataManager {
                   order: (index + 1) * this.ORDER_STEP,
                 })
               } else {
-                result = await db.collections.add({
-                  title: c.title || "",
-                  spaceId: c.spaceId,
-                  labelIds: c.labelIds,
-                  order: (index + 1) * this.ORDER_STEP,
-                  createdAt: Date.now(),
-                })
+                result = await this.addWithUid((uid) =>
+                  db.collections.add({
+                    uid,
+                    title: c.title || "",
+                    spaceId: c.spaceId,
+                    labelIds: c.labelIds,
+                    order: (index + 1) * this.ORDER_STEP,
+                    createdAt: Date.now(),
+                  }),
+                )
               }
             }),
           )
@@ -190,13 +221,18 @@ class DataManager {
             [collection.spaceId, Dexie.maxKey],
           )
           .last()
-        result = await db.collections.add({
-          title: collection.title || "",
-          spaceId: collection.spaceId,
-          labelIds: collection.labelIds,
-          order: lastCollection ? lastCollection.order + this.ORDER_STEP : 1000,
-          createdAt: Date.now(),
-        })
+        result = await this.addWithUid((uid) =>
+          db.collections.add({
+            uid,
+            title: collection.title || "",
+            spaceId: collection.spaceId,
+            labelIds: collection.labelIds,
+            order: lastCollection
+              ? lastCollection.order + this.ORDER_STEP
+              : 1000,
+            createdAt: Date.now(),
+          }),
+        )
       }
     })
     this.notifyModify("collections")
@@ -305,7 +341,9 @@ class DataManager {
   }
 
   async addLabel(title: string, color: string) {
-    const result = await db.labels.add({ title, color })
+    const result = await this.addWithUid((uid) =>
+      db.labels.add({ uid, title, color }),
+    )
     this.notifyModify("labels")
     return result
   }
@@ -315,10 +353,13 @@ class DataManager {
       const label = await db.labels.where("title").equals(title).first()
       if (label) return label.id
       const randomIndex = Math.floor(Math.random() * COLOR_LIST.length)
-      return (await db.labels.add({
-        title,
-        color: COLOR_LIST[randomIndex],
-      })) as number
+      return (await this.addWithUid((uid) =>
+        db.labels.add({
+          uid,
+          title,
+          color: COLOR_LIST[randomIndex],
+        }),
+      )) as number
     })
     if (notify) this.notifyModify("labels")
     return result
@@ -385,7 +426,10 @@ class DataManager {
     return result
   }
 
-  async addCard(card: Omit<Card, "id" | "order">, targetIndex?: number) {
+  async addCard(
+    card: Omit<Card, "id" | "uid" | "order">,
+    targetIndex?: number,
+  ) {
     const result = await db.transaction("rw", db.cards, async () => {
       const cards = await db.cards
         .where("[collectionId+order]")
@@ -411,10 +455,13 @@ class DataManager {
         targetIndex >= cards.length
       ) {
         const lastOrder = cards.length > 0 ? cards[cards.length - 1].order : 0
-        return await db.cards.add({
-          ...baseRecord,
-          order: lastOrder + this.ORDER_STEP,
-        })
+        return await this.addWithUid((uid) =>
+          db.cards.add({
+            ...baseRecord,
+            uid,
+            order: lastOrder + this.ORDER_STEP,
+          }),
+        )
       }
 
       // 在中间插入：用相邻 prev / next 的中间值，1 次写
@@ -422,7 +469,9 @@ class DataManager {
       const next = cards[targetIndex]
       const midOrder = this.orderBetween(prev, next)
       if (midOrder !== null) {
-        return await db.cards.add({ ...baseRecord, order: midOrder })
+        return await this.addWithUid((uid) =>
+          db.cards.add({ ...baseRecord, uid, order: midOrder }),
+        )
       }
 
       // 密度过低 → 整组 rebalance 兜底
@@ -434,10 +483,13 @@ class DataManager {
           })
         }),
       )
-      return await db.cards.add({
-        ...baseRecord,
-        order: newOrderAtIdx,
-      })
+      return await this.addWithUid((uid) =>
+        db.cards.add({
+          ...baseRecord,
+          uid,
+          order: newOrderAtIdx,
+        }),
+      )
     })
     this.notifyModify("cards")
     return result
@@ -723,8 +775,10 @@ class DataManager {
     )
   }
 
-  async batchAddCards(cards: Omit<Card, "id">[], notify = true) {
-    const result = await db.cards.bulkAdd(cards)
+  async batchAddCards(cards: Omit<Card, "id" | "uid">[], notify = true) {
+    const result = await db.cards.bulkAdd(
+      cards.map((card) => ({ ...card, uid: createEntityUid() })),
+    )
     if (notify) this.notifyModify("cards")
     return result
   }
@@ -735,7 +789,7 @@ class DataManager {
     const result = await db.transaction("rw", db.favicons, async () => {
       const isExist = await db.favicons.where("url").equals(_url).first()
       if (isExist) return isExist.id
-      return await db.favicons.add({ url: _url })
+      return await this.addWithUid((uid) => db.favicons.add({ uid, url: _url }))
     })
     if (notify) this.notifyModify("favicons")
     return result
@@ -762,9 +816,25 @@ class DataManager {
     const labels = await db.labels.toArray()
     const cards = await db.cards.toArray()
     const favicons = await db.favicons.toArray()
+    const spaceUidById = new Map(spaces.map((space) => [space.id, space.uid]))
+    const collectionUidById = new Map(
+      collections.map((collection) => [collection.id, collection.uid]),
+    )
+    const labelUidById = new Map(labels.map((label) => [label.id, label.uid]))
+    const faviconUidById = new Map(
+      favicons.map((favicon) => [favicon.id, favicon.uid]),
+    )
+    const identityTable = <T extends { id: number; uid: EntityUid }>(
+      entities: T[],
+    ) =>
+      Object.fromEntries(
+        entities.map((entity) => [String(entity.id), entity.uid]),
+      )
+
     return {
       spaces: spaces.map((space) => ({
         id: space.id,
+        uid: space.uid,
         title: space.title,
         icon: space.icon,
         order: space.order,
@@ -772,39 +842,61 @@ class DataManager {
       })),
       collections: collections.map((collection) => ({
         id: collection.id,
+        uid: collection.uid,
         title: collection.title,
         spaceId: collection.spaceId,
+        spaceUid: spaceUidById.get(collection.spaceId),
         order: collection.order,
         labelIds: collection.labelIds,
+        labelUids: collection.labelIds
+          .map((labelId) => labelUidById.get(labelId))
+          .filter((uid): uid is EntityUid => uid !== undefined),
         createdAt: collection.createdAt,
       })),
       labels: labels.map((label) => ({
         id: label.id,
+        uid: label.uid,
         title: label.title,
         color: label.color,
       })),
       cards: cards.map((card) => ({
         id: card.id,
+        uid: card.uid,
         title: card.title,
         url: card.url,
         order: card.order,
         faviconId: card.faviconId,
         description: card.description,
         collectionId: card.collectionId,
+        collectionUid: collectionUidById.get(card.collectionId),
+        faviconUid:
+          card.faviconId === undefined
+            ? undefined
+            : faviconUidById.get(card.faviconId),
         createdAt: card.createdAt,
       })),
       favicons: favicons.map((favicon) => ({
         id: favicon.id,
+        uid: favicon.uid,
         url: favicon.url,
       })),
+      identity: {
+        schemaVersion: 2 as const,
+        tables: {
+          spaces: identityTable(spaces),
+          collections: identityTable(collections),
+          labels: identityTable(labels),
+          cards: identityTable(cards),
+          favicons: identityTable(favicons),
+        },
+      },
     }
   }
 
-  private stripMetadata<T extends { createdAt?: number; id?: number }>(
-    obj: T,
-    additionalFields: (keyof T)[] = [],
-  ): Partial<T> {
-    const { createdAt: _, id: _id, ...rest } = obj
+  private stripMetadata<
+    T extends { createdAt?: number; id?: number; uid?: EntityUid },
+  >(obj: T, additionalFields: (keyof T)[] = []): Partial<T> {
+    const { createdAt: _, id: _id, uid: _uid, ...rest } = obj
     const result = { ...rest } as Partial<T>
     additionalFields.forEach((field) => {
       if (field in result) {
@@ -873,13 +965,90 @@ class DataManager {
     )
   }
 
-  async importData(data: {
-    spaces: Space[]
-    collections: Collection[]
-    labels: Label[]
-    cards: Card[]
-    favicons: Favicon[]
-  }) {
+  private normalizeSyncData(
+    data: SyncData,
+    existing: {
+      spaces: Space[]
+      collections: Collection[]
+      labels: Label[]
+      cards: Card[]
+      favicons: Favicon[]
+    },
+  ) {
+    const existingUids: Record<TableName, Map<number, EntityUid>> = {
+      spaces: new Map(existing.spaces.map((item) => [item.id, item.uid])),
+      collections: new Map(
+        existing.collections.map((item) => [item.id, item.uid]),
+      ),
+      labels: new Map(existing.labels.map((item) => [item.id, item.uid])),
+      cards: new Map(existing.cards.map((item) => [item.id, item.uid])),
+      favicons: new Map(existing.favicons.map((item) => [item.id, item.uid])),
+    }
+    const usedUids = new Set<EntityUid>()
+
+    const resolveUid = (
+      table: TableName,
+      id: number,
+      incomingUid: unknown,
+    ): EntityUid => {
+      const identityUid = data.identity?.tables?.[table]?.[String(id)]
+      if (
+        isEntityUid(incomingUid) &&
+        isEntityUid(identityUid) &&
+        incomingUid !== identityUid
+      ) {
+        throw new Error(`importData: identity mismatch for ${table}:${id}`)
+      }
+      const uid = [identityUid, incomingUid, existingUids[table].get(id)].find(
+        isEntityUid,
+      )
+      if (uid) {
+        if (usedUids.has(uid)) {
+          throw new Error(`importData: duplicate uid ${uid}`)
+        }
+        usedUids.add(uid)
+        return uid
+      }
+
+      let generatedUid = createEntityUid()
+      while (usedUids.has(generatedUid)) generatedUid = createEntityUid()
+      usedUids.add(generatedUid)
+      return generatedUid
+    }
+
+    const spaces: Space[] = (data.spaces || []).map((space) => ({
+      ...space,
+      uid: resolveUid("spaces", space.id, space.uid),
+    }))
+    const collections: Collection[] = (data.collections || []).map(
+      ({ spaceUid: _spaceUid, labelUids: _labelUids, ...collection }) => ({
+        ...collection,
+        uid: resolveUid("collections", collection.id, collection.uid),
+      }),
+    )
+    const labels: Label[] = (data.labels || []).map((label) => ({
+      ...label,
+      uid: resolveUid("labels", label.id, label.uid),
+    }))
+    const cards: Card[] = (data.cards || []).map(
+      ({
+        collectionUid: _collectionUid,
+        faviconUid: _faviconUid,
+        ...card
+      }) => ({
+        ...card,
+        uid: resolveUid("cards", card.id, card.uid),
+      }),
+    )
+    const favicons: Favicon[] = (data.favicons || []).map((favicon) => ({
+      ...favicon,
+      uid: resolveUid("favicons", favicon.id, favicon.uid),
+    }))
+
+    return { spaces, collections, labels, cards, favicons }
+  }
+
+  async importData(data: SyncData) {
     if (!data || typeof data !== "object") {
       throw new Error("importData: invalid data payload")
     }
@@ -894,6 +1063,21 @@ class DataManager {
     // 注意：不再 try/catch 吞掉错误。事务失败时会自动回滚，
     // 调用方需要据此感知失败、避免误把 LOCAL_LAST_DOWNLOAD_TIME 等元信息落库。
     await db.transaction("rw", tablesToLock, async () => {
+      const [spaces, collections, labels, cards, favicons] = await Promise.all([
+        db.spaces.toArray(),
+        db.collections.toArray(),
+        db.labels.toArray(),
+        db.cards.toArray(),
+        db.favicons.toArray(),
+      ])
+      const normalized = this.normalizeSyncData(data, {
+        spaces,
+        collections,
+        labels,
+        cards,
+        favicons,
+      })
+
       await Promise.all([
         db.spaces.clear(),
         db.collections.clear(),
@@ -902,34 +1086,29 @@ class DataManager {
         db.favicons.clear(),
       ])
       const chunkSize = 100
-      if (data.spaces && data.spaces.length > 0) {
-        await db.spaces.bulkPut(data.spaces)
+      if (normalized.spaces.length > 0) {
+        await db.spaces.bulkPut(normalized.spaces)
       }
-      if (data.collections && data.collections.length > 0) {
-        await db.collections.bulkPut(data.collections)
+      if (normalized.collections.length > 0) {
+        await db.collections.bulkPut(normalized.collections)
       }
-      if (data.labels && data.labels.length > 0) {
-        await db.labels.bulkPut(data.labels)
+      if (normalized.labels.length > 0) {
+        await db.labels.bulkPut(normalized.labels)
       }
       let faviconsToImport: Favicon[] = []
-      if (
-        data.cards &&
-        data.cards.length > 0 &&
-        data.favicons &&
-        data.favicons.length > 0
-      ) {
+      if (normalized.cards.length > 0 && normalized.favicons.length > 0) {
         const usedFaviconIds = new Set<number>()
-        data.cards.forEach((card) => {
+        normalized.cards.forEach((card) => {
           if (card.faviconId && card.faviconId > 0) {
             usedFaviconIds.add(card.faviconId)
           }
         })
-        faviconsToImport = data.favicons.filter((favicon) =>
+        faviconsToImport = normalized.favicons.filter((favicon) =>
           usedFaviconIds.has(favicon.id),
         )
       } else {
         faviconsToImport =
-          data.favicons && data.cards?.length === 0 ? data.favicons : []
+          normalized.cards.length === 0 ? normalized.favicons : []
       }
       if (faviconsToImport.length > 0) {
         const numChunks = Math.ceil(faviconsToImport.length / chunkSize)
@@ -941,12 +1120,12 @@ class DataManager {
         }
       }
 
-      if (data.cards && data.cards.length > 0) {
-        const numChunks = Math.ceil(data.cards.length / chunkSize)
+      if (normalized.cards.length > 0) {
+        const numChunks = Math.ceil(normalized.cards.length / chunkSize)
         for (let i = 0; i < numChunks; i++) {
           const start = i * chunkSize
           const end = start + chunkSize
-          const chunk = data.cards.slice(start, end)
+          const chunk = normalized.cards.slice(start, end)
           await db.cards.bulkPut(chunk)
         }
       }
@@ -1016,7 +1195,7 @@ class DataManager {
               spaceId,
               labelIds,
             })
-            const cards: Omit<Card, "id">[] = []
+            const cards: Omit<Card, "id" | "uid">[] = []
             for (const [index, card] of collection.cards.entries()) {
               let faviconId: number | undefined
               if (card.favicon) {

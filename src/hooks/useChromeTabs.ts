@@ -1,9 +1,9 @@
 import { ref } from "vue"
-import { Card } from "@/type.ts"
+import { CardView } from "@/type.ts"
 
 export function useChromeTabs() {
   const tabs = ref<{
-    [key: string]: Card[]
+    [key: string]: CardView[]
   }>({})
 
   const activeWindowId = ref<number>(0)
@@ -16,8 +16,8 @@ export function useChromeTabs() {
       currentWindow: true,
     })
     activeWindowId.value = currentWindowTabs[0].windowId!
-    tabs.value = allTabs.reduce((acc: { [key: string]: Card[] }, cur) => {
-      const tab: Card = {
+    tabs.value = allTabs.reduce((acc: { [key: string]: CardView[] }, cur) => {
+      const tab: CardView = {
         title: cur.title || "",
         url: cur.url || "",
         description: "",
@@ -64,7 +64,7 @@ export function useChromeTabs() {
     await getTabs()
   }
 
-  async function activeTab(child: Card) {
+  async function activeTab(child: CardView) {
     if (!child) return
     await chrome.windows.update(child.windowId!, { focused: true })
     return chrome.tabs.update(child.id, { active: true })

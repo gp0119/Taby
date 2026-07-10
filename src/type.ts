@@ -1,5 +1,8 @@
+export type EntityUid = string
+
 interface BaseEntity {
   id: number
+  uid: EntityUid
   createdAt?: number
 }
 
@@ -43,6 +46,8 @@ export interface Card extends BaseEntity {
   favicon?: string
 }
 
+export type CardView = Omit<Card, "uid"> & { uid?: EntityUid }
+
 export interface CollectionWithCards extends Collection {
   cards: Card[]
   labels: Label[]
@@ -52,17 +57,46 @@ export interface SpaceWithCollections extends Space {
   collections: Collection[]
 }
 
-export interface Favicon {
-  id: number
+export interface Favicon extends BaseEntity {
   url: string
 }
 
+export type SyncSpace = Omit<Space, "uid"> & { uid?: EntityUid }
+export type SyncLabel = Omit<Label, "uid"> & { uid?: EntityUid }
+export type SyncFavicon = Omit<Favicon, "uid"> & { uid?: EntityUid }
+
+export type SyncCollection = Omit<Collection, "uid"> & {
+  uid?: EntityUid
+  spaceUid?: EntityUid
+  labelUids?: EntityUid[]
+}
+
+export type SyncCard = Omit<Card, "uid"> & {
+  uid?: EntityUid
+  collectionUid?: EntityUid
+  faviconUid?: EntityUid
+}
+
+export type SyncIdentityTable = Record<string, EntityUid>
+
+export interface SyncIdentityRegistry {
+  schemaVersion: 2
+  tables: {
+    spaces: SyncIdentityTable
+    collections: SyncIdentityTable
+    labels: SyncIdentityTable
+    cards: SyncIdentityTable
+    favicons: SyncIdentityTable
+  }
+}
+
 export interface SyncData {
-  spaces: Space[]
-  collections: Collection[]
-  labels: Label[]
-  cards: Card[]
-  favicons: Favicon[]
+  spaces: SyncSpace[]
+  collections: SyncCollection[]
+  labels: SyncLabel[]
+  cards: SyncCard[]
+  favicons: SyncFavicon[]
+  identity?: SyncIdentityRegistry
 }
 
 export interface iOption {

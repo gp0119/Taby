@@ -17,13 +17,13 @@
 </template>
 
 <script setup lang="tsx">
-import { Card } from "@/type.ts"
+import { CardView } from "@/type.ts"
 import { getGoogleFavicon, getFaviconFromCache, getWsrvFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
 
 const props = withDefaults(
   defineProps<{
-    child: Card
+    child: CardView
     lazyload?: boolean
   }>(),
   {

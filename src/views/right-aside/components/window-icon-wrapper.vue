@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { Card } from "@/type.ts"
+import { CardView } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
 import WindowIcon from "@/views/right-aside/components/window-icon.vue"
 
@@ -49,7 +49,7 @@ onUnmounted(() => {
 
 defineProps<{
   tabs: {
-    [key: string]: Card[]
+    [key: string]: CardView[]
   }
   active: number | string
 }>()

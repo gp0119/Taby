@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { Card } from "@/type.ts"
+import { CardView } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useLayoutStore } from "@/store/layout"
@@ -135,7 +135,7 @@ onUnmounted(() => {
 })
 
 const props = defineProps<{
-  tab: Card[]
+  tab: CardView[]
   active: number | string
   windowId: number | string
   index: number

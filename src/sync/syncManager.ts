@@ -23,6 +23,7 @@ import {
   isWebdavSync,
   RemoteMeta,
 } from "@/sync/syncProvider.ts"
+import { createEntityUid } from "@/utils/entityUid.ts"
 
 const UPLOAD_LOCK_NAME = "taby-sync-upload"
 
@@ -201,6 +202,7 @@ class SyncManager {
 
   private async createDefaultSpace() {
     await db.spaces.add({
+      uid: createEntityUid(),
       title: "My Collections",
       order: 1000,
       createdAt: Date.now(),

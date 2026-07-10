@@ -20,6 +20,7 @@ interface GistRawResponse {
     labels?: { content: string }
     cards?: { content: string }
     favicons?: { content: string }
+    identityV2?: { content: string }
   }
 }
 
@@ -138,7 +139,8 @@ class GistManager {
     const files: { [key: string]: { content: string } } = {}
     Object.entries(data).forEach(([key, value]) => {
       if (value) {
-        files[key] = { content: compressToUTF16(JSON.stringify(value)) }
+        const fileName = key === "identity" ? "identityV2" : key
+        files[fileName] = { content: compressToUTF16(JSON.stringify(value)) }
       }
     })
     return files
@@ -146,11 +148,12 @@ class GistManager {
 
   private parseFiles(files: GistRawResponse["files"]): SyncData {
     return {
-      spaces: this.parseCompressed(files?.spaces?.content),
-      collections: this.parseCompressed(files?.collections?.content),
-      labels: this.parseCompressed(files?.labels?.content),
-      cards: this.parseCompressed(files?.cards?.content),
-      favicons: this.parseCompressed(files?.favicons?.content),
+      spaces: this.parseCompressed(files?.spaces?.content, []),
+      collections: this.parseCompressed(files?.collections?.content, []),
+      labels: this.parseCompressed(files?.labels?.content, []),
+      cards: this.parseCompressed(files?.cards?.content, []),
+      favicons: this.parseCompressed(files?.favicons?.content, []),
+      identity: this.parseCompressed(files?.identityV2?.content, undefined),
     }
   }
 
@@ -169,6 +172,10 @@ class GistManager {
     if (data.favicons?.length)
       files.favicons = {
         content: compressToUTF16(JSON.stringify(data.favicons)),
+      }
+    if (data.identity)
+      files.identityV2 = {
+        content: compressToUTF16(JSON.stringify(data.identity)),
       }
 
     const { response, data: body } = await this.rawRequest({
@@ -250,14 +257,14 @@ class GistManager {
     this.saveSyncedRemoteState(updatedAt, etag)
   }
 
-  private parseCompressed(content: string | undefined): any[] {
-    if (!content) return []
+  private parseCompressed<T>(content: string | undefined, fallback: T): T {
+    if (!content) return fallback
     const decompressed = decompressFromUTF16(content)
-    if (!decompressed) return []
+    if (!decompressed) return fallback
     try {
-      return JSON.parse(decompressed)
+      return JSON.parse(decompressed) as T
     } catch {
-      return []
+      return fallback
     }
   }
 

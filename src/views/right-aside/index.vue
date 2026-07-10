@@ -47,7 +47,7 @@ import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import { debounce } from "lodash-es"
 import TabsWrapper from "./components/tabs-wrapper.vue"
 import type { SortableEvent } from "vue-draggable-plus"
-import type { Card as iCard } from "@/type"
+import type { CardView } from "@/type"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchCardStore } from "@/store/batch-card"
@@ -144,7 +144,7 @@ const removeListener = () => {
   window.removeEventListener("beforeunload", removeListener)
 }
 
-const onHandleCheckbox = (e: boolean, tab: iCard) => {
+const onHandleCheckbox = (e: boolean, tab: CardView) => {
   if (e) {
     batchTabsStore.addSelectedTab(tab)
   } else {

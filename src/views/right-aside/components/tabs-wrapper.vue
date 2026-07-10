@@ -38,7 +38,7 @@
 <script setup lang="ts">
 import { isNewTabPage } from "@/utils"
 import { VueDraggable, SortableEvent } from "vue-draggable-plus"
-import type { Card as iCard } from "@/type.ts"
+import type { CardView } from "@/type.ts"
 import card from "@components/card.vue"
 import { useLayoutStore } from "@/store/layout"
 
@@ -53,9 +53,9 @@ const layoutStore = useLayoutStore()
 
 const emit = defineEmits<{
   (e: "removeTab", id: number | undefined): void
-  (e: "activeTab", tab: iCard): void
+  (e: "activeTab", tab: CardView): void
   (e: "dragEnd", event: SortableEvent): void
-  (e: "check", value: boolean, tab: iCard): void
+  (e: "check", value: boolean, tab: CardView): void
   (e: "move", event: SortableEvent): boolean | void | 1 | -1
 }>()
 
@@ -63,7 +63,7 @@ const removeTab = (id: string) => {
   emit("removeTab", Number(id))
 }
 
-const activeTab = (tab: iCard) => {
+const activeTab = (tab: CardView) => {
   emit("activeTab", tab)
 }
 
@@ -71,7 +71,7 @@ const onDragEnd = (e: SortableEvent) => {
   emit("dragEnd", e)
 }
 
-const onHandleCheckbox = (value: boolean, tab: iCard) => {
+const onHandleCheckbox = (value: boolean, tab: CardView) => {
   emit("check", value, tab)
 }
 </script>

@@ -1,5 +1,6 @@
 import Dexie, { EntityTable } from "dexie"
 import { Card, Collection, Favicon, Label, Space } from "@/type.ts"
+import { createEntityUid, isEntityUid } from "@/utils/entityUid.ts"
 
 class DataBase extends Dexie {
   private static instance: DataBase
@@ -20,6 +21,40 @@ class DataBase extends Dexie {
         "++id, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
       favicons: "++id, url",
     })
+    this.version(3)
+      .stores({
+        spaces: "++id, &uid, title, order, createdAt, icon",
+        collections:
+          "++id, &uid, title, spaceId, order, labelIds, [spaceId+order], createdAt, icon",
+        labels: "++id, &uid, title, color",
+        cards:
+          "++id, &uid, title, url, order, faviconId, description, collectionId, [collectionId+order], createdAt",
+        favicons: "++id, &uid, url",
+      })
+      .upgrade(async (transaction) => {
+        const usedUids = new Set<string>()
+        for (const tableName of [
+          "spaces",
+          "collections",
+          "labels",
+          "cards",
+          "favicons",
+        ]) {
+          await transaction
+            .table(tableName)
+            .toCollection()
+            .modify((entity) => {
+              if (isEntityUid(entity.uid) && !usedUids.has(entity.uid)) {
+                usedUids.add(entity.uid)
+                return
+              }
+              let uid = createEntityUid()
+              while (usedUids.has(uid)) uid = createEntityUid()
+              entity.uid = uid
+              usedUids.add(uid)
+            })
+        }
+      })
   }
 
   public static getInstance(): DataBase {

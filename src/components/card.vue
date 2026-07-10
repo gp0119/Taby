@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { Card } from "@/type.ts"
+import { CardView } from "@/type.ts"
 import favicon from "./favicon.vue"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import { Close } from "@vicons/carbon"
@@ -96,7 +96,7 @@ const layoutStore = useLayoutStore()
 withDefaults(
   defineProps<{
     type: "card" | "tab"
-    child: Card
+    child: CardView
     selectIds?: number[]
     duplicateUrl?: string | null
     showCheckbox?: boolean

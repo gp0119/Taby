@@ -1,10 +1,10 @@
 import { defineStore } from "pinia"
-import type { Card } from "@/type"
+import type { CardView } from "@/type"
 
 export const useBatchTabsStore = defineStore("batch-tabs", () => {
-  const selectedTab = ref<Card[]>([])
+  const selectedTab = ref<CardView[]>([])
 
-  const addSelectedTab = (tab: Card) => {
+  const addSelectedTab = (tab: CardView) => {
     selectedTab.value.push(tab)
   }
 
