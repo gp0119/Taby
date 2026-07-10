@@ -21,6 +21,7 @@ interface WebdavPayload {
 
 class WebdavManager {
   private static instance: WebdavManager
+  private readyDirectoryKey = ""
 
   public static getInstance(): WebdavManager {
     if (!WebdavManager.instance) {
@@ -154,10 +155,17 @@ class WebdavManager {
       : (stat as FileStat)
   }
 
+  private async ensureDirectory(client: WebDAVClient, directoryPath: string) {
+    const directoryKey = this.getStateKey("directory")
+    if (this.readyDirectoryKey === directoryKey) return
+    await client.createDirectory(directoryPath, { recursive: true })
+    this.readyDirectoryKey = directoryKey
+  }
+
   async uploadData(data: Partial<SyncData>) {
     const { client, directoryPath, filePath } = this.connection
     if (directoryPath) {
-      await client.createDirectory(directoryPath, { recursive: true })
+      await this.ensureDirectory(client, directoryPath)
     }
     const updatedAt = new Date().toISOString()
     const payload: WebdavPayload = {
@@ -205,6 +213,7 @@ class WebdavManager {
     let remoteUpdatedAt: string | undefined
     try {
       const stat = await this.statFile(client, filePath)
+      this.readyDirectoryKey = this.getStateKey("directory")
       remoteEtag = typeof stat.etag === "string" ? stat.etag : undefined
       remoteUpdatedAt = this.normalizeDate(stat.lastmod)
       if (
