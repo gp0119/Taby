@@ -134,7 +134,7 @@ jobs:
         with:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          name: ${{ needs.build.outputs.version }}
           bodyFile: ${{ steps.changelog.outputs.notes_file }}
           artifacts: release/${{ needs.build.outputs.zip_name }}
           allowUpdates: true
