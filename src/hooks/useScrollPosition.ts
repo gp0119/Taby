@@ -142,7 +142,9 @@ export function useScrollPosition(
   function resetCurrentScroller() {
     const scroller = scrollerRef.value
     if (!scroller) return
-    scroller.forceUpdate(true)
+    // 保留运行时高度：DynamicScrollerItem 使用 ResizeObserver 时不会响应
+    // forceUpdate(true) 主动重测，清空 sizes 反而会让 collection 回退到最小高度。
+    scroller.forceUpdate()
     scroller.scrollToPosition(0)
     const el = scroller.$el as HTMLElement | undefined
     if (el) el.scrollTop = 0

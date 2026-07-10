@@ -217,7 +217,6 @@ class WebdavManager {
       }
       if (
         !options.forceRead &&
-        !remoteEtag &&
         remoteUpdatedAt &&
         lastSeen &&
         this.isNotNewer(remoteUpdatedAt, lastSeen)

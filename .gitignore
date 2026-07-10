@@ -34,3 +34,5 @@ auto-imports.d.ts
 .secrets/
 service-account*.json
 RELEASE_FLOW.md
+
+.codegraph/
