@@ -1,14 +1,22 @@
 import type { EntityUid } from "@/type.ts"
 
-const UID_LENGTH = 12
-const UID_ALPHABET =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+const UID_LENGTH = 16
+const UNBIASED_BYTE_LIMIT = 250
 
 export function createEntityUid(): EntityUid {
-  const bytes = crypto.getRandomValues(new Uint8Array(UID_LENGTH))
-  return Array.from(bytes, (byte) => UID_ALPHABET[byte & 63]).join("")
+  let uid = ""
+  while (uid.length < UID_LENGTH) {
+    const bytes = crypto.getRandomValues(
+      new Uint8Array(UID_LENGTH - uid.length),
+    )
+    for (const byte of bytes) {
+      if (byte >= UNBIASED_BYTE_LIMIT) continue
+      uid += String(byte % 10)
+    }
+  }
+  return uid
 }
 
 export function isEntityUid(value: unknown): value is EntityUid {
-  return typeof value === "string" && /^[A-Za-z0-9_-]{12}$/.test(value)
+  return typeof value === "string" && /^\d{16}$/.test(value)
 }
