@@ -1,8 +1,8 @@
 import dataManager from "@/db"
-import { CollectionWithCards } from "@/type.ts"
 import { useMessage } from "naive-ui"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
+import { normalizeTobyExport } from "@/utils/tobyImport.ts"
 
 export function useImport() {
   const message = useMessage()
@@ -13,13 +13,13 @@ export function useImport() {
       reader.readAsText(file)
       reader.onload = async (event) => {
         try {
-          const lists: {
-            lists: CollectionWithCards[]
-          } = JSON.parse(event.target?.result as string)
-          if (!lists.lists || !lists.lists.length) {
+          const spaces = normalizeTobyExport(
+            JSON.parse(event.target?.result as string),
+          )
+          if (!spaces.length) {
             throw new Error(ft("invalid-file", "toby"))
           }
-          await dataManager.importFromToby(lists.lists)
+          await dataManager.importFromToby(spaces)
           resetMainScrollPosition()
           resolve(true)
         } catch (error) {

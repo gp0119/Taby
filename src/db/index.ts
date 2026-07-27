@@ -12,6 +12,7 @@ import {
   ExportSpace,
 } from "@/type.ts"
 import { db } from "./database.ts"
+import { TobyImportSpace } from "@/utils/tobyImport.ts"
 
 type TableName = "spaces" | "collections" | "labels" | "cards" | "favicons"
 
@@ -953,41 +954,44 @@ class DataManager {
     })
   }
 
-  async importFromToby(lists: CollectionWithCards[]) {
+  async importFromToby(spaces: TobyImportSpace[]) {
     await db.transaction(
       "rw",
       [db.spaces, db.collections, db.cards, db.favicons, db.labels],
       async () => {
-        const spaceId = await this.addSpace({
-          title: "From Toby",
-          icon: "StorefrontOutline",
-        })
-        for (const list of lists) {
-          const labelIds: number[] = []
-          for (const label of list.labels) {
-            const labelId = await this.getOrCreateLabelWithTitle(label.title)
-            if (labelId) {
-              labelIds.push(labelId)
-            }
-          }
-          const collectionId = await this.addCollection({
-            title: list.title,
-            spaceId,
-            labelIds: labelIds,
+        for (const space of spaces) {
+          const spaceId = await this.addSpace({
+            title: space.title,
+            icon: "StorefrontOutline",
           })
-          await this.batchAddCards(
-            list.cards.map((card, index) => {
-              const now = Date.now()
-              return {
+          for (const list of space.lists) {
+            const labelIds: number[] = []
+            for (const label of list.labels) {
+              const labelId = await this.getOrCreateLabelWithTitle(label.title)
+              if (labelId) {
+                labelIds.push(labelId)
+              }
+            }
+            const collectionId = await this.addCollection({
+              title: list.title,
+              spaceId,
+              labelIds: labelIds,
+            })
+            const cards: Omit<Card, "id">[] = []
+            for (const [index, card] of list.cards.entries()) {
+              const faviconId = await this.addFavicon(card.favIconUrl)
+              cards.push({
                 title: card.customTitle || card.title,
                 url: card.url,
                 description: card.customDescription || card.description || "",
                 collectionId: collectionId!,
+                ...(faviconId && { faviconId }),
                 order: (index + 1) * 1000,
-                createdAt: now,
-              }
-            }),
-          )
+                createdAt: Date.now(),
+              })
+            }
+            await this.batchAddCards(cards)
+          }
         }
       },
     )
