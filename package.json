@@ -8,7 +8,7 @@
     "build": "vite build",
     "chrome:upload": "node scripts/chrome-webstore.mjs",
     "edge:upload": "node scripts/edge-addons.mjs",
-    "release": "release-it",
+    "release": "node scripts/check-changelog.mjs && release-it",
     "preview": "vite preview"
   },
   "dependencies": {
