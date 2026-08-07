@@ -1,3 +1,5 @@
+import { hasExtensionLocalStorage } from "@/utils/platform"
+
 // SW（背景脚本）与 SPA（前台页面）共享的"未上传修改"标记存储。
 //
 // 为什么不用 localStorage：localStorage 只在 page context 可用，SW（MV3 service worker）
@@ -11,7 +13,16 @@ const DIRTY_KEY = "syncDirty"
 
 export type DirtyToken = number
 
+const getLocalDirtyToken = () => {
+  const value = localStorage.getItem(DIRTY_KEY)
+  const token = value ? Number(value) : NaN
+  return Number.isFinite(token) ? token : null
+}
+
 export async function getDirtyToken(): Promise<DirtyToken | null> {
+  if (!hasExtensionLocalStorage()) {
+    return getLocalDirtyToken()
+  }
   const result = await chrome.storage.local.get(DIRTY_KEY)
   const v = result[DIRTY_KEY]
   return typeof v === "number" ? v : null
@@ -20,6 +31,10 @@ export async function getDirtyToken(): Promise<DirtyToken | null> {
 export async function markDirtyAsync(): Promise<DirtyToken> {
   const cur = (await getDirtyToken()) ?? 0
   const next = Math.max(cur + 1, Date.now())
+  if (!hasExtensionLocalStorage()) {
+    localStorage.setItem(DIRTY_KEY, String(next))
+    return next
+  }
   await chrome.storage.local.set({ [DIRTY_KEY]: next })
   return next
 }
@@ -28,11 +43,19 @@ export async function markDirtyAsync(): Promise<DirtyToken> {
 export async function clearDirtyIfUnchanged(token: DirtyToken): Promise<void> {
   const cur = await getDirtyToken()
   if (cur === token) {
+    if (!hasExtensionLocalStorage()) {
+      localStorage.removeItem(DIRTY_KEY)
+      return
+    }
     await chrome.storage.local.remove(DIRTY_KEY)
   }
 }
 
 export async function clearDirty(): Promise<void> {
+  if (!hasExtensionLocalStorage()) {
+    localStorage.removeItem(DIRTY_KEY)
+    return
+  }
   await chrome.storage.local.remove(DIRTY_KEY)
 }
 
@@ -40,6 +63,9 @@ export async function clearDirty(): Promise<void> {
 export function onDirtyChanged(
   cb: (newToken: DirtyToken | null, oldToken: DirtyToken | null) => void,
 ): () => void {
+  if (!hasExtensionLocalStorage()) {
+    return () => {}
+  }
   const listener = (
     changes: { [key: string]: chrome.storage.StorageChange },
     area: chrome.storage.AreaName,

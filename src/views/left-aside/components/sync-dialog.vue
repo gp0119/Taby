@@ -133,7 +133,7 @@
         >
           <n-input
             v-model:value="formModel.gistId"
-            :placeholder="ft('placeholder', 'gist-id')"
+            :placeholder="ft('gist-id-placeholder')"
           />
         </n-form-item>
       </template>
@@ -202,6 +202,8 @@ import type { WebdavProtocol } from "@/sync/webdavConfig.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import Gitee from "@/components/gitee.vue"
+import { hasExtensionSyncStorage } from "@/utils/platform"
+import { normalizeGistId } from "@/utils/syncConfigInput"
 
 const { ft, ft2 } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
@@ -273,7 +275,7 @@ const canUpload = computed(() => {
 const canDownload = computed(() => {
   return isWebdav.value
     ? !!formModel.value.webdavHost.trim()
-    : !!(formModel.value.accessToken && formModel.value.gistId)
+    : !!(formModel.value.accessToken && normalizeGistId(formModel.value.gistId))
 })
 const canTestWebdav = computed(() => {
   return !!formModel.value.webdavHost.trim()
@@ -329,14 +331,19 @@ const hasSyncTargetChanged = () => {
     )
   }
 
-  return (localStorage.getItem(SYNC_GIST_ID) || "") !== formModel.value.gistId
+  return (
+    (localStorage.getItem(SYNC_GIST_ID) || "") !==
+    normalizeGistId(formModel.value.gistId)
+  )
 }
 
 const persistCurrentConfig = async () => {
   const targetChanged = hasSyncTargetChanged()
   const inactiveConfigKeys = isWebdav.value ? gistConfigKeys : webdavConfigKeys
   inactiveConfigKeys.forEach((key) => localStorage.removeItem(key))
-  await chrome.storage.sync.remove(inactiveConfigKeys)
+  if (hasExtensionSyncStorage()) {
+    await chrome.storage.sync.remove(inactiveConfigKeys)
+  }
 
   const values: Record<string, string> = isWebdav.value
     ? {
@@ -348,12 +355,14 @@ const persistCurrentConfig = async () => {
     : {
         [SYNC_TYPE]: formModel.value.syncType,
         [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-        [SYNC_GIST_ID]: formModel.value.gistId,
+        [SYNC_GIST_ID]: normalizeGistId(formModel.value.gistId),
       }
   Object.entries(values).forEach(([key, value]) => {
     localStorage.setItem(key, value)
   })
-  await chrome.storage.sync.set(values)
+  if (hasExtensionSyncStorage()) {
+    await chrome.storage.sync.set(values)
+  }
   if (targetChanged) {
     await syncManager.resetSyncTargetState()
   }
@@ -383,10 +392,12 @@ const handleUpload = () => {
       if (!isWebdav.value) {
         formModel.value.gistId = targetId
         localStorage.setItem(SYNC_GIST_ID, targetId)
-        await chrome.storage.sync.set({
-          [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-          [SYNC_GIST_ID]: targetId,
-        })
+        if (hasExtensionSyncStorage()) {
+          await chrome.storage.sync.set({
+            [SYNC_GIST_TOKEN]: formModel.value.accessToken,
+            [SYNC_GIST_ID]: targetId,
+          })
+        }
       }
       message.success(ft("success", "upload"))
       uploadLoading.value = false

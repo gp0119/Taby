@@ -23,6 +23,7 @@ import {
   isWebdavSync,
   RemoteMeta,
 } from "@/sync/syncProvider.ts"
+import { hasExtensionSyncStorage, isWeb } from "@/utils/platform"
 
 const UPLOAD_LOCK_NAME = "taby-sync-upload"
 
@@ -96,7 +97,9 @@ class SyncManager {
       }
     }
     localStorage.removeItem(LOCAL_LAST_DOWNLOAD_TIME)
-    await chrome.storage.sync.remove(REMOTE_LAST_UPDATE_TIME)
+    if (hasExtensionSyncStorage()) {
+      await chrome.storage.sync.remove(REMOTE_LAST_UPDATE_TIME)
+    }
   }
 
   isDirty(): boolean {
@@ -307,7 +310,9 @@ class SyncManager {
       const data = await dataManager.getUploadData()
       const newTargetId = await getSyncProvider().uploadData(data)
       const now = Date.now()
-      await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
+      if (hasExtensionSyncStorage()) {
+        await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
+      }
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(now))
       if (dirtyToken !== null) {
         await clearDirtyIfUnchangedAsync(dirtyToken)
@@ -430,6 +435,7 @@ class SyncManager {
     }
 
     try {
+      if (!hasExtensionSyncStorage()) return false
       const syncStorage = await chrome.storage.sync.get([
         REMOTE_LAST_UPDATE_TIME,
       ])
@@ -502,6 +508,8 @@ class SyncManager {
   }
 
   autoDownload = async (): Promise<boolean> => {
+    if (isWeb) return false
+    if (!hasExtensionSyncStorage()) return false
     if (!hasSyncConfig("download")) return false
 
     try {
@@ -582,6 +590,7 @@ class SyncManager {
   }
 
   autoUpload = async () => {
+    if (isWeb) return
     if (!hasSyncConfig("download")) return
 
     const dirtyToken = this._dirtyToken

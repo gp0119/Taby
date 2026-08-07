@@ -11,6 +11,7 @@ node_modules
 dist
 release
 dist-ssr
+dist-web
 *.local
 
 # Editor directories and files

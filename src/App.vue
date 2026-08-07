@@ -35,11 +35,14 @@ import {
 import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
 import { useTheme } from "@/hooks/useTheme"
+import { isWeb, hasExtensionSyncStorage } from "@/utils/platform"
+import { applySyncConfigFromUrl } from "@/utils/syncConfigInput"
 
 const { updateContextMenus } = useRefresh()
 const { themeOverrides, theme } = useTheme()
 
 const loading = ref(true)
+const hasUrlSyncConfig = ref(false)
 
 provide("loading", {
   loading,
@@ -66,6 +69,11 @@ const removeListener = () => {
 }
 
 onBeforeMount(async () => {
+  if (isWeb) {
+    hasUrlSyncConfig.value = applySyncConfigFromUrl()
+    return
+  }
+  if (!hasExtensionSyncStorage()) return
   const result = await chrome.storage.sync.get([
     SYNC_GIST_TOKEN,
     SYNC_GIST_ID,
@@ -97,6 +105,12 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
+  if (isWeb) {
+    await loadInitialWebData()
+    loading.value = false
+    return
+  }
+
   // 远端覆盖本地后，store 由 liveQuery 更新；这里只同步 Chrome 原生菜单。
   syncManager.setOnRemoteImported(async () => {
     await updateContextMenus()
@@ -122,4 +136,9 @@ onUnmounted(() => {
   removeListener()
   syncManager.setOnRemoteImported(undefined)
 })
+
+async function loadInitialWebData() {
+  if (!hasUrlSyncConfig.value) return
+  await syncManager.triggerDownload()
+}
 </script>
