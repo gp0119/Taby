@@ -15,7 +15,6 @@ export default {
   "download-remote": "下载远程数据",
   "access-token": "AccessToken",
   "gist-id": "GistId",
-  "gist-id-placeholder": "可粘贴 GistId 或完整 Gist 链接",
   "webdav-host": "WebDAV 地址",
   "webdav-host-placeholder":
     "域名或 WebDAV 路径，如：dav.example.com/remote.php/dav/files/me",

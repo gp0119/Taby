@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:web": "vite --config vite.web.config.ts",
     "build": "vite build",
-    "build:extension": "vite build --mode extension",
+    "build:extension": "vite build",
     "build:web": "vite build --config vite.web.config.ts",
     "build:all": "pnpm build:extension && pnpm build:web",
     "cloudflare:upload": "pnpm build:web && npx wrangler pages deploy dist-web --project-name=taby-web",

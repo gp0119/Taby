@@ -36,13 +36,11 @@ import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
 import { useTheme } from "@/hooks/useTheme"
 import { isWeb, hasExtensionSyncStorage } from "@/utils/platform"
-import { applySyncConfigFromUrl } from "@/utils/syncConfigInput"
 
 const { updateContextMenus } = useRefresh()
 const { themeOverrides, theme } = useTheme()
 
 const loading = ref(true)
-const hasUrlSyncConfig = ref(false)
 
 provide("loading", {
   loading,
@@ -69,10 +67,7 @@ const removeListener = () => {
 }
 
 onBeforeMount(async () => {
-  if (isWeb) {
-    hasUrlSyncConfig.value = applySyncConfigFromUrl()
-    return
-  }
+  if (isWeb) return
   if (!hasExtensionSyncStorage()) return
   const result = await chrome.storage.sync.get([
     SYNC_GIST_TOKEN,
@@ -105,40 +100,36 @@ onBeforeMount(async () => {
 })
 
 onMounted(async () => {
-  if (isWeb) {
-    await loadInitialWebData()
-    loading.value = false
-    return
-  }
+  try {
+    if (isWeb) {
+      await syncManager.waitForInit()
+      return
+    }
 
-  // 远端覆盖本地后，store 由 liveQuery 更新；这里只同步 Chrome 原生菜单。
-  syncManager.setOnRemoteImported(async () => {
+    // 远端覆盖本地后，store 由 liveQuery 更新；这里只同步 Chrome 原生菜单。
+    syncManager.setOnRemoteImported(async () => {
+      await updateContextMenus()
+    })
+
+    const isRecovered = await syncManager.waitForInit()
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("beforeunload", removeListener)
+
+    // 初次渲染：store 由 liveQuery 订阅 IDB；这里只需要同步 Chrome 原生菜单。
     await updateContextMenus()
-  })
 
-  const isRecovered = await syncManager.waitForInit()
-  document.addEventListener("visibilitychange", handleVisibilityChange)
-  window.addEventListener("beforeunload", removeListener)
-
-  // 初次渲染：store 由 liveQuery 订阅 IDB；这里只需要同步 Chrome 原生菜单。
-  await updateContextMenus()
-
-  // 启动时主动跑一次 visibility 流：上传脏数据 + 拉取远端更新（带冲突检测）。
-  // 如果 isRecovered 说明刚从远端恢复，没必要再来一遍。
-  if (!isRecovered) {
-    handleVisibilityChange()
+    // 启动时主动跑一次 visibility 流：上传脏数据 + 拉取远端更新（带冲突检测）。
+    // 如果 isRecovered 说明刚从远端恢复，没必要再来一遍。
+    if (!isRecovered) {
+      handleVisibilityChange()
+    }
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false
 })
 
 onUnmounted(() => {
   removeListener()
   syncManager.setOnRemoteImported(undefined)
 })
-
-async function loadInitialWebData() {
-  if (!hasUrlSyncConfig.value) return
-  await syncManager.triggerDownload()
-}
 </script>

@@ -68,6 +68,9 @@ pnpm install
 # 开发环境运行
 pnpm run dev
 
+# Web 开发环境运行
+pnpm run dev:web
+
 # 构建浏览器插件
 pnpm run build:extension
 
@@ -88,14 +91,6 @@ pnpm build:web
 
 ```text
 dist-web/
-```
-
-URL 参数：
-
-```text
-https://example.com/?syncType=github&gistId=GIST_ID&accessToken=ACCESS_TOKEN
-https://example.com/?gistId=https://gist.github.com/user/GIST_ID&accessToken=ACCESS_TOKEN
-https://example.com/?gistId=https://gitee.com/user/codes/GIST_ID&accessToken=ACCESS_TOKEN
 ```
 
 部署到 Cloudflare Pages：

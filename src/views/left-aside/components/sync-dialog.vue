@@ -133,7 +133,7 @@
         >
           <n-input
             v-model:value="formModel.gistId"
-            :placeholder="ft('gist-id-placeholder')"
+            :placeholder="ft('placeholder', 'gist-id')"
           />
         </n-form-item>
       </template>
@@ -203,7 +203,6 @@ import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import Gitee from "@/components/gitee.vue"
 import { hasExtensionSyncStorage } from "@/utils/platform"
-import { normalizeGistId } from "@/utils/syncConfigInput"
 
 const { ft, ft2 } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
@@ -275,7 +274,7 @@ const canUpload = computed(() => {
 const canDownload = computed(() => {
   return isWebdav.value
     ? !!formModel.value.webdavHost.trim()
-    : !!(formModel.value.accessToken && normalizeGistId(formModel.value.gistId))
+    : !!(formModel.value.accessToken && formModel.value.gistId)
 })
 const canTestWebdav = computed(() => {
   return !!formModel.value.webdavHost.trim()
@@ -331,10 +330,7 @@ const hasSyncTargetChanged = () => {
     )
   }
 
-  return (
-    (localStorage.getItem(SYNC_GIST_ID) || "") !==
-    normalizeGistId(formModel.value.gistId)
-  )
+  return (localStorage.getItem(SYNC_GIST_ID) || "") !== formModel.value.gistId
 }
 
 const persistCurrentConfig = async () => {
@@ -355,7 +351,7 @@ const persistCurrentConfig = async () => {
     : {
         [SYNC_TYPE]: formModel.value.syncType,
         [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-        [SYNC_GIST_ID]: normalizeGistId(formModel.value.gistId),
+        [SYNC_GIST_ID]: formModel.value.gistId,
       }
   Object.entries(values).forEach(([key, value]) => {
     localStorage.setItem(key, value)

@@ -15,7 +15,6 @@ export default {
   "download-remote": "Download Remote",
   "access-token": "AccessToken",
   "gist-id": "GistId",
-  "gist-id-placeholder": "Paste a GistId or full Gist URL",
   "webdav-host": "WebDAV Host",
   "webdav-host-placeholder":
     "Domain or WebDAV path, e.g. dav.example.com/remote.php/dav/files/me",

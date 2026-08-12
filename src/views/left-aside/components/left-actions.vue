@@ -100,6 +100,7 @@ import SyncDialog from "@/views/left-aside/components/sync-dialog.vue"
 import { useLayoutStore } from "@/store/layout"
 import popoverWrapper from "@/components/popover-wrapper.vue"
 import Bookmarks from "@/views/left-aside/components/bookmarks.vue"
+import { isWeb } from "@/utils/platform"
 
 const { ft } = useHelpi18n()
 const spacesStore = useSpacesStore()
@@ -129,15 +130,17 @@ function onImport() {
         <n-form model={formModel.value}>
           <n-form-item>
             <n-radio-group class="w-full" v-model:value={type.value}>
-              <n-radio-button class="w-1/3 text-center" value="taby">
+              <n-radio-button class="flex-1 text-center" value="taby">
                 {ft("import-from", "taby")}
               </n-radio-button>
-              <n-radio-button class="w-1/3 text-center" value="toby">
+              <n-radio-button class="flex-1 text-center" value="toby">
                 {ft("import-from", "toby")}
               </n-radio-button>
-              <n-radio-button class="w-1/3 text-center" value="bookmarks">
-                {ft("import-from-bookmarks")}
-              </n-radio-button>
+              {!isWeb && (
+                <n-radio-button class="flex-1 text-center" value="bookmarks">
+                  {ft("import-from-bookmarks")}
+                </n-radio-button>
+              )}
             </n-radio-group>
           </n-form-item>
           {type.value === "taby" || type.value === "toby" ? (
