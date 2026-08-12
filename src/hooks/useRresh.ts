@@ -1,5 +1,9 @@
+import { hasExtensionRuntime } from "@/utils/platform"
+
 export const useRefresh = () => {
   const updateContextMenus = async () => {
+    if (!hasExtensionRuntime()) return
+
     try {
       await chrome.runtime.sendMessage({
         type: "updateContextMenus",

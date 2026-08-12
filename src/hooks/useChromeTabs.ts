@@ -1,5 +1,10 @@
 import { ref } from "vue"
 import { Card } from "@/type.ts"
+import {
+  hasExtensionTabGroups,
+  hasExtensionTabs,
+  hasExtensionWindows,
+} from "@/utils/platform"
 
 export function useChromeTabs() {
   const tabs = ref<{
@@ -9,6 +14,8 @@ export function useChromeTabs() {
   const activeWindowId = ref<number>(0)
 
   async function getTabs() {
+    if (!hasExtensionTabs()) return
+
     const allTabs = await chrome.tabs.query({})
     // console.log("allTabs: ", allTabs)
     const currentWindowTabs = await chrome.tabs.query({
@@ -42,6 +49,7 @@ export function useChromeTabs() {
     Object.keys(tabs.value).forEach((key) => {
       tabs.value[key] = tabs.value[key].filter((item) => item.id !== tabId)
     })
+    if (!hasExtensionTabs()) return
     return chrome.tabs.remove(tabId)
   }
 
@@ -51,6 +59,7 @@ export function useChromeTabs() {
         (item) => !tabIds.includes(item.id),
       )
     })
+    if (!hasExtensionTabs()) return
     return chrome.tabs.remove(tabIds)
   }
 
@@ -60,17 +69,27 @@ export function useChromeTabs() {
     windowId: number,
   ) {
     if (!tabId) return
+    if (!hasExtensionTabs()) return
+
     await chrome.tabs.move(tabId, { index, windowId })
     await getTabs()
   }
 
   async function activeTab(child: Card) {
     if (!child) return
+    if (!hasExtensionTabs() || !hasExtensionWindows()) {
+      window.open(child.url, "_blank", "noopener,noreferrer")
+      return
+    }
     await chrome.windows.update(child.windowId!, { focused: true })
     return chrome.tabs.update(child.id, { active: true })
   }
 
   async function openTab(url: string) {
+    if (!hasExtensionTabs()) {
+      window.open(url, "_blank", "noopener,noreferrer")
+      return
+    }
     return chrome.tabs.create({ url: url })
   }
 
@@ -80,6 +99,11 @@ export function useChromeTabs() {
   ) {
     const { windowId, background = false } = opts
     const result: chrome.tabs.Tab[] = []
+    if (!hasExtensionTabs()) {
+      urls.forEach((url) => window.open(url, "_blank", "noopener,noreferrer"))
+      return result
+    }
+
     for (let i = 0; i < urls.length; i++) {
       const tab = await chrome.tabs.create({
         url: urls[i],
@@ -92,6 +116,8 @@ export function useChromeTabs() {
   }
 
   async function closeAllTabsExceptCurrent(windowId: number) {
+    if (!hasExtensionTabs()) return
+
     const currentTab = await chrome.tabs.getCurrent()
     if (!currentTab) return
     const removeTabIds: number[] = []
@@ -125,6 +151,8 @@ export function useChromeTabs() {
 
   async function groupTabs(tabIds: number[], title: string, windowId?: number) {
     if (tabIds.length === 0) return
+    if (!hasExtensionTabs() || !hasExtensionTabGroups()) return
+
     const groupId = await chrome.tabs.group(
       windowId
         ? {
@@ -144,6 +172,11 @@ export function useChromeTabs() {
 
   async function openInNewWindow(urls: string[]) {
     const first = urls[0]
+    if (!hasExtensionTabs() || !hasExtensionWindows()) {
+      urls.forEach((url) => window.open(url, "_blank", "noopener,noreferrer"))
+      return []
+    }
+
     const win = await chrome.windows.create({ url: first, focused: true })
     if (!win) return []
     const created: chrome.tabs.Tab[] = []

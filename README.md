@@ -68,8 +68,42 @@ pnpm install
 # 开发环境运行
 pnpm run dev
 
-# 构建生产版本
-pnpm run build
+# Web 开发环境运行
+pnpm run dev:web
+
+# 构建浏览器插件
+pnpm run build:extension
+
+# 构建静态网页
+pnpm run build:web
+
+# 同时构建插件和静态网页
+pnpm run build:all
+```
+
+## 🌐 静态网页 | Static Web
+
+```bash
+pnpm build:web
+```
+
+产物目录：
+
+```text
+dist-web/
+```
+
+部署到 Cloudflare Pages：
+
+```bash
+pnpm cloudflare:upload
+```
+
+Cloudflare Pages Git 集成：
+
+```text
+Build command: pnpm build:web
+Build output directory: dist-web
 ```
 
 ## 🤝 贡献 | Contributing

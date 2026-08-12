@@ -59,6 +59,7 @@ import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useSettingStore } from "@/store/setting"
 import { getDomain } from "@/utils"
+import { hasExtensionTabs } from "@/utils/platform"
 
 defineProps<{
   cards: iCard[]
@@ -76,6 +77,15 @@ const settingStore = useSettingStore()
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(e: MouseEvent, child: any) {
+  if (!hasExtensionTabs()) {
+    if (e.ctrlKey || e.metaKey || settingStore.getSetting("openInNewWindow")) {
+      window.open(child.url, "_blank", "noopener,noreferrer")
+      return
+    }
+    window.location.assign(child.url)
+    return
+  }
+
   let tabId: number
   if (e.ctrlKey || e.metaKey) {
     const tab = await chrome.tabs.create({ url: child.url, active: false })
@@ -109,6 +119,8 @@ const debounceUpdateCardFavicon = debounce(
 )
 
 function onHandleNoFavicon(tabId: number, cardId: number) {
+  if (!hasExtensionTabs()) return
+
   let timer: ReturnType<typeof setTimeout>
   function listener(
     updatedTabId: number,

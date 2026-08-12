@@ -202,6 +202,7 @@ import type { WebdavProtocol } from "@/sync/webdavConfig.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import Gitee from "@/components/gitee.vue"
+import { hasExtensionSyncStorage } from "@/utils/platform"
 
 const { ft, ft2 } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
@@ -336,7 +337,9 @@ const persistCurrentConfig = async () => {
   const targetChanged = hasSyncTargetChanged()
   const inactiveConfigKeys = isWebdav.value ? gistConfigKeys : webdavConfigKeys
   inactiveConfigKeys.forEach((key) => localStorage.removeItem(key))
-  await chrome.storage.sync.remove(inactiveConfigKeys)
+  if (hasExtensionSyncStorage()) {
+    await chrome.storage.sync.remove(inactiveConfigKeys)
+  }
 
   const values: Record<string, string> = isWebdav.value
     ? {
@@ -353,7 +356,9 @@ const persistCurrentConfig = async () => {
   Object.entries(values).forEach(([key, value]) => {
     localStorage.setItem(key, value)
   })
-  await chrome.storage.sync.set(values)
+  if (hasExtensionSyncStorage()) {
+    await chrome.storage.sync.set(values)
+  }
   if (targetChanged) {
     await syncManager.resetSyncTargetState()
   }
@@ -383,10 +388,12 @@ const handleUpload = () => {
       if (!isWebdav.value) {
         formModel.value.gistId = targetId
         localStorage.setItem(SYNC_GIST_ID, targetId)
-        await chrome.storage.sync.set({
-          [SYNC_GIST_TOKEN]: formModel.value.accessToken,
-          [SYNC_GIST_ID]: targetId,
-        })
+        if (hasExtensionSyncStorage()) {
+          await chrome.storage.sync.set({
+            [SYNC_GIST_TOKEN]: formModel.value.accessToken,
+            [SYNC_GIST_ID]: targetId,
+          })
+        }
       }
       message.success(ft("success", "upload"))
       uploadLoading.value = false

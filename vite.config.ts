@@ -1,22 +1,17 @@
 import { defineConfig } from "vite"
-import vue from "@vitejs/plugin-vue"
-import AutoImport from "unplugin-auto-import/vite"
-import Components from "unplugin-vue-components/vite"
-import { NaiveUiResolver } from "unplugin-vue-components/resolvers"
-import vueJsx from "@vitejs/plugin-vue-jsx"
 import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.config"
 import pkg from "./package.json"
+import { sharedPlugins, sharedResolve } from "./vite.shared"
 import zip from "vite-plugin-zip-pack"
 import fs from "fs"
 import path from "path"
 
 export default defineConfig({
   plugins: [
-    vue(),
+    ...sharedPlugins,
     crx({ manifest }),
     zip({ outDir: "release", outFileName: `${pkg.version}.zip` }),
-    vueJsx({}),
     {
       name: "remove-vite-manifest",
       closeBundle() {
@@ -30,35 +25,8 @@ export default defineConfig({
         }
       },
     },
-    AutoImport({
-      imports: [
-        "vue",
-        {
-          "naive-ui": [
-            "useDialog",
-            "useMessage",
-            "useNotification",
-            "useLoadingBar",
-          ],
-        },
-      ],
-      dts: "src/auto-imports.d.ts",
-      eslintrc: {
-        enabled: true,
-        filepath: "./.eslintrc-auto-import.json",
-        globalsPropValue: true,
-      },
-    }),
-    Components({
-      resolvers: [NaiveUiResolver()],
-    }),
   ],
-  resolve: {
-    alias: [
-      { find: "@", replacement: "/src" },
-      { find: "@components", replacement: "/src/components" },
-    ],
-  },
+  resolve: sharedResolve,
   server: {
     cors: {
       origin: [/chrome-extension:\/\//],

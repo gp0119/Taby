@@ -4,6 +4,7 @@ import type { iSetting } from "@/type"
 import { DEFAULT_SHORTCUT_SETTINGS } from "@/utils/constants"
 import syncManager from "@/sync/syncManager"
 import { useI18n } from "vue-i18n"
+import { hasExtensionLocalStorage, isWeb } from "@/utils/platform"
 
 export const useSettingStore = defineStore("Setting", () => {
   const { locale } = useI18n()
@@ -42,10 +43,12 @@ export const useSettingStore = defineStore("Setting", () => {
   }
 
   watchEffect(() => {
+    if (isWeb) return
     syncManager.setInterval(setting.value.saveAfterOperationTime)
   })
 
   watchEffect(async () => {
+    if (!hasExtensionLocalStorage()) return
     const hideRightClickMenu = setting.value.hideRightClickMenu
     await chrome.storage.local.set({ hideRightClickMenu })
   })

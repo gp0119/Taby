@@ -1,4 +1,7 @@
 export function getFaviconFromCache(u: string) {
+  if (typeof chrome === "undefined" || !chrome.runtime?.getURL) {
+    return getGoogleFavicon(u)
+  }
   const url = new URL(chrome.runtime.getURL("/_favicon/"))
   url.searchParams.set("pageUrl", u)
   url.searchParams.set("size", "32")

@@ -20,16 +20,19 @@
             ? '60px'
             : '220px',
         marginRight:
-          layoutStore.rightLayoutMode === 'collapse' ||
-          layoutStore.rightLayoutMode === 'hover'
-            ? '60px'
-            : '220px',
+          isWeb
+            ? '0'
+            : layoutStore.rightLayoutMode === 'collapse' ||
+                layoutStore.rightLayoutMode === 'hover'
+              ? '60px'
+              : '220px',
       }"
     >
       <navs />
       <content />
     </main>
     <pinSide
+      v-if="!isWeb"
       :mode="layoutStore.rightLayoutMode"
       :hovering="layoutStore.rightLayoutHovering"
       side="right"
@@ -52,6 +55,7 @@ import { useLayoutStore } from "@/store/layout"
 import LeftActions from "@/views/left-aside/components/left-actions.vue"
 import UploadBtn from "@/components/upload-btn.vue"
 import SyncConflictHandler from "@/components/sync-conflict-handler"
+import { isWeb } from "@/utils/platform"
 
 const layoutStore = useLayoutStore()
 </script>

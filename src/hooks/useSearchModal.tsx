@@ -6,6 +6,7 @@ import { Card } from "@/type"
 import Favicon from "@/components/favicon.vue"
 import { SearchOutline } from "@vicons/ionicons5"
 import { useEventListener } from "@vueuse/core"
+import { hasExtensionTabs } from "@/utils/platform"
 
 export const useSearchModal = () => {
   const searchValue = ref("")
@@ -77,6 +78,10 @@ export const useSearchModal = () => {
   async function onHandleClick(child: any) {
     modal.destroyAll()
     await new Promise((resolve) => setTimeout(resolve, 300))
+    if (!hasExtensionTabs()) {
+      window.open(child.url, "_blank", "noopener,noreferrer")
+      return
+    }
     const tab = await chrome.tabs.create({ url: child.url })
     if (child.favicon) return
     const tabId = tab.id!
