@@ -113,6 +113,7 @@ export default {
   "favicon-tip": "图标支持 base64 格式",
   "save-tabs-to": "保存标签到{type}",
   "open-all-tabs": "打开所有标签",
+  "allow-popups-to-open-all": "请允许当前站点弹出窗口，然后重试打开所有标签。",
   "close-all-tabs": "关闭所有标签",
   "save-all-tabs": "保存所有标签",
   "save-all-tabs-and-close": "保存所有标签并关闭",

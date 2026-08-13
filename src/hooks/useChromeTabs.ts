@@ -5,7 +5,7 @@ import {
   hasExtensionTabs,
   hasExtensionWindows,
 } from "@/utils/platform"
-import { openWebUrl } from "@/utils/web"
+import { openWebUrl, openWebUrls } from "@/utils/web"
 
 export function useChromeTabs() {
   const tabs = ref<{
@@ -101,7 +101,7 @@ export function useChromeTabs() {
     const { windowId, background = false } = opts
     const result: chrome.tabs.Tab[] = []
     if (!hasExtensionTabs()) {
-      urls.forEach(openWebUrl)
+      openWebUrls(urls)
       return result
     }
 
@@ -174,7 +174,7 @@ export function useChromeTabs() {
   async function openInNewWindow(urls: string[]) {
     const first = urls[0]
     if (!hasExtensionTabs() || !hasExtensionWindows()) {
-      urls.forEach(openWebUrl)
+      openWebUrls(urls)
       return []
     }
 

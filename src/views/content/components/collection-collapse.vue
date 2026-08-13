@@ -59,15 +59,23 @@
           />
 
           <!-- 卡片数量 -->
-          <PopoverWrapper :message="ft('open-all-tabs')" placement="top-start">
+          <PopoverWrapper
+            :message="ft('open-all-tabs')"
+            :disabled="isMobileWeb"
+            placement="top-start"
+          >
             <div
-              class="flex cursor-pointer items-center rounded bg-hover-color py-0.5 pl-1.5 pr-0.5 text-xs text-text-secondary"
+              class="flex items-center rounded bg-hover-color py-0.5 pl-1.5 text-xs text-text-secondary"
+              :class="{
+                'cursor-pointer pr-0.5': !isMobileWeb,
+                'pr-1.5': isMobileWeb,
+              }"
               @click="onOpenCollection($event, collection)"
             >
               <span class="whitespace-nowrap">
                 {{ collection.cards.length }} cards
               </span>
-              <n-icon size="12" :component="ArrowUpRight" />
+              <n-icon v-if="!isMobileWeb" size="12" :component="ArrowUpRight" />
             </div>
           </PopoverWrapper>
         </div>
@@ -113,11 +121,18 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useChromeTabs } from "@/hooks/useChromeTabs"
 import { useSettingStore } from "@/store/setting"
+import { hasExtensionTabs, isWeb } from "@/utils/platform"
+import { useMediaQuery } from "@vueuse/core"
+import { openWebUrls } from "@/utils/web"
+import { useMessage } from "naive-ui"
 
 const { ft } = useHelpi18n()
+const message = useMessage()
 const settingStore = useSettingStore()
 const duplicateCardStore = useDuplicateCardStore()
 const { openTabs, groupTabs, openInNewWindow } = useChromeTabs()
+const mobileLayoutQuery = useMediaQuery("(max-width: 999px)")
+const isMobileWeb = computed(() => isWeb && mobileLayoutQuery.value)
 const props = defineProps<{
   collection: CollectionWithCards
 }>()
@@ -149,8 +164,14 @@ async function onOpenCollection(
   e: MouseEvent,
   collection: CollectionWithCards,
 ) {
+  if (isMobileWeb.value) return
   if (!collection.cards.length) return
   const urls = collection.cards.map((c) => c.url)
+  if (!hasExtensionTabs()) {
+    const { opened, total } = openWebUrls(urls)
+    if (opened < total) message.warning(ft("allow-popups-to-open-all"))
+    return
+  }
   if (e.shiftKey) {
     const tabs = await openInNewWindow(urls)
     if (settingStore.getSetting("openCardsInGroup") && tabs.length) {

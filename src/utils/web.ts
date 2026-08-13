@@ -11,7 +11,30 @@ export const getSafeWebUrl = (value: string) => {
 
 export const openWebUrl = (value: string) => {
   const url = getSafeWebUrl(value)
-  return url ? window.open(url, "_blank", "noopener,noreferrer") : null
+  if (!url) return null
+
+  const tab = window.open("", "_blank")
+  if (!tab) return null
+
+  tab.opener = null
+  const link = tab.document.createElement("a")
+  link.href = url
+  link.rel = "noreferrer"
+  tab.document.body.append(link)
+  link.click()
+  return tab
+}
+
+export const openWebUrls = (values: string[]) => {
+  const urls = values.map(getSafeWebUrl).filter((url) => url !== null)
+  let opened = 0
+
+  for (const url of urls) {
+    if (!openWebUrl(url)) break
+    opened++
+  }
+
+  return { opened, total: urls.length }
 }
 
 export const splitHighlightedText = (text: string, query: string) => {

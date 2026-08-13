@@ -120,6 +120,8 @@ export default {
   "favicon-tip": "Favicon supports base64 format",
   "save-tabs-to": "Save Tabs to {type}",
   "open-all-tabs": "Open All Tabs",
+  "allow-popups-to-open-all":
+    "Allow pop-ups for this site, then try again to open all tabs.",
   "close-all-tabs": "Close All Tabs",
   "save-all-tabs": "Save All Tabs",
   "save-all-tabs-and-close": "Save All Tabs and Close",
