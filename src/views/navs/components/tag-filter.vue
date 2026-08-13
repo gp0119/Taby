@@ -13,7 +13,8 @@
         tertiary
         :focusable="false"
         size="small"
-        class="min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button__content]:!w-full"
+        class="tag-filter-button min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button__content]:!w-full"
+        :aria-label="ft('tag-filter')"
       >
         <template #icon>
           <PopoverWrapper :message="tagFilterTooltip" placement="bottom-start">
@@ -29,7 +30,7 @@
           </PopoverWrapper>
         </template>
         <div
-          class="flex w-full max-w-[250px] flex-nowrap items-center justify-between"
+          class="tag-filter-label flex w-full max-w-[250px] flex-nowrap items-center justify-between"
         >
           <template v-if="tagsStore.selectedTags.length">
             <div class="scrollbar-none flex flex-1 justify-start overflow-auto">

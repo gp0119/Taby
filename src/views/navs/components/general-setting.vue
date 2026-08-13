@@ -6,6 +6,7 @@
     >
       <!-- 新窗口设置 -->
       <ItemWrapper
+        v-if="!isWeb"
         :icon="Launch"
         :title="ft('open-in-new-window')"
         :hover="false"
@@ -17,6 +18,7 @@
       </ItemWrapper>
       <!-- 按组打开 -->
       <ItemWrapper
+        v-if="!isWeb"
         class="border-t border-border-color"
         :icon="GroupResource"
         :title="ft('open-cards-in-group')"
@@ -29,7 +31,7 @@
       </ItemWrapper>
       <!-- 记住浏览位置 -->
       <ItemWrapper
-        class="border-t border-border-color"
+        :class="{ 'border-t border-border-color': !isWeb }"
         :icon="AutoScroll"
         :title="ft('remember-scroll-position')"
         :hover="false"
@@ -43,6 +45,7 @@
       </ItemWrapper>
       <!-- 隐藏右键菜单 -->
       <ItemWrapper
+        v-if="!isWeb"
         class="border-t border-border-color"
         :icon="AlignBoxMiddleCenter"
         :title="ft('hide-right-click-menu')"
@@ -132,6 +135,7 @@ import ShortcutItem from "./shortcut-item.vue"
 import { DEFAULT_SHORTCUT_SETTINGS } from "@/utils/constants"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { Information } from "@vicons/carbon"
+import { isWeb } from "@/utils/platform"
 
 const settingStore = useSettingStore()
 const { ft } = useHelpi18n()
@@ -148,44 +152,45 @@ type ShortcutKey =
   | "closeDuplicateTabs"
   | "closeAllTabs"
   | "globalSearch"
+  | "openTagFilter"
 
 const shortcutList = computed(() => {
-  console.log(
-    'settingStore.getSetting("shortcutSettings"): ',
-    settingStore.getSetting("shortcutSettings"),
-  )
-  return [
+  const settings = settingStore.getSetting("shortcutSettings")
+  const extensionShortcuts = [
     {
       title: ft("save-all-tabs"),
-      value: settingStore.getSetting("shortcutSettings")?.saveAllTabs,
+      value: settings?.saveAllTabs,
       key: "saveAllTabs" as ShortcutKey,
     },
     {
       title: ft("save-all-tabs-and-close"),
-      value: settingStore.getSetting("shortcutSettings")?.saveAllTabsAndClose,
+      value: settings?.saveAllTabsAndClose,
       key: "saveAllTabsAndClose" as ShortcutKey,
     },
     {
       title: ft("close-duplicate-tabs"),
-      value: settingStore.getSetting("shortcutSettings")?.closeDuplicateTabs,
+      value: settings?.closeDuplicateTabs,
       key: "closeDuplicateTabs" as ShortcutKey,
     },
     {
       title: ft("close-all-tabs"),
-      value: settingStore.getSetting("shortcutSettings")?.closeAllTabs,
+      value: settings?.closeAllTabs,
       key: "closeAllTabs" as ShortcutKey,
     },
+  ]
+  const webShortcuts = [
     {
       title: ft("global-search"),
-      value: settingStore.getSetting("shortcutSettings")?.globalSearch,
+      value: settings?.globalSearch,
       key: "globalSearch" as ShortcutKey,
     },
     {
       title: ft("open-tag-filter"),
-      value: settingStore.getSetting("shortcutSettings")?.openTagFilter,
+      value: settings?.openTagFilter,
       key: "openTagFilter" as ShortcutKey,
     },
   ]
+  return isWeb ? webShortcuts : [...extensionShortcuts, ...webShortcuts]
 })
 
 const defaultShortcutSettings = { ...DEFAULT_SHORTCUT_SETTINGS }

@@ -14,7 +14,7 @@
     >
       <div class="card-header">
         <div
-          class="favicon-size hidden h-7 w-7 flex-shrink-0 animate-scale-in items-center justify-center group-hover/card:flex"
+          class="mobile-hover-only favicon-size hidden h-7 w-7 flex-shrink-0 animate-scale-in items-center justify-center group-hover/card:flex"
           :class="{
             '!inline-flex': showCheckbox && selectIds?.includes(child.id),
             '!hidden': !showCheckbox,
@@ -30,7 +30,7 @@
         <n-button
           :focusable="false"
           size="small"
-          class="favicon-size w-[28px] group-hover/card:hidden"
+          class="card-favicon-button favicon-size w-[28px] group-hover/card:hidden"
           :class="{
             '!hidden': selectIds?.includes(child.id),
             '!flex': !showCheckbox,

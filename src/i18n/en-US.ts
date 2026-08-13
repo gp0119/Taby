@@ -113,6 +113,10 @@ export default {
   "sync-note-3":
     "Every time you open the application, if there is an update, it will be automatically downloaded.",
   "sync-note-4": "Automatic update does not support cross-browser.",
+  "web-sync-storage-note":
+    "Credentials are stored only in this browser. Use a least-privilege token.",
+  "webdav-cors-note":
+    "WebDAV requires the server to allow cross-origin requests from this site.",
   "favicon-tip": "Favicon supports base64 format",
   "save-tabs-to": "Save Tabs to {type}",
   "open-all-tabs": "Open All Tabs",

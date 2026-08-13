@@ -14,6 +14,7 @@
     :animation="150"
     :delay="100"
     :delay-on-touch-only="true"
+    :disabled="isMobileWeb"
     @end="onDragEnd"
   >
     <Card
@@ -59,7 +60,9 @@ import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useSettingStore } from "@/store/setting"
 import { getDomain } from "@/utils"
-import { hasExtensionTabs } from "@/utils/platform"
+import { hasExtensionTabs, isWeb } from "@/utils/platform"
+import { openWebUrl } from "@/utils/web"
+import { useMediaQuery } from "@vueuse/core"
 
 defineProps<{
   cards: iCard[]
@@ -73,16 +76,14 @@ const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
 const dialog = useDialog()
 const settingStore = useSettingStore()
+const mobileLayoutQuery = useMediaQuery("(max-width: 999px)")
+const isMobileWeb = computed(() => isWeb && mobileLayoutQuery.value)
 
 const { open: openDeleteDialog } = useDeleteDialog()
 const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(e: MouseEvent, child: any) {
   if (!hasExtensionTabs()) {
-    if (e.ctrlKey || e.metaKey || settingStore.getSetting("openInNewWindow")) {
-      window.open(child.url, "_blank", "noopener,noreferrer")
-      return
-    }
-    window.location.assign(child.url)
+    openWebUrl(child.url)
     return
   }
 

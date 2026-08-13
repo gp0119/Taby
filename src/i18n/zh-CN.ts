@@ -108,6 +108,8 @@ export default {
   "sync-note-2": "编辑后5分钟自动上传。5分钟内再次编辑将重置计时。",
   "sync-note-3": "每次打开应用时，若有更新将自动下载。",
   "sync-note-4": "自动更新不支持跨浏览器。",
+  "web-sync-storage-note": "凭据仅保存在当前浏览器，请使用最小权限 Token。",
+  "webdav-cors-note": "WebDAV 服务器必须允许当前网页域名跨域访问。",
   "favicon-tip": "图标支持 base64 格式",
   "save-tabs-to": "保存标签到{type}",
   "open-all-tabs": "打开所有标签",

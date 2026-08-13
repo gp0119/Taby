@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    :trigger="isWeb ? 'click' : 'hover'"
     placement="bottom-start"
     :show-arrow="false"
     style="padding: 0; width: 220px"
@@ -69,10 +69,13 @@ import { useDuplicateCardStore } from "@/store/duplicate-card"
 import SortSwitch from "@/views/navs/components/sort-switch.vue"
 import { Move, View } from "@vicons/carbon"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
+import { isWeb } from "@/utils/platform"
+import { useMediaQuery } from "@vueuse/core"
 
 const { ft } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
 const draggableStore = useDraggableStore()
+const isMobileWeb = useMediaQuery("(max-width: 999px)")
 const batchCardStore = useBatchCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
@@ -94,4 +97,14 @@ const onToggleFindDuplicate = (value: boolean) => {
     batchTabsStore.clearSelectedTabs()
   }
 }
+
+watchEffect(() => {
+  if (!isWeb || !isMobileWeb.value) return
+  if (draggableStore.draggable) {
+    draggableStore.setDraggable(false)
+  }
+  if (duplicateCardStore.isFindDuplicate) {
+    duplicateCardStore.clearDuplicateCards()
+  }
+})
 </script>

@@ -5,6 +5,7 @@ import {
   hasExtensionTabs,
   hasExtensionWindows,
 } from "@/utils/platform"
+import { openWebUrl } from "@/utils/web"
 
 export function useChromeTabs() {
   const tabs = ref<{
@@ -78,7 +79,7 @@ export function useChromeTabs() {
   async function activeTab(child: Card) {
     if (!child) return
     if (!hasExtensionTabs() || !hasExtensionWindows()) {
-      window.open(child.url, "_blank", "noopener,noreferrer")
+      openWebUrl(child.url)
       return
     }
     await chrome.windows.update(child.windowId!, { focused: true })
@@ -87,7 +88,7 @@ export function useChromeTabs() {
 
   async function openTab(url: string) {
     if (!hasExtensionTabs()) {
-      window.open(url, "_blank", "noopener,noreferrer")
+      openWebUrl(url)
       return
     }
     return chrome.tabs.create({ url: url })
@@ -100,7 +101,7 @@ export function useChromeTabs() {
     const { windowId, background = false } = opts
     const result: chrome.tabs.Tab[] = []
     if (!hasExtensionTabs()) {
-      urls.forEach((url) => window.open(url, "_blank", "noopener,noreferrer"))
+      urls.forEach(openWebUrl)
       return result
     }
 
@@ -173,7 +174,7 @@ export function useChromeTabs() {
   async function openInNewWindow(urls: string[]) {
     const first = urls[0]
     if (!hasExtensionTabs() || !hasExtensionWindows()) {
-      urls.forEach((url) => window.open(url, "_blank", "noopener,noreferrer"))
+      urls.forEach(openWebUrl)
       return []
     }
 

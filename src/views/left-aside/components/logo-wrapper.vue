@@ -12,7 +12,7 @@
         quaternary
         :focusable="false"
         size="small"
-        class="ml-3 w-[28px]"
+        class="mobile-manage-action ml-3 w-[28px]"
         :class="[layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show']"
         @click="onAddSpace"
       >

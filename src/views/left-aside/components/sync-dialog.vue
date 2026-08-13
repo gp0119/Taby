@@ -91,6 +91,10 @@
         <n-form-item :label="`${ft('username')}:`" path="webdavUsername">
           <n-input
             v-model:value="formModel.webdavUsername"
+            :input-props="{
+              name: 'username',
+              autocomplete: 'section-webdav username',
+            }"
             :placeholder="ft('webdav-username-placeholder')"
           />
         </n-form-item>
@@ -103,11 +107,30 @@
             v-model:value="formModel.webdavPassword"
             type="password"
             show-password-on="click"
+            :input-props="{
+              name: 'password',
+              autocomplete: 'section-webdav current-password',
+            }"
             :placeholder="ft('webdav-password-placeholder')"
           />
         </n-form-item>
       </template>
       <template v-else>
+        <n-form-item
+          class="pb-3"
+          path="gistId"
+          :label="`${ft('gist-id')}:`"
+          :show-feedback="false"
+        >
+          <n-input
+            v-model:value="formModel.gistId"
+            :input-props="{
+              name: 'username',
+              autocomplete: `${credentialSection} username`,
+            }"
+            :placeholder="ft('placeholder', 'gist-id')"
+          />
+        </n-form-item>
         <n-form-item label-style="width: 100%" path="accessToken">
           <template #label>
             <a
@@ -123,21 +146,20 @@
           </template>
           <n-input
             v-model:value="formModel.accessToken"
+            type="password"
+            show-password-on="click"
+            :input-props="{
+              name: 'password',
+              autocomplete: `${credentialSection} current-password`,
+            }"
             :placeholder="ft('placeholder', 'access-token')"
-          />
-        </n-form-item>
-        <n-form-item
-          path="gistId"
-          :label="`${ft('gist-id')}:`"
-          :show-feedback="false"
-        >
-          <n-input
-            v-model:value="formModel.gistId"
-            :placeholder="ft('placeholder', 'gist-id')"
           />
         </n-form-item>
       </template>
     </n-form>
+    <p v-if="isWeb" class="text-xs text-text-secondary">
+      {{ ft(isWebdav ? "webdav-cors-note" : "web-sync-storage-note") }}
+    </p>
     <template #action>
       <div class="flex justify-end gap-2">
         <n-button
@@ -202,7 +224,7 @@ import type { WebdavProtocol } from "@/sync/webdavConfig.ts"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import Gitee from "@/components/gitee.vue"
-import { hasExtensionSyncStorage } from "@/utils/platform"
+import { hasExtensionSyncStorage, isWeb } from "@/utils/platform"
 
 const { ft, ft2 } = useHelpi18n()
 const show = defineModel<boolean>("show", { required: true })
@@ -239,6 +261,7 @@ const formModel = ref({
   webdavPassword: "",
 })
 const isWebdav = computed(() => formModel.value.syncType === "webdav")
+const credentialSection = computed(() => `section-${formModel.value.syncType}`)
 const getSyncLabel = (value: string) => {
   return (
     syncTypeOptions.value.find((item) => item.value === value)?.label ||
@@ -304,10 +327,11 @@ const currentWebdavConfig = () => ({
 })
 
 const formatErrorMessage = (fallback: string, err: unknown) => {
+  const suffix = isWeb && isWebdav.value ? ` ${ft("webdav-cors-note")}` : ""
   if (err instanceof Error && err.message) {
-    return `${fallback}: ${err.message}`
+    return `${fallback}: ${err.message}${suffix}`
   }
-  return fallback
+  return `${fallback}${suffix}`
 }
 
 const handleSyncTypeChange = (value: string) => {

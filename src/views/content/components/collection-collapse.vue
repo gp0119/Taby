@@ -15,7 +15,7 @@
       >
         <div class="flex-center relative py-3">
           <n-checkbox
-            class="absolute -left-5 mr-2 hidden w-[20px] group-hover/collection-title:block"
+            class="mobile-hover-only absolute -left-5 mr-2 hidden w-[20px] group-hover/collection-title:block"
             :class="{
               '!block': batchCollectionStore.selectedCollectionIds.includes(
                 collection.id,
@@ -80,7 +80,9 @@
         <Tags :labels="collection.labels" :collection-id="collection.id" />
       </div>
       <!-- 操作 -->
-      <div class="flex min-w-[120px] flex-shrink-0 items-center justify-end">
+      <div
+        class="collection-actions-wrapper flex min-w-[120px] flex-shrink-0 items-center justify-end"
+      >
         <CollectionAction :item="collection" />
       </div>
     </div>

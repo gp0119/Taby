@@ -243,31 +243,27 @@ class SyncManager {
 
   setInterval(value: number) {
     const nextInterval = value * 60 * 1000
-    if (nextInterval === this.SYNC_INTERVAL) return
-
-    this.SYNC_INTERVAL = nextInterval
-    if (this.uploadDebounce) {
-      if (typeof this.uploadDebounce.cancel === "function") {
-        this.uploadDebounce.cancel()
-      }
+    if (nextInterval !== this.SYNC_INTERVAL) {
+      this.SYNC_INTERVAL = nextInterval
+      this.uploadDebounce.cancel()
+      this.uploadDebounce = debounce(
+        () => this.safeUpload(),
+        this.SYNC_INTERVAL,
+        {
+          leading: false,
+          trailing: true,
+          maxWait: Math.max(this.SYNC_INTERVAL, 30 * 60 * 1000),
+        },
+      )
     }
+    void this.initPromise.then(() => this.scheduleDirtyUpload())
+  }
+
+  private scheduleDirtyUpload() {
     if (this.autoUploadTimer) {
       clearTimeout(this.autoUploadTimer)
       this.autoUploadTimer = null
     }
-    this.uploadDebounce = debounce(
-      () => this.safeUpload(),
-      this.SYNC_INTERVAL,
-      {
-        leading: false,
-        trailing: true,
-        maxWait: Math.max(this.SYNC_INTERVAL, 30 * 60 * 1000),
-      },
-    )
-    this.scheduleDirtyUpload()
-  }
-
-  private scheduleDirtyUpload() {
     const dirtyToken = this._dirtyToken
     if (dirtyToken === null) return
 

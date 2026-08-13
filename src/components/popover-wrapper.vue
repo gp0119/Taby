@@ -1,5 +1,5 @@
 <template>
-  <slot v-if="disabled" />
+  <slot v-if="tooltipDisabled" />
   <n-tooltip
     v-else
     v-bind="$attrs"
@@ -20,8 +20,12 @@
 
 <script setup lang="ts">
 import { TooltipProps } from "naive-ui"
+import { useMediaQuery } from "@vueuse/core"
+import { isWeb } from "@/utils/platform"
 
-withDefaults(
+defineOptions({ inheritAttrs: false })
+
+const props = withDefaults(
   defineProps<{
     trigger?: TooltipProps["trigger"]
     placement?: TooltipProps["placement"]
@@ -33,5 +37,10 @@ withDefaults(
     placement: "bottom",
     disabled: false,
   },
+)
+
+const isMobileLayout = useMediaQuery("(max-width: 999px)")
+const tooltipDisabled = computed(
+  () => props.disabled || (isWeb && isMobileLayout.value),
 )
 </script>

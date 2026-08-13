@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    :trigger="isWeb ? 'click' : 'hover'"
     placement="bottom"
     :show-arrow="false"
     style="padding: 0; width: 220px"
@@ -20,11 +20,13 @@
     <template #default>
       <div class="flex flex-col overflow-hidden rounded-lg bg-dialog-color">
         <div class="flex flex-col">
-          <ItemWrapper
-            :icon="Settings"
-            :title="ft('setting')"
-            @click="show = true"
-          />
+          <div class="mobile-manage-action">
+            <ItemWrapper
+              :icon="Settings"
+              :title="ft('setting')"
+              @click="show = true"
+            />
+          </div>
           <ItemWrapper
             tag="a"
             href="https://github.com/gp0119/Taby/issues/new"
@@ -53,6 +55,7 @@ import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import { Settings } from "@vicons/carbon"
 import SettingDrawer from "./setting-drawer.vue"
 import ItemWrapper from "./item-wrapper.vue"
+import { isWeb } from "@/utils/platform"
 
 const { ft } = useHelpi18n()
 const show = ref(false)

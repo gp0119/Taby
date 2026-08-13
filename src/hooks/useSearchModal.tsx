@@ -7,6 +7,7 @@ import Favicon from "@/components/favicon.vue"
 import { SearchOutline } from "@vicons/ionicons5"
 import { useEventListener } from "@vueuse/core"
 import { hasExtensionTabs } from "@/utils/platform"
+import { openWebUrl, splitHighlightedText } from "@/utils/web"
 
 export const useSearchModal = () => {
   const searchValue = ref("")
@@ -77,9 +78,8 @@ export const useSearchModal = () => {
 
   async function onHandleClick(child: any) {
     modal.destroyAll()
-    await new Promise((resolve) => setTimeout(resolve, 300))
     if (!hasExtensionTabs()) {
-      window.open(child.url, "_blank", "noopener,noreferrer")
+      openWebUrl(child.url)
       return
     }
     const tab = await chrome.tabs.create({ url: child.url })
@@ -96,6 +96,18 @@ export const useSearchModal = () => {
       },
     )
   }
+
+  const renderHighlightedText = (text: unknown) =>
+    splitHighlightedText(String(text ?? ""), searchValue.value).map(
+      (part, index) =>
+        part.highlighted ? (
+          <span key={index} class="font-semibold text-text-primary">
+            {part.text}
+          </span>
+        ) : (
+          part.text
+        ),
+    )
 
   const openModal = () => {
     modal.create({
@@ -142,31 +154,19 @@ export const useSearchModal = () => {
                     />
                     <div class="ml-2 flex flex-1 flex-col">
                       <span class="flex items-center text-ellipsis">
-                        <span
-                          v-html={card.title.replace(
-                            new RegExp(searchValue.value, "gi"),
-                            `<span class="font-semibold text-text-primary">${searchValue.value}</span>`,
-                          )}
-                        />
+                        <span>{renderHighlightedText(card.title)}</span>
                         {card.description && (
                           <>
                             <span class="mx-2 inline-block h-[16px] w-[1px] bg-text-secondary"></span>
-                            <span
-                              v-html={card.description.replace(
-                                new RegExp(searchValue.value, "gi"),
-                                `<span class="font-semibold text-text-primary">${searchValue.value}</span>`,
-                              )}
-                            />
+                            <span>
+                              {renderHighlightedText(card.description)}
+                            </span>
                           </>
                         )}
                       </span>
-                      <div
-                        class="text-ellipsis text-xs font-light text-text-secondary"
-                        v-html={card.url.replace(
-                          new RegExp(searchValue.value, "gi"),
-                          `<span class="font-semibold text-text-primary">${searchValue.value}</span>`,
-                        )}
-                      />
+                      <div class="text-ellipsis text-xs font-light text-text-secondary">
+                        {renderHighlightedText(card.url)}
+                      </div>
                     </div>
                   </div>
                 </div>

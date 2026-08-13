@@ -18,7 +18,7 @@
         :border-radius="10"
         icon-color="#fff"
         :size="14"
-        class="absolute -right-1.5 -top-1.5 z-10 hidden bg-error-color group-hover/tag:inline-flex"
+        class="mobile-hover-only absolute -right-1.5 -top-1.5 z-10 hidden bg-error-color group-hover/tag:inline-flex"
         @click.stop="onDeleteTag"
       >
         <n-icon :component="Close" />

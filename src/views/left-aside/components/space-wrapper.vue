@@ -4,7 +4,7 @@
     item-key="id"
     class="flex flex-col gap-y-1"
     ghost-class="sortable-ghost-dashed-border"
-    :disabled="layoutStore.isLeftCollapsed"
+    :disabled="isMobileWeb || layoutStore.isLeftCollapsed"
     @end="onDragEnd"
   >
     <div
@@ -52,8 +52,12 @@ import { ICON_LIST } from "@/utils/constants.ts"
 import { StorefrontOutline } from "@vicons/ionicons5"
 import { useLayoutStore } from "@/store/layout"
 import popoverWrapper from "@/components/popover-wrapper.vue"
+import { isWeb } from "@/utils/platform"
+import { useMediaQuery } from "@vueuse/core"
 
 const layoutStore = useLayoutStore()
+const mobileLayoutQuery = useMediaQuery("(max-width: 999px)")
+const isMobileWeb = computed(() => isWeb && mobileLayoutQuery.value)
 
 defineProps<{
   spaces: Space[]

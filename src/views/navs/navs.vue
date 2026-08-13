@@ -1,38 +1,65 @@
 <template>
   <div
-    class="group/nav flex h-[50px] items-center justify-between pl-4 pr-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
+    class="taby-nav group/nav flex h-[50px] items-center justify-between pl-4 pr-6 [&_.n\-base\-selection\-input]:!pl-1 [&_.n\-base\-selection\-input]:!pr-1"
   >
-    <div class="flex shrink-0 flex-nowrap items-center gap-3">
-      <PinIcon
-        side="left"
-        :mode="layoutStore.leftLayoutMode"
-        placement="bottom-start"
-        :options="['collapse', 'expand', 'hover']"
-        @update:mode="onChangeLayoutMode($event, 'left')"
-      />
+    <div
+      class="taby-nav-left flex min-w-0 shrink-0 flex-nowrap items-center gap-3"
+    >
+      <n-button
+        quaternary
+        size="small"
+        class="mobile-menu-button w-[28px]"
+        aria-label="Open spaces menu"
+        @click="emit('open-mobile-aside')"
+      >
+        <template #icon>
+          <n-icon size="24" :component="Menu" />
+        </template>
+      </n-button>
+      <div class="desktop-pin-icon">
+        <PinIcon
+          side="left"
+          :mode="layoutStore.leftLayoutMode"
+          placement="bottom-start"
+          :options="['collapse', 'expand', 'hover']"
+          @update:mode="onChangeLayoutMode($event, 'left')"
+        />
+      </div>
       <template v-if="title">
-        <div class="flex shrink-0 flex-nowrap items-center gap-4">
-          <div class="flex-center">
-            <n-icon size="18" class="mr-2 text-text-primary">
+        <div
+          class="nav-space-meta flex shrink-0 flex-nowrap items-center gap-4"
+        >
+          <div class="nav-space-title-wrapper flex-center">
+            <n-icon size="18" class="nav-space-icon mr-2 text-text-primary">
               <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
             </n-icon>
-            <span class="shrink-0 select-none text-lg text-text-primary">
+            <span
+              class="nav-space-title shrink-0 select-none text-lg text-text-primary"
+            >
               {{ title }}
             </span>
           </div>
-          <span class="h-[16px] w-[0.5px] bg-text-secondary" />
-          <span class="whitespace-nowrap font-thin text-text-secondary">
+          <span class="nav-space-detail h-[16px] w-[0.5px] bg-text-secondary" />
+          <span
+            class="nav-space-detail whitespace-nowrap font-thin text-text-secondary"
+          >
             {{ spacesStore.collections.length }} Collections
           </span>
         </div>
       </template>
       <TagFilter />
       <CollapseBtn />
-      <LeftMoreAction />
+      <div class="mobile-manage-action">
+        <LeftMoreAction />
+      </div>
     </div>
-    <div class="flex-center gap-x-3">
-      <EditSpace v-if="title" :title="title!" :icon="icon!" />
-      <AddCollection />
+    <div class="taby-nav-right flex-center shrink-0 gap-x-3">
+      <div v-if="title" class="mobile-manage-action">
+        <EditSpace :title="title!" :icon="icon!" />
+      </div>
+      <div class="mobile-manage-action">
+        <AddCollection />
+      </div>
       <SearchBtn />
       <MorePopover />
       <PinIcon
@@ -65,9 +92,13 @@ import EditSpace from "@/views/navs/components/edit-space.vue"
 import TopDragableAction from "@/views/navs/components/top-dragable-action.vue"
 import LeftMoreAction from "@/views/navs/components/left-more-action.vue"
 import { isWeb } from "@/utils/platform"
+import { Menu } from "@vicons/ionicons5"
 
 const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()
+const emit = defineEmits<{
+  (e: "open-mobile-aside"): void
+}>()
 
 const title = computed(
   () =>

@@ -6,6 +6,8 @@ import { createI18n } from "vue-i18n"
 import zhCN from "./i18n/zh-CN.ts"
 import enUS from "./i18n/en-US.ts"
 
+document.documentElement.classList.add("web")
+
 const pinia = createPinia()
 const app = createApp(App)
 const i18n = createI18n({

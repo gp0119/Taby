@@ -1,6 +1,6 @@
 <template>
   <div
-    class="hidden items-center gap-x-2 group-hover/item:flex"
+    class="collection-actions hidden items-center gap-x-2 group-hover/item:flex"
     :class="{ '!flex': isShowTagAction }"
   >
     <PopoverWrapper :message="ft('edit', 'collection')">
