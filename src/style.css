@@ -122,7 +122,10 @@ body {
     position: fixed;
     inset: 0;
     z-index: 9;
-    background: rgb(0 0 0 / 45%);
+  }
+
+  html.web .mobile-aside-mask ~ .taby-main {
+    filter: brightness(55%);
   }
 
   html.web .mobile-left-aside {
