@@ -76,6 +76,9 @@ export const useTheme = () => {
     const root = document.documentElement
     if (root) {
       root.dataset.theme = _theme
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", THEME_COLOR[_theme].cardBg)
     }
   }
 
