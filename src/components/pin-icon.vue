@@ -1,7 +1,7 @@
 <template>
   <n-popover
     v-model:show="showPopover"
-    trigger="hover"
+    :trigger="canHover ? 'hover' : 'click'"
     :placement="placement"
     content-class="!p-0"
     :show-arrow="false"
@@ -32,7 +32,7 @@
       </n-button>
     </template>
     <div class="flex gap-x-2">
-      <template v-for="option in options" :key="option">
+      <template v-for="option in visibleOptions" :key="option">
         <popover-wrapper :message="option">
           <svg
             class="h-5 w-5 cursor-pointer"
@@ -62,8 +62,9 @@
 import popoverWrapper from "./popover-wrapper.vue"
 import type { layoutMode } from "@/type"
 import type { PopoverPlacement } from "naive-ui"
+import { useCanHover } from "@/hooks/useCanHover"
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     mode: layoutMode
     side: "left" | "right"
@@ -76,6 +77,12 @@ withDefaults(
 )
 
 const showPopover = ref(false)
+const canHover = useCanHover()
+const visibleOptions = computed(() =>
+  canHover.value
+    ? props.options
+    : props.options.filter((option) => option !== "hover"),
+)
 
 const pathMap: Record<string, string> = {
   collapse:

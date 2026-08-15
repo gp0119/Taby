@@ -16,7 +16,8 @@
         <div
           class="mobile-hover-only favicon-size hidden h-7 w-7 flex-shrink-0 animate-scale-in items-center justify-center group-hover/card:flex"
           :class="{
-            '!inline-flex': showCheckbox && selectIds?.includes(child.id),
+            '!inline-flex':
+              showCheckbox && (selectIds?.includes(child.id) || !canHover),
             '!hidden': !showCheckbox,
           }"
           @click.stop="() => {}"
@@ -32,7 +33,8 @@
           size="small"
           class="card-favicon-button favicon-size w-[28px] group-hover/card:hidden"
           :class="{
-            '!hidden': selectIds?.includes(child.id),
+            '!hidden':
+              selectIds?.includes(child.id) || (showCheckbox && !canHover),
             '!flex': !showCheckbox,
           }"
         >
@@ -48,6 +50,7 @@
           :focusable="false"
           size="tiny"
           class="more-button hidden w-[22px] animate-scale-in group-hover/card:inline-flex"
+          :class="{ '!inline-flex': !canHover }"
           @click.stop="onHandleEdit"
         >
           <template #icon>
@@ -65,6 +68,7 @@
           circle
           size="tiny"
           class="close-button hidden h-[20px] w-[20px] animate-scale-in group-hover/card:inline-flex"
+          :class="{ '!inline-flex': !canHover }"
           @click.stop="onHandleDelete"
         >
           <template #icon>
@@ -90,8 +94,10 @@ import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import { Close } from "@vicons/carbon"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useLayoutStore } from "@/store/layout"
+import { useCanHover } from "@/hooks/useCanHover"
 
 const layoutStore = useLayoutStore()
+const canHover = useCanHover()
 
 withDefaults(
   defineProps<{
@@ -125,7 +131,6 @@ function onHandleCheckbox(checked: boolean) {
 <style>
 .card {
   @apply relative w-full cursor-pointer rounded-md bg-card-color shadow-card-shadow;
-  @apply [&:hover_.delete\-button]:flex [&:hover_.delete\-button]:animate-scale-in;
 }
 .card-header {
   @apply relative flex items-center p-2;
@@ -136,14 +141,5 @@ function onHandleCheckbox(checked: boolean) {
 }
 .card-description {
   @apply select-none text-xs font-light text-text-secondary;
-}
-.delete-button {
-  @apply absolute -right-2 hidden rounded-full bg-primary hover:opacity-70;
-}
-.copy-button {
-  @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
-}
-.edit-button {
-  @apply animate-scale-in rounded-full bg-primary hover:opacity-70;
 }
 </style>

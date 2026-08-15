@@ -83,13 +83,18 @@ html[data-theme="dark"] {
   .scrollbar-none {
     scrollbar-width: none;
   }
-  .scrollbar-thin:hover,
   .scrollbar-thin:active,
   .scrollbar-thin:focus {
     scrollbar-color: var(--scrollbarColor) transparent;
   }
   .scrollbar-gutter-stable {
     scrollbar-gutter: stable;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .scrollbar-thin:hover {
+    scrollbar-color: var(--scrollbarColor) transparent;
   }
 }
 

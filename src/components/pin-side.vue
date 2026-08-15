@@ -3,11 +3,13 @@
     class="fixed bottom-0 top-0 z-10 h-full translate-x-0 rounded-xl bg-body-color transition-all duration-100 ease-in-out"
     :class="[
       side === 'left' ? 'left-0' : 'right-0',
-      mode === 'hover' && hovering ? 'shadow-collection-shadow' : '',
-      mode === 'collapse' || (mode === 'hover' && !hovering) ? 'p-0' : 'px-2',
+      mode === 'hover' && hoverActive ? 'shadow-collection-shadow' : '',
+      mode === 'collapse' || (mode === 'hover' && !hoverActive)
+        ? 'p-0'
+        : 'px-2',
     ]"
     :style="{
-      width: `${mode === 'collapse' || (mode === 'hover' && !hovering) ? collapsedWidth : width}px`,
+      width: `${mode === 'collapse' || (mode === 'hover' && !hoverActive) ? collapsedWidth : width}px`,
     }"
     @mouseleave="handleMouseAction('leave')"
   >
@@ -18,7 +20,7 @@
       <div
         class="flex-1 overflow-y-hidden rounded-xl transition-colors duration-300 ease-in-out"
         :class="[
-          !(mode === 'collapse' || (mode === 'hover' && !hovering))
+          !(mode === 'collapse' || (mode === 'hover' && !hoverActive))
             ? 'bg-card-color'
             : 'bg-transparent',
         ]"
@@ -29,7 +31,7 @@
         v-if="$slots.footer"
         class="rounded-xl p-[13px] transition-colors duration-300 ease-in-out"
         :class="[
-          !(mode === 'collapse' || (mode === 'hover' && !hovering))
+          !(mode === 'collapse' || (mode === 'hover' && !hoverActive))
             ? 'bg-card-color'
             : 'bg-transparent',
         ]"
@@ -43,7 +45,7 @@
       style="background: transparent"
     /> -->
     <div
-      v-if="mode === 'hover' && hovering"
+      v-if="mode === 'hover' && hoverActive"
       class="absolute top-0 z-[99999] h-full w-10 bg-transparent"
       :class="{
         '-right-10': side === 'left',
@@ -56,6 +58,7 @@
 <script setup lang="ts">
 import { debounce } from "lodash-es"
 import type { layoutMode } from "@/type"
+import { useCanHover } from "@/hooks/useCanHover"
 
 const props = withDefaults(
   defineProps<{
@@ -75,8 +78,11 @@ const emit = defineEmits<{
   (e: "update:hovering", hovering: boolean): void
 }>()
 
+const canHover = useCanHover()
+const hoverActive = computed(() => canHover.value && props.hovering)
+
 const handleMouseAction = debounce((type: "enter" | "leave") => {
-  if (props.mode !== "hover") return
+  if (!canHover.value || props.mode !== "hover") return
   if (type === "enter") {
     if (!props.hovering) {
       emit("update:hovering", true)

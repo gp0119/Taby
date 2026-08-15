@@ -120,7 +120,7 @@
               'bg-hover-color': idx === activeIndex,
             }"
             @click="handleTagSelect(tag.id, tag)"
-            @mouseenter="activeIndex = idx"
+            @mouseenter="canHover && (activeIndex = idx)"
           >
             <Tag :tag="tag" />
             <n-icon
@@ -153,6 +153,7 @@ import Tag from "@/components/tag.vue"
 import type { InputInst } from "naive-ui"
 import { useSettingStore } from "@/store/setting"
 import { useShortcutHotkeys } from "@/hooks/useShortcutHotkeys"
+import { useCanHover } from "@/hooks/useCanHover"
 import { useEventListener } from "@vueuse/core"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 
@@ -162,6 +163,7 @@ const filterTag = ref({
 })
 const tagsStore = useTagsStore()
 const { ft, ft2 } = useHelpi18n()
+const canHover = useCanHover()
 
 const settingStore = useSettingStore()
 const shortcutsSetting = computed(() =>

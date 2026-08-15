@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    :trigger="canHover ? 'hover' : 'click'"
     placement="bottom-end"
     :show-arrow="false"
     class="min-w-[150px]"
@@ -35,7 +35,7 @@
               'bg-hover-color': idx === activeIndex,
             }"
             @click="handleTagSelect(tag.id)"
-            @mouseenter="activeIndex = idx"
+            @mouseenter="canHover && (activeIndex = idx)"
           >
             <Tag :tag="tag" :closeable="false" />
             <n-icon
@@ -46,6 +46,7 @@
             />
             <div
               class="absolute right-1.5 hidden items-center gap-x-2 group-hover/tag:flex"
+              :class="{ '!flex': !canHover }"
             >
               <PopoverWrapper :message="ft('edit', 'tag')">
                 <n-icon
@@ -124,12 +125,14 @@ import Tag from "@/components/tag.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import type { InputInst } from "naive-ui"
 import { useEventListener } from "@vueuse/core"
+import { useCanHover } from "@/hooks/useCanHover"
 
 const props = defineProps<{
   item: CollectionWithCards
 }>()
 
 const { ft } = useHelpi18n()
+const canHover = useCanHover()
 const tagsStore = useTagsStore()
 const selectedColor = ref<string>(COLOR_LIST[0])
 const newTag = ref({

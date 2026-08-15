@@ -1,7 +1,7 @@
 <template>
   <div
     class="collection-actions hidden items-center gap-x-2 group-hover/item:flex"
-    :class="{ '!flex': isShowTagAction }"
+    :class="{ '!flex': isShowTagAction || !canHover }"
   >
     <PopoverWrapper :message="ft('edit', 'collection')">
       <n-button
@@ -43,8 +43,10 @@ import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import { useCanHover } from "@/hooks/useCanHover"
 
 const { ft, gt } = useHelpi18n()
+const canHover = useCanHover()
 defineProps<{
   item: CollectionWithCards
 }>()

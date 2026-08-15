@@ -1,6 +1,6 @@
 <template>
   <n-popover
-    trigger="hover"
+    :trigger="canHover ? 'hover' : 'click'"
     :show="sortStore.isSortOpen"
     placement="right-start"
     :show-arrow="false"
@@ -83,9 +83,11 @@ import { useSortStore } from "@/store/sort"
 import { ArrowDown, ArrowUp, Draggable } from "@vicons/carbon"
 import { ChevronForward } from "@vicons/ionicons5"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
+import { useCanHover } from "@/hooks/useCanHover"
 
 const sortStore = useSortStore()
 const { ft } = useHelpi18n()
+const canHover = useCanHover()
 
 const handleSortSelect = (key: string) => {
   sortStore.setSortOrder(key)

@@ -19,6 +19,7 @@
         icon-color="#fff"
         :size="14"
         class="mobile-hover-only absolute -right-1.5 -top-1.5 z-10 hidden bg-error-color group-hover/tag:inline-flex"
+        :class="{ '!inline-flex': !canHover }"
         @click.stop="onDeleteTag"
       >
         <n-icon :component="Close" />
@@ -36,6 +37,9 @@
 <script setup lang="tsx">
 import { Label } from "@/type"
 import { Close } from "@vicons/ionicons5"
+import { useCanHover } from "@/hooks/useCanHover"
+
+const canHover = useCanHover()
 
 withDefaults(
   defineProps<{

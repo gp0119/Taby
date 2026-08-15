@@ -1,7 +1,7 @@
 <template>
   <n-popover
     v-model:show="show"
-    trigger="hover"
+    :trigger="canHover ? 'hover' : 'click'"
     content-class="scrollbar-thin scrollbar-gutter-stable max-h-[120px] grid grid-cols-4 gap-2 overflow-scroll"
   >
     <template #trigger>
@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { COLOR_LIST } from "@/utils/constants.ts"
 import { Checkmark, ColorPalette } from "@vicons/carbon"
+import { useCanHover } from "@/hooks/useCanHover"
 
 defineProps({
   size: {
@@ -40,6 +41,7 @@ defineProps({
 })
 
 const show = ref(false)
+const canHover = useCanHover()
 const selectedColor = defineModel("value", {
   type: String,
   default: COLOR_LIST[0],

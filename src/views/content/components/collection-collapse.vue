@@ -17,9 +17,11 @@
           <n-checkbox
             class="mobile-hover-only absolute -left-5 mr-2 hidden w-[20px] group-hover/collection-title:block"
             :class="{
-              '!block': batchCollectionStore.selectedCollectionIds.includes(
-                collection.id,
-              ),
+              '!block':
+                !canHover ||
+                batchCollectionStore.selectedCollectionIds.includes(
+                  collection.id,
+                ),
               '!hidden':
                 batchCardStore.selectedCardIds.length > 0 ||
                 batchTabsStore.selectedTabIds.length > 0 ||
@@ -123,6 +125,7 @@ import { useChromeTabs } from "@/hooks/useChromeTabs"
 import { useSettingStore } from "@/store/setting"
 import { hasExtensionTabs, isWeb } from "@/utils/platform"
 import { useMediaQuery } from "@vueuse/core"
+import { useCanHover } from "@/hooks/useCanHover"
 import { openWebUrls } from "@/utils/web"
 import { useMessage } from "naive-ui"
 
@@ -133,6 +136,7 @@ const duplicateCardStore = useDuplicateCardStore()
 const { openTabs, groupTabs, openInNewWindow } = useChromeTabs()
 const mobileLayoutQuery = useMediaQuery("(max-width: 999px)")
 const isMobileWeb = computed(() => isWeb && mobileLayoutQuery.value)
+const canHover = useCanHover()
 const props = defineProps<{
   collection: CollectionWithCards
 }>()

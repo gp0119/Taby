@@ -20,8 +20,8 @@
 
 <script setup lang="ts">
 import { TooltipProps } from "naive-ui"
-import { useMediaQuery } from "@vueuse/core"
 import { isWeb } from "@/utils/platform"
+import { useCanHover } from "@/hooks/useCanHover"
 
 defineOptions({ inheritAttrs: false })
 
@@ -39,8 +39,8 @@ const props = withDefaults(
   },
 )
 
-const isMobileLayout = useMediaQuery("(max-width: 999px)")
+const canHover = useCanHover()
 const tooltipDisabled = computed(
-  () => props.disabled || (isWeb && isMobileLayout.value),
+  () => props.disabled || (isWeb && !canHover.value),
 )
 </script>

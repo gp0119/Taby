@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./newtab.html", "./popup.html", "./src/**/*.{js,ts,jsx,tsx,vue}"],
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       boxShadow: {
