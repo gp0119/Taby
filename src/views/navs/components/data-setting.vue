@@ -94,9 +94,10 @@
 
 <script setup lang="ts">
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { SYNC_GIST_TOKEN, SYNC_GIST_ID, SYNC_TYPE } from "@/utils/constants.ts"
 import { GistVersion } from "@/type.ts"
-import GistManager from "@/sync/gistManager.ts"
+import { createGistManager } from "@/sync/gistManager.ts"
+import { getGistConfig, getSyncProviderType } from "@/sync/syncConfig.ts"
+import type { GistConfig, SyncProviderType } from "@/sync/syncConfig.ts"
 import dataManager from "@/db/index.ts"
 import { useMessage } from "naive-ui"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
@@ -111,22 +112,31 @@ const { open } = useDeleteDialog()
 const { updateContextMenus } = useRefresh()
 
 const CACHE_EXPIRE_TIME = 60 * 60 * 1000 // 1小时过期
+const CACHE_KEY_PREFIX = "gist_versions_cache_"
+
+// 同步配置存在 localStorage 里，不是响应式的，只能在挂载时读一次快照
+const githubConfig = ref<GistConfig>({
+  type: "github",
+  accessToken: "",
+  gistId: "",
+})
+const syncType = ref<SyncProviderType>("github")
+
+onBeforeMount(() => {
+  githubConfig.value = getGistConfig("github")
+  syncType.value = getSyncProviderType()
+})
 
 const hasGistConfig = computed(() => {
-  const accessToken = localStorage.getItem(SYNC_GIST_TOKEN)
-  const gistId = localStorage.getItem(SYNC_GIST_ID)
-  return !!(accessToken && gistId)
+  return !!(githubConfig.value.accessToken && githubConfig.value.gistId)
 })
 
 const isGithub = computed(() => {
-  const syncType = localStorage.getItem(SYNC_TYPE)
-  return !syncType || syncType === "github"
+  return syncType.value === "github"
 })
 
 const cacheKey = computed(() => {
-  const gistId = localStorage.getItem(SYNC_GIST_ID) || "default"
-  const syncType = localStorage.getItem(SYNC_TYPE) || "github"
-  return `gist_versions_cache_${syncType}_${gistId}`
+  return `${CACHE_KEY_PREFIX}github_${githubConfig.value.gistId || "default"}`
 })
 
 const loading = ref(false)
@@ -160,9 +170,20 @@ const loadFromCache = () => {
   return false
 }
 
+// 清掉切换 gistId / 同步方式后遗留的缓存
+const removeStaleCache = () => {
+  for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+    const key = localStorage.key(index)
+    if (key?.startsWith(CACHE_KEY_PREFIX) && key !== cacheKey.value) {
+      localStorage.removeItem(key)
+    }
+  }
+}
+
 // 保存到缓存
 const saveToCache = (data: GistVersion[]) => {
   try {
+    removeStaleCache()
     localStorage.setItem(
       cacheKey.value,
       JSON.stringify({
@@ -180,7 +201,9 @@ const handleGetData = async () => {
 
   try {
     loading.value = true
-    versions.value = await GistManager.fetchGistVersions()
+    versions.value = await createGistManager(
+      githubConfig.value,
+    ).fetchGistVersions()
     if (versions.value.length === 0) {
       message.warning(ft("no-versions"))
     } else {
@@ -195,14 +218,7 @@ const handleGetData = async () => {
   }
 }
 
-// 组件加载时尝试从缓存加载
-onMounted(() => {
-  if (hasGistConfig.value && isGithub.value) {
-    loadFromCache()
-  }
-})
-
-// 监听配置变化
+// 监听配置变化（首次读取配置也会走这里）
 watch([hasGistConfig, isGithub, cacheKey], ([hasConfig, github]) => {
   if (!hasConfig || !github) {
     versions.value = []
@@ -218,7 +234,9 @@ const handleRollback = (version: GistVersion) => {
     onPositiveClick: async () => {
       try {
         rollbackLoading.value = version.version
-        const data = await GistManager.fetchGistByVersion(version.version)
+        const data = await createGistManager(
+          githubConfig.value,
+        ).fetchGistByVersion(version.version)
         await dataManager.importData(data)
         resetMainScrollPosition()
         await updateContextMenus()

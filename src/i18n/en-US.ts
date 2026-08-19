@@ -15,6 +15,7 @@ export default {
   "download-remote": "Download Remote",
   "access-token": "AccessToken",
   "gist-id": "GistId",
+  "gist-id-label": "GistId (optional, created automatically on upload):",
   "webdav-host": "WebDAV Host",
   "webdav-host-placeholder":
     "Domain or WebDAV path, e.g. dav.example.com/remote.php/dav/files/me",
@@ -33,7 +34,14 @@ export default {
   username: "Username",
   password: "Password",
   sync: "Sync",
-  "sync-with": "Sync with {type}",
+  "sync-settings": "Sync Settings",
+  "primary-sync": "Primary Sync",
+  "backup-sync": "Backup Sync (Optional)",
+  "backup-sync-note":
+    "Primary sync handles downloads and conflicts. Backups upload only after primary sync succeeds.",
+  "upload-and-backup": "Upload and Update Backups",
+  "backup-sync-failed":
+    "These backups failed and their settings were not saved: {types}",
   "drag-to-sort": "Drag to Sort",
   tags: "Tags",
   tag: "Tag",
@@ -89,7 +97,6 @@ export default {
   search: "Search",
   "search-placeholder": "Please enter title or link",
   "no-search-result": "No search results",
-  "sync-type": "Sync Type",
   "sync-with-gist": "Sync with Gist",
   next: "Next",
   previous: "Prev",

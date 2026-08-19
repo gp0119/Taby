@@ -2,12 +2,10 @@ import { SyncData } from "@/type.ts"
 import {
   GITHUB_API,
   GITEE_API,
-  SYNC_TYPE,
-  SYNC_GIST_TOKEN,
-  SYNC_GIST_ID,
   SYNC_LAST_REMOTE_UPDATED_AT,
   SYNC_LAST_ETAG,
 } from "@/utils/constants.ts"
+import type { GistConfig } from "@/sync/syncConfig.ts"
 import { compressToUTF16, decompressFromUTF16 } from "lz-string"
 
 interface GistRawResponse {
@@ -24,61 +22,67 @@ interface GistRawResponse {
 }
 
 class GistManager {
-  private static instance: GistManager
+  private gistId: string
+
+  constructor(
+    private readonly config: GistConfig,
+    private readonly onGistIdChange?: (gistId: string) => void | Promise<void>,
+    private readonly ignoreSyncedRemoteState = false,
+  ) {
+    this.gistId = config.gistId
+  }
 
   private get API() {
-    const syncType = localStorage.getItem(SYNC_TYPE)
-    return syncType === "gitee" ? GITEE_API : GITHUB_API
+    return this.config.type === "gitee" ? GITEE_API : GITHUB_API
   }
 
   private get ACCESS_TOKEN() {
-    return localStorage.getItem(SYNC_GIST_TOKEN) || ""
+    return this.config.accessToken
   }
 
   private get GIST_ID() {
-    return localStorage.getItem(SYNC_GIST_ID) || ""
+    return this.gistId
   }
 
-  private set GIST_ID(value: string) {
-    localStorage.setItem(SYNC_GIST_ID, value)
-  }
-
-  public static getInstance(): GistManager {
-    if (!GistManager.instance) {
-      GistManager.instance = new GistManager()
-    }
-    return GistManager.instance
+  private getStateKey(key: string) {
+    return `${key}:${this.config.type}`
   }
 
   // 上次同步看到的远端 updated_at（ISO 字符串）。读取用于冲突检测。
   getLastRemoteUpdatedAt(): string {
-    return localStorage.getItem(SYNC_LAST_REMOTE_UPDATED_AT) || ""
+    if (this.ignoreSyncedRemoteState) return ""
+    return (
+      localStorage.getItem(this.getStateKey(SYNC_LAST_REMOTE_UPDATED_AT)) || ""
+    )
   }
 
   getLastEtag(): string {
-    return localStorage.getItem(SYNC_LAST_ETAG) || ""
+    if (this.ignoreSyncedRemoteState) return ""
+    return localStorage.getItem(this.getStateKey(SYNC_LAST_ETAG)) || ""
   }
 
   // 在我们成功 push/pull 后调用，记录此时已知的远端版本，作为下次冲突检测的基准
   private saveSyncedRemoteState(updatedAt?: string, etag?: string) {
     if (updatedAt) {
-      localStorage.setItem(SYNC_LAST_REMOTE_UPDATED_AT, updatedAt)
+      localStorage.setItem(
+        this.getStateKey(SYNC_LAST_REMOTE_UPDATED_AT),
+        updatedAt,
+      )
     }
     if (etag) {
-      localStorage.setItem(SYNC_LAST_ETAG, etag)
+      localStorage.setItem(this.getStateKey(SYNC_LAST_ETAG), etag)
     }
   }
 
   clearSyncedRemoteState() {
-    localStorage.removeItem(SYNC_LAST_REMOTE_UPDATED_AT)
-    localStorage.removeItem(SYNC_LAST_ETAG)
+    localStorage.removeItem(this.getStateKey(SYNC_LAST_REMOTE_UPDATED_AT))
+    localStorage.removeItem(this.getStateKey(SYNC_LAST_ETAG))
   }
 
   private buildHeaders(
     extra: Record<string, string> = {},
   ): Record<string, string> {
-    const syncType = localStorage.getItem(SYNC_TYPE)
-    if (syncType === "gitee") {
+    if (this.config.type === "gitee") {
       // Gitee 的 Gist API 用 token 风格鉴权，且不识别 GitHub 的 vnd.github / api-version 头。
       return {
         Accept: "application/json",
@@ -263,8 +267,8 @@ class GistManager {
 
   async uploadData(data: Partial<SyncData>) {
     if (!this.GIST_ID) {
-      this.GIST_ID = await this.createGist(data as SyncData)
-      localStorage.setItem(SYNC_GIST_ID, this.GIST_ID)
+      this.gistId = await this.createGist(data as SyncData)
+      await this.onGistIdChange?.(this.gistId)
     } else {
       await this.updateGist(data)
     }
@@ -308,4 +312,8 @@ class GistManager {
   }
 }
 
-export default GistManager.getInstance()
+export const createGistManager = (
+  config: GistConfig,
+  onGistIdChange?: (gistId: string) => void | Promise<void>,
+  ignoreSyncedRemoteState = false,
+) => new GistManager(config, onGistIdChange, ignoreSyncedRemoteState)

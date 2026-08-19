@@ -10,6 +10,7 @@ import {
   buildWebdavUrl,
   getWebdavConfig,
 } from "@/sync/webdavConfig.ts"
+import type { WebdavConfig, WebdavCredential } from "@/sync/webdavConfig.ts"
 import { AuthType, createClient } from "webdav"
 import type { FileStat, ResponseDataDetailed, WebDAVClient } from "webdav"
 
@@ -20,26 +21,23 @@ interface WebdavPayload {
 }
 
 class WebdavManager {
-  private static instance: WebdavManager
   private readyDirectoryKey = ""
 
-  public static getInstance(): WebdavManager {
-    if (!WebdavManager.instance) {
-      WebdavManager.instance = new WebdavManager()
-    }
-    return WebdavManager.instance
-  }
+  constructor(
+    private readonly config: WebdavConfig,
+    private readonly credential: WebdavCredential,
+  ) {}
 
   private get URL() {
-    return buildWebdavUrl(getWebdavConfig())
+    return buildWebdavUrl(this.config)
   }
 
   private get USERNAME() {
-    return localStorage.getItem(SYNC_WEBDAV_USERNAME) || ""
+    return this.credential.username
   }
 
   private get PASSWORD() {
-    return localStorage.getItem(SYNC_WEBDAV_PASSWORD) || ""
+    return this.credential.password
   }
 
   private getStateKey(key: string) {
@@ -49,7 +47,7 @@ class WebdavManager {
   }
 
   private get connection() {
-    const location = buildWebdavLocation(getWebdavConfig())
+    const location = buildWebdavLocation(this.config)
     if (!location) {
       throw new Error("未设置 WebDAV Host")
     }
@@ -250,4 +248,10 @@ class WebdavManager {
   }
 }
 
-export default WebdavManager.getInstance()
+export const createWebdavManager = (
+  config: WebdavConfig = getWebdavConfig(),
+  credential: WebdavCredential = {
+    username: localStorage.getItem(SYNC_WEBDAV_USERNAME) || "",
+    password: localStorage.getItem(SYNC_WEBDAV_PASSWORD) || "",
+  },
+) => new WebdavManager(config, credential)

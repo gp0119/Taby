@@ -18,20 +18,10 @@
 
 <script setup lang="ts">
 import syncManager from "@/sync/syncManager.ts"
+import { migrateSyncConfig } from "@/sync/syncProvider.ts"
+import { SYNC_CONFIG_STORAGE_KEYS } from "@/sync/syncConfig.ts"
 import { darkTheme, lightTheme } from "naive-ui"
 import { useRefresh } from "@/hooks/useRresh"
-import {
-  SYNC_GIST_ID,
-  SYNC_GIST_TOKEN,
-  SYNC_TYPE,
-  SYNC_WEBDAV_FILENAME,
-  SYNC_WEBDAV_FOLDER,
-  SYNC_WEBDAV_HOST,
-  SYNC_WEBDAV_PASSWORD,
-  SYNC_WEBDAV_PORT,
-  SYNC_WEBDAV_PROTOCOL,
-  SYNC_WEBDAV_USERNAME,
-} from "@/utils/constants.ts"
 import { debounce } from "lodash-es"
 import layout from "@/layout/index.vue"
 import { useTheme } from "@/hooks/useTheme"
@@ -67,36 +57,15 @@ const removeListener = () => {
 }
 
 onBeforeMount(async () => {
-  if (isWeb) return
-  if (!hasExtensionSyncStorage()) return
-  const result = await chrome.storage.sync.get([
-    SYNC_GIST_TOKEN,
-    SYNC_GIST_ID,
-    SYNC_TYPE,
-    SYNC_WEBDAV_PROTOCOL,
-    SYNC_WEBDAV_HOST,
-    SYNC_WEBDAV_PORT,
-    SYNC_WEBDAV_FOLDER,
-    SYNC_WEBDAV_FILENAME,
-    SYNC_WEBDAV_USERNAME,
-    SYNC_WEBDAV_PASSWORD,
-  ])
-  ;[
-    SYNC_TYPE,
-    SYNC_GIST_TOKEN,
-    SYNC_GIST_ID,
-    SYNC_WEBDAV_PROTOCOL,
-    SYNC_WEBDAV_HOST,
-    SYNC_WEBDAV_PORT,
-    SYNC_WEBDAV_FOLDER,
-    SYNC_WEBDAV_FILENAME,
-    SYNC_WEBDAV_USERNAME,
-    SYNC_WEBDAV_PASSWORD,
-  ].forEach((key) => {
-    if (Object.hasOwn(result, key)) {
-      localStorage.setItem(key, String(result[key]))
-    }
-  })
+  if (hasExtensionSyncStorage()) {
+    const result = await chrome.storage.sync.get([...SYNC_CONFIG_STORAGE_KEYS])
+    SYNC_CONFIG_STORAGE_KEYS.forEach((key) => {
+      if (Object.hasOwn(result, key)) {
+        localStorage.setItem(key, String(result[key]))
+      }
+    })
+  }
+  await migrateSyncConfig()
 })
 
 onMounted(async () => {

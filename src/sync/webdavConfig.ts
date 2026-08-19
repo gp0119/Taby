@@ -89,22 +89,18 @@ export const getWebdavConfig = (): WebdavConfig => {
   }
 }
 
-export const persistWebdavConfig = (config: WebdavConfig) => {
-  const values = {
+export const getWebdavConfigValues = (config: WebdavConfig) => {
+  return {
     [SYNC_WEBDAV_PROTOCOL]: config.protocol,
     [SYNC_WEBDAV_HOST]: config.host,
     [SYNC_WEBDAV_PORT]: config.port,
     [SYNC_WEBDAV_FOLDER]: config.folder,
     [SYNC_WEBDAV_FILENAME]: normalizeFilename(config.filename),
   }
-  Object.entries(values).forEach(([key, value]) => {
-    localStorage.setItem(key, value)
-  })
-  return values
 }
 
-export const hasWebdavConfig = () => {
-  return !!getWebdavConfig().host.trim()
+export const hasWebdavConfig = (config = getWebdavConfig()) => {
+  return !!config.host.trim()
 }
 
 export const testWebdavConnection = async (

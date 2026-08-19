@@ -5,8 +5,6 @@ import { debounce, DebouncedFunc } from "lodash-es"
 import {
   LOCAL_LAST_DOWNLOAD_TIME,
   REMOTE_LAST_UPDATE_TIME,
-  SYNC_LAST_ETAG,
-  SYNC_LAST_REMOTE_UPDATED_AT,
 } from "@/utils/constants.ts"
 import {
   getDirtyToken as getDirtyTokenAsync,
@@ -18,11 +16,13 @@ import {
 } from "@/sync/dirtyStorage.ts"
 import { resetMainScrollPosition } from "@/utils/scrollPositionStorage"
 import {
-  getSyncProvider,
-  hasSyncConfig,
-  isWebdavSync,
+  getSyncTargets,
   RemoteMeta,
+  SyncTarget,
+  SyncTargets,
 } from "@/sync/syncProvider.ts"
+import type { SyncProviderType } from "@/sync/syncProvider.ts"
+import { shouldTryBaselineBootstrap } from "@/sync/syncConfig.ts"
 import { hasExtensionSyncStorage, isWeb } from "@/utils/platform"
 
 const UPLOAD_LOCK_NAME = "taby-sync-upload"
@@ -39,6 +39,15 @@ export type ConflictHandler = (
   info: ConflictInfo,
 ) => Promise<ConflictResolution>
 
+export type BackupSyncResult =
+  | { type: SyncProviderType; success: true; targetId: string }
+  | { type: SyncProviderType; success: false; error: unknown }
+
+export interface SyncOperationResult {
+  primaryTargetId?: string
+  backups: BackupSyncResult[]
+}
+
 export class SyncConflictCancelledError extends Error {
   constructor() {
     super("Upload cancelled by user due to remote conflict.")
@@ -47,7 +56,7 @@ export class SyncConflictCancelledError extends Error {
 }
 
 export class SyncConflictResolvedRemoteError extends Error {
-  constructor() {
+  constructor(public readonly result: SyncOperationResult) {
     super("Upload skipped: user chose to use remote data on conflict.")
     this.name = "SyncConflictResolvedRemoteError"
   }
@@ -56,7 +65,7 @@ export class SyncConflictResolvedRemoteError extends Error {
 class SyncManager {
   private static instance: SyncManager
   SYNC_INTERVAL = 1000 * 60 * 5 // 5 minutes
-  uploadDebounce: DebouncedFunc<() => Promise<string | undefined>>
+  uploadDebounce: DebouncedFunc<() => Promise<SyncOperationResult | undefined>>
   private initPromise: Promise<boolean>
   private autoUploadTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -80,28 +89,6 @@ class SyncManager {
     this.onRemoteImported = cb
   }
 
-  async resetSyncTargetState(): Promise<void> {
-    getSyncProvider().clearSyncedRemoteState()
-    const remoteStateKeys = [SYNC_LAST_ETAG, SYNC_LAST_REMOTE_UPDATED_AT]
-    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
-      const key = localStorage.key(index)
-      if (
-        key &&
-        (remoteStateKeys.some(
-          (stateKey) =>
-            key === stateKey || key.startsWith(`${stateKey}:webdav:`),
-        ) ||
-          key.startsWith("gist_versions_cache_"))
-      ) {
-        localStorage.removeItem(key)
-      }
-    }
-    localStorage.removeItem(LOCAL_LAST_DOWNLOAD_TIME)
-    if (hasExtensionSyncStorage()) {
-      await chrome.storage.sync.remove(REMOTE_LAST_UPDATE_TIME)
-    }
-  }
-
   isDirty(): boolean {
     return this._dirtyToken !== null
   }
@@ -122,9 +109,10 @@ class SyncManager {
   // 仅记录真正的错误，避免 unhandled rejection 噪声。供 debounce / setTimeout 等无 try/catch 的调用处使用。
   private safeUpload = async (
     force: boolean = false,
-  ): Promise<string | undefined> => {
+    targets?: SyncTargets,
+  ): Promise<SyncOperationResult | undefined> => {
     try {
-      return await this.uploadImmediate(force)
+      return await this.uploadImmediate(force, targets)
     } catch (err) {
       if (
         err instanceof SyncConflictCancelledError ||
@@ -225,7 +213,7 @@ class SyncManager {
       const spaceCount = await db.spaces.count()
       // 仅当本地"真的空"且没有任何待上传修改时，才尝试从远端恢复
       if (spaceCount === 0 && !this.isDirty()) {
-        if (hasSyncConfig("download")) {
+        if (getSyncTargets().primary.canDownload) {
           console.warn("检测到本地数据为空，尝试从远程恢复...")
           try {
             await this.triggerDownload()
@@ -279,6 +267,28 @@ class SyncManager {
     )
   }
 
+  private uploadBackups = async (
+    data: SyncData,
+    backups: SyncTarget[],
+  ): Promise<BackupSyncResult[]> => {
+    const settled = await Promise.allSettled(
+      backups.map(async (target) => {
+        if (!target.canUpload) {
+          throw new Error(`${target.type} backup is not configured.`)
+        }
+        return await target.provider.uploadData(data)
+      }),
+    )
+    return settled.map((result, index) => {
+      const type = backups[index].type
+      if (result.status === "fulfilled") {
+        return { type, success: true, targetId: result.value }
+      }
+      console.warn(`[sync] ${type} backup failed:`, result.reason)
+      return { type, success: false, error: result.reason }
+    })
+  }
+
   // 全量上传当前所有表数据。
   // - force=true 时即使没有 dirty 也会强制上传（设置页"上传"按钮）。
   // - 跨 Tab 互斥：用 navigator.locks 只允许同时一个 Tab 上传，其它 Tab 立即返回 undefined。
@@ -288,23 +298,31 @@ class SyncManager {
   //   no handler 时默认 local（保持向后兼容，只是 console.warn）。
   uploadImmediate = async (
     force: boolean = false,
-  ): Promise<string | undefined> => {
-    const runUpload = async (): Promise<string | undefined> => {
-      if (!hasSyncConfig("upload")) return
+    targets: SyncTargets = getSyncTargets(),
+  ): Promise<SyncOperationResult | undefined> => {
+    const runUpload = async (): Promise<SyncOperationResult | undefined> => {
+      if (!targets.primary.canUpload) return
 
       const dirtyToken = this._dirtyToken
       if (!force && dirtyToken === null) return
 
       // 冲突检测：仅当已经有可下载的远端目标时检查（首次创建 Gist 不需要）
-      if (hasSyncConfig("download")) {
-        const decided = await this.detectAndResolveConflict()
-        if (decided === "remote") throw new SyncConflictResolvedRemoteError()
+      if (targets.primary.canDownload) {
+        const decided = await this.detectAndResolveConflict(
+          targets.primary.provider,
+          !!targets.primary.targetChanged,
+        )
+        if (decided === "remote") {
+          const data = await dataManager.getUploadData()
+          const backups = await this.uploadBackups(data, targets.backups)
+          throw new SyncConflictResolvedRemoteError({ backups })
+        }
         if (decided === "cancel") throw new SyncConflictCancelledError()
         // "local" 或 "no-conflict" → 继续 PATCH 覆盖
       }
 
       const data = await dataManager.getUploadData()
-      const newTargetId = await getSyncProvider().uploadData(data)
+      const newTargetId = await targets.primary.provider.uploadData(data)
       const now = Date.now()
       if (hasExtensionSyncStorage()) {
         await chrome.storage.sync.set({ [REMOTE_LAST_UPDATE_TIME]: now })
@@ -316,7 +334,10 @@ class SyncManager {
           this._dirtyToken = null
         }
       }
-      return newTargetId
+      return {
+        primaryTargetId: newTargetId,
+        backups: await this.uploadBackups(data, targets.backups),
+      }
     }
 
     if (typeof navigator !== "undefined" && navigator.locks) {
@@ -336,11 +357,11 @@ class SyncManager {
   // - no-conflict / local：调用方继续 PATCH。
   // - remote：调用方应停止上传（已经把远端 import 进来）。
   // - cancel：调用方应停止上传，保留 dirty。
-  private async detectAndResolveConflict(): Promise<
-    "no-conflict" | ConflictResolution
-  > {
+  private async detectAndResolveConflict(
+    provider: SyncTarget["provider"],
+    targetChanged = false,
+  ): Promise<"no-conflict" | ConflictResolution> {
     let meta: RemoteMeta
-    const provider = getSyncProvider()
     try {
       meta = await provider.fetchRemoteMeta()
     } catch (err) {
@@ -354,7 +375,7 @@ class SyncManager {
     const lastEtag = provider.getLastEtag()
     const remoteUpdatedAt = meta.updatedAt ?? ""
 
-    if (!lastSeen && remoteUpdatedAt) {
+    if (shouldTryBaselineBootstrap(targetChanged, lastSeen, remoteUpdatedAt)) {
       const canBootstrapBaseline =
         await this.canBootstrapMissingRemoteBaseline(remoteUpdatedAt)
       if (canBootstrapBaseline) {
@@ -455,10 +476,11 @@ class SyncManager {
     this.uploadDebounce()
   }
 
-  // 手动上传全部数据（设置页面"上传"按钮）。失败抛错，避免调用方拿到 undefined
-  // 误把假 gistId 写入存储破坏配置。
-  uploadAll = async (): Promise<string> => {
-    const result = await this.uploadImmediate(true)
+  // 手动上传全部数据（设置页面"上传"按钮）。失败抛错，避免调用方把未执行当成成功。
+  uploadAll = async (
+    targets: SyncTargets = getSyncTargets(),
+  ): Promise<SyncOperationResult> => {
+    const result = await this.uploadImmediate(true, targets)
     if (!result) {
       throw new Error(
         "Upload skipped: another upload is in progress or no access token configured.",
@@ -497,20 +519,28 @@ class SyncManager {
   // allowEmpty: 用户在 UI 中显式确认覆盖时（同步对话框、版本回滚）才允许传 true。
   // 所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
   triggerDownload = async (
-    options: { allowEmpty?: boolean } = {},
-  ): Promise<SyncData> => {
-    const data = await getSyncProvider().downloadAll()
-    return await this.importRemoteData(data, options)
+    options: { allowEmpty?: boolean; targets?: SyncTargets } = {},
+  ): Promise<SyncOperationResult> => {
+    const targets = options.targets ?? getSyncTargets()
+    if (!targets.primary.canDownload) {
+      throw new Error("Primary sync is not configured for download.")
+    }
+    const data = await targets.primary.provider.downloadAll()
+    await this.importRemoteData(data, options)
+    return {
+      backups: await this.uploadBackups(data, targets.backups),
+    }
   }
 
   autoDownload = async (): Promise<boolean> => {
     if (isWeb) return false
     if (!hasExtensionSyncStorage()) return false
-    if (!hasSyncConfig("download")) return false
+    const targets = getSyncTargets()
+    if (!targets.primary.canDownload) return false
 
     try {
-      if (isWebdavSync()) {
-        return await this.autoDownloadByRemoteMeta()
+      if (targets.primary.type === "webdav") {
+        return await this.autoDownloadByRemoteMeta(targets)
       }
 
       // 先用 chrome.storage.sync 上的 REMOTE_LAST_UPDATE_TIME 做廉价检查，
@@ -538,7 +568,7 @@ class SyncManager {
       // 把 last-write-wins 的责任交给冲突检测路径。
       if (this.isDirty()) {
         try {
-          await this.safeUpload(true)
+          await this.safeUpload(true, targets)
         } catch (err) {
           console.warn("Pre-download flush failed; aborting autoDownload:", err)
           return false
@@ -548,7 +578,7 @@ class SyncManager {
       }
 
       console.log("Remote data potentially newer, downloading...")
-      await this.triggerDownload()
+      await this.triggerDownload({ targets })
       return true
     } catch (error) {
       console.error("Error during autoDownload check:", error)
@@ -556,8 +586,10 @@ class SyncManager {
     }
   }
 
-  private autoDownloadByRemoteMeta = async (): Promise<boolean> => {
-    const provider = getSyncProvider()
+  private autoDownloadByRemoteMeta = async (
+    targets: SyncTargets,
+  ): Promise<boolean> => {
+    const provider = targets.primary.provider
     const meta = await provider.fetchRemoteMeta()
     if (meta.notModified || !meta.data) return false
 
@@ -575,31 +607,34 @@ class SyncManager {
     // 远端比本地新。如果本地还有未上传的修改，先 flush 保护本地数据，
     // 把 last-write-wins 的责任交给冲突检测路径。
     if (this.isDirty()) {
-      await this.safeUpload(true)
+      await this.safeUpload(true, targets)
       return false
     }
 
     console.log("Remote WebDAV data potentially newer, downloading...")
     await this.importRemoteData(meta.data)
     provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+    await this.uploadBackups(meta.data, targets.backups)
     return true
   }
 
   autoUpload = async () => {
     if (isWeb) return
-    if (!hasSyncConfig("download")) return
+    const targets = getSyncTargets()
+    if (!targets.primary.canDownload) return
 
     const dirtyToken = this._dirtyToken
     if (dirtyToken === null) return
 
     const elapsed = Date.now() - dirtyToken
     if (elapsed > this.SYNC_INTERVAL) {
-      await this.safeUpload()
+      await this.safeUpload(false, targets)
     } else {
       if (this.autoUploadTimer) {
         clearTimeout(this.autoUploadTimer)
       }
       const remaining = this.SYNC_INTERVAL - elapsed
+      // 延迟执行时不复用这里的 targets：等待期间用户可能改过同步配置
       this.autoUploadTimer = setTimeout(() => this.safeUpload(), remaining)
     }
   }
