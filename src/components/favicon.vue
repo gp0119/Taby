@@ -5,13 +5,10 @@
     class="card-avatar favicon h-5 w-5"
   >
     <template #placeholder>
-      <div class="flex-center favicon h-5 w-5">
-        <n-icon
-          class="text-text-secondary"
-          size="18"
-          :component="DocumentUnknown"
-        />
-      </div>
+      <FaviconUnknown />
+    </template>
+    <template #fallback>
+      <FaviconUnknown />
     </template>
   </n-avatar>
 </template>
@@ -20,6 +17,16 @@
 import { Card } from "@/type.ts"
 import { getGoogleFavicon, getFaviconFromCache, getWsrvFavicon } from "@/utils"
 import { DocumentUnknown } from "@vicons/carbon"
+
+const FaviconUnknown = () => (
+  <div class="flex-center favicon h-5 w-5">
+    <n-icon
+      class="text-text-secondary"
+      size="18"
+      component={DocumentUnknown}
+    />
+  </div>
+)
 
 const props = withDefaults(
   defineProps<{
