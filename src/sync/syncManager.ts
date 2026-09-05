@@ -9,7 +9,6 @@ import {
 import {
   getDirtyToken as getDirtyTokenAsync,
   markDirtyAsync,
-  clearDirty as clearDirtyAsync,
   clearDirtyIfUnchanged as clearDirtyIfUnchangedAsync,
   onDirtyChanged,
   DirtyToken,
@@ -74,7 +73,7 @@ class SyncManager {
   private _dirtyToken: DirtyToken | null = null
 
   // 冲突处理钩子，由 UI 层注入（弹窗让用户选择 local / remote / cancel）。
-  // 没有注入时退化为：仍然检测冲突，但默认按 "local"（保留原有行为，只是日志告警）。
+  // 没有注入时取消上传，避免后台静默覆盖远端。
   private conflictHandler?: ConflictHandler
 
   setConflictHandler(handler: ConflictHandler | undefined) {
@@ -101,7 +100,7 @@ class SyncManager {
   // 标记本地有未上传的修改（异步落盘到 chrome.storage.local）
   async markDirty(): Promise<DirtyToken> {
     const next = await markDirtyAsync()
-    this._dirtyToken = next
+    this._dirtyToken = await getDirtyTokenAsync()
     return next
   }
 
@@ -203,9 +202,7 @@ class SyncManager {
     const spaceCount = await db.spaces.count()
     if (spaceCount > 0) return
     await this.createDefaultSpace()
-    // 默认数据不算用户修改
-    await clearDirtyAsync()
-    this._dirtyToken = null
+    // 默认空间不触发修改通知；保留其它页面可能刚写入的 dirty 标记。
   }
 
   async checkDataIntegrity(): Promise<boolean> {
@@ -295,7 +292,7 @@ class SyncManager {
   // - 冲突检测：上传前 GET 一次 Gist（带 If-None-Match），如果远端被其它设备改过且
   //   updated_at 比本地记录的 lastSeen 新，调用 conflictHandler 让用户决定
   //   local（覆盖远端）/ remote（接受远端）/ cancel（保留 dirty）。
-  //   no handler 时默认 local（保持向后兼容，只是 console.warn）。
+  //   no handler 时取消上传，保留本地未上传修改。
   uploadImmediate = async (
     force: boolean = false,
     targets: SyncTargets = getSyncTargets(),
@@ -303,7 +300,7 @@ class SyncManager {
     const runUpload = async (): Promise<SyncOperationResult | undefined> => {
       if (!targets.primary.canUpload) return
 
-      const dirtyToken = this._dirtyToken
+      const dirtyToken = await getDirtyTokenAsync()
       if (!force && dirtyToken === null) return
 
       // 冲突检测：仅当已经有可下载的远端目标时检查（首次创建 Gist 不需要）
@@ -330,9 +327,7 @@ class SyncManager {
       localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(now))
       if (dirtyToken !== null) {
         await clearDirtyIfUnchangedAsync(dirtyToken)
-        if (this._dirtyToken === dirtyToken) {
-          this._dirtyToken = null
-        }
+        this._dirtyToken = await getDirtyTokenAsync()
       }
       return {
         primaryTargetId: newTargetId,
@@ -361,14 +356,7 @@ class SyncManager {
     provider: SyncTarget["provider"],
     targetChanged = false,
   ): Promise<"no-conflict" | ConflictResolution> {
-    let meta: RemoteMeta
-    try {
-      meta = await provider.fetchRemoteMeta()
-    } catch (err) {
-      // 网络问题等：放过，后续 PATCH 失败也是相同的失败模式
-      console.warn("Conflict pre-check fetch failed, skipping:", err)
-      return "no-conflict"
-    }
+    const meta: RemoteMeta = await provider.fetchRemoteMeta()
     if (meta.notModified) return "no-conflict"
 
     const lastSeen = provider.getLastRemoteUpdatedAt()
@@ -398,15 +386,17 @@ class SyncManager {
 
     if (!this.conflictHandler) {
       console.warn(
-        "Sync conflict detected but no conflict handler registered; defaulting to local-overwrite. " +
+        "Sync conflict detected but no conflict handler registered; cancelling upload. " +
           "Remote updated_at:",
         remoteUpdatedAt,
         "lastSeen:",
         lastSeen,
       )
-      return "local"
+      return "cancel"
     }
 
+    const dirtyToken = await getDirtyTokenAsync()
+    const expectedData = await dataManager.getUploadData()
     let decision: ConflictResolution
     try {
       decision = await this.conflictHandler({
@@ -420,19 +410,12 @@ class SyncManager {
     }
 
     if (decision === "remote") {
-      // 接受远端：用 fetchGistMeta 已经拿到的数据 import，避免再多一次 GET
-      await dataManager.importData(meta.data!)
-      resetMainScrollPosition()
-      await clearDirtyAsync()
-      this._dirtyToken = null
+      await this.importRemoteData(meta.data!, {
+        allowEmpty: true,
+        expectedData,
+        dirtyToken,
+      })
       provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
-      localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
-      // 通知 UI 刷新（store + 上下文菜单等）
-      try {
-        await this.onRemoteImported?.()
-      } catch (err) {
-        console.warn("onRemoteImported callback failed:", err)
-      }
     }
     // local / cancel 不在这里改任何持久化状态，由调用方处理后续 PATCH 或保留 dirty
     return decision
@@ -491,7 +474,11 @@ class SyncManager {
 
   private importRemoteData = async (
     data: SyncData,
-    options: { allowEmpty?: boolean } = {},
+    options: {
+      allowEmpty?: boolean
+      expectedData: SyncData
+      dirtyToken: DirtyToken | null
+    },
   ): Promise<SyncData> => {
     const { allowEmpty = false } = options
 
@@ -502,11 +489,10 @@ class SyncManager {
       )
     }
 
-    await dataManager.importData(data)
+    await dataManager.importData(data, options.expectedData)
     resetMainScrollPosition()
-    // 下载覆盖后本地不再有未上传的修改
-    await clearDirtyAsync()
-    this._dirtyToken = null
+    await clearDirtyIfUnchangedAsync(options.dirtyToken)
+    this._dirtyToken = await getDirtyTokenAsync()
     localStorage.setItem(LOCAL_LAST_DOWNLOAD_TIME, String(Date.now()))
     try {
       await this.onRemoteImported?.()
@@ -519,17 +505,47 @@ class SyncManager {
   // allowEmpty: 用户在 UI 中显式确认覆盖时（同步对话框、版本回滚）才允许传 true。
   // 所有自动调用必须保持默认 false，避免远端损坏导致本地全清。
   triggerDownload = async (
-    options: { allowEmpty?: boolean; targets?: SyncTargets } = {},
-  ): Promise<SyncOperationResult> => {
+    options: {
+      allowEmpty?: boolean
+      targets?: SyncTargets
+      onlyIfChanged?: boolean
+    } = {},
+  ): Promise<SyncOperationResult & { downloaded: boolean }> => {
     const targets = options.targets ?? getSyncTargets()
-    if (!targets.primary.canDownload) {
-      throw new Error("Primary sync is not configured for download.")
+    const runDownload = async () => {
+      if (!targets.primary.canDownload) {
+        throw new Error("Primary sync is not configured for download.")
+      }
+      const expectedData = await dataManager.getUploadData()
+      const dirtyToken = await getDirtyTokenAsync()
+      if (!options.allowEmpty && dirtyToken !== null) {
+        throw new Error(
+          "Local data has pending changes; automatic download cancelled.",
+        )
+      }
+      const provider = targets.primary.provider
+      const meta = await provider.fetchRemoteMeta({
+        forceRead: !options.onlyIfChanged,
+      })
+      if (options.onlyIfChanged && (meta.notModified || !meta.data)) {
+        return { backups: [], downloaded: false }
+      }
+      if (!meta.data) throw new Error("Remote sync data is missing")
+      await this.importRemoteData(meta.data, {
+        ...options,
+        expectedData,
+        dirtyToken,
+      })
+      provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
+      return {
+        backups: await this.uploadBackups(meta.data, targets.backups),
+        downloaded: true,
+      }
     }
-    const data = await targets.primary.provider.downloadAll()
-    await this.importRemoteData(data, options)
-    return {
-      backups: await this.uploadBackups(data, targets.backups),
+    if (typeof navigator !== "undefined" && navigator.locks) {
+      return navigator.locks.request(UPLOAD_LOCK_NAME, runDownload)
     }
+    return runDownload()
   }
 
   autoDownload = async (): Promise<boolean> => {
@@ -540,7 +556,15 @@ class SyncManager {
 
     try {
       if (targets.primary.type === "webdav") {
-        return await this.autoDownloadByRemoteMeta(targets)
+        if ((await getDirtyTokenAsync()) !== null) {
+          const meta = await targets.primary.provider.fetchRemoteMeta()
+          if (!meta.notModified && meta.data) {
+            await this.safeUpload(true, targets)
+          }
+          return false
+        }
+        return (await this.triggerDownload({ targets, onlyIfChanged: true }))
+          .downloaded
       }
 
       // 先用 chrome.storage.sync 上的 REMOTE_LAST_UPDATE_TIME 做廉价检查，
@@ -578,44 +602,12 @@ class SyncManager {
       }
 
       console.log("Remote data potentially newer, downloading...")
-      await this.triggerDownload({ targets })
-      return true
+      return (await this.triggerDownload({ targets, onlyIfChanged: true }))
+        .downloaded
     } catch (error) {
       console.error("Error during autoDownload check:", error)
       return false
     }
-  }
-
-  private autoDownloadByRemoteMeta = async (
-    targets: SyncTargets,
-  ): Promise<boolean> => {
-    const provider = targets.primary.provider
-    const meta = await provider.fetchRemoteMeta()
-    if (meta.notModified || !meta.data) return false
-
-    const lastSeen = provider.getLastRemoteUpdatedAt()
-    const remoteUpdatedAt = meta.updatedAt ?? ""
-    if (
-      !meta.etag &&
-      lastSeen &&
-      remoteUpdatedAt &&
-      remoteUpdatedAt <= lastSeen
-    ) {
-      return false
-    }
-
-    // 远端比本地新。如果本地还有未上传的修改，先 flush 保护本地数据，
-    // 把 last-write-wins 的责任交给冲突检测路径。
-    if (this.isDirty()) {
-      await this.safeUpload(true, targets)
-      return false
-    }
-
-    console.log("Remote WebDAV data potentially newer, downloading...")
-    await this.importRemoteData(meta.data)
-    provider.commitSyncedRemoteState(meta.updatedAt, meta.etag)
-    await this.uploadBackups(meta.data, targets.backups)
-    return true
   }
 
   autoUpload = async () => {

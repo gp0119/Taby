@@ -60,7 +60,7 @@ function onEditSpace() {
       </n-form>
     ),
     onPositiveClick: async () => {
-      if (!formModel.value.title) return
+      if (!formModel.value.title) return false
       await dataManager.updateSpaceTitle(
         spacesStore.activeId,
         formModel.value.title,

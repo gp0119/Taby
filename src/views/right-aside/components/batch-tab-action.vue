@@ -59,22 +59,12 @@ const closeDrawer = () => {
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleSave = async () => {
-  const { collectionId, position } = await openDialog(ft("save-to"))
-  const cardIds: number[] = []
-  for (const tab of batchTabsStore.selectedTab) {
-    const faviconId = await dataManager.addFavicon(tab.favicon)
-    const cardId = await dataManager.addCard({
-      title: tab.title,
-      url: tab.url,
-      collectionId: Number(collectionId),
-      faviconId: faviconId,
-      description: "",
-    })
-    cardIds.push(cardId)
-  }
-  await dataManager.batchUpdateCards(
-    cardIds,
-    { collectionId: collectionId! },
+  const target = await openDialog(ft("save-to"))
+  if (!target) return
+  const { collectionId, position } = target
+  await dataManager.saveTabsToCollection(
+    batchTabsStore.selectedTab,
+    collectionId!,
     position,
   )
   batchTabsStore.clearSelectedTabs()

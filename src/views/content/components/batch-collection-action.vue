@@ -67,7 +67,9 @@ const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()
 const { openDialog: openMergeDialog } = useBatchMoveCardDialog()
 
 const onHandleMove = async () => {
-  const { spaceId, position } = await openMoveDialog()
+  const target = await openMoveDialog()
+  if (!target) return
+  const { spaceId, position } = target
   await dataManager.batchUpdateCollections(
     batchCollectionStore.selectedCollectionIds,
     { spaceId: spaceId! },
@@ -92,7 +94,9 @@ const onHandleDelete = async () => {
 }
 
 const onHandleMerge = async () => {
-  const { collectionId, position } = await openMergeDialog(ft("merge-to"))
+  const target = await openMergeDialog(ft("merge-to"))
+  if (!target) return
+  const { collectionId, position } = target
   const cards = await dataManager.getCardWithCollectionIds(
     batchCollectionStore.selectedCollectionIds,
   )

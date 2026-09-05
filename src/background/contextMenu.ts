@@ -24,6 +24,9 @@ dataManager.setOnModify(() => {
 async function _updateContextMenus() {
   await chrome.contextMenus.removeAll()
   try {
+    const { hideRightClickMenu } =
+      await chrome.storage.local.get("hideRightClickMenu")
+    if (hideRightClickMenu) return
     const spaces = await dataManager.getAllSpaceWithCollections()
     chrome.contextMenus.create({
       id: "addTabToSpaceCollection",

@@ -646,20 +646,24 @@ const handleDownload = async () => {
   })
 }
 
-watch(show, (value) => {
-  if (!value) return
-  formModel.value.syncType = getSyncProviderType()
-  formModel.value.backupTypes = getBackupProviderTypes()
-  expandedBackupTypes.value = expandedBackupTypes.value.filter((type) =>
-    formModel.value.backupTypes.includes(type),
-  )
-  formModel.value.gist.github = getGistConfig("github")
-  formModel.value.gist.gitee = getGistConfig("gitee")
-  const webdavConfig = getWebdavConfig()
-  formModel.value.webdav = {
-    ...webdavConfig,
-    username: localStorage.getItem(SYNC_WEBDAV_USERNAME) || "",
-    password: localStorage.getItem(SYNC_WEBDAV_PASSWORD) || "",
-  }
-})
+watch(
+  show,
+  (value) => {
+    if (!value) return
+    formModel.value.syncType = getSyncProviderType()
+    formModel.value.backupTypes = getBackupProviderTypes()
+    expandedBackupTypes.value = expandedBackupTypes.value.filter((type) =>
+      formModel.value.backupTypes.includes(type),
+    )
+    formModel.value.gist.github = getGistConfig("github")
+    formModel.value.gist.gitee = getGistConfig("gitee")
+    const webdavConfig = getWebdavConfig()
+    formModel.value.webdav = {
+      ...webdavConfig,
+      username: localStorage.getItem(SYNC_WEBDAV_USERNAME) || "",
+      password: localStorage.getItem(SYNC_WEBDAV_PASSWORD) || "",
+    }
+  },
+  { immediate: true },
+)
 </script>

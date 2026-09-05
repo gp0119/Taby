@@ -26,6 +26,9 @@ export function isNewTabPage(url: string) {
 }
 
 export function getDomain(url: string) {
-  if (!url) return ""
-  return new URL(url)?.hostname ?? ""
+  try {
+    return new URL(url).hostname
+  } catch {
+    return ""
+  }
 }

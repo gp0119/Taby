@@ -116,9 +116,9 @@ function onDeleteCollection(item: CollectionWithCards) {
 
 const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()
 async function onMoveCollection(item: CollectionWithCards) {
-  const { spaceId, position } = await openMoveDialog(
-    gt("move-type-to", item.title),
-  )
+  const target = await openMoveDialog(gt("move-type-to", item.title))
+  if (!target) return
+  const { spaceId, position } = target
   await dataManager.batchUpdateCollections(
     [item.id],
     { spaceId: spaceId! },

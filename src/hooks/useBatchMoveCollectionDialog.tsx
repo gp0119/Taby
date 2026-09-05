@@ -13,7 +13,7 @@ export const useBatchMoveCollectionDialog = () => {
     new Promise<{
       spaceId: number | null
       position: movePosition
-    }>((resolve, reject) => {
+    } | null>((resolve) => {
       const formModel = ref<{
         spaceId: number | null
         position: movePosition
@@ -46,11 +46,11 @@ export const useBatchMoveCollectionDialog = () => {
           )
         },
         onPositiveClick: async () => {
-          if (!formModel.value.spaceId) return
+          if (!formModel.value.spaceId) return false
           resolve(formModel.value)
         },
         onNegativeClick: () => {
-          reject()
+          resolve(null)
         },
       })
     })

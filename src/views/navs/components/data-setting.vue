@@ -234,10 +234,11 @@ const handleRollback = (version: GistVersion) => {
     onPositiveClick: async () => {
       try {
         rollbackLoading.value = version.version
+        const expectedData = await dataManager.getUploadData()
         const data = await createGistManager(
           githubConfig.value,
         ).fetchGistByVersion(version.version)
-        await dataManager.importData(data)
+        await dataManager.importData(data, expectedData)
         resetMainScrollPosition()
         await updateContextMenus()
         message.success(ft("rollback-success"))

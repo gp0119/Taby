@@ -5,7 +5,6 @@ import {
   SYNC_WEBDAV_PORT,
   SYNC_WEBDAV_PROTOCOL,
 } from "@/utils/constants.ts"
-import { AuthType, createClient } from "webdav"
 
 export type WebdavProtocol = "http" | "https"
 
@@ -112,6 +111,7 @@ export const testWebdavConnection = async (
     throw new Error("Missing WebDAV host")
   }
 
+  const { AuthType, createClient } = await import("webdav")
   const hasCredentials = !!(credential.username || credential.password)
   const client = createClient(location.baseUrl, {
     authType: hasCredentials ? AuthType.Auto : AuthType.None,

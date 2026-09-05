@@ -9,6 +9,27 @@ export const getSafeWebUrl = (value: string) => {
   }
 }
 
+export const getSafeCardUrl = (value: string) => {
+  try {
+    const url = new URL(value)
+    return [
+      "http:",
+      "https:",
+      "file:",
+      "ftp:",
+      "chrome:",
+      "edge:",
+      "about:",
+      "chrome-extension:",
+      "moz-extension:",
+    ].includes(url.protocol)
+      ? url.href
+      : null
+  } catch {
+    return null
+  }
+}
+
 export const openWebUrl = (value: string) => {
   const url = getSafeWebUrl(value)
   if (!url) return null

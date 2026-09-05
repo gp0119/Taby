@@ -1,8 +1,5 @@
 export type RuntimePlatform =
-  | "chrome-extension"
-  | "edge-extension"
-  | "firefox-extension"
-  | "web"
+  "chrome-extension" | "edge-extension" | "firefox-extension" | "web"
 
 type ExtensionApi = typeof chrome
 

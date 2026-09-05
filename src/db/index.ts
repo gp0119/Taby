@@ -10,9 +10,12 @@ import {
   SpaceWithCollections,
   Favicon,
   ExportSpace,
+  SyncData,
 } from "@/type.ts"
 import { db } from "./database.ts"
 import { TobyImportSpace } from "@/utils/tobyImport.ts"
+import { validateSyncData } from "@/sync/validateSyncData"
+import { getSafeCardUrl } from "@/utils/web"
 
 type TableName = "spaces" | "collections" | "labels" | "cards" | "favicons"
 
@@ -361,8 +364,7 @@ class DataManager {
     if (!id) return
     await db.transaction("rw", db.labels, db.collections, async () => {
       const collections = await db.collections
-        .where("labelIds")
-        .anyOf(id)
+        .filter((collection) => collection.labelIds.includes(id))
         .toArray()
       await Promise.all(
         collections.map(async (collection) => {
@@ -429,9 +431,9 @@ class DataManager {
       // 密度过低 → 整组 rebalance 兜底
       const newOrderAtIdx = (targetIndex + 1) * this.ORDER_STEP
       await Promise.all(
-        cards.slice(targetIndex).map(async (existingCard, index) => {
+        cards.map(async (existingCard, index) => {
           await db.cards.update(existingCard.id, {
-            order: newOrderAtIdx + (index + 1) * this.ORDER_STEP,
+            order: (index + (index >= targetIndex ? 2 : 1)) * this.ORDER_STEP,
           })
         }),
       )
@@ -464,6 +466,11 @@ class DataManager {
       url?: string
     },
   ) {
+    if (url !== undefined) {
+      const safeUrl = getSafeCardUrl(url)
+      if (!safeUrl) throw new Error("Invalid card URL")
+      url = safeUrl
+    }
     const result = await db.cards.update(id, {
       title,
       description,
@@ -700,34 +707,86 @@ class DataManager {
 
     const labels = await db.labels.toArray()
     const labelMap = new Map(labels.map((label) => [label.id, label]))
-    const favicons = await db.favicons.toArray()
+    const collectionCards = await Promise.all(
+      collections.map((collection) =>
+        db.cards.where({ collectionId: collection.id }).sortBy("order"),
+      ),
+    )
+    const faviconIds = [
+      ...new Set(
+        collectionCards
+          .flat()
+          .flatMap((card) => (card.faviconId ? [card.faviconId] : [])),
+      ),
+    ]
+    const favicons = await db.favicons.where("id").anyOf(faviconIds).toArray()
     const faviconMap = new Map(
       favicons.map((favicon) => [favicon.id, favicon.url]),
     )
-    return await Promise.all(
-      collections.map(async (collection) => {
-        const cards = await db.cards
-          .where({ collectionId: collection.id })
-          .sortBy("order")
-        const cardsWithFavicon = cards.map((card) => ({
-          ...card,
-          favicon: card.faviconId ? faviconMap.get(card.faviconId) || "" : "",
-        }))
-        return {
-          ...collection,
-          cards: cardsWithFavicon,
-          labels: (collection.labelIds || [])
-            .map((labelId) => labelMap.get(labelId))
-            .filter((label): label is Label => label !== undefined),
-        }
-      }),
-    )
+    return collections.map((collection, index) => {
+      const cards = collectionCards[index]
+      const cardsWithFavicon = cards.map((card) => ({
+        ...card,
+        favicon: card.faviconId ? faviconMap.get(card.faviconId) || "" : "",
+      }))
+      return {
+        ...collection,
+        cards: cardsWithFavicon,
+        labels: (collection.labelIds || [])
+          .map((labelId) => labelMap.get(labelId))
+          .filter((label): label is Label => label !== undefined),
+      }
+    })
   }
 
   async batchAddCards(cards: Omit<Card, "id">[], notify = true) {
     const result = await db.cards.bulkAdd(cards)
     if (notify) this.notifyModify("cards")
     return result
+  }
+
+  async saveTabsToCollection(
+    tabs: Pick<Card, "title" | "url" | "favicon">[],
+    collectionId: number,
+    position: movePosition = "END",
+  ) {
+    if (!tabs.length) return
+    await db.transaction(
+      "rw",
+      db.collections,
+      db.cards,
+      db.favicons,
+      async () => {
+        if (!(await db.collections.get(collectionId))) {
+          throw new Error("Target collection no longer exists")
+        }
+        const query = db.cards
+          .where("[collectionId+order]")
+          .between([collectionId, Dexie.minKey], [collectionId, Dexie.maxKey])
+        const edge =
+          position === "HEAD" ? await query.first() : await query.last()
+        const startOrder =
+          position === "HEAD"
+            ? (edge?.order ?? this.ORDER_STEP) - tabs.length * this.ORDER_STEP
+            : (edge?.order ?? 0) + this.ORDER_STEP
+        const cards: Omit<Card, "id">[] = []
+        for (const [index, tab] of tabs.entries()) {
+          const faviconId = await this.addFavicon(tab.favicon, false)
+          cards.push({
+            title: tab.title,
+            url: tab.url,
+            description: "",
+            collectionId,
+            faviconId,
+            order: startOrder + index * this.ORDER_STEP,
+            createdAt: Date.now(),
+          })
+        }
+        await this.batchAddCards(cards, false)
+      },
+    )
+    this.notifyModify("cards")
+    this.notifyModify("favicons")
   }
 
   async addFavicon(url: string | undefined, notify = true) {
@@ -757,48 +816,50 @@ class DataManager {
     }))
   }
 
-  async getUploadData() {
-    const spaces = await db.spaces.toArray()
-    const collections = await db.collections.toArray()
-    const labels = await db.labels.toArray()
-    const cards = await db.cards.toArray()
-    const favicons = await db.favicons.toArray()
-    return {
-      spaces: spaces.map((space) => ({
-        id: space.id,
-        title: space.title,
-        icon: space.icon,
-        order: space.order,
-        createdAt: space.createdAt,
-      })),
-      collections: collections.map((collection) => ({
-        id: collection.id,
-        title: collection.title,
-        spaceId: collection.spaceId,
-        order: collection.order,
-        labelIds: collection.labelIds,
-        createdAt: collection.createdAt,
-      })),
-      labels: labels.map((label) => ({
-        id: label.id,
-        title: label.title,
-        color: label.color,
-      })),
-      cards: cards.map((card) => ({
-        id: card.id,
-        title: card.title,
-        url: card.url,
-        order: card.order,
-        faviconId: card.faviconId,
-        description: card.description,
-        collectionId: card.collectionId,
-        createdAt: card.createdAt,
-      })),
-      favicons: favicons.map((favicon) => ({
-        id: favicon.id,
-        url: favicon.url,
-      })),
-    }
+  async getUploadData(): Promise<SyncData> {
+    return db.transaction("r", db.tables, async () => {
+      const spaces = await db.spaces.toArray()
+      const collections = await db.collections.toArray()
+      const labels = await db.labels.toArray()
+      const cards = await db.cards.toArray()
+      const favicons = await db.favicons.toArray()
+      return {
+        spaces: spaces.map((space) => ({
+          id: space.id,
+          title: space.title,
+          icon: space.icon,
+          order: space.order,
+          createdAt: space.createdAt,
+        })),
+        collections: collections.map((collection) => ({
+          id: collection.id,
+          title: collection.title,
+          spaceId: collection.spaceId,
+          order: collection.order,
+          labelIds: collection.labelIds,
+          createdAt: collection.createdAt,
+        })),
+        labels: labels.map((label) => ({
+          id: label.id,
+          title: label.title,
+          color: label.color,
+        })),
+        cards: cards.map((card) => ({
+          id: card.id,
+          title: card.title,
+          url: card.url,
+          order: card.order,
+          faviconId: card.faviconId,
+          description: card.description,
+          collectionId: card.collectionId,
+          createdAt: card.createdAt,
+        })),
+        favicons: favicons.map((favicon) => ({
+          id: favicon.id,
+          url: favicon.url,
+        })),
+      }
+    })
   }
 
   private stripMetadata<T extends { createdAt?: number; id?: number }>(
@@ -874,16 +935,8 @@ class DataManager {
     )
   }
 
-  async importData(data: {
-    spaces: Space[]
-    collections: Collection[]
-    labels: Label[]
-    cards: Card[]
-    favicons: Favicon[]
-  }) {
-    if (!data || typeof data !== "object") {
-      throw new Error("importData: invalid data payload")
-    }
+  async importData(data: SyncData, expectedData?: SyncData) {
+    validateSyncData(data)
 
     const tablesToLock: Dexie.Table[] = [
       db.spaces,
@@ -895,6 +948,15 @@ class DataManager {
     // 注意：不再 try/catch 吞掉错误。事务失败时会自动回滚，
     // 调用方需要据此感知失败、避免误把 LOCAL_LAST_DOWNLOAD_TIME 等元信息落库。
     await db.transaction("rw", tablesToLock, async () => {
+      if (
+        expectedData &&
+        JSON.stringify(await this.getUploadData()) !==
+          JSON.stringify(expectedData)
+      ) {
+        throw new Error(
+          "Local data changed during sync; download cancelled. Please try again.",
+        )
+      }
       await Promise.all([
         db.spaces.clear(),
         db.collections.clear(),

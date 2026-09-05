@@ -1,3 +1,4 @@
+import { validateSyncData } from "@/sync/validateSyncData"
 import { SyncData } from "@/type.ts"
 import {
   GITHUB_API,
@@ -149,13 +150,16 @@ class GistManager {
   }
 
   private parseFiles(files: GistRawResponse["files"]): SyncData {
-    return {
+    const data = {
       spaces: this.parseCompressed(files?.spaces?.content),
       collections: this.parseCompressed(files?.collections?.content),
       labels: this.parseCompressed(files?.labels?.content),
       cards: this.parseCompressed(files?.cards?.content),
       favicons: this.parseCompressed(files?.favicons?.content),
     }
+    if (!files?.spaces) throw new Error("Missing sync spaces file")
+    validateSyncData(data)
+    return data
   }
 
   async createGist(data: SyncData) {
@@ -200,22 +204,9 @@ class GistManager {
     return body
   }
 
-  async fetchGist(): Promise<SyncData> {
-    if (!this.GIST_ID) {
-      throw new Error("未设置 Gist ID")
-    }
-    const { response, data: body } = await this.rawRequest({
-      endpoint: `/gists/${this.GIST_ID}`,
-      method: "GET",
-    })
-    const etag = response.headers.get("ETag") ?? undefined
-    this.saveSyncedRemoteState(body?.updated_at, etag)
-    return this.parseFiles(body.files)
-  }
-
   // 仅用于上传前的冲突检测：尽量利用 If-None-Match 让服务端返回 304 不传 body。
   // 注意：这里**不会**自动写入 lastSeen / etag —— 只有在调用方据此采取行动后再决定是否落库。
-  async fetchGistMeta(): Promise<{
+  async fetchGistMeta(options: { forceRead?: boolean } = {}): Promise<{
     notModified: boolean
     updatedAt?: string
     etag?: string
@@ -226,7 +217,7 @@ class GistManager {
     }
     const lastEtag = this.getLastEtag()
     const extraHeaders: Record<string, string> = {}
-    if (lastEtag) extraHeaders["If-None-Match"] = lastEtag
+    if (lastEtag && !options.forceRead) extraHeaders["If-None-Match"] = lastEtag
 
     const { response, data: body } = await this.rawRequest({
       endpoint: `/gists/${this.GIST_ID}`,
@@ -245,8 +236,8 @@ class GistManager {
     }
   }
 
-  async fetchRemoteMeta() {
-    return this.fetchGistMeta()
+  async fetchRemoteMeta(options: { forceRead?: boolean } = {}) {
+    return this.fetchGistMeta(options)
   }
 
   // 由 syncManager 在用户解决冲突后调用，把已知的远端版本提升到给定值
@@ -255,14 +246,13 @@ class GistManager {
   }
 
   private parseCompressed(content: string | undefined): any[] {
-    if (!content) return []
+    if (content === undefined) return []
     const decompressed = decompressFromUTF16(content)
-    if (!decompressed) return []
-    try {
-      return JSON.parse(decompressed)
-    } catch {
-      return []
-    }
+    if (!decompressed) throw new Error("Invalid compressed sync file")
+    const data: unknown = JSON.parse(decompressed)
+    if (!Array.isArray(data))
+      throw new Error("Invalid sync file: expected an array")
+    return data
   }
 
   async uploadData(data: Partial<SyncData>) {
@@ -273,10 +263,6 @@ class GistManager {
       await this.updateGist(data)
     }
     return this.GIST_ID
-  }
-
-  async downloadAll() {
-    return await this.fetchGist()
   }
 
   async fetchGistVersions() {

@@ -20,11 +20,7 @@ import { DocumentUnknown } from "@vicons/carbon"
 
 const FaviconUnknown = () => (
   <div class="flex-center favicon h-5 w-5">
-    <n-icon
-      class="text-text-secondary"
-      size="18"
-      component={DocumentUnknown}
-    />
+    <n-icon class="text-text-secondary" size="18" component={DocumentUnknown} />
   </div>
 )
 

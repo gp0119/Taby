@@ -48,6 +48,7 @@
 
 <script setup lang="ts">
 import dataManager from "@/db"
+import { db } from "@/db/database"
 import { useSpacesStore } from "@/store/spaces"
 import { useRefresh } from "@/hooks/useRresh"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
@@ -102,21 +103,28 @@ async function importFolder(folder: chrome.bookmarks.BookmarkTreeNode) {
   try {
     const spaceId = spacesStore.activeId
 
-    const collectionId = await dataManager.addCollection({
-      title: folder.title,
-      spaceId,
-      labelIds: [],
-    })
-
-    const bookmarks = folder.children.filter((child) => child.url)
-    for (const bookmark of bookmarks) {
-      await dataManager.addCard({
-        title: bookmark.title || "",
-        url: bookmark.url || "",
-        description: "",
-        collectionId: collectionId!,
-      })
-    }
+    await db.transaction(
+      "rw",
+      db.collections,
+      db.cards,
+      db.favicons,
+      async () => {
+        const collectionId = await dataManager.addCollection({
+          title: folder.title,
+          spaceId,
+          labelIds: [],
+        })
+        await dataManager.saveTabsToCollection(
+          folder
+            .children!.filter((bookmark) => bookmark.url)
+            .map((bookmark) => ({
+              title: bookmark.title || "",
+              url: bookmark.url!,
+            })),
+          collectionId!,
+        )
+      },
+    )
     resetMainScrollPosition()
     await updateContextMenus()
   } catch (error) {

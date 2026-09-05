@@ -77,7 +77,7 @@
       </n-button>
     </popoverWrapper>
   </div>
-  <SyncDialog v-model:show="showSyncDialog" />
+  <SyncDialog v-if="loaded" v-model:show="showSyncDialog" />
 </template>
 
 <script setup lang="tsx">
@@ -96,7 +96,9 @@ import { useImport } from "@/views/left-aside/hooks/useImport"
 import { useExport } from "@/views/left-aside/hooks/useExport"
 import { useRefresh } from "@/hooks/useRresh"
 import SpaceSelect from "@/components/space-select.vue"
-import SyncDialog from "@/views/left-aside/components/sync-dialog.vue"
+const SyncDialog = defineAsyncComponent(
+  () => import("@/views/left-aside/components/sync-dialog.vue"),
+)
 import { useLayoutStore } from "@/store/layout"
 import popoverWrapper from "@/components/popover-wrapper.vue"
 import Bookmarks from "@/views/left-aside/components/bookmarks.vue"
@@ -112,6 +114,10 @@ const { updateContextMenus } = useRefresh()
 const message = useMessage()
 const layoutStore = useLayoutStore()
 const showSyncDialog = ref(false)
+const loaded = ref(false)
+watch(showSyncDialog, (value) => {
+  if (value) loaded.value = true
+})
 
 function onImport() {
   const type = ref("taby")
@@ -165,7 +171,7 @@ function onImport() {
     },
     onPositiveClick: async () => {
       if (type.value === "bookmarks") return
-      if (!formModel.value.fileList.length) return
+      if (!formModel.value.fileList.length) return false
       loadingBar.start()
       try {
         if (type.value === "toby") {
@@ -202,7 +208,8 @@ function onExport() {
       )
     },
     onPositiveClick: () => {
-      exportFromTaby(formModel.value.spaceIds)
+      if (!formModel.value.spaceIds.length) return false
+      return exportFromTaby(formModel.value.spaceIds)
     },
   })
 }

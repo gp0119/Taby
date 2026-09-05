@@ -43,7 +43,7 @@
       </div>
     </template>
   </n-popover>
-  <SettingDrawer v-model:show="show" />
+  <SettingDrawer v-if="loaded" v-model:show="show" />
 </template>
 
 <script setup lang="tsx">
@@ -53,10 +53,14 @@ import LangSwitch from "./lang-switch.vue"
 import ThemeSwitch from "./theme-switch.vue"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import { Settings } from "@vicons/carbon"
-import SettingDrawer from "./setting-drawer.vue"
+const SettingDrawer = defineAsyncComponent(() => import("./setting-drawer.vue"))
 import ItemWrapper from "./item-wrapper.vue"
 import { isWeb } from "@/utils/platform"
 
 const { ft } = useHelpi18n()
 const show = ref(false)
+const loaded = ref(false)
+watch(show, (value) => {
+  if (value) loaded.value = true
+})
 </script>

@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import dataManager from "@/db"
+import { db } from "@/db/database"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import { debounce } from "lodash-es"
 import TabsWrapper from "./components/tabs-wrapper.vue"
@@ -103,9 +104,9 @@ chrome.tabs.onRemoved.addListener(debounceRefreshTabs)
 chrome.tabs.onAttached.addListener(debounceRefreshTabs)
 
 const onDragEnd = async (evt: SortableEvent) => {
-  const { item: itemEl, to, newIndex, from } = evt
+  const { item: itemEl, to, oldIndex, newIndex, from } = evt
   const { id, windowid } = itemEl.dataset
-  if (from === to) return
+  if (from === to && oldIndex === newIndex) return
   if (to.classList.contains("card-wrapper")) {
     const toClollectionId = to.getAttribute("data-collectionid")
     const title = itemEl.getAttribute("data-title") as string
@@ -126,7 +127,11 @@ const onDragEnd = async (evt: SortableEvent) => {
       newIndex!,
     )
   } else {
-    await moveTab(Number(id), Number(newIndex), Number(windowid))
+    await moveTab(
+      Number(id),
+      Number(newIndex),
+      Number(to.dataset.windowid ?? windowid),
+    )
     await refreshTabs()
   }
 }
@@ -157,27 +162,19 @@ const onSaveAllTabs = async (windowId: number | string) => {
     (tab) => !isNewTabPage(tab.url),
   )
   if (filteredTabs.length <= 0) return
-  const newCollectionId = await dataManager.addCollection({
-    title: dayjs().format("MMM DD [at] HH:mm"),
-    spaceId: spaceStore.activeId,
-    labelIds: [],
-  })
-  const cardIds: number[] = []
-  for (const tab of filteredTabs) {
-    const faviconId = await dataManager.addFavicon(tab.favicon)
-    const cardId = await dataManager.addCard({
-      title: tab.title,
-      url: tab.url,
-      collectionId: newCollectionId!,
-      faviconId: faviconId,
-      description: "",
-    })
-    cardIds.push(cardId)
-  }
-  await dataManager.batchUpdateCards(
-    cardIds,
-    { collectionId: newCollectionId! },
-    "END",
+  await db.transaction(
+    "rw",
+    db.collections,
+    db.cards,
+    db.favicons,
+    async () => {
+      const newCollectionId = await dataManager.addCollection({
+        title: dayjs().format("MMM DD [at] HH:mm"),
+        spaceId: spaceStore.activeId,
+        labelIds: [],
+      })
+      await dataManager.saveTabsToCollection(filteredTabs, newCollectionId!)
+    },
   )
 }
 

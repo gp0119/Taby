@@ -103,6 +103,7 @@ export default {
   "merge-to": "合并到",
   "move-to": "移动到",
   more: "更多",
+  "invalid-url": "请输入含有效协议的链接，例如 https://example.com",
   "invalid-file": "请检查是否为有效的 {type} 导出文件",
   "save-to": "保存到",
   "save-tabs": "保存标签",

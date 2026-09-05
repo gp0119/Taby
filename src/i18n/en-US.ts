@@ -107,6 +107,8 @@ export default {
   "merge-to": "Merge to",
   "move-to": "Move to",
   more: "More",
+  "invalid-url":
+    "Enter a valid URL with a supported protocol, such as https://example.com",
   "invalid-file": "Please check if the {type} export file is valid",
   "save-to": "Save to",
   "save-tabs": "Save Tabs",

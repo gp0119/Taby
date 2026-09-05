@@ -1,4 +1,6 @@
 import { hasExtensionLocalStorage } from "@/utils/platform"
+import Dexie from "dexie"
+import { db } from "@/db/database"
 
 // SW（背景脚本）与 SPA（前台页面）共享的"未上传修改"标记存储。
 //
@@ -28,35 +30,48 @@ export async function getDirtyToken(): Promise<DirtyToken | null> {
   return typeof v === "number" ? v : null
 }
 
-export async function markDirtyAsync(): Promise<DirtyToken> {
-  const cur = (await getDirtyToken()) ?? 0
-  const next = Math.max(cur + 1, Date.now())
-  if (!hasExtensionLocalStorage()) {
-    localStorage.setItem(DIRTY_KEY, String(next))
-    return next
+function withDirtyLock<T>(action: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== "undefined" && navigator.locks) {
+    return navigator.locks.request("taby-sync-dirty", action)
   }
-  await chrome.storage.local.set({ [DIRTY_KEY]: next })
-  return next
+  // HTTP Web 没有 Web Locks；复用 IDB 写事务实现跨页面互斥。
+  return Dexie.ignoreTransaction(() =>
+    db.transaction("rw", db.spaces, async () => {
+      await db.spaces.count()
+      return Dexie.waitFor(action())
+    }),
+  )
 }
 
-// 仅当当前 token 与传入 token 相同时才清除，避免上传过程中的新 modify 被误清
-export async function clearDirtyIfUnchanged(token: DirtyToken): Promise<void> {
-  const cur = await getDirtyToken()
-  if (cur === token) {
+export function markDirtyAsync(): Promise<DirtyToken> {
+  return withDirtyLock(async () => {
+    const cur = (await getDirtyToken()) ?? 0
+    const next = Math.max(cur + 1, Date.now())
     if (!hasExtensionLocalStorage()) {
-      localStorage.removeItem(DIRTY_KEY)
-      return
+      localStorage.setItem(DIRTY_KEY, String(next))
+    } else {
+      await chrome.storage.local.set({ [DIRTY_KEY]: next })
     }
+    return next
+  })
+}
+
+async function removeDirty() {
+  if (!hasExtensionLocalStorage()) {
+    localStorage.removeItem(DIRTY_KEY)
+  } else {
     await chrome.storage.local.remove(DIRTY_KEY)
   }
 }
 
-export async function clearDirty(): Promise<void> {
-  if (!hasExtensionLocalStorage()) {
-    localStorage.removeItem(DIRTY_KEY)
-    return
-  }
-  await chrome.storage.local.remove(DIRTY_KEY)
+export function clearDirtyIfUnchanged(token: DirtyToken | null): Promise<void> {
+  return withDirtyLock(async () => {
+    if ((await getDirtyToken()) === token) await removeDirty()
+  })
+}
+
+export function clearDirty(): Promise<void> {
+  return withDirtyLock(removeDirty)
 }
 
 // 监听 dirty token 在 chrome.storage.local 中的变化（其它 context 写入时通知本 context）
@@ -64,7 +79,12 @@ export function onDirtyChanged(
   cb: (newToken: DirtyToken | null, oldToken: DirtyToken | null) => void,
 ): () => void {
   if (!hasExtensionLocalStorage()) {
-    return () => {}
+    const listener = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage || event.key !== DIRTY_KEY) return
+      cb(getLocalDirtyToken(), event.oldValue ? Number(event.oldValue) : null)
+    }
+    window.addEventListener("storage", listener)
+    return () => window.removeEventListener("storage", listener)
   }
   const listener = (
     changes: { [key: string]: chrome.storage.StorageChange },

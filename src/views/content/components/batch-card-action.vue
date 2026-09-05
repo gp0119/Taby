@@ -50,7 +50,9 @@ const closeDrawer = () => {
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleMove = async () => {
-  const { collectionId, position } = await openDialog()
+  const target = await openDialog()
+  if (!target) return
+  const { collectionId, position } = target
   await dataManager.batchUpdateCards(
     batchCardStore.selectedCardIds,
     { collectionId: collectionId! },

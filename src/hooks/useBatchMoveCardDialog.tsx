@@ -17,7 +17,7 @@ export const useBatchMoveCardDialog = () => {
       spaceId: number | null
       collectionId: number | null
       position: movePosition
-    }>((resolve, reject) => {
+    } | null>((resolve) => {
       const formModel = ref<{
         spaceId: number | null
         collectionId: number | null
@@ -66,11 +66,11 @@ export const useBatchMoveCardDialog = () => {
           )
         },
         onPositiveClick: async () => {
-          if (!formModel.value.collectionId) return
+          if (!formModel.value.collectionId) return false
           resolve(formModel.value)
         },
         onNegativeClick: () => {
-          reject()
+          resolve(null)
         },
       })
     })

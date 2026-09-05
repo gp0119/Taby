@@ -25,8 +25,7 @@ export interface RemoteMeta {
 
 export interface SyncRemoteProvider {
   uploadData(data: Partial<SyncData>): Promise<string>
-  downloadAll(): Promise<SyncData>
-  fetchRemoteMeta(): Promise<RemoteMeta>
+  fetchRemoteMeta(options?: { forceRead?: boolean }): Promise<RemoteMeta>
   clearSyncedRemoteState(): void
   getLastRemoteUpdatedAt(): string
   getLastEtag(): string

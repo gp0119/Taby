@@ -11,7 +11,7 @@ import {
   getWebdavConfig,
 } from "@/sync/webdavConfig.ts"
 import type { WebdavConfig, WebdavCredential } from "@/sync/webdavConfig.ts"
-import { AuthType, createClient } from "webdav"
+import { validateSyncData } from "@/sync/validateSyncData"
 import type { FileStat, ResponseDataDetailed, WebDAVClient } from "webdav"
 
 interface WebdavPayload {
@@ -46,7 +46,8 @@ class WebdavManager {
     )}`
   }
 
-  private get connection() {
+  private async connect() {
+    const { AuthType, createClient } = await import("webdav")
     const location = buildWebdavLocation(this.config)
     if (!location) {
       throw new Error("未设置 WebDAV Host")
@@ -98,6 +99,8 @@ class WebdavManager {
     updatedAt?: string
     data: SyncData
   } {
+    if (!payload || typeof payload !== "object")
+      throw new Error("Invalid WebDAV payload")
     const maybePayload = payload as Partial<WebdavPayload>
     if (maybePayload.data) {
       return {
@@ -111,16 +114,8 @@ class WebdavManager {
   }
 
   private normalizeData(data: unknown): SyncData {
-    const maybeData = data as Partial<SyncData>
-    return {
-      spaces: Array.isArray(maybeData.spaces) ? maybeData.spaces : [],
-      collections: Array.isArray(maybeData.collections)
-        ? maybeData.collections
-        : [],
-      labels: Array.isArray(maybeData.labels) ? maybeData.labels : [],
-      cards: Array.isArray(maybeData.cards) ? maybeData.cards : [],
-      favicons: Array.isArray(maybeData.favicons) ? maybeData.favicons : [],
-    }
+    validateSyncData(data)
+    return data
   }
 
   private normalizeDate(value: string | null) {
@@ -161,7 +156,7 @@ class WebdavManager {
   }
 
   async uploadData(data: Partial<SyncData>) {
-    const { client, directoryPath, filePath } = this.connection
+    const { client, directoryPath, filePath } = await this.connect()
     if (directoryPath) {
       await this.ensureDirectory(client, directoryPath)
     }
@@ -189,22 +184,13 @@ class WebdavManager {
     return this.URL
   }
 
-  async downloadAll() {
-    const meta = await this.fetchRemoteMeta({ forceRead: true })
-    if (!meta.data) {
-      throw new Error("WebDAV remote data is empty")
-    }
-    this.saveSyncedRemoteState(meta.updatedAt, meta.etag)
-    return meta.data
-  }
-
   async fetchRemoteMeta(options: { forceRead?: boolean } = {}): Promise<{
     notModified: boolean
     updatedAt?: string
     etag?: string
     data?: SyncData
   }> {
-    const { client, filePath } = this.connection
+    const { client, filePath } = await this.connect()
     const lastEtag = this.getLastEtag()
     const lastSeen = this.getLastRemoteUpdatedAt()
     let remoteEtag: string | undefined
@@ -224,6 +210,7 @@ class WebdavManager {
       }
       if (
         !options.forceRead &&
+        !(lastEtag && remoteEtag) &&
         remoteUpdatedAt &&
         lastSeen &&
         this.isNotNewer(remoteUpdatedAt, lastSeen)

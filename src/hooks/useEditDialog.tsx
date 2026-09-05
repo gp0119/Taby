@@ -1,8 +1,9 @@
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
-import { useDialog, NButton } from "naive-ui"
+import { useDialog, useMessage } from "naive-ui"
 
 export function useEditDialog() {
   const dialog = useDialog()
+  const message = useMessage()
   const { ft } = useHelpi18n()
 
   const open = ({
@@ -20,12 +21,13 @@ export function useEditDialog() {
     className?: string
     renderContent: () => VNode
     renderAction?: (props: { close: () => void }) => VNode
-    onPositiveClick?: () => void
+    onPositiveClick?: () => void | boolean | Promise<void | boolean>
     onNegativeClick?: () => void
     icon?: () => VNode
     positiveText?: string
     negativeText?: string
   }) => {
+    let confirmed = false
     const dialogRef = dialog.create({
       title,
       titleClass: "[&_.n-base-icon]:hidden !text-text-primary",
@@ -36,50 +38,38 @@ export function useEditDialog() {
       positiveText: positiveText || ft("confirm"),
       content: renderContent,
       ...(icon ? { icon } : {}),
-      ...(onPositiveClick ? { onPositiveClick } : {}),
-      ...(onNegativeClick
-        ? {
-            onNegativeClick,
-            onClose: onNegativeClick,
-            onMaskClick: onNegativeClick,
-          }
-        : {}),
+      positiveButtonProps: { size: "small" },
+      negativeButtonProps: { size: "small" },
+      onAfterLeave: () => {
+        if (!confirmed) onNegativeClick?.()
+      },
+      onPositiveClick: async () => {
+        if (dialogRef.loading) return false
+        dialogRef.loading = true
+        dialogRef.closable = false
+        dialogRef.maskClosable = false
+        dialogRef.closeOnEsc = false
+        dialogRef.negativeButtonProps = { size: "small", disabled: true }
+        try {
+          const result = await onPositiveClick?.()
+          confirmed = result !== false
+          return result
+        } catch (error) {
+          message.error(error instanceof Error ? error.message : ft("fail"))
+          return false
+        } finally {
+          dialogRef.loading = false
+          dialogRef.closable = true
+          dialogRef.maskClosable = true
+          dialogRef.closeOnEsc = true
+          dialogRef.negativeButtonProps = { size: "small" }
+        }
+      },
       ...(renderAction
-        ? {
-            action: () =>
-              renderAction({
-                close: () => dialogRef.destroy(),
-              }),
-          }
-        : {
-            action: () => {
-              return (
-                <div class="flex items-center gap-2">
-                  <NButton
-                    onClick={() => dialogRef.destroy()}
-                    size="small"
-                    tertiary
-                  >
-                    {ft("cancel")}
-                  </NButton>
-                  <NButton
-                    type="primary"
-                    onClick={() => {
-                      onPositiveClick?.()
-                      dialogRef.destroy()
-                    }}
-                    size="small"
-                  >
-                    {ft("confirm")}
-                  </NButton>
-                </div>
-              )
-            },
-          }),
+        ? { action: () => renderAction({ close: () => dialogRef.destroy() }) }
+        : {}),
     })
   }
 
-  return {
-    open,
-  }
+  return { open }
 }

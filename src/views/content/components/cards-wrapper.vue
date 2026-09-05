@@ -61,7 +61,7 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useSettingStore } from "@/store/setting"
 import { getDomain } from "@/utils"
 import { hasExtensionTabs, isWeb } from "@/utils/platform"
-import { openWebUrl } from "@/utils/web"
+import { openWebUrl, getSafeCardUrl, getSafeWebUrl } from "@/utils/web"
 import { useMediaQuery } from "@vueuse/core"
 
 defineProps<{
@@ -161,7 +161,9 @@ async function onDeleteCard(card: iCard) {
 
 const { openDialog } = useBatchMoveCardDialog()
 const onHandleMove = async (card: iCard) => {
-  const { collectionId, position } = await openDialog()
+  const target = await openDialog()
+  if (!target) return
+  const { collectionId, position } = target
   await dataManager.batchUpdateCards(
     [card.id],
     { collectionId: collectionId! },
@@ -177,6 +179,11 @@ function onEdit(child: iCard) {
     favicon: child.favicon,
     url: child.url,
   })
+  const urlError = computed(() =>
+    (isWeb ? getSafeWebUrl : getSafeCardUrl)(formModel.value.url)
+      ? undefined
+      : ft("invalid-url"),
+  )
   openEditDialog({
     title: () => {
       return (
@@ -207,10 +214,15 @@ function onEdit(child: iCard) {
             placeholder={ft("placeholder", "description")}
           />
         </n-form-item>
-        <n-form-item label={`${ft("url")}:`}>
+        <n-form-item
+          label={`${ft("url")}:`}
+          feedback={urlError.value}
+          validation-status={urlError.value ? "error" : undefined}
+        >
           <n-input
             v-model:value={formModel.value.url}
             onBlur={() => {
+              if (urlError.value) return
               const originDomain = getDomain(child.url)
               const newDomain = getDomain(formModel.value.url)
               if (originDomain !== newDomain) {
@@ -277,7 +289,9 @@ function onEdit(child: iCard) {
           <n-button
             type="primary"
             size="small"
+            disabled={!!urlError.value}
             onClick={async () => {
+              if (urlError.value) return
               let faviconId
               if (formModel.value.favicon) {
                 faviconId = await dataManager.addFavicon(

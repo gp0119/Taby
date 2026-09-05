@@ -62,7 +62,7 @@ function onAddSpace() {
       </n-form>
     ),
     onPositiveClick: async () => {
-      if (!formModel.value.title) return
+      if (!formModel.value.title) return false
       await dataManager.addSpace({
         title: formModel.value.title,
         icon: formModel.value.icon,
