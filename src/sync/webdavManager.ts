@@ -71,7 +71,14 @@ class WebdavManager {
   }
 
   getLastEtag(): string {
-    return localStorage.getItem(this.getStateKey(SYNC_LAST_ETAG)) || ""
+    return this.normalizeEtag(
+      localStorage.getItem(this.getStateKey(SYNC_LAST_ETAG)) || "",
+    )
+  }
+
+  // WebDAV 库已去掉引号；同步变更检测使用弱比较，忽略 W/ 前缀。
+  private normalizeEtag(etag: string): string {
+    return etag.replace(/^W\//, "")
   }
 
   clearSyncedRemoteState() {
@@ -198,7 +205,10 @@ class WebdavManager {
     try {
       const stat = await this.statFile(client, filePath)
       this.readyDirectoryKey = this.getStateKey("directory")
-      remoteEtag = typeof stat.etag === "string" ? stat.etag : undefined
+      remoteEtag =
+        typeof stat.etag === "string"
+          ? this.normalizeEtag(stat.etag)
+          : undefined
       remoteUpdatedAt = this.normalizeDate(stat.lastmod)
       if (
         !options.forceRead &&
