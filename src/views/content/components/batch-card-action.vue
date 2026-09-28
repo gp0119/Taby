@@ -8,12 +8,14 @@
       {{ batchCardStore.selectedCardIds.length }}
     </div>
     <div class="flex items-center justify-between gap-x-4">
-      <n-button tertiary @click="onHandleMove">
-        <template #icon>
-          <n-icon :size="16" :component="FolderMoveTo" />
-        </template>
-        {{ ft("move") }}
-      </n-button>
+      <MovePopover type="card" placement="top" @select="onHandleMove">
+        <n-button tertiary>
+          <template #icon>
+            <n-icon :size="16" :component="FolderMoveTo" />
+          </template>
+          {{ ft("move") }}
+        </n-button>
+      </MovePopover>
       <n-button ghost type="error" @click="onHandleDelete">
         <template #icon>
           <n-icon :size="16" :component="Delete" />
@@ -26,13 +28,14 @@
 
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import { useBatchCardStore } from "@/store/batch-card"
 import { FolderMoveTo, Delete } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import bottomAction from "@/components/bottom-action.vue"
+import MovePopover from "@/components/move-popover.vue"
 import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
+import { movePosition } from "@/type"
 
 const batchCardStore = useBatchCardStore()
 const { show, animated, onAnimationEnd } = useAnimatedPresence(
@@ -48,14 +51,10 @@ const closeDrawer = () => {
   batchCardStore.clearSelectedCardIds()
 }
 
-const { openDialog } = useBatchMoveCardDialog()
-const onHandleMove = async () => {
-  const target = await openDialog()
-  if (!target) return
-  const { collectionId, position } = target
+const onHandleMove = async (collectionId: number, position: movePosition) => {
   await dataManager.batchUpdateCards(
     batchCardStore.selectedCardIds,
-    { collectionId: collectionId! },
+    { collectionId },
     position,
   )
   closeDrawer()

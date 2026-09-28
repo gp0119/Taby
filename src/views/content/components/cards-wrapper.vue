@@ -43,7 +43,7 @@
 <script setup lang="tsx">
 import dataManager from "@/db"
 import Card from "@components/card.vue"
-import { Card as iCard } from "@/type.ts"
+import { Card as iCard, movePosition } from "@/type.ts"
 import { VueDraggable } from "vue-draggable-plus"
 import { useBatchCardStore } from "@/store/batch-card"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
@@ -56,8 +56,8 @@ import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
 import { Information, FolderMoveTo, Delete } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
-import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import MovePopover from "@/components/move-popover.vue"
 import { useSettingStore } from "@/store/setting"
 import { getDomain } from "@/utils"
 import { hasExtensionTabs, isWeb } from "@/utils/platform"
@@ -159,16 +159,12 @@ async function onDeleteCard(card: iCard) {
   })
 }
 
-const { openDialog } = useBatchMoveCardDialog()
-const onHandleMove = async (card: iCard) => {
-  const target = await openDialog()
-  if (!target) return
-  const { collectionId, position } = target
-  await dataManager.batchUpdateCards(
-    [card.id],
-    { collectionId: collectionId! },
-    position,
-  )
+const onHandleMove = async (
+  card: iCard,
+  collectionId: number,
+  position: movePosition,
+) => {
+  await dataManager.batchUpdateCards([card.id], { collectionId }, position)
   dialog.destroyAll()
 }
 
@@ -272,17 +268,27 @@ function onEdit(child: iCard) {
             }}
             onClick={() => onDeleteCard(child)}
           />
-          <n-button
-            tertiary
-            class="mr-auto"
-            size="small"
+          <MovePopover
+            type="card"
+            placement="top-start"
+            onSelect={(collectionId: number, position: movePosition) =>
+              onHandleMove(child, collectionId, position)
+            }
             v-slots={{
-              icon: () => <n-icon size="16" component={FolderMoveTo} />,
+              default: () => (
+                <n-button
+                  tertiary
+                  class="mr-auto"
+                  size="small"
+                  v-slots={{
+                    icon: () => <n-icon size="16" component={FolderMoveTo} />,
+                  }}
+                >
+                  {ft("move")}
+                </n-button>
+              ),
             }}
-            onClick={() => onHandleMove(child)}
-          >
-            {ft("move")}
-          </n-button>
+          />
           <n-button tertiary size="small" onClick={() => close()}>
             {ft("cancel")}
           </n-button>

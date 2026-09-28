@@ -1,7 +1,7 @@
 <template>
   <div
     class="collection-actions hidden items-center gap-x-2 group-hover/item:flex"
-    :class="{ '!flex': isShowTagAction || !canHover }"
+    :class="{ '!flex': isShowTagAction || isShowMoveAction || !canHover }"
   >
     <PopoverWrapper :message="ft('edit', 'collection')">
       <n-button
@@ -16,23 +16,30 @@
       </n-button>
     </PopoverWrapper>
     <PopoverWrapper :message="ft('move-collection')">
-      <n-button
-        quaternary
-        size="small"
-        class="w-[28px]"
-        @click="onMoveCollection(item)"
-      >
-        <template #icon>
-          <n-icon :component="FolderMoveTo" size="18" />
-        </template>
-      </n-button>
+      <div>
+        <MovePopover
+          v-model:show="isShowMoveAction"
+          type="collection"
+          placement="bottom-end"
+          :title="gt('move-type-to', item.title)"
+          @select="
+            (spaceId, position) => onMoveCollection(item, spaceId, position)
+          "
+        >
+          <n-button quaternary size="small" class="w-[28px]">
+            <template #icon>
+              <n-icon :component="FolderMoveTo" size="18" />
+            </template>
+          </n-button>
+        </MovePopover>
+      </div>
     </PopoverWrapper>
     <TagAction :item="item" />
   </div>
 </template>
 
 <script setup lang="tsx">
-import { CollectionWithCards } from "@/type.ts"
+import { CollectionWithCards, movePosition } from "@/type.ts"
 import { FolderMoveTo, Delete, Edit } from "@vicons/carbon"
 import { useDialog } from "naive-ui"
 import dataManager from "@/db"
@@ -41,8 +48,8 @@ import TagAction from "./tag-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
+import MovePopover from "@/components/move-popover.vue"
 import { useCanHover } from "@/hooks/useCanHover"
 
 const { ft, gt } = useHelpi18n()
@@ -53,6 +60,7 @@ defineProps<{
 
 const { updateContextMenus } = useRefresh()
 const isShowTagAction = ref(false)
+const isShowMoveAction = ref(false)
 
 provide("isShowTagAction", {
   isShowTagAction,
@@ -114,16 +122,12 @@ function onDeleteCollection(item: CollectionWithCards) {
   })
 }
 
-const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()
-async function onMoveCollection(item: CollectionWithCards) {
-  const target = await openMoveDialog(gt("move-type-to", item.title))
-  if (!target) return
-  const { spaceId, position } = target
-  await dataManager.batchUpdateCollections(
-    [item.id],
-    { spaceId: spaceId! },
-    position,
-  )
+async function onMoveCollection(
+  item: CollectionWithCards,
+  spaceId: number,
+  position: movePosition,
+) {
+  await dataManager.batchUpdateCollections([item.id], { spaceId }, position)
   await updateContextMenus()
 }
 </script>

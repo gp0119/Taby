@@ -9,12 +9,19 @@
     </div>
 
     <div class="flex items-center justify-between gap-x-4">
-      <n-button secondary @click="onHandleSave">
-        <template #icon>
-          <n-icon :size="16" :component="FolderMoveTo" />
-        </template>
-        {{ ft("save-tabs") }}
-      </n-button>
+      <MovePopover
+        type="card"
+        placement="top"
+        :title="ft('save-to')"
+        @select="onHandleSave"
+      >
+        <n-button secondary>
+          <template #icon>
+            <n-icon :size="16" :component="FolderMoveTo" />
+          </template>
+          {{ ft("save-tabs") }}
+        </n-button>
+      </MovePopover>
       <n-button secondary @click="onHandleGroup">
         <template #icon>
           <n-icon :size="16" :component="FolderMoveTo" />
@@ -33,12 +40,13 @@
 
 <script setup lang="tsx">
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import { FolderMoveTo, CloseOutline } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import bottomAction from "@/components/bottom-action.vue"
+import MovePopover from "@/components/move-popover.vue"
 import { useBatchTabsStore } from "@/store/batch-tabs"
+import { movePosition } from "@/type"
 import { useChromeTabs } from "@/hooks/useChromeTabs.ts"
 import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
 
@@ -57,14 +65,10 @@ const closeDrawer = () => {
   clear()
 }
 
-const { openDialog } = useBatchMoveCardDialog()
-const onHandleSave = async () => {
-  const target = await openDialog(ft("save-to"))
-  if (!target) return
-  const { collectionId, position } = target
+const onHandleSave = async (collectionId: number, position: movePosition) => {
   await dataManager.saveTabsToCollection(
     batchTabsStore.selectedTab,
-    collectionId!,
+    collectionId,
     position,
   )
   batchTabsStore.clearSelectedTabs()

@@ -8,22 +8,30 @@
       {{ batchCollectionStore.selectedCollectionIds.length }}
     </div>
     <div class="flex items-center justify-between gap-x-4">
-      <n-button tertiary @click="onHandleMove">
-        <template #icon>
-          <n-icon :size="16" :component="FolderMoveTo" />
-        </template>
-        {{ ft("move") }}
-      </n-button>
-      <n-button
-        tertiary
-        :disabled="batchCollectionStore.selectedCollectionIds.length < 2"
-        @click="onHandleMerge"
+      <MovePopover type="collection" placement="top" @select="onHandleMove">
+        <n-button tertiary>
+          <template #icon>
+            <n-icon :size="16" :component="FolderMoveTo" />
+          </template>
+          {{ ft("move") }}
+        </n-button>
+      </MovePopover>
+      <MovePopover
+        type="card"
+        placement="top"
+        :title="ft('merge-to')"
+        @select="onHandleMerge"
       >
-        <template #icon>
-          <n-icon :size="16" :component="DirectionMerge" />
-        </template>
-        {{ ft("merge") }}
-      </n-button>
+        <n-button
+          tertiary
+          :disabled="batchCollectionStore.selectedCollectionIds.length < 2"
+        >
+          <template #icon>
+            <n-icon :size="16" :component="DirectionMerge" />
+          </template>
+          {{ ft("merge") }}
+        </n-button>
+      </MovePopover>
       <n-button ghost type="error" @click="onHandleDelete">
         <template #icon>
           <n-icon :size="16" :component="Delete" />
@@ -41,10 +49,10 @@ import { useBatchCollectionStore } from "@/store/batch-collection.ts"
 import { FolderMoveTo, Delete, DirectionMerge } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useBatchMoveCollectionDialog } from "@/hooks/useBatchMoveCollectionDialog.tsx"
-import { useBatchMoveCardDialog } from "@/hooks/useBatchMoveCardDialog.tsx"
 import bottomAction from "@/components/bottom-action.vue"
+import MovePopover from "@/components/move-popover.vue"
 import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
+import { movePosition } from "@/type"
 
 const batchCollectionStore = useBatchCollectionStore()
 const { show, animated, onAnimationEnd } = useAnimatedPresence(
@@ -63,16 +71,10 @@ const closeDrawer = () => {
 }
 
 const { open: onDeleteComfirm } = useDeleteDialog()
-const { openDialog: openMoveDialog } = useBatchMoveCollectionDialog()
-const { openDialog: openMergeDialog } = useBatchMoveCardDialog()
-
-const onHandleMove = async () => {
-  const target = await openMoveDialog()
-  if (!target) return
-  const { spaceId, position } = target
+const onHandleMove = async (spaceId: number, position: movePosition) => {
   await dataManager.batchUpdateCollections(
     batchCollectionStore.selectedCollectionIds,
-    { spaceId: spaceId! },
+    { spaceId },
     position,
   )
   await updateContextMenus()
@@ -93,19 +95,12 @@ const onHandleDelete = async () => {
   })
 }
 
-const onHandleMerge = async () => {
-  const target = await openMergeDialog(ft("merge-to"))
-  if (!target) return
-  const { collectionId, position } = target
+const onHandleMerge = async (collectionId: number, position: movePosition) => {
   const cards = await dataManager.getCardWithCollectionIds(
     batchCollectionStore.selectedCollectionIds,
   )
   const cardIds = cards.map((card) => card.id)
-  await dataManager.batchUpdateCards(
-    cardIds,
-    { collectionId: collectionId! },
-    position,
-  )
+  await dataManager.batchUpdateCards(cardIds, { collectionId }, position)
   await updateContextMenus()
   closeDrawer()
 }
