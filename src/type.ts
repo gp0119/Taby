@@ -85,6 +85,7 @@ export type iSetting = {
   hideRightClickMenu: boolean
   saveAfterOperationTime: number
   openCardsInGroup: boolean
+  fetchCoverOnOpen: boolean
   shortcutSettings: {
     saveAllTabs: string
     saveAllTabsAndClose: string

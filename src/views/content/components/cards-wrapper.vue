@@ -38,30 +38,28 @@
       {{ ft("no-cards") }}
     </div>
   </VueDraggable>
+  <CardDetailDialog
+    v-if="editingCard"
+    v-model:show="showDetail"
+    :card="editingCard"
+  />
 </template>
 
 <script setup lang="tsx">
 import dataManager from "@/db"
 import Card from "@components/card.vue"
-import { Card as iCard, movePosition } from "@/type.ts"
+import { Card as iCard } from "@/type.ts"
 import { VueDraggable } from "vue-draggable-plus"
 import { useBatchCardStore } from "@/store/batch-card"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import { useEditDialog } from "@/hooks/useEditDialog.tsx"
-import Favicon from "@/components/favicon.vue"
 import { useDuplicateCardStore } from "@/store/duplicate-card"
 import { useBatchCollectionStore } from "@/store/batch-collection"
 import { useBatchTabsStore } from "@/store/batch-tabs"
 import { debounce } from "lodash-es"
-import { Information, FolderMoveTo, Delete } from "@vicons/carbon"
-import { useDialog } from "naive-ui"
-import PopoverWrapper from "@/components/popover-wrapper.vue"
-import MovePopover from "@/components/move-popover.vue"
+import CardDetailDialog from "./card-detail-dialog.vue"
 import { useSettingStore } from "@/store/setting"
-import { getDomain } from "@/utils"
 import { hasExtensionTabs, isWeb } from "@/utils/platform"
-import { openWebUrl, getSafeCardUrl, getSafeWebUrl } from "@/utils/web"
+import { openWebUrl } from "@/utils/web"
 import { useMediaQuery } from "@vueuse/core"
 
 defineProps<{
@@ -74,13 +72,12 @@ const { ft } = useHelpi18n()
 const duplicateCardStore = useDuplicateCardStore()
 const batchCollectionStore = useBatchCollectionStore()
 const batchTabsStore = useBatchTabsStore()
-const dialog = useDialog()
 const settingStore = useSettingStore()
 const mobileLayoutQuery = useMediaQuery("(max-width: 999px)")
 const isMobileWeb = computed(() => isWeb && mobileLayoutQuery.value)
+const editingCard = ref<iCard>()
+const showDetail = ref(false)
 
-const { open: openDeleteDialog } = useDeleteDialog()
-const { open: openEditDialog } = useEditDialog()
 async function onHandleClick(e: MouseEvent, child: any) {
   if (!hasExtensionTabs()) {
     openWebUrl(child.url)
@@ -142,183 +139,9 @@ function onHandleNoFavicon(tabId: number, cardId: number) {
   timer = setTimeout(cleanup, 3000)
 }
 
-async function onDeleteCard(card: iCard) {
-  openDeleteDialog({
-    title: ft("delete", "card"),
-    content: () => (
-      <span class="text-text-primary">
-        {ft("delete-confirm-prefix")}
-        <span class="text-primary">{card.title}</span>
-        {ft("delete-confirm-suffix")}
-      </span>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.removeCard(card.id)
-      dialog.destroyAll()
-    },
-  })
-}
-
-const onHandleMove = async (
-  card: iCard,
-  collectionId: number,
-  position: movePosition,
-) => {
-  await dataManager.batchUpdateCards([card.id], { collectionId }, position)
-  dialog.destroyAll()
-}
-
-function onEdit(child: iCard) {
-  const formModel = ref({
-    title: child.title,
-    description: child.description,
-    favicon: child.favicon,
-    url: child.url,
-  })
-  const urlError = computed(() =>
-    (isWeb ? getSafeWebUrl : getSafeCardUrl)(formModel.value.url)
-      ? undefined
-      : ft("invalid-url"),
-  )
-  openEditDialog({
-    title: () => {
-      return (
-        <div class="flex items-center">
-          <n-button
-            focusable={false}
-            size="small"
-            class="w-[28px]"
-            v-slots={{
-              icon: () => <Favicon child={child} lazyload={false} />,
-            }}
-          />
-          <span class="ml-2">{ft("edit", "card")}</span>
-        </div>
-      )
-    },
-    renderContent: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label={`${ft("title")}:`}>
-          <n-input
-            v-model:value={formModel.value.title}
-            placeholder={ft("placeholder", "title")}
-          />
-        </n-form-item>
-        <n-form-item label={`${ft("description")}:`}>
-          <n-input
-            v-model:value={formModel.value.description}
-            placeholder={ft("placeholder", "description")}
-          />
-        </n-form-item>
-        <n-form-item
-          label={`${ft("url")}:`}
-          feedback={urlError.value}
-          validation-status={urlError.value ? "error" : undefined}
-        >
-          <n-input
-            v-model:value={formModel.value.url}
-            onBlur={() => {
-              if (urlError.value) return
-              const originDomain = getDomain(child.url)
-              const newDomain = getDomain(formModel.value.url)
-              if (originDomain !== newDomain) {
-                formModel.value.favicon = undefined
-              }
-            }}
-          />
-        </n-form-item>
-        <n-form-item
-          v-slots={{
-            label: () => (
-              <div class="flex items-center">
-                <PopoverWrapper
-                  message={ft("favicon-tip")}
-                  placement="top-start"
-                  v-slots={{
-                    default: () => (
-                      <n-icon
-                        size="16"
-                        class="mr-1 cursor-pointer text-primary"
-                        component={Information}
-                      />
-                    ),
-                  }}
-                />
-                <span>{ft("favicon")}:</span>
-              </div>
-            ),
-          }}
-        >
-          <n-input
-            v-model:value={formModel.value.favicon}
-            placeholder={ft("placeholder", "favicon")}
-          />
-        </n-form-item>
-      </n-form>
-    ),
-    renderAction: ({ close }) => {
-      return (
-        <div class="flex w-full items-center gap-x-3">
-          <n-button
-            ghost
-            type="error"
-            size="small"
-            v-slots={{
-              icon: () => <n-icon size="16" component={Delete} />,
-            }}
-            onClick={() => onDeleteCard(child)}
-          />
-          <MovePopover
-            type="card"
-            placement="top-start"
-            onSelect={(collectionId: number, position: movePosition) =>
-              onHandleMove(child, collectionId, position)
-            }
-            v-slots={{
-              default: () => (
-                <n-button
-                  tertiary
-                  class="mr-auto"
-                  size="small"
-                  v-slots={{
-                    icon: () => <n-icon size="16" component={FolderMoveTo} />,
-                  }}
-                >
-                  {ft("move")}
-                </n-button>
-              ),
-            }}
-          />
-          <n-button tertiary size="small" onClick={() => close()}>
-            {ft("cancel")}
-          </n-button>
-          <n-button
-            type="primary"
-            size="small"
-            disabled={!!urlError.value}
-            onClick={async () => {
-              if (urlError.value) return
-              let faviconId
-              if (formModel.value.favicon) {
-                faviconId = await dataManager.addFavicon(
-                  formModel.value.favicon,
-                )
-              }
-              await dataManager.updateCard(child.id, {
-                title: formModel.value.title,
-                description: formModel.value.description,
-                faviconId,
-                url: formModel.value.url,
-              })
-              close()
-            }}
-          >
-            {ft("confirm")}
-          </n-button>
-        </div>
-      )
-    },
-  })
+function onEdit(card: iCard) {
+  editingCard.value = card
+  showDetail.value = true
 }
 
 const onDragEnd = async (evt: any) => {
