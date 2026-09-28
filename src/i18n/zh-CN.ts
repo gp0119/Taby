@@ -148,7 +148,6 @@ export default {
   "open-cards-in-group": "打开卡片时自动分组",
   "save-after-operation-time": "操作后多久保存",
   "hide-right-click-menu": "隐藏右键菜单",
-  "fetch-cover-on-open": "打开详情时获取分享图",
   "group-tabs": "分组标签",
   "close-duplicate-tabs": "关闭重复标签",
   "save-and-enter-drag-mode": "保存并进入拖拽",

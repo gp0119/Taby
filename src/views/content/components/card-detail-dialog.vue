@@ -13,7 +13,20 @@
           class="h-full w-full object-cover"
           @error="coverFailed = true"
         />
-        <Favicon v-else :child="previewCard" class="!h-16 !w-16" />
+        <div v-else class="flex select-none flex-col items-center gap-y-3">
+          <div
+            class="cover-tint flex-center h-24 w-24 rounded-full text-text-secondary shadow-inner"
+          >
+            <n-icon
+              size="44"
+              class="opacity-60"
+              :component="ImageOff24Regular"
+            />
+          </div>
+          <span class="text-xs font-medium text-text-secondary">
+            {{ ft("cover-not-found") }}
+          </span>
+        </div>
         <PopoverWrapper
           v-if="hasExtensionTabs()"
           :message="ft('refetch-cover')"
@@ -24,7 +37,7 @@
             :focusable="false"
             :loading="fetchingCover"
             class="!absolute right-3 top-3 h-9 w-9"
-            @click="onRefetchCover(true)"
+            @click="onRefetchCover"
           >
             <template #icon>
               <n-icon size="18" :component="Renew" />
@@ -167,8 +180,9 @@ import {
   OverflowMenuVertical,
   Renew,
 } from "@vicons/carbon"
+import { ImageOff24Regular } from "@vicons/fluent"
 import { useMessage } from "naive-ui"
-import { useSettingStore } from "@/store/setting"
+import { useLocalStorage } from "@vueuse/core"
 import { getDomain } from "@/utils"
 import { hasExtensionTabs, isWeb } from "@/utils/platform"
 import { getSafeCardUrl, getSafeWebUrl } from "@/utils/web"
@@ -184,7 +198,6 @@ const show = defineModel<boolean>("show", { default: false })
 
 const { ft } = useHelpi18n()
 const message = useMessage()
-const settingStore = useSettingStore()
 const { open: openDeleteDialog } = useDeleteDialog()
 
 const formModel = ref({
@@ -197,6 +210,8 @@ const showIconMenu = ref(false)
 const showCustomInput = ref(false)
 const refetching = ref(false)
 const cover = ref<string>()
+// debt: 缓存不设上限也不过期，条目过多或需要更新分享图时再加 LRU/过期时间
+const coverCache = useLocalStorage<Record<string, string>>("cover-cache", {})
 const fetchingCover = ref(false)
 const coverFailed = ref(false)
 
@@ -260,10 +275,13 @@ async function onRefetchFavicon() {
     message.error(ft("invalid-url"))
     return
   }
+  const cardId = props.card.id
   refetching.value = true
   const tab = await chrome.tabs.create({ url: safeUrl.value, active: false })
   try {
-    formModel.value.favicon = await waitForFavicon(tab.id!)
+    const favicon = await waitForFavicon(tab.id!)
+    await dataManager.updateCardFavicon(cardId, favicon)
+    if (cardId === props.card.id) formModel.value.favicon = favicon
   } catch (error) {
     message.error((error as Error).message)
   } finally {
@@ -286,20 +304,21 @@ async function fetchCover(url: string) {
   return image ? new URL(image, response.url).href : undefined
 }
 
-async function onRefetchCover(manual: boolean) {
+async function onRefetchCover() {
   const url = safeUrl.value
   if (!url) {
-    if (manual) message.error(ft("invalid-url"))
+    message.error(ft("invalid-url"))
     return
   }
   fetchingCover.value = true
   try {
     const image = await fetchCover(url)
+    coverCache.value[url] = image ?? ""
     if (url !== safeUrl.value) return
     if (image) cover.value = image
-    else if (manual) message.warning(ft("cover-not-found"))
+    else message.warning(ft("cover-not-found"))
   } catch {
-    if (manual) message.error(ft("fail", "refetch-cover"))
+    message.error(ft("fail", "refetch-cover"))
   } finally {
     fetchingCover.value = false
   }
@@ -311,10 +330,8 @@ watch(
     if (!value) return
     const { title, description, favicon, url } = props.card
     formModel.value = { title, description, favicon, url }
-    cover.value = undefined
-    if (hasExtensionTabs() && settingStore.getSetting("fetchCoverOnOpen")) {
-      onRefetchCover(false)
-    }
+    cover.value =
+      (safeUrl.value && coverCache.value[safeUrl.value]) || undefined
   },
   { immediate: true },
 )
@@ -366,6 +383,9 @@ async function onSave() {
 <style scoped>
 .detail-input {
   @apply w-full rounded-md border border-solid border-transparent bg-transparent px-2 py-1 text-text-primary outline-none transition-colors duration-200 hover:bg-hover-color focus:border-primary;
+}
+.cover-tint {
+  background: color-mix(in srgb, var(--textSecondary) 8%, transparent);
 }
 .icon-menu-item {
   @apply flex min-h-[34px] cursor-pointer select-none items-center gap-x-2 rounded-md px-2 py-1 text-text-primary transition-colors duration-200 hover:bg-hover-color;

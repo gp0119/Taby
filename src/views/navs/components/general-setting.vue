@@ -56,19 +56,6 @@
           @update-value="settingStore.setSetting('hideRightClickMenu', $event)"
         />
       </ItemWrapper>
-      <!-- 打开详情时获取分享图 -->
-      <ItemWrapper
-        v-if="!isWeb"
-        class="border-t border-border-color"
-        :icon="ImageIcon"
-        :title="ft('fetch-cover-on-open')"
-        :hover="false"
-      >
-        <n-switch
-          :value="settingStore.getSetting('fetchCoverOnOpen')"
-          @update-value="settingStore.setSetting('fetchCoverOnOpen', $event)"
-        />
-      </ItemWrapper>
     </div>
     <!-- 操作后多久保存 -->
     <div
@@ -141,7 +128,6 @@ import {
   GroupResource,
   Keyboard,
   AutoScroll,
-  Image as ImageIcon,
 } from "@vicons/carbon"
 import ItemWrapper from "./item-wrapper.vue"
 import { useSettingStore } from "@/store/setting"

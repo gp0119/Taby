@@ -56,7 +56,7 @@
           </div>
           <n-icon
             v-else
-            class="text-text-secondary"
+            class="text-text-primary"
             size="14"
             :component="ChevronDown"
           />
@@ -150,9 +150,9 @@
 
 <script setup lang="tsx">
 import { useTagsStore } from "@/store/tags.ts"
-import { TagGroup, Checkmark, Close, ChevronDown } from "@vicons/carbon"
+import { TagGroup, Checkmark, Close } from "@vicons/carbon"
 import { ShapeUnion20Regular, ShapeIntersect20Regular } from "@vicons/fluent"
-import { SearchOutline } from "@vicons/ionicons5"
+import { SearchOutline, ChevronDown } from "@vicons/ionicons5"
 import { Label } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import Tag from "@/components/tag.vue"

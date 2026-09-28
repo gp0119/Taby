@@ -14,7 +14,6 @@ export const useSettingStore = defineStore("Setting", () => {
     openInNewWindow: true,
     rememberScrollPosition: false,
     openCardsInGroup: false,
-    fetchCoverOnOpen: false,
     hideRightClickMenu: false,
     saveAfterOperationTime: 5,
     shortcutSettings: { ...DEFAULT_SHORTCUT_SETTINGS },

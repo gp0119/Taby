@@ -162,7 +162,6 @@ export default {
   "open-cards-in-group": "Open Cards in Group",
   "save-after-operation-time": "Save delay after operation",
   "hide-right-click-menu": "Hide Right Click Menu",
-  "fetch-cover-on-open": "Fetch Cover When Opening Details",
   "group-tabs": "Group Tabs",
   "close-duplicate-tabs": "Close Duplicate Tabs",
   "save-and-enter-drag-mode": "Save and Enter Drag",
