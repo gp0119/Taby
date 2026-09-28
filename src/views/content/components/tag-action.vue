@@ -45,7 +45,7 @@
               :component="Checkmark"
             />
             <div
-              class="absolute right-1.5 hidden items-center gap-x-2 group-hover/tag:flex"
+              class="absolute right-1.5 hidden animate-scale-in items-center gap-x-2 group-hover/tag:flex"
               :class="{ '!flex': !canHover }"
             >
               <PopoverWrapper :message="ft('edit', 'tag')">

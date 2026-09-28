@@ -84,6 +84,7 @@ export default {
   fail: "{type} Fail",
   "select-file": "Click or drag file to this area to upload",
   "no-collections": "No collections here, please add one.",
+  "no-other-spaces": "No other spaces",
   "no-cards": "No cards here, please drag tabs here",
   "delete-confirm-prefix": "Are you sure you want to delete ",
   "delete-confirm-suffix": "?",
@@ -140,7 +141,6 @@ export default {
   "close-duplicate-tabs-confirm":
     "Are you sure you want to close duplicate tabs?",
   "close-all-tabs-confirm": "Are you sure you want to close all tabs?",
-  "move-collection": "Move Collection",
   "close-tabs-confirm": "Are you sure you want to close these tabs?",
   collections: "Collections",
   "delete-collections-confirm":

@@ -1,7 +1,7 @@
 <template>
   <n-popover
     :show="show"
-    trigger="click"
+    :trigger="canHover ? 'hover' : 'click'"
     :placement="placement"
     :show-arrow="false"
     class="!bg-transparent !shadow-none"
@@ -16,7 +16,9 @@
         v-if="type === 'card'"
         class="flex w-[196px] flex-col gap-y-2 rounded-lg bg-dialog-color p-2 shadow-card-shadow"
       >
-        <div class="px-1 font-bold text-text-primary">
+        <div
+          class="-mx-2 border-b border-solid border-border-color px-3 pb-2 font-bold text-text-primary"
+        >
           {{ title ?? ft("move-to") }}
         </div>
         <div
@@ -56,14 +58,14 @@
           class="flex w-[236px] flex-col gap-y-2 rounded-lg bg-dialog-color p-2 shadow-card-shadow"
           :class="
             type === 'card' && [
-              'absolute left-full ml-2',
+              'absolute left-full ml-2 before:absolute before:inset-y-0 before:-left-2 before:w-2',
               placement.startsWith('top') ? 'bottom-0' : 'top-0',
             ]
           "
         >
           <div
             v-if="type === 'collection'"
-            class="px-1 font-bold text-text-primary"
+            class="-mx-2 border-b border-solid border-border-color px-3 pb-2 font-bold text-text-primary"
           >
             {{ title ?? ft("move-to") }}
           </div>
@@ -112,11 +114,33 @@
               />
               <span class="flex-1 truncate">{{ target.title }}</span>
             </div>
-            <div
+            <n-empty
               v-if="!targets.length"
-              class="py-2.5 text-center text-text-secondary"
+              size="small"
+              :description="
+                ft(type === 'collection' ? 'no-other-spaces' : 'no-collections')
+              "
+              class="py-3 [&_.n-empty\_\_description]:whitespace-nowrap [&_.n-empty\_\_description]:!text-xs"
+            />
+          </div>
+          <div
+            class="-mx-2 border-t border-solid border-border-color px-2 pt-2"
+          >
+            <n-input
+              v-if="isCreating"
+              v-model:value="newTitle"
+              autofocus
+              :placeholder="ft('create', createType)"
+              @keyup.enter="onCreate"
+              @blur="isCreating = false"
+            />
+            <div
+              v-else
+              class="flex min-h-[34px] cursor-pointer select-none items-center gap-x-1.5 rounded-md px-2 text-text-secondary transition-colors duration-200 hover:bg-hover-color hover:text-primary"
+              @click="isCreating = true"
             >
-              {{ ft("no-collections") }}
+              <n-icon size="16" :component="Add" />
+              <span class="truncate">{{ ft("create", createType) }}</span>
             </div>
           </div>
         </div>
@@ -127,11 +151,13 @@
 
 <script setup lang="ts">
 import type { PopoverPlacement } from "naive-ui"
-import { ChevronRight, UpToTop, DownToBottom } from "@vicons/carbon"
+import { Add, ChevronRight, UpToTop, DownToBottom } from "@vicons/carbon"
 import dataManager from "@/db"
 import type { SpaceWithCollections, movePosition } from "@/type"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useCanHover } from "@/hooks/useCanHover"
+import { useSpacesStore } from "@/store/spaces"
+import { useRefresh } from "@/hooks/useRresh"
 import { ICON_LIST } from "@/utils/constants"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 
@@ -160,14 +186,24 @@ const POSITION_ACTIONS = [
 
 const { ft } = useHelpi18n()
 const canHover = useCanHover()
+const spacesStore = useSpacesStore()
+const { updateContextMenus } = useRefresh()
 const spaces = ref<SpaceWithCollections[]>([])
 const activeSpaceId = ref<number>()
+const isCreating = ref(false)
+const newTitle = ref("")
+
+const createType = computed(() =>
+  props.type === "collection" ? "space" : "collection",
+)
 
 const getSpaceIcon = (icon?: string) => ICON_LIST[icon ?? "StorefrontOutline"]
 
 const targets = computed(() => {
   if (props.type === "collection") {
-    return spaces.value.map(({ id, title, icon }) => ({ id, title, icon }))
+    return spaces.value
+      .filter((space) => space.id !== spacesStore.activeId)
+      .map(({ id, title, icon }) => ({ id, title, icon }))
   }
   const activeSpace = spaces.value.find(
     (space) => space.id === activeSpaceId.value,
@@ -183,7 +219,26 @@ const onUpdateShow = async (value: boolean) => {
   show.value = value
   if (!value) return
   activeSpaceId.value = undefined
+  isCreating.value = false
   spaces.value = await dataManager.getAllSpaceWithCollections()
+}
+
+const onCreate = async () => {
+  const title = newTitle.value.trim()
+  if (!title) return
+  if (props.type === "collection") {
+    await dataManager.addSpace({ title })
+  } else {
+    await dataManager.addCollection({
+      title,
+      spaceId: activeSpaceId.value!,
+      labelIds: [],
+    })
+  }
+  newTitle.value = ""
+  isCreating.value = false
+  spaces.value = await dataManager.getAllSpaceWithCollections()
+  await updateContextMenus()
 }
 
 const onSelect = (id: number, position: movePosition) => {

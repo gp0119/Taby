@@ -15,25 +15,19 @@
         </template>
       </n-button>
     </PopoverWrapper>
-    <PopoverWrapper :message="ft('move-collection')">
-      <div>
-        <MovePopover
-          v-model:show="isShowMoveAction"
-          type="collection"
-          placement="bottom-end"
-          :title="gt('move-type-to', item.title)"
-          @select="
-            (spaceId, position) => onMoveCollection(item, spaceId, position)
-          "
-        >
-          <n-button quaternary size="small" class="w-[28px]">
-            <template #icon>
-              <n-icon :component="FolderMoveTo" size="18" />
-            </template>
-          </n-button>
-        </MovePopover>
-      </div>
-    </PopoverWrapper>
+    <MovePopover
+      v-model:show="isShowMoveAction"
+      type="collection"
+      placement="bottom-end"
+      :title="gt('move-type-to', item.title)"
+      @select="(spaceId, position) => onMoveCollection(item, spaceId, position)"
+    >
+      <n-button quaternary size="small" class="w-[28px]">
+        <template #icon>
+          <n-icon :component="FolderMoveTo" size="18" />
+        </template>
+      </n-button>
+    </MovePopover>
     <TagAction :item="item" />
   </div>
 </template>
