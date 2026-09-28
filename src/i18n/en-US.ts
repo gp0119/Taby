@@ -180,6 +180,7 @@ export default {
   "reset-shortcut": "Reset",
   "open-tag-filter": "Open Tag Filter",
   "open-tag-filter-hint": "Press {combo} to open tag filter",
+  "tag-selected-count": "{count} selected",
   "search-hint": "Press {combo} to open search",
   "search-hint-no-shortcut": "Click to open search (no shortcut)",
   "data-rollback": "Data Rollback",

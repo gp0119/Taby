@@ -167,6 +167,7 @@ export default {
   "reset-shortcut": "重置",
   "open-tag-filter": "打开标签筛选",
   "open-tag-filter-hint": "按 {combo} 打开标签筛选",
+  "tag-selected-count": "已选 {count} 个",
   "search-hint": "按 {combo} 打开搜索",
   "search-hint-no-shortcut": "点击打开搜索（未设置快捷键）",
   "data-rollback": "数据回溯",

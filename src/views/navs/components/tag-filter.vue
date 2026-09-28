@@ -13,7 +13,7 @@
         tertiary
         :focusable="false"
         size="small"
-        class="tag-filter-button min-w-[180px] justify-start !shadow-btn-shadow [&_.n-button__content]:!w-full"
+        class="tag-filter-button min-w-[140px] justify-start !shadow-btn-shadow [&_.n-button\_\_content]:!w-full"
         :aria-label="ft('tag-filter')"
       >
         <template #icon>
@@ -30,92 +30,101 @@
           </PopoverWrapper>
         </template>
         <div
-          class="tag-filter-label flex w-full max-w-[250px] flex-nowrap items-center justify-between"
+          class="tag-filter-label flex w-full flex-nowrap items-center justify-between gap-x-2"
         >
-          <template v-if="tagsStore.selectedTags.length">
-            <div class="scrollbar-none flex flex-1 justify-start overflow-auto">
-              <Tag
-                v-for="tag in tagsStore.selectedTags"
-                :key="tag.id"
-                :tag="tag"
-                removeable
-                class="mr-1 inline-flex"
-                @remove="tagsStore.removeSelectedTag(tag)"
-              />
-            </div>
-            <div class="pl-2" @click="tagsStore.resetSelectedTag">
-              <n-icon-wrapper
-                :border-radius="10"
-                icon-color="#fff"
-                :size="14"
-                class="block bg-gray-500"
-              >
-                <n-icon :component="Close" />
-              </n-icon-wrapper>
-            </div>
-          </template>
-          <template v-else>
-            <div class="leading-6">
-              {{ ft("tag-filter") }}
-            </div>
-          </template>
+          <div class="leading-6">
+            {{
+              tagsStore.selectedTags.length
+                ? ft2("tag-selected-count", {
+                    count: String(tagsStore.selectedTags.length),
+                  })
+                : ft("tag-filter")
+            }}
+          </div>
+          <div
+            v-if="tagsStore.selectedTags.length"
+            @click.stop="tagsStore.resetSelectedTag"
+          >
+            <n-icon-wrapper
+              :border-radius="10"
+              icon-color="#fff"
+              :size="14"
+              class="block bg-gray-500"
+            >
+              <n-icon :component="Close" />
+            </n-icon-wrapper>
+          </div>
+          <n-icon
+            v-else
+            class="text-text-secondary"
+            size="14"
+            :component="ChevronDown"
+          />
         </div>
       </n-button>
     </template>
     <template #default>
       <div
-        class="flex min-w-[150px] flex-col overflow-hidden rounded-lg bg-dialog-color"
+        class="flex w-[200px] flex-col gap-y-3 overflow-hidden rounded-xl bg-dialog-color p-3"
       >
-        <div
-          class="flex flex-col gap-y-2 border-b border-solid border-border-color px-4 py-2"
-        >
-          <div class="flex items-center gap-x-2">
-            <n-tag
-              size="small"
-              class="flex-1 cursor-pointer justify-center"
-              :type="tagsStore.tagFilterType === 'AND' ? 'success' : 'default'"
-              @click="tagsStore.setTagFilterType('AND')"
-            >
-              <span class="text-text-secondary">AND</span>
-              <template #icon>
-                <n-icon :component="ShapeIntersect20Regular" />
-              </template>
-            </n-tag>
-            <n-tag
-              size="small"
-              class="flex-1 cursor-pointer justify-center"
-              :type="tagsStore.tagFilterType === 'OR' ? 'success' : 'default'"
-              @click="tagsStore.setTagFilterType('OR')"
-            >
-              <span class="text-text-secondary">OR</span>
-              <template #icon>
-                <n-icon :component="ShapeUnion20Regular" />
-              </template>
-            </n-tag>
-          </div>
-          <n-input
-            ref="searchInputRef"
-            v-model:value="filterTag.title"
-            class="max-w-[150px]"
-            :placeholder="ft('search-tag')"
-            size="tiny"
-            maxlength="10"
+        <div class="flex items-center justify-between px-1">
+          <span class="text-base font-semibold text-text-primary">
+            {{ ft("tag-filter") }}
+          </span>
+          <n-button
+            text
+            type="primary"
+            size="small"
+            :focusable="false"
+            :disabled="!tagsStore.selectedTags.length"
+            @click="tagsStore.resetSelectedTag"
           >
-            <template #prefix>
-              <n-icon :component="SearchOutline" />
-            </template>
-          </n-input>
+            {{ ft("clear-shortcut") }}
+          </n-button>
         </div>
+        <div class="flex items-center gap-x-1 rounded-lg bg-hover-color p-1">
+          <button
+            v-for="type in tagFilterTypes"
+            :key="type"
+            type="button"
+            class="flex flex-1 cursor-pointer items-center justify-center gap-x-1 rounded-md py-1 text-sm transition-colors"
+            :class="
+              tagsStore.tagFilterType === type
+                ? 'bg-card-color font-medium text-text-primary'
+                : 'text-text-secondary'
+            "
+            @click="tagsStore.setTagFilterType(type)"
+          >
+            <n-icon
+              size="16"
+              :component="
+                type === 'AND' ? ShapeIntersect20Regular : ShapeUnion20Regular
+              "
+            />
+            {{ type }}
+          </button>
+        </div>
+        <n-input
+          ref="searchInputRef"
+          v-model:value="filterTag.title"
+          :placeholder="ft('search-tag')"
+          size="small"
+          maxlength="10"
+        >
+          <template #prefix>
+            <n-icon :component="SearchOutline" />
+          </template>
+        </n-input>
 
         <div
           v-if="filterTagOptions.length > 0"
           ref="listRef"
-          class="scrollbar-thin max-h-[60vh] overflow-auto"
+          class="scrollbar-thin flex max-h-[60vh] flex-col gap-y-1 overflow-auto"
         >
           <div
             v-for="(tag, idx) in filterTagOptions"
             :key="tag.id"
-            class="tag-option-item flex cursor-pointer select-none items-center justify-between gap-x-2 px-4 py-2"
+            class="tag-option-item flex cursor-pointer select-none items-center justify-between gap-x-2 rounded-lg px-2 py-1.5"
             :class="{
               'bg-hover-color': idx === activeIndex,
             }"
@@ -126,15 +135,12 @@
             <n-icon
               v-if="tagsStore.selectedTagIds.includes(tag.id)"
               class="text-primary"
-              size="14"
+              size="16"
               :component="Checkmark"
             />
           </div>
         </div>
-        <div
-          v-else
-          class="!bg-card-color py-2.5 text-center text-text-secondary"
-        >
+        <div v-else class="py-2.5 text-center text-text-secondary">
           {{ ft("no-tags") }}
         </div>
       </div>
@@ -144,7 +150,7 @@
 
 <script setup lang="tsx">
 import { useTagsStore } from "@/store/tags.ts"
-import { TagGroup, Checkmark, Close } from "@vicons/carbon"
+import { TagGroup, Checkmark, Close, ChevronDown } from "@vicons/carbon"
 import { ShapeUnion20Regular, ShapeIntersect20Regular } from "@vicons/fluent"
 import { SearchOutline } from "@vicons/ionicons5"
 import { Label } from "@/type"
@@ -157,6 +163,7 @@ import { useCanHover } from "@/hooks/useCanHover"
 import { useEventListener } from "@vueuse/core"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 
+const tagFilterTypes = ["AND", "OR"] as const
 const searchInputRef = ref<InputInst | null>(null)
 const filterTag = ref({
   title: "",
