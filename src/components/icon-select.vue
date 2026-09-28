@@ -6,7 +6,7 @@
     content-class="scrollbar-thin scrollbar-gutter-stable max-h-[120px] grid grid-cols-4 gap-2 overflow-scroll"
   >
     <template #trigger>
-      <n-button>
+      <n-button :size="size">
         <template #icon>
           <n-icon size="18" :component="ICON_LIST[selectIcon]" />
         </template>
@@ -28,6 +28,8 @@
 
 <script setup lang="ts">
 import { ICON_LIST } from "@/utils/constants.ts"
+
+defineProps<{ size?: "small" | "medium" }>()
 
 const show = ref(false)
 const selectIcon = defineModel("value", {

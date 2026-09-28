@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="rootRef"
     class="group/item flex h-full w-full flex-col rounded-xl border-2 border-transparent bg-card-color"
     :class="{
       '!border-primary': batchCollectionStore.selectedCollectionIds.includes(
@@ -15,7 +16,7 @@
       >
         <div class="flex-center relative py-3">
           <n-checkbox
-            class="mobile-hover-only absolute -left-5 mr-2 hidden w-[20px] group-hover/collection-title:block"
+            class="mobile-hover-only absolute -left-5 mr-2 hidden w-[20px] animate-scale-in group-hover/collection-title:block"
             :class="{
               '!block':
                 !canHover ||
@@ -25,7 +26,8 @@
               '!hidden':
                 batchCardStore.selectedCardIds.length > 0 ||
                 batchTabsStore.selectedTabIds.length > 0 ||
-                duplicateCardStore.isFindDuplicate,
+                duplicateCardStore.isFindDuplicate ||
+                isDraft,
             }"
             size="large"
             :checked="
@@ -51,49 +53,83 @@
             >
               <ChevronForward />
             </n-icon>
-            <span class="ml-2 whitespace-nowrap text-lg font-medium">
+            <span
+              v-if="!isEditing"
+              class="ml-2 cursor-text whitespace-nowrap text-lg font-medium"
+              @click.stop="onStartEdit"
+            >
               {{ collection.title }}
             </span>
           </div>
+          <div v-if="isEditing" class="ml-2 flex items-center gap-x-2">
+            <n-input
+              ref="titleInputRef"
+              v-model:value="editingTitle"
+              class="!w-[260px]"
+              size="small"
+              :placeholder="ft('placeholder', 'title')"
+              @keydown.enter="!$event.isComposing && onSaveTitle()"
+              @keyup.esc="spacesStore.stopEditingCollection"
+            />
+            <n-button size="small" @click="spacesStore.stopEditingCollection">
+              {{ ft("cancel") }}
+            </n-button>
+            <n-button
+              size="small"
+              type="primary"
+              :disabled="!editingTitle.trim()"
+              @click="onSaveTitle"
+            >
+              {{ ft("save") }}
+            </n-button>
+          </div>
 
+          <template v-else>
+            <span
+              class="mx-4 h-[16px] w-[0.5px] flex-shrink-0 bg-text-secondary"
+            />
+
+            <!-- 卡片数量 -->
+            <PopoverWrapper
+              :message="ft('open-all-tabs')"
+              :disabled="isMobileWeb"
+              placement="top-start"
+            >
+              <div
+                class="flex items-center rounded bg-hover-color py-0.5 pl-1.5 text-xs text-text-secondary"
+                :class="{
+                  'cursor-pointer pr-0.5': !isMobileWeb,
+                  'pr-1.5': isMobileWeb,
+                }"
+                @click="onOpenCollection($event, collection)"
+              >
+                <span class="whitespace-nowrap">
+                  {{ collection.cards.length }} cards
+                </span>
+                <n-icon
+                  v-if="!isMobileWeb"
+                  size="12"
+                  :component="ArrowUpRight"
+                />
+              </div>
+            </PopoverWrapper>
+          </template>
+        </div>
+        <template v-if="!isEditing">
           <span
+            v-if="collection.labels.length > 0"
             class="mx-4 h-[16px] w-[0.5px] flex-shrink-0 bg-text-secondary"
           />
 
-          <!-- 卡片数量 -->
-          <PopoverWrapper
-            :message="ft('open-all-tabs')"
-            :disabled="isMobileWeb"
-            placement="top-start"
-          >
-            <div
-              class="flex items-center rounded bg-hover-color py-0.5 pl-1.5 text-xs text-text-secondary"
-              :class="{
-                'cursor-pointer pr-0.5': !isMobileWeb,
-                'pr-1.5': isMobileWeb,
-              }"
-              @click="onOpenCollection($event, collection)"
-            >
-              <span class="whitespace-nowrap">
-                {{ collection.cards.length }} cards
-              </span>
-              <n-icon v-if="!isMobileWeb" size="12" :component="ArrowUpRight" />
-            </div>
-          </PopoverWrapper>
-        </div>
-        <span
-          v-if="collection.labels.length > 0"
-          class="mx-4 h-[16px] w-[0.5px] flex-shrink-0 bg-text-secondary"
-        />
-
-        <!-- 标签 -->
-        <Tags :labels="collection.labels" :collection-id="collection.id" />
+          <!-- 标签 -->
+          <Tags :labels="collection.labels" :collection-id="collection.id" />
+        </template>
       </div>
       <!-- 操作 -->
       <div
         class="collection-actions-wrapper flex min-w-[120px] flex-shrink-0 items-center justify-end"
       >
-        <CollectionAction :item="collection" />
+        <CollectionAction v-if="!isDraft" :item="collection" />
       </div>
     </div>
 
@@ -102,7 +138,13 @@
       :class="isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
     >
       <div class="overflow-hidden">
-        <slot name="cards" :collection="collection" />
+        <div
+          v-if="isDraft"
+          class="select-none px-4 pb-4 pt-2 text-center text-lg leading-[90px] text-gray-300"
+        >
+          {{ ft("no-cards") }}
+        </div>
+        <slot v-else name="cards" :collection="collection" />
       </div>
     </div>
   </div>
@@ -123,11 +165,16 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useChromeTabs } from "@/hooks/useChromeTabs"
 import { useSettingStore } from "@/store/setting"
+import { useSpacesStore } from "@/store/spaces"
 import { hasExtensionTabs, isWeb } from "@/utils/platform"
-import { useMediaQuery } from "@vueuse/core"
+import { useMediaQuery, useMutationObserver } from "@vueuse/core"
+import { DRAFT_COLLECTION_ID } from "@/utils/constants"
 import { useCanHover } from "@/hooks/useCanHover"
 import { openWebUrls } from "@/utils/web"
 import { useMessage } from "naive-ui"
+import type { InputInst } from "naive-ui"
+import dataManager from "@/db"
+import { useRefresh } from "@/hooks/useRresh.ts"
 
 const { ft } = useHelpi18n()
 const message = useMessage()
@@ -155,6 +202,65 @@ const isOpen = computed({
     }
   },
 })
+
+const { updateContextMenus } = useRefresh()
+const spacesStore = useSpacesStore()
+const rootRef = ref<HTMLElement>()
+const editingTitle = ref("")
+const titleInputRef = ref<InputInst>()
+const isDraft = computed(() => props.collection.id === DRAFT_COLLECTION_ID)
+const isEditing = computed(
+  () => spacesStore.editingCollectionId === props.collection.id,
+)
+
+// 虚拟列表会在更新后重排视图节点，移动 DOM 会让输入框失焦，这里在被移动后重新聚焦
+useMutationObserver(
+  () =>
+    isEditing.value
+      ? rootRef.value?.closest<HTMLElement>(
+          ".vue-recycle-scroller__item-wrapper",
+        )
+      : undefined,
+  (records) => {
+    const view = rootRef.value?.closest(".vue-recycle-scroller__item-view")
+    if (records.some((r) => view && Array.from(r.addedNodes).includes(view))) {
+      titleInputRef.value?.focus()
+    }
+  },
+  { childList: true },
+)
+
+watch(
+  isEditing,
+  (editing) => {
+    if (!editing) return
+    editingTitle.value = props.collection.title
+    nextTick(() => {
+      titleInputRef.value?.focus()
+      titleInputRef.value?.select()
+    })
+  },
+  { immediate: true },
+)
+
+const onStartEdit = () => {
+  spacesStore.stopEditingCollection()
+  spacesStore.editingCollectionId = props.collection.id
+}
+
+const onSaveTitle = async () => {
+  const title = editingTitle.value.trim()
+  if (!title) return
+  if (isDraft.value) {
+    await spacesStore.saveDraftCollection(title)
+  } else {
+    spacesStore.stopEditingCollection()
+    if (title !== props.collection.title) {
+      await dataManager.updateCollectionTitle(props.collection.id, title)
+    }
+  }
+  await updateContextMenus()
+}
 
 const onHandleCheckbox = (checked: boolean, collectionId: number) => {
   if (checked) {

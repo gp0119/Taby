@@ -207,6 +207,46 @@ class DataManager {
     return result
   }
 
+  async addCollectionBeside(
+    collection: Omit<Collection, "id" | "order">,
+    anchorId: number,
+    side: "before" | "after",
+  ) {
+    let result: number | undefined
+    await db.transaction("rw", db.collections, async () => {
+      const siblings = await db.collections
+        .where("[spaceId+order]")
+        .between(
+          [collection.spaceId, Dexie.minKey],
+          [collection.spaceId, Dexie.maxKey],
+        )
+        .toArray()
+      const index =
+        siblings.findIndex((c) => c.id === anchorId) +
+        (side === "after" ? 1 : 0)
+      let order = this.orderBetween(siblings[index - 1], siblings[index])
+      if (order === null) {
+        await Promise.all(
+          siblings.map((c, i) =>
+            db.collections.update(c.id, {
+              order: (i < index ? i + 1 : i + 2) * this.ORDER_STEP,
+            }),
+          ),
+        )
+        order = (index + 1) * this.ORDER_STEP
+      }
+      result = await db.collections.add({
+        title: collection.title || "",
+        spaceId: collection.spaceId,
+        labelIds: collection.labelIds,
+        order,
+        createdAt: Date.now(),
+      })
+    })
+    this.notifyModify("collections")
+    return result
+  }
+
   async removeCollection(id: number) {
     await db.transaction("rw", db.collections, db.cards, async () => {
       await db.cards.where("collectionId").equals(id).delete()

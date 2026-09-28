@@ -38,7 +38,7 @@
     <BatchCollectionAction />
   </template>
   <template v-else>
-    <title-dragable :collections="collections" />
+    <title-dragable :collections="sortedCollections" />
   </template>
 </template>
 
@@ -88,11 +88,22 @@ const filteredCollections = computed(() => {
   return baseCollections
 })
 
-const collections = computed(() => {
+const sortedCollections = computed(() => {
   if (sortStore.sortOrder === "draggable") {
     return filteredCollections.value
   }
   return [...filteredCollections.value].sort(sortCollections)
+})
+
+const collections = computed(() => {
+  const draft = spacesStore.draftCollection
+  if (!draft) return sortedCollections.value
+  const list = [...sortedCollections.value]
+  const anchorIndex = list.findIndex((c) => c.id === draft.anchorId)
+  const index =
+    anchorIndex === -1 ? 0 : anchorIndex + (draft.side === "after" ? 1 : 0)
+  list.splice(index, 0, draft.item)
+  return list
 })
 
 // 排序函数抽离
@@ -114,6 +125,15 @@ function sortCollections(a: Collection, b: Collection) {
 const scrollerRef = ref<MainScrollerRef | null>(null)
 
 const { handleScroll } = useScrollPosition(scrollerRef, () => collections.value)
+
+watch(
+  () => spacesStore.draftCollection,
+  async (draft) => {
+    if (!draft || draft.anchorId !== undefined) return
+    await nextTick()
+    scrollerRef.value?.scrollToItem(0)
+  },
+)
 </script>
 
 <style scoped>

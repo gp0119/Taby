@@ -1,20 +1,50 @@
 <template>
   <div
     class="collection-actions hidden items-center gap-x-2 group-hover/item:flex"
-    :class="{ '!flex': isShowTagAction || isShowMoveAction || !canHover }"
+    :class="{
+      '!flex':
+        isShowTagAction || isShowMoveAction || isShowMoreAction || !canHover,
+    }"
   >
-    <PopoverWrapper :message="ft('edit', 'collection')">
-      <n-button
-        quaternary
-        size="small"
-        class="w-[28px]"
-        @click="onEditCollection(item)"
-      >
-        <template #icon>
-          <n-icon :component="Edit" size="18" />
-        </template>
-      </n-button>
-    </PopoverWrapper>
+    <n-popover
+      v-model:show="isShowMoreAction"
+      :trigger="canHover ? 'hover' : 'click'"
+      placement="bottom-end"
+      :show-arrow="false"
+      class="!rounded-xl"
+      content-style="padding: 0;"
+    >
+      <template #trigger>
+        <n-button quaternary size="small" class="w-[28px]">
+          <template #icon>
+            <n-icon size="18" :component="EllipsisVerticalSharp" />
+          </template>
+        </n-button>
+      </template>
+      <div class="flex w-[200px] flex-col gap-y-1 p-1.5">
+        <div
+          class="more-menu-item text-text-primary"
+          @click="onAddCollectionBeside(item, 'before')"
+        >
+          <n-icon size="18" :component="ArrowUp" />
+          <span>{{ ft("add-before") }}</span>
+        </div>
+        <div
+          class="more-menu-item text-text-primary"
+          @click="onAddCollectionBeside(item, 'after')"
+        >
+          <n-icon size="18" :component="ArrowDown" />
+          <span>{{ ft("add-after") }}</span>
+        </div>
+        <div
+          class="more-menu-item text-error-color"
+          @click="onDeleteCollection(item)"
+        >
+          <n-icon size="18" :component="Delete" />
+          <span>{{ ft("delete") }}</span>
+        </div>
+      </div>
+    </n-popover>
     <MovePopover
       v-model:show="isShowMoveAction"
       type="collection"
@@ -34,17 +64,16 @@
 
 <script setup lang="tsx">
 import { CollectionWithCards, movePosition } from "@/type.ts"
-import { FolderMoveTo, Delete, Edit } from "@vicons/carbon"
-import { useDialog } from "naive-ui"
+import { FolderMoveTo, Delete, ArrowUp, ArrowDown } from "@vicons/carbon"
+import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import TagAction from "./tag-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useEditDialog } from "@/hooks/useEditDialog.tsx"
 import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
-import PopoverWrapper from "@/components/popover-wrapper.vue"
 import MovePopover from "@/components/move-popover.vue"
 import { useCanHover } from "@/hooks/useCanHover"
+import { useSpacesStore } from "@/store/spaces"
 
 const { ft, gt } = useHelpi18n()
 const canHover = useCanHover()
@@ -55,6 +84,7 @@ defineProps<{
 const { updateContextMenus } = useRefresh()
 const isShowTagAction = ref(false)
 const isShowMoveAction = ref(false)
+const isShowMoreAction = ref(false)
 
 provide("isShowTagAction", {
   isShowTagAction,
@@ -63,42 +93,19 @@ provide("isShowTagAction", {
   },
 })
 
-const { open: openEditDialog } = useEditDialog()
 const { open: openDeleteDialog } = useDeleteDialog()
+const spacesStore = useSpacesStore()
 
-function onEditCollection(item: CollectionWithCards) {
-  const formModel = ref({ title: item.title })
-  openEditDialog({
-    title: ft("edit", "collection"),
-    renderContent: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label={`${ft("title")}:`} class="!text-text-primary">
-          <n-input-group>
-            <n-input
-              v-model:value={formModel.value.title}
-              placeholder={ft("placeholder", "title")}
-            />
-            <n-button
-              ghost
-              type="error"
-              onClick={() => onDeleteCollection(item)}
-              v-slots={{
-                icon: () => <n-icon size="16" component={Delete} />,
-              }}
-            />
-          </n-input-group>
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.updateCollectionTitle(item.id, formModel.value.title)
-      await updateContextMenus()
-    },
-  })
+function onAddCollectionBeside(
+  item: CollectionWithCards,
+  side: "before" | "after",
+) {
+  isShowMoreAction.value = false
+  spacesStore.startDraftCollection(ft("untitled"), item.id, side)
 }
 
-const dialog = useDialog()
 function onDeleteCollection(item: CollectionWithCards) {
+  isShowMoreAction.value = false
   openDeleteDialog({
     title: ft("delete", "collection"),
     content: () => (
@@ -111,7 +118,6 @@ function onDeleteCollection(item: CollectionWithCards) {
     onPositiveClick: async () => {
       await dataManager.removeCollection(item.id)
       await updateContextMenus()
-      dialog.destroyAll()
     },
   })
 }
@@ -125,3 +131,9 @@ async function onMoveCollection(
   await updateContextMenus()
 }
 </script>
+
+<style scoped>
+.more-menu-item {
+  @apply flex h-9 cursor-pointer select-none items-center gap-x-3 rounded-lg px-3 text-[15px] transition-colors duration-200 hover:bg-hover-color;
+}
+</style>

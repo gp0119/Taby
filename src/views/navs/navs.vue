@@ -29,34 +29,65 @@
         <div
           class="nav-space-meta flex shrink-0 flex-nowrap items-center gap-4"
         >
-          <div class="nav-space-title-wrapper flex-center">
+          <div v-if="isEditing" ref="editRef" class="flex items-center gap-x-2">
+            <n-input-group class="!w-[260px]">
+              <IconSelect v-model:value="editingIcon" size="small" />
+              <n-input
+                ref="titleInputRef"
+                v-model:value="editingTitle"
+                size="small"
+                :placeholder="ft('placeholder', 'title')"
+                @keydown.enter="!$event.isComposing && onSaveSpace()"
+                @keyup.esc="isEditing = false"
+              />
+            </n-input-group>
+            <n-button size="small" @click="isEditing = false">
+              {{ ft("cancel") }}
+            </n-button>
+            <n-button
+              size="small"
+              type="primary"
+              :disabled="!editingTitle.trim()"
+              @click="onSaveSpace"
+            >
+              {{ ft("save") }}
+            </n-button>
+            <n-button size="small" ghost type="error" @click="onDeleteSpace">
+              {{ ft("delete") }}
+            </n-button>
+          </div>
+          <div v-else class="nav-space-title-wrapper flex-center">
             <n-icon size="18" class="nav-space-icon mr-2 text-text-primary">
               <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
             </n-icon>
             <span
-              class="nav-space-title shrink-0 select-none text-lg text-text-primary"
+              class="nav-space-title shrink-0 cursor-text select-none text-lg text-text-primary"
+              @click="onStartEdit"
             >
               {{ title }}
             </span>
           </div>
-          <span class="nav-space-detail h-[16px] w-[0.5px] bg-text-secondary" />
-          <span
-            class="nav-space-detail whitespace-nowrap font-thin text-text-secondary"
-          >
-            {{ spacesStore.collections.length }} Collections
-          </span>
+          <template v-if="!isEditing">
+            <span
+              class="nav-space-detail h-[16px] w-[0.5px] bg-text-secondary"
+            />
+            <span
+              class="nav-space-detail whitespace-nowrap font-thin text-text-secondary"
+            >
+              {{ spacesStore.collections.length }} Collections
+            </span>
+          </template>
         </div>
       </template>
-      <TagFilter />
-      <CollapseBtn />
-      <div class="mobile-manage-action">
-        <LeftMoreAction />
-      </div>
+      <template v-if="!isEditing">
+        <TagFilter />
+        <CollapseBtn />
+        <div class="mobile-manage-action">
+          <LeftMoreAction />
+        </div>
+      </template>
     </div>
     <div class="taby-nav-right flex-center shrink-0 gap-x-3">
-      <div v-if="title" class="mobile-manage-action">
-        <EditSpace :title="title!" :icon="icon!" />
-      </div>
       <div class="mobile-manage-action">
         <AddCollection />
       </div>
@@ -88,14 +119,23 @@ import SearchBtn from "@/views/navs/components/search-btn.vue"
 import PinIcon from "@/components/pin-icon.vue"
 import { useLayoutStore } from "@/store/layout"
 import type { layoutMode } from "@/type"
-import EditSpace from "@/views/navs/components/edit-space.vue"
 import TopDragableAction from "@/views/navs/components/top-dragable-action.vue"
 import LeftMoreAction from "@/views/navs/components/left-more-action.vue"
+import IconSelect from "@components/icon-select.vue"
 import { isWeb } from "@/utils/platform"
 import { Menu } from "@vicons/ionicons5"
+import type { InputInst } from "naive-ui"
+import { onClickOutside } from "@vueuse/core"
+import dataManager from "@/db"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import { useRefresh } from "@/hooks/useRresh.ts"
 
 const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()
+const { ft } = useHelpi18n()
+const { open: deleteDialog } = useDeleteDialog()
+const { updateContextMenus } = useRefresh()
 const emit = defineEmits<{
   (e: "open-mobile-aside"): void
 }>()
@@ -109,6 +149,62 @@ const icon = computed(
   () =>
     spacesStore.spaces.find((item) => item.id === spacesStore.activeId)?.icon,
 )
+
+const isEditing = ref(false)
+const editingTitle = ref("")
+const editingIcon = ref("")
+const titleInputRef = ref<InputInst>()
+const editRef = ref<HTMLElement>()
+
+onClickOutside(editRef, () => (isEditing.value = false), {
+  ignore: [".n-modal-container"],
+})
+
+watch(
+  () => spacesStore.activeId,
+  () => (isEditing.value = false),
+)
+
+function onStartEdit() {
+  editingTitle.value = title.value!
+  editingIcon.value = icon.value ?? "StorefrontOutline"
+  isEditing.value = true
+  nextTick(() => {
+    titleInputRef.value?.focus()
+    titleInputRef.value?.select()
+  })
+}
+
+async function onSaveSpace() {
+  const newTitle = editingTitle.value.trim()
+  if (!newTitle) return
+  isEditing.value = false
+  if (newTitle === title.value && editingIcon.value === icon.value) return
+  await dataManager.updateSpaceTitle(
+    spacesStore.activeId,
+    newTitle,
+    editingIcon.value,
+  )
+  await updateContextMenus()
+}
+
+function onDeleteSpace() {
+  deleteDialog({
+    title: ft("delete", "space"),
+    content: () => (
+      <span class="text-text-primary">
+        {ft("delete-confirm-prefix")}
+        <span class="text-primary">{title.value || ""}</span>
+        {ft("delete-confirm-suffix")}
+      </span>
+    ),
+    onPositiveClick: async () => {
+      isEditing.value = false
+      await dataManager.removeSpace(spacesStore.activeId)
+      await updateContextMenus()
+    },
+  })
+}
 
 function onChangeLayoutMode(mode: layoutMode, side: "left" | "right") {
   layoutStore.onUpdateLayoutMode(mode, side)

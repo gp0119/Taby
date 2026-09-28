@@ -293,6 +293,8 @@ export const ICON_LIST: Record<string, Component> = {
   WineOutline,
 } as const
 
+export const DRAFT_COLLECTION_ID = -1
+
 export const GITHUB_API = "https://api.github.com"
 export const GITEE_API = "https://gitee.com/api/v5"
 export const SYNC_GIST_ID = "gistId"
