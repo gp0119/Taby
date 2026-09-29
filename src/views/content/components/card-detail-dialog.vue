@@ -152,7 +152,12 @@
             </template>
           </n-button>
         </DeletePopconfirm>
-        <MovePopover type="card" placement="top-start" @select="onMove">
+        <MovePopover
+          type="card"
+          placement="top-start"
+          :current-collection-id="card.collectionId"
+          @select="onMove"
+        >
           <n-button tertiary class="mr-auto">
             <template #icon>
               <n-icon size="16" :component="FolderMoveTo" />

@@ -164,6 +164,7 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 const props = withDefaults(
   defineProps<{
     type: "card" | "collection"
+    currentCollectionId?: number
     title?: string
     placement?: PopoverPlacement
   }>(),
@@ -208,11 +209,9 @@ const targets = computed(() => {
   const activeSpace = spaces.value.find(
     (space) => space.id === activeSpaceId.value,
   )
-  return (activeSpace?.collections ?? []).map(({ id, title }) => ({
-    id,
-    title,
-    icon: undefined,
-  }))
+  return (activeSpace?.collections ?? [])
+    .filter(({ id }) => id !== props.currentCollectionId)
+    .map(({ id, title }) => ({ id, title, icon: undefined }))
 })
 
 const onUpdateShow = async (value: boolean) => {

@@ -8,7 +8,12 @@
       {{ batchCardStore.selectedCardIds.length }}
     </div>
     <div class="flex items-center justify-between gap-x-4">
-      <MovePopover type="card" placement="top" @select="onHandleMove">
+      <MovePopover
+        type="card"
+        placement="top"
+        :current-collection-id="currentCollectionId"
+        @select="onHandleMove"
+      >
         <n-button tertiary>
           <template #icon>
             <n-icon :size="16" :component="FolderMoveTo" />
@@ -34,6 +39,7 @@
 <script setup lang="ts">
 import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { useBatchCardStore } from "@/store/batch-card"
+import { useSpacesStore } from "@/store/spaces"
 import { FolderMoveTo } from "@vicons/carbon"
 import { TrashOutline } from "@vicons/ionicons5"
 import dataManager from "@/db"
@@ -44,6 +50,15 @@ import { useAnimatedPresence } from "@/hooks/useAnimatedPresence"
 import { movePosition } from "@/type"
 
 const batchCardStore = useBatchCardStore()
+const spacesStore = useSpacesStore()
+const currentCollectionId = computed(() => {
+  const collections = spacesStore.collections.filter((collection) =>
+    collection.cards.some((card) =>
+      batchCardStore.selectedCardIds.includes(card.id),
+    ),
+  )
+  return collections.length === 1 ? collections[0].id : undefined
+})
 const { show, animated, onAnimationEnd } = useAnimatedPresence(
   () => batchCardStore.selectedCardIds.length,
 )

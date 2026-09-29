@@ -3,7 +3,7 @@
     v-model:show="show"
     trigger="click"
     :to="false"
-    content-class="scrollbar-thin scrollbar-gutter-stable max-h-[120px] grid grid-cols-4 gap-2 overflow-scroll"
+    content-class="scrollbar-thin scrollbar-gutter-stable max-h-[120px] grid grid-cols-4 gap-2 overflow-x-hidden overflow-y-auto pr-3"
   >
     <template #trigger>
       <n-button :size="size">

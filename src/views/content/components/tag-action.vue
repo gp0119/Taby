@@ -52,8 +52,7 @@
                 :aria-label="ft('title')"
                 size="tiny"
                 autofocus
-                @keydown.enter.stop.prevent="onSaveTag"
-                @keydown.esc.stop.prevent="onCancelEditTag"
+                @keydown="onEditTagKeydown"
               />
               <n-button
                 size="tiny"
@@ -298,6 +297,17 @@ const onSaveTag = async () => {
   if (!editingTag.value || !editingTag.value.title.trim()) return
   await tagsStore.updateTag(editingTag.value)
   onCancelEditTag()
+}
+
+const onEditTagKeydown = (event: KeyboardEvent) => {
+  if (event.key !== "Enter" && event.key !== "Escape") return
+  event.stopPropagation()
+  event.preventDefault()
+  if (event.key === "Enter") {
+    onSaveTag()
+  } else {
+    onCancelEditTag()
+  }
 }
 
 const searchFilterTag = (tag: { title?: string }) => {
