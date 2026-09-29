@@ -1,5 +1,5 @@
 import { defineConfig } from "vite"
-import { sharedPlugins, sharedResolve } from "./vite.shared"
+import { sharedPlugins, sharedResolve } from "./vite.shared.ts"
 
 export default defineConfig({
   plugins: sharedPlugins,

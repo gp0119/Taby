@@ -1,5 +1,5 @@
 import { defineManifest } from "@crxjs/vite-plugin"
-import pkg from "./package.json"
+import pkg from "./package.json" with { type: "json" }
 
 export default defineManifest({
   name: "Taby - Simple & Powerful New Tab",
