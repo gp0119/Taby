@@ -140,8 +140,17 @@
             />
           </div>
         </div>
-        <div v-else class="py-2.5 text-center text-text-secondary">
-          {{ ft("no-tags") }}
+        <div
+          v-else
+          class="flex flex-col items-center gap-y-2 py-2.5 text-center text-text-secondary"
+        >
+          <n-icon
+            size="32"
+            class="opacity-50"
+            :component="TagNone"
+            aria-hidden="true"
+          />
+          <span class="opacity-50">{{ ft("no-tags") }}</span>
         </div>
       </div>
     </template>
@@ -150,7 +159,7 @@
 
 <script setup lang="tsx">
 import { useTagsStore } from "@/store/tags.ts"
-import { TagGroup, Checkmark, Close } from "@vicons/carbon"
+import { TagGroup, TagNone, Checkmark, Close } from "@vicons/carbon"
 import { ShapeUnion20Regular, ShapeIntersect20Regular } from "@vicons/fluent"
 import { SearchOutline, ChevronDown } from "@vicons/ionicons5"
 import { Label } from "@/type"

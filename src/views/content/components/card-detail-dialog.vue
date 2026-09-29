@@ -13,16 +13,16 @@
           class="h-full w-full object-cover"
           @error="coverFailed = true"
         />
-        <div v-else class="flex select-none flex-col items-center gap-y-3">
-          <div
-            class="cover-tint flex-center h-24 w-24 rounded-full text-text-secondary shadow-inner"
-          >
-            <n-icon
-              size="44"
-              class="opacity-60"
-              :component="ImageOff24Regular"
-            />
-          </div>
+        <div
+          v-else
+          class="flex-center h-full w-full select-none flex-col gap-y-2"
+        >
+          <img
+            :src="noCoverIllustration"
+            alt=""
+            class="h-[62%] max-w-[80%] object-contain"
+            draggable="false"
+          />
           <span class="text-xs font-medium text-text-secondary">
             {{ ft("cover-not-found") }}
           </span>
@@ -186,7 +186,7 @@ import {
   OverflowMenuVertical,
   Renew,
 } from "@vicons/carbon"
-import { ImageOff24Regular } from "@vicons/fluent"
+import noCoverIllustration from "@/assets/no-cover.svg"
 import { useMessage } from "naive-ui"
 import { useLocalStorage } from "@vueuse/core"
 import { getDomain } from "@/utils"
@@ -376,9 +376,6 @@ async function onSave() {
 <style scoped>
 .detail-input {
   @apply w-full rounded-md border border-solid border-transparent bg-transparent px-2 py-1 text-text-primary outline-none transition-colors duration-200 hover:bg-hover-color focus:border-primary;
-}
-.cover-tint {
-  background: color-mix(in srgb, var(--textSecondary) 8%, transparent);
 }
 .icon-menu-item {
   @apply flex min-h-[34px] cursor-pointer select-none items-center gap-x-2 rounded-md px-2 py-1 text-text-primary transition-colors duration-200 hover:bg-hover-color;

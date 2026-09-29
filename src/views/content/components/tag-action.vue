@@ -30,7 +30,7 @@
           <div
             v-for="(tag, idx) in filterTags"
             :key="tag.id"
-            class="group/tag tag-option-item relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-14"
+            class="group/tag tag-option-item relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-[72px]"
             :class="{
               'bg-hover-color': idx === activeIndex,
             }"
@@ -80,9 +80,15 @@
         </div>
         <div
           v-else
-          class="flex h-full items-center justify-center !bg-card-color text-text-secondary"
+          class="flex h-full flex-col items-center justify-center gap-y-2 !bg-card-color text-text-secondary"
         >
-          {{ ft("no-tags") }}
+          <n-icon
+            size="32"
+            class="opacity-50"
+            :component="TagNone"
+            aria-hidden="true"
+          />
+          <span class="opacity-50">{{ ft("no-tags") }}</span>
         </div>
       </div>
     </template>
@@ -121,6 +127,7 @@ import { COLOR_LIST } from "@/utils/constants.ts"
 import ColorSelect from "@components/color-select.vue"
 import {
   TagGroup,
+  TagNone,
   TagEdit,
   Checkmark,
   Delete,

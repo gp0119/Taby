@@ -5,13 +5,13 @@
     class="h-full"
   >
     <n-loading-bar-provider>
-      <n-dialog-provider>
-        <n-message-provider>
+      <n-message-provider>
+        <n-dialog-provider>
           <n-modal-provider>
             <layout />
           </n-modal-provider>
-        </n-message-provider>
-      </n-dialog-provider>
+        </n-dialog-provider>
+      </n-message-provider>
     </n-loading-bar-provider>
   </n-config-provider>
 </template>
