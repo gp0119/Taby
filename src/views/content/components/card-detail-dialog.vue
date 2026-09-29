@@ -140,7 +140,11 @@
       </div>
 
       <div class="mt-6 flex items-center gap-x-3">
-        <DeletePopconfirm :name="card.title" :confirm="onDelete">
+        <DeletePopconfirm
+          :name="card.title"
+          :confirm="onDelete"
+          placement="bottom"
+        >
           <n-button
             tertiary
             type="error"
