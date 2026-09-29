@@ -143,11 +143,12 @@
         <DeletePopconfirm :name="card.title" :confirm="onDelete">
           <n-button
             tertiary
+            type="error"
             :focusable="false"
             :aria-label="ft('delete', 'card')"
           >
             <template #icon>
-              <n-icon size="16" :component="Delete" />
+              <n-icon size="16" :component="TrashOutline" />
             </template>
           </n-button>
         </DeletePopconfirm>
@@ -181,11 +182,11 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 import {
   AddFilled,
   ChevronDown,
-  Delete,
   FolderMoveTo,
   OverflowMenuVertical,
   Renew,
 } from "@vicons/carbon"
+import { TrashOutline } from "@vicons/ionicons5"
 import noCoverIllustration from "@/assets/no-cover.svg"
 import { useMessage } from "naive-ui"
 import { useLocalStorage } from "@vueuse/core"

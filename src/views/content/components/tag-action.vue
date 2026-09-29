@@ -48,14 +48,17 @@
               class="absolute right-1.5 hidden animate-scale-in items-center gap-x-2 group-hover/tag:flex"
               :class="{ '!flex': !canHover || deletingTagId === tag.id }"
             >
-              <PopoverWrapper :message="ft('edit', 'tag')">
-                <n-icon
-                  size="16"
-                  :component="TagEdit"
-                  class="cursor-pointer text-primary"
-                  @click.stop="onEditTag(tag)"
-                />
-              </PopoverWrapper>
+              <n-button
+                quaternary
+                size="tiny"
+                type="primary"
+                :aria-label="ft('edit', 'tag')"
+                @click.stop="onEditTag(tag)"
+              >
+                <template #icon>
+                  <n-icon size="16" :component="TagEdit" />
+                </template>
+              </n-button>
               <DeletePopconfirm
                 :show="deletingTagId === tag.id"
                 :name="tag.title"
@@ -71,7 +74,7 @@
                   @click.stop
                 >
                   <template #icon>
-                    <n-icon size="16" :component="Delete" />
+                    <n-icon size="16" :component="TrashOutline" />
                   </template>
                 </n-button>
               </DeletePopconfirm>
@@ -130,9 +133,9 @@ import {
   TagNone,
   TagEdit,
   Checkmark,
-  Delete,
   SaveAnnotation,
 } from "@vicons/carbon"
+import { TrashOutline } from "@vicons/ionicons5"
 import { useTagsStore } from "@/store/tags"
 import { CollectionWithCards } from "@/type"
 import dataManager from "@/db"
@@ -262,7 +265,7 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
                     type="error"
                     aria-label={ft("delete", "tag")}
                     v-slots={{
-                      icon: () => <n-icon size="16" component={Delete} />,
+                      icon: () => <n-icon size="16" component={TrashOutline} />,
                     }}
                   />
                 ),

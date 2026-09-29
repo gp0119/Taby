@@ -44,7 +44,7 @@
                 :aria-label="ft('delete', 'space')"
               >
                 <template #icon>
-                  <n-icon size="18" :component="Delete" />
+                  <n-icon size="18" :component="TrashOutline" />
                 </template>
               </n-button>
             </DeletePopconfirm>
@@ -138,8 +138,7 @@ import TopDragableAction from "@/views/navs/components/top-dragable-action.vue"
 import LeftMoreAction from "@/views/navs/components/left-more-action.vue"
 import IconSelect from "@components/icon-select.vue"
 import { isWeb } from "@/utils/platform"
-import { Menu } from "@vicons/ionicons5"
-import { Delete } from "@vicons/carbon"
+import { Menu, TrashOutline } from "@vicons/ionicons5"
 import type { InputInst } from "naive-ui"
 import { onClickOutside } from "@vueuse/core"
 import dataManager from "@/db"

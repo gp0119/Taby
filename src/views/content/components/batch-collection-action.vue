@@ -38,7 +38,7 @@
       >
         <n-button ghost type="error">
           <template #icon>
-            <n-icon :size="16" :component="Delete" />
+            <n-icon :size="16" :component="TrashOutline" />
           </template>
           {{ ft("delete") }}
         </n-button>
@@ -51,7 +51,8 @@
 import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
-import { FolderMoveTo, Delete, DirectionMerge } from "@vicons/carbon"
+import { FolderMoveTo, DirectionMerge } from "@vicons/carbon"
+import { TrashOutline } from "@vicons/ionicons5"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import bottomAction from "@/components/bottom-action.vue"

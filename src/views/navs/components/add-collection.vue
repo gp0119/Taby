@@ -23,11 +23,14 @@ import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { Add } from "@vicons/carbon"
 import { useHelpi18n } from "@/hooks/useHelpi18n.ts"
 import { useSpacesStore } from "@/store/spaces.ts"
+import { useDraggableStore } from "@/store/draggable"
 
 const { ft } = useHelpi18n()
 const spacesStore = useSpacesStore()
+const draggableStore = useDraggableStore()
 
 function onAddCollection() {
+  draggableStore.setDraggable(false)
   spacesStore.startDraftCollection(ft("untitled"))
 }
 </script>

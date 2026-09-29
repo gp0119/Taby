@@ -42,7 +42,7 @@
               aria-hidden="true"
             >
               <rect x="4" y="13" width="16" height="7" rx="2" />
-              <path d="M12 3v6M9 6h6" />
+              <path d="M12 4v6M9 7h6" />
             </svg>
           </n-icon>
           <span>{{ ft("add-before") }}</span>
@@ -62,7 +62,7 @@
               aria-hidden="true"
             >
               <rect x="4" y="4" width="16" height="7" rx="2" />
-              <path d="M12 15v6M9 18h6" />
+              <path d="M12 14v6M9 17h6" />
             </svg>
           </n-icon>
           <span>{{ ft("add-after") }}</span>
@@ -74,7 +74,7 @@
           :confirm="() => onDeleteCollection(item)"
         >
           <div class="more-menu-item text-error-color">
-            <n-icon size="18" :component="Delete" />
+            <n-icon size="18" :component="TrashOutline" />
             <span>{{ ft("delete") }}</span>
           </div>
         </DeletePopconfirm>
@@ -99,8 +99,8 @@
 
 <script setup lang="ts">
 import { CollectionWithCards, movePosition } from "@/type.ts"
-import { FolderMoveTo, Delete } from "@vicons/carbon"
-import { EllipsisVerticalSharp } from "@vicons/ionicons5"
+import { FolderMoveTo } from "@vicons/carbon"
+import { EllipsisVerticalSharp, TrashOutline } from "@vicons/ionicons5"
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import TagAction from "./tag-action.vue"
