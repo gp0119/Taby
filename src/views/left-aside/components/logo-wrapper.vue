@@ -14,7 +14,8 @@
         size="small"
         class="mobile-manage-action ml-3 w-[28px]"
         :class="[layoutStore.isLeftCollapsed ? 'animate-hide' : 'animate-show']"
-        @click="onAddSpace"
+        :aria-label="ft('add', 'space')"
+        @click="emit('add-space')"
       >
         <template #icon>
           <n-icon
@@ -32,43 +33,12 @@
 import { useLayoutStore } from "@/store/layout"
 import { Add } from "@vicons/carbon"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useEditDialog } from "@/hooks/useEditDialog.tsx"
-import IconSelect from "@components/icon-select.vue"
-import dataManager from "@/db"
-import { useRefresh } from "@/hooks/useRresh.ts"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import Logo from "@/components/logo.vue"
 
 const layoutStore = useLayoutStore()
 const { ft } = useHelpi18n()
-const { open } = useEditDialog()
-const { updateContextMenus } = useRefresh()
-
-function onAddSpace() {
-  const formModel = ref({ title: "", icon: "StorefrontOutline" })
-  open({
-    title: ft("add", "space"),
-    renderContent: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label={`${ft("title")}:`}>
-          <n-input-group>
-            <IconSelect v-model:value={formModel.value.icon} />
-            <n-input
-              v-model:value={formModel.value.title}
-              placeholder={ft("placeholder", "title")}
-            />
-          </n-input-group>
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      if (!formModel.value.title) return false
-      await dataManager.addSpace({
-        title: formModel.value.title,
-        icon: formModel.value.icon,
-      })
-      await updateContextMenus()
-    },
-  })
-}
+const emit = defineEmits<{
+  (e: "add-space"): void
+}>()
 </script>
