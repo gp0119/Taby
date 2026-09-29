@@ -76,7 +76,8 @@
               <component :is="ICON_LIST[icon ?? 'StorefrontOutline']" />
             </n-icon>
             <span
-              class="nav-space-title shrink-0 cursor-text select-none text-lg text-text-primary"
+              class="nav-space-title shrink-0 select-none text-lg text-text-primary"
+              :class="{ 'cursor-text': !isMobileWeb }"
               @click="onStartEdit"
             >
               {{ title }}
@@ -140,7 +141,7 @@ import IconSelect from "@components/icon-select.vue"
 import { isWeb } from "@/utils/platform"
 import { Menu, TrashOutline } from "@vicons/ionicons5"
 import type { InputInst } from "naive-ui"
-import { onClickOutside } from "@vueuse/core"
+import { onClickOutside, useMediaQuery } from "@vueuse/core"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import DeletePopconfirm from "@/components/delete-popconfirm.vue"
@@ -150,6 +151,8 @@ const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()
 const { ft } = useHelpi18n()
 const { updateContextMenus } = useRefresh()
+const mobileLayoutQuery = useMediaQuery("(max-width: 999px)")
+const isMobileWeb = computed(() => isWeb && mobileLayoutQuery.value)
 const emit = defineEmits<{
   (e: "open-mobile-aside"): void
 }>()
@@ -180,6 +183,7 @@ watch(
 )
 
 function onStartEdit() {
+  if (isMobileWeb.value) return
   editingTitle.value = title.value!
   editingIcon.value = icon.value ?? "StorefrontOutline"
   isEditing.value = true

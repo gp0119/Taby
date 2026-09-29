@@ -55,8 +55,9 @@
             </n-icon>
             <span
               v-if="!isEditing"
-              class="ml-2 cursor-text whitespace-nowrap text-lg font-medium"
-              @click.stop="onStartEdit"
+              class="ml-2 whitespace-nowrap text-lg font-medium"
+              :class="{ 'cursor-text': !isMobileWeb }"
+              @click="onStartEdit"
             >
               {{ collection.title }}
             </span>
@@ -243,7 +244,9 @@ watch(
   { immediate: true },
 )
 
-const onStartEdit = () => {
+const onStartEdit = (e: MouseEvent) => {
+  if (isMobileWeb.value) return
+  e.stopPropagation()
   spacesStore.stopEditingCollection()
   spacesStore.editingCollectionId = props.collection.id
 }
