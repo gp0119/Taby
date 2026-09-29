@@ -30,6 +30,19 @@
           class="nav-space-meta flex shrink-0 flex-nowrap items-center gap-4"
         >
           <div v-if="isEditing" ref="editRef" class="flex items-center gap-x-2">
+            <n-button
+              size="small"
+              quaternary
+              type="error"
+              class="mr-2 w-[28px] shrink-0"
+              :title="ft('delete', 'space')"
+              :aria-label="ft('delete', 'space')"
+              @click="onDeleteSpace"
+            >
+              <template #icon>
+                <n-icon size="18" :component="Delete" />
+              </template>
+            </n-button>
             <n-input-group class="!w-[260px]">
               <IconSelect v-model:value="editingIcon" size="small" />
               <n-input
@@ -51,9 +64,6 @@
               @click="onSaveSpace"
             >
               {{ ft("save") }}
-            </n-button>
-            <n-button size="small" ghost type="error" @click="onDeleteSpace">
-              {{ ft("delete") }}
             </n-button>
           </div>
           <div v-else class="nav-space-title-wrapper flex-center">
@@ -124,6 +134,7 @@ import LeftMoreAction from "@/views/navs/components/left-more-action.vue"
 import IconSelect from "@components/icon-select.vue"
 import { isWeb } from "@/utils/platform"
 import { Menu } from "@vicons/ionicons5"
+import { Delete } from "@vicons/carbon"
 import type { InputInst } from "naive-ui"
 import { onClickOutside } from "@vueuse/core"
 import dataManager from "@/db"

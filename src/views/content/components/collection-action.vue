@@ -12,7 +12,7 @@
       placement="bottom-end"
       :show-arrow="false"
       class="!rounded-xl"
-      content-style="padding: 0;"
+      style="padding: 0"
     >
       <template #trigger>
         <n-button quaternary size="small" class="w-[28px]">
@@ -26,14 +26,40 @@
           class="more-menu-item text-text-primary"
           @click="onAddCollectionBeside(item, 'before')"
         >
-          <n-icon size="18" :component="ArrowUp" />
+          <n-icon size="18">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="4" y="13" width="16" height="7" rx="2" />
+              <path d="M12 3v6M9 6h6" />
+            </svg>
+          </n-icon>
           <span>{{ ft("add-before") }}</span>
         </div>
         <div
           class="more-menu-item text-text-primary"
           @click="onAddCollectionBeside(item, 'after')"
         >
-          <n-icon size="18" :component="ArrowDown" />
+          <n-icon size="18">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="4" y="4" width="16" height="7" rx="2" />
+              <path d="M12 15v6M9 18h6" />
+            </svg>
+          </n-icon>
           <span>{{ ft("add-after") }}</span>
         </div>
         <div
@@ -64,7 +90,7 @@
 
 <script setup lang="tsx">
 import { CollectionWithCards, movePosition } from "@/type.ts"
-import { FolderMoveTo, Delete, ArrowUp, ArrowDown } from "@vicons/carbon"
+import { FolderMoveTo, Delete } from "@vicons/carbon"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
