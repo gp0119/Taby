@@ -30,33 +30,48 @@
           <div
             v-for="(tag, idx) in filterTags"
             :key="tag.id"
-            class="group/tag tag-option-item relative flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-2.5 pr-[72px]"
+            class="group/tag tag-option-item relative flex items-center justify-between rounded-md py-1.5 pl-2.5"
             :class="{
               'bg-hover-color': idx === activeIndex,
+              'cursor-pointer pr-9': editingTag?.id !== tag.id,
+              'pr-1.5': editingTag?.id === tag.id,
             }"
-            @click="handleTagSelect(tag.id)"
+            @click="editingTag?.id !== tag.id && handleTagSelect(tag.id)"
             @mouseenter="canHover && (activeIndex = idx)"
           >
-            <Tag :tag="tag" :closeable="false" />
-            <n-icon
-              v-if="item.labelIds.includes(tag.id)"
-              class="text-primary"
-              size="16"
-              :component="Checkmark"
-            />
-            <div
-              class="absolute right-1.5 hidden animate-scale-in items-center gap-x-2 group-hover/tag:flex"
-              :class="{ '!flex': !canHover || deletingTagId === tag.id }"
+            <n-input-group
+              v-if="editingTag?.id === tag.id"
+              class="w-full min-w-0"
+              @click.stop
             >
-              <n-button
-                quaternary
+              <color-select v-model:value="editingTag.color" size="tiny" />
+              <n-input
+                v-model:value="editingTag.title"
+                class="!w-0 min-w-0 flex-1"
+                :placeholder="ft('placeholder', 'tag')"
+                :aria-label="ft('title')"
                 size="tiny"
-                type="primary"
-                :aria-label="ft('edit', 'tag')"
-                @click.stop="onEditTag(tag)"
+                autofocus
+                @keydown.enter.stop.prevent="onSaveTag"
+                @keydown.esc.stop.prevent="onCancelEditTag"
+              />
+              <n-button
+                size="tiny"
+                :aria-label="ft('save')"
+                :disabled="!editingTag.title.trim()"
+                @click="onSaveTag"
               >
                 <template #icon>
-                  <n-icon size="16" :component="TagEdit" />
+                  <n-icon size="16" :component="Checkmark" />
+                </template>
+              </n-button>
+              <n-button
+                size="tiny"
+                :aria-label="ft('cancel')"
+                @click="onCancelEditTag"
+              >
+                <template #icon>
+                  <n-icon size="16" :component="Close" />
                 </template>
               </n-button>
               <DeletePopconfirm
@@ -74,11 +89,36 @@
                   @click.stop
                 >
                   <template #icon>
-                    <n-icon size="16" :component="TrashOutline" />
+                    <n-icon size="14" :component="TrashOutline" />
                   </template>
                 </n-button>
               </DeletePopconfirm>
-            </div>
+            </n-input-group>
+            <template v-else>
+              <Tag :tag="tag" :closeable="false" />
+              <n-icon
+                v-if="item.labelIds.includes(tag.id)"
+                class="text-primary"
+                size="16"
+                :component="Checkmark"
+              />
+              <div
+                class="absolute right-1.5 hidden animate-scale-in items-center group-focus-within/tag:flex group-hover/tag:flex"
+                :class="{ '!flex': !canHover }"
+              >
+                <n-button
+                  quaternary
+                  size="tiny"
+                  type="primary"
+                  :aria-label="ft('edit', 'tag')"
+                  @click.stop="onEditTag(tag)"
+                >
+                  <template #icon>
+                    <n-icon size="16" :component="TagEdit" />
+                  </template>
+                </n-button>
+              </div>
+            </template>
           </div>
         </div>
         <div
@@ -125,7 +165,7 @@
   </n-popover>
 </template>
 
-<script setup lang="tsx">
+<script setup lang="ts">
 import { COLOR_LIST } from "@/utils/constants.ts"
 import ColorSelect from "@components/color-select.vue"
 import {
@@ -135,12 +175,11 @@ import {
   Checkmark,
   SaveAnnotation,
 } from "@vicons/carbon"
-import { TrashOutline } from "@vicons/ionicons5"
+import { Close, TrashOutline } from "@vicons/ionicons5"
 import { useTagsStore } from "@/store/tags"
-import { CollectionWithCards } from "@/type"
+import { CollectionWithCards, Label } from "@/type"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useEditDialog } from "@/hooks/useEditDialog"
 import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import Tag from "@/components/tag.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
@@ -161,6 +200,7 @@ const newTag = ref({
 })
 const newTagInputRef = ref<InputInst | null>(null)
 const deletingTagId = ref<number | null>(null)
+const editingTag = ref<Label | null>(null)
 
 const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
   isShowTagAction: Ref<boolean>
@@ -173,11 +213,11 @@ const getRandomColor = () => {
 
 function onUpdateDeleteTag(show: boolean, tagId: number) {
   deletingTagId.value = show ? tagId : null
-  setIsShowTagAction(show)
+  if (show) setIsShowTagAction(true)
 }
 
 const onUpdateShowTagAction = async (value: boolean) => {
-  if (!value && deletingTagId.value !== null) return
+  if (editingTag.value || (!value && deletingTagId.value !== null)) return
   setIsShowTagAction(value)
   if (value) {
     selectedColor.value = getRandomColor()
@@ -236,7 +276,6 @@ const saveAndAddTag = async () => {
   scrollActiveIntoView()
 }
 
-const { open: openEditDialog } = useEditDialog()
 const onDeleteTag = async (tag: { id: number }) => {
   await dataManager.removeLabel(tag.id)
   await tagsStore.fetchTags()
@@ -244,47 +283,23 @@ const onDeleteTag = async (tag: { id: number }) => {
   setIsShowTagAction(false)
 }
 
-const onEditTag = (tag: { id: number; title: string; color: string }) => {
-  const formModel = ref({ title: tag.title, color: tag.color })
-  openEditDialog({
-    title: ft("edit", "tag"),
-    renderContent: () => (
-      <n-form model={formModel.value}>
-        <n-form-item label={`${ft("title")}:`} class="!mb-1">
-          <n-input-group>
-            <color-select v-model:value={formModel.value.color} />
-            <n-input
-              v-model:value={formModel.value.title}
-              placeholder={ft("placeholder", "tag")}
-            />
-            <DeletePopconfirm name={tag.title} confirm={() => onDeleteTag(tag)}>
-              {{
-                default: () => (
-                  <n-button
-                    ghost
-                    type="error"
-                    aria-label={ft("delete", "tag")}
-                    v-slots={{
-                      icon: () => <n-icon size="16" component={TrashOutline} />,
-                    }}
-                  />
-                ),
-              }}
-            </DeletePopconfirm>
-          </n-input-group>
-        </n-form-item>
-      </n-form>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.updateLabel(
-        tag.id,
-        formModel.value.title,
-        formModel.value.color,
-      )
-      await tagsStore.fetchTags()
-    },
-  })
+const onEditTag = (tag: Label) => {
+  deletingTagId.value = null
+  editingTag.value = { ...tag }
 }
+
+const onCancelEditTag = () => {
+  editingTag.value = null
+  deletingTagId.value = null
+  focusNewTagInputSafely()
+}
+
+const onSaveTag = async () => {
+  if (!editingTag.value || !editingTag.value.title.trim()) return
+  await tagsStore.updateTag(editingTag.value)
+  onCancelEditTag()
+}
+
 const searchFilterTag = (tag: { title?: string }) => {
   return (tag.title ?? "")
     .toLocaleLowerCase()
@@ -292,7 +307,9 @@ const searchFilterTag = (tag: { title?: string }) => {
 }
 
 const filterTags = computed(() => {
-  return tagsStore.tags.filter((tag) => searchFilterTag(tag))
+  return tagsStore.tags.filter(
+    (tag) => tag.id === editingTag.value?.id || searchFilterTag(tag),
+  )
 })
 const focusNewTagInputSafely = async () => {
   await nextTick()
@@ -339,7 +356,7 @@ const scrollActiveIntoView = async () => {
 
 let stopKeydown: null | (() => void) = null
 const onKeydown = (e: KeyboardEvent) => {
-  if (deletingTagId.value !== null) return
+  if (editingTag.value || deletingTagId.value !== null) return
   if (e.key === "ArrowDown") {
     e.preventDefault()
     e.stopPropagation()
@@ -363,9 +380,13 @@ watch(
       stopKeydown = useEventListener(window, "keydown", onKeydown, {
         capture: true,
       })
-    } else if (stopKeydown) {
-      stopKeydown()
-      stopKeydown = null
+    } else {
+      editingTag.value = null
+      deletingTagId.value = null
+      if (stopKeydown) {
+        stopKeydown()
+        stopKeydown = null
+      }
     }
   },
   { immediate: true },
