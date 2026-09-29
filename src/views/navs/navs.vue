@@ -30,19 +30,24 @@
           class="nav-space-meta flex shrink-0 flex-nowrap items-center gap-4"
         >
           <div v-if="isEditing" ref="editRef" class="flex items-center gap-x-2">
-            <n-button
-              size="small"
-              quaternary
-              type="error"
-              class="mr-2 w-[28px] shrink-0"
-              :title="ft('delete', 'space')"
-              :aria-label="ft('delete', 'space')"
-              @click="onDeleteSpace"
+            <DeletePopconfirm
+              :name="title"
+              :confirm="onDeleteSpace"
+              placement="bottom-start"
             >
-              <template #icon>
-                <n-icon size="18" :component="Delete" />
-              </template>
-            </n-button>
+              <n-button
+                size="small"
+                quaternary
+                type="error"
+                class="mr-2 w-[28px] shrink-0"
+                :title="ft('delete', 'space')"
+                :aria-label="ft('delete', 'space')"
+              >
+                <template #icon>
+                  <n-icon size="18" :component="Delete" />
+                </template>
+              </n-button>
+            </DeletePopconfirm>
             <n-input-group class="!w-[260px]">
               <IconSelect v-model:value="editingIcon" size="small" />
               <n-input
@@ -117,7 +122,7 @@
   <TopDragableAction />
 </template>
 
-<script setup lang="tsx">
+<script setup lang="ts">
 import { useSpacesStore } from "@/store/spaces.ts"
 import MorePopover from "@/views/navs/components/more-popover.vue"
 import TagFilter from "@/views/navs/components/tag-filter.vue"
@@ -139,13 +144,12 @@ import type { InputInst } from "naive-ui"
 import { onClickOutside } from "@vueuse/core"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { useRefresh } from "@/hooks/useRresh.ts"
 
 const layoutStore = useLayoutStore()
 const spacesStore = useSpacesStore()
 const { ft } = useHelpi18n()
-const { open: deleteDialog } = useDeleteDialog()
 const { updateContextMenus } = useRefresh()
 const emit = defineEmits<{
   (e: "open-mobile-aside"): void
@@ -168,7 +172,7 @@ const titleInputRef = ref<InputInst>()
 const editRef = ref<HTMLElement>()
 
 onClickOutside(editRef, () => (isEditing.value = false), {
-  ignore: [".n-modal-container"],
+  ignore: [".n-modal-container", ".n-popconfirm"],
 })
 
 watch(
@@ -199,22 +203,10 @@ async function onSaveSpace() {
   await updateContextMenus()
 }
 
-function onDeleteSpace() {
-  deleteDialog({
-    title: ft("delete", "space"),
-    content: () => (
-      <span class="text-text-primary">
-        {ft("delete-confirm-prefix")}
-        <span class="text-primary">{title.value || ""}</span>
-        {ft("delete-confirm-suffix")}
-      </span>
-    ),
-    onPositiveClick: async () => {
-      isEditing.value = false
-      await dataManager.removeSpace(spacesStore.activeId)
-      await updateContextMenus()
-    },
-  })
+async function onDeleteSpace() {
+  await dataManager.removeSpace(spacesStore.activeId)
+  isEditing.value = false
+  await updateContextMenus()
 }
 
 function onChangeLayoutMode(mode: layoutMode, side: "left" | "right") {

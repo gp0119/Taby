@@ -16,18 +16,23 @@
           {{ ft("move") }}
         </n-button>
       </MovePopover>
-      <n-button ghost type="error" @click="onHandleDelete">
-        <template #icon>
-          <n-icon :size="16" :component="Delete" />
-        </template>
-        {{ ft("delete") }}
-      </n-button>
+      <DeletePopconfirm
+        :content="ft('delete-cards-confirm')"
+        :confirm="onHandleDelete"
+      >
+        <n-button ghost type="error">
+          <template #icon>
+            <n-icon :size="16" :component="Delete" />
+          </template>
+          {{ ft("delete") }}
+        </n-button>
+      </DeletePopconfirm>
     </div>
   </bottom-action>
 </template>
 
-<script setup lang="tsx">
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+<script setup lang="ts">
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { useBatchCardStore } from "@/store/batch-card"
 import { FolderMoveTo, Delete } from "@vicons/carbon"
 import dataManager from "@/db"
@@ -60,15 +65,8 @@ const onHandleMove = async (collectionId: number, position: movePosition) => {
   closeDrawer()
 }
 
-const { open: onDeleteComfirm } = useDeleteDialog()
 const onHandleDelete = async () => {
-  onDeleteComfirm({
-    title: ft("delete", "cards"),
-    content: ft("delete-cards-confirm"),
-    onPositiveClick: async () => {
-      await dataManager.batchDeleteCards(batchCardStore.selectedCardIds)
-      closeDrawer()
-    },
-  })
+  await dataManager.batchDeleteCards(batchCardStore.selectedCardIds)
+  closeDrawer()
 }
 </script>

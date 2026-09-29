@@ -140,11 +140,17 @@
       </div>
 
       <div class="mt-6 flex items-center gap-x-3">
-        <n-button tertiary :focusable="false" @click="onDelete">
-          <template #icon>
-            <n-icon size="16" :component="Delete" />
-          </template>
-        </n-button>
+        <DeletePopconfirm :name="card.title" :confirm="onDelete">
+          <n-button
+            tertiary
+            :focusable="false"
+            :aria-label="ft('delete', 'card')"
+          >
+            <template #icon>
+              <n-icon size="16" :component="Delete" />
+            </template>
+          </n-button>
+        </DeletePopconfirm>
         <MovePopover type="card" placement="top-start" @select="onMove">
           <n-button tertiary class="mr-auto">
             <template #icon>
@@ -168,7 +174,7 @@
 import dataManager from "@/db"
 import { Card as iCard, movePosition } from "@/type.ts"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import Favicon from "@/components/favicon.vue"
 import MovePopover from "@/components/move-popover.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
@@ -198,7 +204,6 @@ const show = defineModel<boolean>("show", { default: false })
 
 const { ft } = useHelpi18n()
 const message = useMessage()
-const { open: openDeleteDialog } = useDeleteDialog()
 
 const formModel = ref({
   title: "",
@@ -338,21 +343,9 @@ watch(
 
 watch(cover, () => (coverFailed.value = false))
 
-function onDelete() {
-  openDeleteDialog({
-    title: ft("delete", "card"),
-    content: () => (
-      <span class="text-text-primary">
-        {ft("delete-confirm-prefix")}
-        <span class="text-primary">{props.card.title}</span>
-        {ft("delete-confirm-suffix")}
-      </span>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.removeCard(props.card.id)
-      show.value = false
-    },
-  })
+async function onDelete() {
+  await dataManager.removeCard(props.card.id)
+  show.value = false
 }
 
 async function onMove(collectionId: number, position: movePosition) {

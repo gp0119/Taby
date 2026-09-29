@@ -80,15 +80,23 @@ const emit = defineEmits<{
 
 const canHover = useCanHover()
 const hoverActive = computed(() => canHover.value && props.hovering)
+let openPopconfirms = 0
+let pointerInside = false
+
+provide("onPopconfirmShowChange", (show: boolean) => {
+  openPopconfirms += show ? 1 : -1
+  if (openPopconfirms === 0 && !pointerInside) handleMouseAction("leave")
+})
 
 const handleMouseAction = debounce((type: "enter" | "leave") => {
+  pointerInside = type === "enter"
   if (!canHover.value || props.mode !== "hover") return
   if (type === "enter") {
     if (!props.hovering) {
       emit("update:hovering", true)
     }
   } else {
-    if (props.hovering) {
+    if (props.hovering && openPopconfirms === 0) {
       emit("update:hovering", false)
     }
   }

@@ -90,6 +90,8 @@ export default {
   "no-cards": "No cards here, please drag tabs here",
   "delete-confirm-prefix": "Are you sure you want to delete ",
   "delete-confirm-suffix": "?",
+  "remove-tag-confirm": "Remove tag {type} from this Collection?",
+  "close-tab-confirm": "Close tab {type}?",
   "delete-cards-confirm": "Are you sure you want to delete these Cards?",
   "download-remote-confirm":
     "Are you sure you want to download remote data? This will overwrite local data, please be careful.",

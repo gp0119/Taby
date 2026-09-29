@@ -32,18 +32,23 @@
           {{ ft("merge") }}
         </n-button>
       </MovePopover>
-      <n-button ghost type="error" @click="onHandleDelete">
-        <template #icon>
-          <n-icon :size="16" :component="Delete" />
-        </template>
-        {{ ft("delete") }}
-      </n-button>
+      <DeletePopconfirm
+        :content="ft('delete-collections-confirm')"
+        :confirm="onHandleDelete"
+      >
+        <n-button ghost type="error">
+          <template #icon>
+            <n-icon :size="16" :component="Delete" />
+          </template>
+          {{ ft("delete") }}
+        </n-button>
+      </DeletePopconfirm>
     </div>
   </bottom-action>
 </template>
 
-<script setup lang="tsx">
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+<script setup lang="ts">
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import { useBatchCollectionStore } from "@/store/batch-collection.ts"
 import { FolderMoveTo, Delete, DirectionMerge } from "@vicons/carbon"
@@ -70,7 +75,6 @@ const closeDrawer = () => {
   batchCollectionStore.clearSelectedCollectionIds()
 }
 
-const { open: onDeleteComfirm } = useDeleteDialog()
 const onHandleMove = async (spaceId: number, position: movePosition) => {
   await dataManager.batchUpdateCollections(
     batchCollectionStore.selectedCollectionIds,
@@ -82,17 +86,11 @@ const onHandleMove = async (spaceId: number, position: movePosition) => {
 }
 
 const onHandleDelete = async () => {
-  onDeleteComfirm({
-    title: ft("delete", "collections"),
-    content: ft("delete-collections-confirm"),
-    onPositiveClick: async () => {
-      await dataManager.batchDeleteCollections(
-        batchCollectionStore.selectedCollectionIds,
-      )
-      await updateContextMenus()
-      closeDrawer()
-    },
-  })
+  await dataManager.batchDeleteCollections(
+    batchCollectionStore.selectedCollectionIds,
+  )
+  await updateContextMenus()
+  closeDrawer()
 }
 
 const onHandleMerge = async (collectionId: number, position: movePosition) => {

@@ -85,6 +85,8 @@ export default {
   "no-cards": "这里是空的,请拖动标签页到这里",
   "delete-confirm-prefix": "确定删除 ",
   "delete-confirm-suffix": " 吗?",
+  "remove-tag-confirm": "确定从此 Collection 移除标签 {type} 吗?",
+  "close-tab-confirm": "确定关闭标签页 {type} 吗?",
   "delete-cards-confirm": "确定删除这些 Cards 吗?",
   "download-remote-confirm": "确定下载远程数据吗?这会覆盖本地数据,请谨慎操作",
   tab: "标签页",

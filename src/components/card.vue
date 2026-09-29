@@ -61,20 +61,28 @@
             />
           </template>
         </n-button>
-        <n-button
-          v-if="!layoutStore.isRightCollapsed"
-          tertiary
-          :focusable="false"
-          circle
-          size="tiny"
-          class="close-button hidden h-[20px] w-[20px] animate-scale-in group-hover/card:inline-flex"
-          :class="{ '!inline-flex': !canHover }"
-          @click.stop="onHandleDelete"
+        <DeletePopconfirm
+          v-if="type === 'tab' && !layoutStore.isRightCollapsed"
+          v-model:show="showDelete"
+          :content="gt('close-tab-confirm', child.title)"
+          :confirm="onHandleDelete"
+          placement="left"
         >
-          <template #icon>
-            <n-icon size="14" class="text-text-primary" :component="Close" />
-          </template>
-        </n-button>
+          <n-button
+            tertiary
+            :focusable="false"
+            circle
+            size="tiny"
+            class="close-button hidden h-[20px] w-[20px] animate-scale-in group-hover/card:inline-flex"
+            :class="{ '!inline-flex': !canHover || showDelete }"
+            :aria-label="ft('close-tabs')"
+            @click.stop
+          >
+            <template #icon>
+              <n-icon size="14" class="text-text-primary" :component="Close" />
+            </template>
+          </n-button>
+        </DeletePopconfirm>
       </div>
     </PopoverWrapper>
     <div
@@ -94,10 +102,14 @@ import { EllipsisVerticalSharp } from "@vicons/ionicons5"
 import { Close } from "@vicons/carbon"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import { useLayoutStore } from "@/store/layout"
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
+import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useCanHover } from "@/hooks/useCanHover"
 
 const layoutStore = useLayoutStore()
 const canHover = useCanHover()
+const { ft, gt } = useHelpi18n()
+const showDelete = ref(false)
 
 withDefaults(
   defineProps<{

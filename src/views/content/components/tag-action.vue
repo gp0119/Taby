@@ -46,7 +46,7 @@
             />
             <div
               class="absolute right-1.5 hidden animate-scale-in items-center gap-x-2 group-hover/tag:flex"
-              :class="{ '!flex': !canHover }"
+              :class="{ '!flex': !canHover || deletingTagId === tag.id }"
             >
               <PopoverWrapper :message="ft('edit', 'tag')">
                 <n-icon
@@ -56,14 +56,25 @@
                   @click.stop="onEditTag(tag)"
                 />
               </PopoverWrapper>
-              <PopoverWrapper :message="ft('delete', 'tag')">
-                <n-icon
-                  size="16"
-                  :component="Delete"
-                  class="cursor-pointer text-error-color"
-                  @click.stop="onDeleteTag(tag)"
-                />
-              </PopoverWrapper>
+              <DeletePopconfirm
+                :show="deletingTagId === tag.id"
+                :name="tag.title"
+                :confirm="() => onDeleteTag(tag)"
+                placement="left"
+                @update:show="onUpdateDeleteTag($event, tag.id)"
+              >
+                <n-button
+                  quaternary
+                  size="tiny"
+                  type="error"
+                  :aria-label="ft('delete', 'tag')"
+                  @click.stop
+                >
+                  <template #icon>
+                    <n-icon size="16" :component="Delete" />
+                  </template>
+                </n-button>
+              </DeletePopconfirm>
             </div>
           </div>
         </div>
@@ -120,7 +131,7 @@ import { CollectionWithCards } from "@/type"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
 import { useEditDialog } from "@/hooks/useEditDialog"
-import { useDeleteDialog } from "@/hooks/useDeleteDialog"
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import Tag from "@/components/tag.vue"
 import PopoverWrapper from "@/components/popover-wrapper.vue"
 import type { InputInst } from "naive-ui"
@@ -139,6 +150,7 @@ const newTag = ref({
   title: "",
 })
 const newTagInputRef = ref<InputInst | null>(null)
+const deletingTagId = ref<number | null>(null)
 
 const { isShowTagAction, setIsShowTagAction } = inject("isShowTagAction") as {
   isShowTagAction: Ref<boolean>
@@ -149,7 +161,13 @@ const getRandomColor = () => {
   return COLOR_LIST[Math.floor(Math.random() * COLOR_LIST.length)]
 }
 
+function onUpdateDeleteTag(show: boolean, tagId: number) {
+  deletingTagId.value = show ? tagId : null
+  setIsShowTagAction(show)
+}
+
 const onUpdateShowTagAction = async (value: boolean) => {
+  if (!value && deletingTagId.value !== null) return
   setIsShowTagAction(value)
   if (value) {
     selectedColor.value = getRandomColor()
@@ -209,27 +227,13 @@ const saveAndAddTag = async () => {
 }
 
 const { open: openEditDialog } = useEditDialog()
-const { open: openDeleteDialog } = useDeleteDialog()
-const onDeleteTag = async (tag: {
-  id: number
-  title: string
-  color: string
-}) => {
-  openDeleteDialog({
-    title: ft("delete", "tag"),
-    content: () => (
-      <span class="text-text-primary">
-        {ft("delete-confirm-prefix")}
-        <span class="text-primary">{tag.title}</span>
-        {ft("delete-confirm-suffix")}
-      </span>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.removeLabel(tag.id)
-      await tagsStore.fetchTags()
-    },
-  })
+const onDeleteTag = async (tag: { id: number }) => {
+  await dataManager.removeLabel(tag.id)
+  await tagsStore.fetchTags()
+  deletingTagId.value = null
+  setIsShowTagAction(false)
 }
+
 const onEditTag = (tag: { id: number; title: string; color: string }) => {
   const formModel = ref({ title: tag.title, color: tag.color })
   openEditDialog({
@@ -243,14 +247,20 @@ const onEditTag = (tag: { id: number; title: string; color: string }) => {
               v-model:value={formModel.value.title}
               placeholder={ft("placeholder", "tag")}
             />
-            <n-button
-              ghost
-              type="error"
-              onClick={() => onDeleteTag(tag)}
-              v-slots={{
-                icon: () => <n-icon size="16" component={Delete} />,
+            <DeletePopconfirm name={tag.title} confirm={() => onDeleteTag(tag)}>
+              {{
+                default: () => (
+                  <n-button
+                    ghost
+                    type="error"
+                    aria-label={ft("delete", "tag")}
+                    v-slots={{
+                      icon: () => <n-icon size="16" component={Delete} />,
+                    }}
+                  />
+                ),
               }}
-            />
+            </DeletePopconfirm>
           </n-input-group>
         </n-form-item>
       </n-form>
@@ -319,6 +329,7 @@ const scrollActiveIntoView = async () => {
 
 let stopKeydown: null | (() => void) = null
 const onKeydown = (e: KeyboardEvent) => {
+  if (deletingTagId.value !== null) return
   if (e.key === "ArrowDown") {
     e.preventDefault()
     e.stopPropagation()

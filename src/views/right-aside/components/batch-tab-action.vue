@@ -28,18 +28,23 @@
         </template>
         {{ ft("group-tabs") }}
       </n-button>
-      <n-button ghost type="error" @click="onHandleClose">
-        <template #icon>
-          <n-icon :size="16" :component="CloseOutline" />
-        </template>
-        {{ ft("close-tabs") }}
-      </n-button>
+      <DeletePopconfirm
+        :content="ft('close-tabs-confirm')"
+        :confirm="onHandleClose"
+      >
+        <n-button ghost type="error">
+          <template #icon>
+            <n-icon :size="16" :component="CloseOutline" />
+          </template>
+          {{ ft("close-tabs") }}
+        </n-button>
+      </DeletePopconfirm>
     </div>
   </bottom-action>
 </template>
 
-<script setup lang="tsx">
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+<script setup lang="ts">
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { FolderMoveTo, CloseOutline } from "@vicons/carbon"
 import dataManager from "@/db"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
@@ -75,18 +80,11 @@ const onHandleSave = async (collectionId: number, position: movePosition) => {
   closeDrawer()
 }
 
-const { open: onDeleteComfirm } = useDeleteDialog()
 const onHandleClose = async () => {
-  onDeleteComfirm({
-    title: ft("close-tabs"),
-    content: ft("close-tabs-confirm"),
-    onPositiveClick: async () => {
-      await removeTabs(batchTabsStore.selectedTabIds)
-      await getTabs()
-      batchTabsStore.clearSelectedTabs()
-      closeDrawer()
-    },
-  })
+  await removeTabs(batchTabsStore.selectedTabIds)
+  await getTabs()
+  batchTabsStore.clearSelectedTabs()
+  closeDrawer()
 }
 
 const onHandleGroup = async () => {

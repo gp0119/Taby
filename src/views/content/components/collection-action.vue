@@ -3,16 +3,21 @@
     class="collection-actions hidden items-center gap-x-2 group-hover/item:flex"
     :class="{
       '!flex':
-        isShowTagAction || isShowMoveAction || isShowMoreAction || !canHover,
+        isShowTagAction ||
+        isShowMoveAction ||
+        isShowMoreAction ||
+        isShowDeleteAction ||
+        !canHover,
     }"
   >
     <n-popover
-      v-model:show="isShowMoreAction"
+      :show="isShowMoreAction || isShowDeleteAction"
       :trigger="canHover ? 'hover' : 'click'"
       placement="bottom-end"
       :show-arrow="false"
       class="!rounded-xl"
       style="padding: 0"
+      @update:show="isShowMoreAction = $event"
     >
       <template #trigger>
         <n-button quaternary size="small" class="w-[28px]">
@@ -62,13 +67,17 @@
           </n-icon>
           <span>{{ ft("add-after") }}</span>
         </div>
-        <div
-          class="more-menu-item text-error-color"
-          @click="onDeleteCollection(item)"
+        <DeletePopconfirm
+          v-model:show="isShowDeleteAction"
+          placement="bottom-end"
+          :name="item.title"
+          :confirm="() => onDeleteCollection(item)"
         >
-          <n-icon size="18" :component="Delete" />
-          <span>{{ ft("delete") }}</span>
-        </div>
+          <div class="more-menu-item text-error-color">
+            <n-icon size="18" :component="Delete" />
+            <span>{{ ft("delete") }}</span>
+          </div>
+        </DeletePopconfirm>
       </div>
     </n-popover>
     <MovePopover
@@ -88,7 +97,7 @@
   </div>
 </template>
 
-<script setup lang="tsx">
+<script setup lang="ts">
 import { CollectionWithCards, movePosition } from "@/type.ts"
 import { FolderMoveTo, Delete } from "@vicons/carbon"
 import { EllipsisVerticalSharp } from "@vicons/ionicons5"
@@ -96,7 +105,7 @@ import dataManager from "@/db"
 import { useRefresh } from "@/hooks/useRresh.ts"
 import TagAction from "./tag-action.vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
-import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
+import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import MovePopover from "@/components/move-popover.vue"
 import { useCanHover } from "@/hooks/useCanHover"
 import { useSpacesStore } from "@/store/spaces"
@@ -111,6 +120,7 @@ const { updateContextMenus } = useRefresh()
 const isShowTagAction = ref(false)
 const isShowMoveAction = ref(false)
 const isShowMoreAction = ref(false)
+const isShowDeleteAction = ref(false)
 
 provide("isShowTagAction", {
   isShowTagAction,
@@ -119,7 +129,6 @@ provide("isShowTagAction", {
   },
 })
 
-const { open: openDeleteDialog } = useDeleteDialog()
 const spacesStore = useSpacesStore()
 
 function onAddCollectionBeside(
@@ -130,22 +139,10 @@ function onAddCollectionBeside(
   spacesStore.startDraftCollection(ft("untitled"), item.id, side)
 }
 
-function onDeleteCollection(item: CollectionWithCards) {
+async function onDeleteCollection(item: CollectionWithCards) {
   isShowMoreAction.value = false
-  openDeleteDialog({
-    title: ft("delete", "collection"),
-    content: () => (
-      <span class="text-text-primary">
-        {ft("delete-confirm-prefix")}
-        <span class="text-primary">{item.title}</span>
-        {ft("delete-confirm-suffix")}
-      </span>
-    ),
-    onPositiveClick: async () => {
-      await dataManager.removeCollection(item.id)
-      await updateContextMenus()
-    },
-  })
+  await dataManager.removeCollection(item.id)
+  await updateContextMenus()
 }
 
 async function onMoveCollection(
