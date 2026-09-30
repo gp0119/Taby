@@ -1,7 +1,7 @@
 <template>
   <n-popover
     trigger="click"
-    :show="showPopover || confirmingAction !== null"
+    :show="showPopover"
     placement="bottom-start"
     :show-arrow="false"
     :to="false"
@@ -42,85 +42,49 @@
           </template>
         </span>
       </div>
-      <DeletePopconfirm
-        :show="confirmingAction === 'save-close'"
-        :content="ft('save-all-tabs-and-close-confirm')"
-        :confirm="() => onSaveAllTabsAndClose(windowId)"
-        placement="left"
-        @update:show="confirmingAction = $event ? 'save-close' : null"
+      <div
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
+        @click="onSaveAllTabsAndClose(windowId)"
       >
-        <div
-          class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
-        >
-          <span class="whitespace-nowrap">
-            {{ ft("save-all-tabs-and-close") }}
-          </span>
-          <span class="flex items-center gap-x-1 text-xs text-text-secondary">
-            <template
-              v-for="k in displayShortcuts.saveAllTabsAndClose"
-              :key="k"
-            >
-              <n-icon
-                v-if="shortcutIconMap[k]"
-                :component="shortcutIconMap[k]"
-              />
-              <span v-else>{{ k.toUpperCase() }}</span>
-            </template>
-          </span>
-        </div>
-      </DeletePopconfirm>
-      <DeletePopconfirm
-        :show="confirmingAction === 'duplicates'"
-        :content="ft('close-duplicate-tabs-confirm')"
-        :confirm="() => onCloseDuplicateTabs(windowId)"
-        placement="left"
-        @update:show="confirmingAction = $event ? 'duplicates' : null"
+        <span class="whitespace-nowrap">
+          {{ ft("save-all-tabs-and-close") }}
+        </span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.saveAllTabsAndClose" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
+      </div>
+      <div
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
+        @click="onCloseDuplicateTabs(windowId)"
       >
-        <div
-          class="flex-between cursor-pointer gap-x-2 px-4 py-2 hover:bg-content-color"
-        >
-          <span class="whitespace-nowrap">
-            {{ ft("close-duplicate-tabs") }}
-          </span>
-          <span class="flex items-center gap-x-1 text-xs text-text-secondary">
-            <template v-for="k in displayShortcuts.closeDuplicateTabs" :key="k">
-              <n-icon
-                v-if="shortcutIconMap[k]"
-                :component="shortcutIconMap[k]"
-              />
-              <span v-else>{{ k.toUpperCase() }}</span>
-            </template>
-          </span>
-        </div>
-      </DeletePopconfirm>
-      <DeletePopconfirm
-        :show="confirmingAction === 'close-all'"
-        :content="ft('close-all-tabs-confirm')"
-        :confirm="() => onCloseAllTabs(windowId)"
-        placement="left"
-        @update:show="confirmingAction = $event ? 'close-all' : null"
+        <span class="whitespace-nowrap">{{ ft("close-duplicate-tabs") }}</span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.closeDuplicateTabs" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
+      </div>
+      <div
+        class="flex-between cursor-pointer gap-x-2 px-4 py-2 text-red-500 hover:bg-content-color"
+        @click="onCloseAllTabs(windowId)"
       >
-        <div
-          class="flex-between cursor-pointer gap-x-2 px-4 py-2 text-red-500 hover:bg-content-color"
-        >
-          <span class="whitespace-nowrap">{{ ft("close-all-tabs") }}</span>
-          <span class="flex items-center gap-x-1 text-xs text-text-secondary">
-            <template v-for="k in displayShortcuts.closeAllTabs" :key="k">
-              <n-icon
-                v-if="shortcutIconMap[k]"
-                :component="shortcutIconMap[k]"
-              />
-              <span v-else>{{ k.toUpperCase() }}</span>
-            </template>
-          </span>
-        </div>
-      </DeletePopconfirm>
+        <span class="whitespace-nowrap">{{ ft("close-all-tabs") }}</span>
+        <span class="flex items-center gap-x-1 text-xs text-text-secondary">
+          <template v-for="k in displayShortcuts.closeAllTabs" :key="k">
+            <n-icon v-if="shortcutIconMap[k]" :component="shortcutIconMap[k]" />
+            <span v-else>{{ k.toUpperCase() }}</span>
+          </template>
+        </span>
+      </div>
     </template>
   </n-popover>
 </template>
 
 <script setup lang="ts">
-import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import { Card } from "@/type.ts"
 import { ref, onMounted, onUnmounted } from "vue"
 import { useHelpi18n } from "@/hooks/useHelpi18n"
@@ -128,12 +92,13 @@ import { useLayoutStore } from "@/store/layout"
 import { isNewTabPage } from "@/utils"
 import { useSettingStore } from "@/store/setting"
 import { SHORTCUT_ICON_MAP } from "@/utils/constants"
+import { useDeleteDialog } from "@/hooks/useDeleteDialog.tsx"
 
 const layoutStore = useLayoutStore()
 const wrapperRef = ref<HTMLDivElement | null>(null)
 const { ft } = useHelpi18n()
 const showPopover = ref(false)
-const confirmingAction = ref<string | null>(null)
+const { open: openConfirmDialog } = useDeleteDialog()
 
 watchEffect(async () => {
   if (
@@ -195,23 +160,39 @@ function handleClick(windowId: number | string) {
 }
 
 const onCloseAllTabs = (windowId: number | string) => {
-  emit("closeAllTabs", Number(windowId))
   showPopover.value = false
+  openConfirmDialog({
+    title: ft("tips-title"),
+    content: ft("close-all-tabs-confirm"),
+    onPositiveClick: () => emit("closeAllTabs", Number(windowId)),
+  })
 }
 
 const onSaveAllTabs = (windowId: number | string) => {
-  emit("saveAllTabs", Number(windowId))
   showPopover.value = false
+  openConfirmDialog({
+    title: ft("tips-title"),
+    content: ft("save-all-tabs-confirm"),
+    onPositiveClick: () => emit("saveAllTabs", Number(windowId)),
+  })
 }
 
 const onSaveAllTabsAndClose = (windowId: number | string) => {
-  emit("saveAllTabsAndClose", Number(windowId))
   showPopover.value = false
+  openConfirmDialog({
+    title: ft("tips-title"),
+    content: ft("save-all-tabs-and-close-confirm"),
+    onPositiveClick: () => emit("saveAllTabsAndClose", Number(windowId)),
+  })
 }
 
 const onCloseDuplicateTabs = (windowId: number | string) => {
-  emit("closeDuplicateTabs", Number(windowId))
   showPopover.value = false
+  openConfirmDialog({
+    title: ft("tips-title"),
+    content: ft("close-duplicate-tabs-confirm"),
+    onPositiveClick: () => emit("closeDuplicateTabs", Number(windowId)),
+  })
 }
 
 const shortcutIconMap = SHORTCUT_ICON_MAP

@@ -300,6 +300,7 @@ const onSaveTag = async () => {
 }
 
 const onEditTagKeydown = (event: KeyboardEvent) => {
+  if (event.isComposing) return
   if (event.key !== "Enter" && event.key !== "Escape") return
   event.stopPropagation()
   event.preventDefault()

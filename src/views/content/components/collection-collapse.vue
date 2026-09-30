@@ -68,17 +68,23 @@
               v-model:value="editingTitle"
               class="!w-[260px]"
               size="small"
+              :disabled="isSavingTitle"
               :placeholder="ft('placeholder', 'title')"
               @keydown.enter="!$event.isComposing && onSaveTitle()"
               @keyup.esc="spacesStore.stopEditingCollection"
             />
-            <n-button size="small" @click="spacesStore.stopEditingCollection">
+            <n-button
+              size="small"
+              :disabled="isSavingTitle"
+              @click="spacesStore.stopEditingCollection"
+            >
               {{ ft("cancel") }}
             </n-button>
             <n-button
               size="small"
               type="primary"
               :disabled="!editingTitle.trim()"
+              :loading="isSavingTitle"
               @click="onSaveTitle"
             >
               {{ ft("save") }}
@@ -208,6 +214,7 @@ const { updateContextMenus } = useRefresh()
 const spacesStore = useSpacesStore()
 const rootRef = ref<HTMLElement>()
 const editingTitle = ref("")
+const isSavingTitle = ref(false)
 const titleInputRef = ref<InputInst>()
 const isDraft = computed(() => props.collection.id === DRAFT_COLLECTION_ID)
 const isEditing = computed(
@@ -253,16 +260,23 @@ const onStartEdit = (e: MouseEvent) => {
 
 const onSaveTitle = async () => {
   const title = editingTitle.value.trim()
-  if (!title) return
-  if (isDraft.value) {
-    await spacesStore.saveDraftCollection(title)
-  } else {
-    spacesStore.stopEditingCollection()
-    if (title !== props.collection.title) {
-      await dataManager.updateCollectionTitle(props.collection.id, title)
+  if (!title || isSavingTitle.value) return
+  isSavingTitle.value = true
+  try {
+    if (isDraft.value) {
+      await spacesStore.saveDraftCollection(title)
+    } else {
+      spacesStore.stopEditingCollection()
+      if (title !== props.collection.title) {
+        await dataManager.updateCollectionTitle(props.collection.id, title)
+      }
     }
+    await updateContextMenus()
+  } catch (error) {
+    message.error(error instanceof Error ? error.message : ft("fail", "save"))
+  } finally {
+    isSavingTitle.value = false
   }
-  await updateContextMenus()
 }
 
 const onHandleCheckbox = (checked: boolean, collectionId: number) => {

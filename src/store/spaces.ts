@@ -146,7 +146,6 @@ export const useSpacesStore = defineStore("spaces", () => {
 
   async function saveDraftCollection(title: string) {
     const draft = draftCollection.value!
-    editingCollectionId.value = undefined
     draft.item.title = title
     const collection = { title, spaceId: draft.item.spaceId, labelIds: [] }
     draft.savedId =
@@ -157,7 +156,10 @@ export const useSpacesStore = defineStore("spaces", () => {
             draft.anchorId,
             draft.side,
           )
-    dropSavedDraft()
+    if (draftCollection.value === draft) {
+      editingCollectionId.value = undefined
+      dropSavedDraft()
+    }
   }
 
   subscribeSpaces()

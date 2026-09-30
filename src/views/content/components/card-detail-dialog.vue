@@ -286,17 +286,19 @@ function waitForFavicon(tabId: number) {
 
 async function onRefetchFavicon() {
   showIconMenu.value = false
-  if (!safeUrl.value) {
+  const url = safeUrl.value
+  if (!url) {
     message.error(ft("invalid-url"))
     return
   }
   const cardId = props.card.id
   refetching.value = true
-  const tab = await chrome.tabs.create({ url: safeUrl.value, active: false })
+  const tab = await chrome.tabs.create({ url, active: false })
   try {
     const favicon = await waitForFavicon(tab.id!)
-    await dataManager.updateCardFavicon(cardId, favicon)
-    if (cardId === props.card.id) formModel.value.favicon = favicon
+    if (cardId === props.card.id && url === safeUrl.value) {
+      formModel.value.favicon = favicon
+    }
   } catch (error) {
     message.error((error as Error).message)
   } finally {
