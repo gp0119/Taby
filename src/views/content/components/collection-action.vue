@@ -28,6 +28,7 @@
       </template>
       <div class="flex w-[200px] flex-col gap-y-1 p-1.5">
         <div
+          v-if="isManualSort"
           class="more-menu-item text-text-primary"
           @click="onAddCollectionBeside(item, 'before')"
         >
@@ -48,6 +49,7 @@
           <span>{{ ft("add-before") }}</span>
         </div>
         <div
+          v-if="isManualSort"
           class="more-menu-item text-text-primary"
           @click="onAddCollectionBeside(item, 'after')"
         >
@@ -109,6 +111,7 @@ import DeletePopconfirm from "@/components/delete-popconfirm.vue"
 import MovePopover from "@/components/move-popover.vue"
 import { useCanHover } from "@/hooks/useCanHover"
 import { useSpacesStore } from "@/store/spaces"
+import { useSortStore } from "@/store/sort"
 
 const { ft, gt } = useHelpi18n()
 const canHover = useCanHover()
@@ -130,6 +133,8 @@ provide("isShowTagAction", {
 })
 
 const spacesStore = useSpacesStore()
+const sortStore = useSortStore()
+const isManualSort = computed(() => sortStore.sortOrder === "draggable")
 
 function onAddCollectionBeside(
   item: CollectionWithCards,

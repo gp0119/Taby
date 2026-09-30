@@ -221,9 +221,10 @@ class DataManager {
           [collection.spaceId, Dexie.maxKey],
         )
         .toArray()
+      const anchorIndex = siblings.findIndex((c) => c.id === anchorId)
+      // 锚点可能在编辑草稿期间被删除（同步或其他标签页），此时退回到插入开头
       const index =
-        siblings.findIndex((c) => c.id === anchorId) +
-        (side === "after" ? 1 : 0)
+        anchorIndex === -1 ? 0 : anchorIndex + (side === "after" ? 1 : 0)
       let order = this.orderBetween(siblings[index - 1], siblings[index])
       if (order === null) {
         await Promise.all(

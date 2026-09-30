@@ -281,6 +281,12 @@ function waitForFavicon(tabId: number) {
       chrome.tabs.onUpdated.removeListener(listener)
     }
     chrome.tabs.onUpdated.addListener(listener)
+    // 监听注册前可能已经拿到图标（如命中缓存），补查一次
+    chrome.tabs.get(tabId).then((tab) => {
+      if (!tab.favIconUrl) return
+      cleanup()
+      resolve(tab.favIconUrl)
+    })
   })
 }
 
@@ -293,16 +299,18 @@ async function onRefetchFavicon() {
   }
   const cardId = props.card.id
   refetching.value = true
-  const tab = await chrome.tabs.create({ url, active: false })
+  let tabId: number | undefined
   try {
-    const favicon = await waitForFavicon(tab.id!)
+    const tab = await chrome.tabs.create({ url, active: false })
+    tabId = tab.id!
+    const favicon = await waitForFavicon(tabId)
     if (cardId === props.card.id && url === safeUrl.value) {
       formModel.value.favicon = favicon
     }
   } catch (error) {
     message.error((error as Error).message)
   } finally {
-    chrome.tabs.remove(tab.id!)
+    if (tabId !== undefined) chrome.tabs.remove(tabId)
     refetching.value = false
   }
 }

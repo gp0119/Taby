@@ -4,6 +4,7 @@ import { liveQuery } from "dexie"
 import type { CollectionWithCards, Space } from "@/type"
 import dataManager from "@/db"
 import { DRAFT_COLLECTION_ID } from "@/utils/constants"
+import { useTagsStore } from "@/store/tags"
 
 type LiveQuerySubscription = {
   unsubscribe: () => void
@@ -112,6 +113,8 @@ export const useSpacesStore = defineStore("spaces", () => {
     anchorId?: number,
     side: DraftCollection["side"] = "before",
   ) {
+    // 新 collection 没有标签，保留过滤会让它保存后立即被过滤掉
+    useTagsStore().resetSelectedTag()
     draftCollection.value = {
       item: {
         id: DRAFT_COLLECTION_ID,
